@@ -301,8 +301,10 @@ async function initOrders() {
   $$('.open-chat').forEach((button) => {
     button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
   });
+
+  // İstifadəçi yalnız admin təsdiq etməmiş sifarişi ləğv edə bilir.
   $$('.cancel-order').forEach((button) => {
-    button.addEventListener('click', () => cancelOrder(button.dataset.id, button.dataset.status));
+    button.addEventListener('click', () => cancelOrder(button.dataset.id));
   });
 }
 
@@ -349,40 +351,41 @@ function orderCard(order) {
         </div>
       ` : '<p class="muted">Kuryer hələ təyin edilməyib.</p>'}
 
-                <div class="order-actions">
-                <button class="btn btn-primary open-chat" data-id="${order.id}">Admin/Kuryer ilə mesajlaş</button>
-              
-                ${order.status === 'pending' ? `
-                  <button class="btn btn-danger cancel-order" data-id="${order.id}" data-status="${order.status}">
-                    Sifarişi ləğv et
-                  </button>
-                ` : ''}
-              </div>
+      <div class="order-actions">
+        <button class="btn btn-primary open-chat" data-id="${order.id}">Admin/Kuryer ilə mesajlaş</button>
+        ${order.status === 'pending' ? `
+          <button class="btn btn-danger cancel-order" data-id="${order.id}">Sifarişi ləğv et</button>
+        ` : ''}
+      </div>
     </div>`;
 }
 
-              async function cancelOrder(orderId, status) {
-                if (status !== 'pending') {
-                  toast('Sifariş artıq təsdiqlənib. Ləğv üçün mağaza ilə əlaqə saxlayın.');
-                  return;
-                }
-              
-                if (!confirm('Sifarişi ləğv etmək istədiyinizə əminsiniz?')) return;
-              
-                const { error } = await supabase
-                  .from('orders')
-                  .update({
-                    status: 'cancelled',
-                    cancelled_by: 'user',
-                    cancel_note: 'İstifadəçi sifarişi təsdiqdən əvvəl ləğv etdi',
-                  })
-                  .eq('id', orderId)
-                  .eq('status', 'pending');
-              
-                toast(error ? error.message : 'Sifariş ləğv edildi');
-                initOrders();
-              }
+// Sifarişi ləğv etmə RPC ilə edilir.
+// Beləliklə RLS və status qaydası backend tərəfdə də qorunur.
+async function cancelOrder(orderId) {
+  if (!orderId) return;
 
+  if (!confirm('Sifarişi ləğv etmək istədiyinizə əminsiniz?')) return;
+
+  const { data, error } = await supabase.rpc('cancel_my_order', {
+    p_order_id: orderId,
+    p_cancel_note: 'İstifadəçi təsdiqdən əvvəl sifarişi ləğv etdi',
+  });
+
+  if (error) {
+    toast(error.message);
+    return;
+  }
+
+  if (data === false) {
+    toast('Bu sifariş artıq təsdiqlənib. Ləğv üçün mağaza ilə əlaqə saxlayın.');
+    await initOrders();
+    return;
+  }
+
+  toast('Sifariş ləğv edildi');
+  await initOrders();
+}
 
 function statusIcon(status) {
   const map = {
@@ -508,7 +511,7 @@ async function openThread(id) {
 
   const { data, error } = await supabase
     .from('chat_messages')
-    .select('id,message_text,sender_id,created_at,is_read,profiles(first_name,last_name,phone)')
+    .select('id,message_text,sender_id,created_at,profiles(first_name,last_name)')
     .eq('thread_id', id)
     .order('created_at')
     .limit(120);
@@ -518,11 +521,9 @@ async function openThread(id) {
   $('#chatBox').innerHTML = error
     ? error.message
     : (data || []).map((message) => `
-      <div class="msg ${message.sender_id === activeUser.id ? 'me' : ''} ${!message.is_read && message.sender_id !== activeUser.id ? 'unread-message' : ''}">
-          <b>${message.profiles?.first_name || ''} ${message.profiles?.last_name || ''}</b>
-          <small class="muted"> • ${message.profiles?.phone || 'Telefon yoxdur'} • ${new Date(message.created_at).toLocaleString('az-AZ')}</small>
-          <br>
-          ${message.message_text}
+      <div class="msg ${message.sender_id === activeUser.id ? 'me' : ''}">
+        ${message.message_text}<br>
+        <small class="muted">${new Date(message.created_at).toLocaleString('az-AZ')}</small>
       </div>
     `).join('') || '<span class="muted">Mesaj yoxdur.</span>';
 
