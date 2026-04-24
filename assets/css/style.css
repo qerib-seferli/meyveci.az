@@ -1001,3 +1001,210 @@ textarea:focus {
     height: 38px;
   }
 }
+
+/* ============================================================
+   V3 DÜZƏLİŞLƏRİ - BANNER/XƏBƏR/PARTNYOR/MESAJ/MOBİL BALANS
+   Bu hissə əvvəlki stilləri pozmadan üstündən düzəliş verir.
+   ============================================================ */
+
+/* Header-də mesaj butonu əlavə olunduğu üçün iconlar daha yığcam saxlanır. */
+.top-actions .icon-btn { flex: 0 0 auto; }
+#messageBtn { text-decoration: none; }
+
+/* Banner və partnyor kartları: ağ kart yox, şəkilin özü kart kimi görünür. */
+.media-slide {
+  position: relative;
+  width: 370px;
+  min-width: 370px;
+  height: 210px;
+  margin-right: 30px;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 26px;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 18px 44px rgba(15, 122, 55, 0.16), 0 0 24px rgba(132, 204, 22, 0.12);
+  scroll-snap-align: start;
+  text-align: left;
+}
+
+.media-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  transition: transform 0.45s ease;
+}
+
+.media-slide:hover img { transform: scale(1.05); }
+
+.media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 38%, rgba(4, 47, 46, 0.72) 100%);
+  pointer-events: none;
+}
+
+.media-slide b {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.1;
+  text-shadow: 0 4px 18px rgba(0,0,0,0.38);
+}
+
+.news-slide {
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.news-slide small {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 10px;
+  z-index: 2;
+  color: rgba(255,255,255,0.88);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-slide b { bottom: 52px; font-size: 18px; }
+.partner-slide b { text-align: center; bottom: 16px; }
+.banner-slide b { font-size: 24px; }
+
+/* Soldan-sağa keçid hissəsində yumşaq kölgə effekti. */
+.slider-strip {
+  position: relative;
+  grid-auto-columns: auto;
+  gap: 0;
+  padding: 2px 0 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Xəbər modalı: heç bir cihazda ekrandan daşmasın. */
+.news-modal-card {
+  width: min(720px, 94vw);
+  max-height: 88vh;
+  overflow: auto;
+}
+
+.news-modal-card img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 18px;
+  margin: 14px 0;
+}
+
+.news-body {
+  color: var(--text);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Səbət total məbləği daha aydın görünsün. */
+#cartTotal {
+  color: var(--green-dark);
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+/* Sifariş statusu yanında ikon. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--green-dark);
+  background: var(--green-soft);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.status-pill img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+/* Canlı xəritə önizləməsi: kuryer və ev markerləri fərqli yerlərdə görünür. */
+.live-map-preview {
+  position: relative;
+  min-height: 230px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(15, 122, 55, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 122, 55, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(220, 252, 231, 0.95), rgba(186, 230, 253, 0.72));
+  background-size: 28px 28px, 28px 28px, auto;
+}
+
+.map-marker {
+  position: absolute;
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  box-shadow: 0 0 25px rgba(34,197,94,0.28);
+}
+
+.map-marker img { width: 40px; height: 40px; object-fit: contain; }
+.courier-marker { left: 22%; top: 32%; animation: floatFruit 3.5s ease-in-out infinite; }
+.home-marker { right: 22%; bottom: 30%; }
+.map-info { position: relative; z-index: 3; padding: 14px; border-radius: 18px; background: rgba(255,255,255,0.74); }
+
+/* Mobil səbət və checkout formu daha yığcam. */
+.checkout-compact input,
+.checkout-compact select,
+.checkout-compact textarea { min-height: 42px; }
+
+@media (max-width: 640px) {
+  :root { --topbar-height: 62px; --bottom-height: 64px; }
+  .topbar-inner { gap: 8px; }
+  .top-actions { gap: 4px; }
+  .top-actions .icon-btn { width: 32px; height: 32px; min-height: 32px; font-size: 14px; }
+  .profile-pill { max-width: 96px; }
+  #panelLink { max-width: 108px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .app-shell { padding-top: 12px; }
+  .section-head h1 { font-size: 26px; }
+  .section-head h2 { font-size: 23px; }
+
+  .media-slide {
+    width: calc(100vw - 38px);
+    min-width: calc(100vw - 38px);
+    height: 245px;
+    margin-right: 18px;
+    border-radius: 24px;
+  }
+  .banner-slide b { font-size: 24px; }
+  .news-slide b { font-size: 17px; }
+
+  .product-card .pic { aspect-ratio: 1 / 0.95; }
+  .product-card h3 { min-height: 34px; }
+  .price { font-size: 15px; }
+  .old-price { font-size: 12px; }
+
+  .compact-row { gap: 8px; padding: 10px; }
+  .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .form-grid .full, .form-grid textarea, .form-grid [type="file"], .form-grid button { grid-column: 1 / -1; }
+  .form-grid input, .form-grid select, .form-grid textarea { font-size: 13px; padding: 9px 10px; border-radius: 14px; }
+
+  .nav-item { height: 44px; font-size: 10px; }
+  .nav-item .ico { font-size: 17px; }
+  .home-logo { width: 49px; height: 49px; }
+}
