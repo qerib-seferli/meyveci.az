@@ -1282,3 +1282,31 @@ textarea:focus {
     font-size: 18px;
   }
 }
+
+/* ============================================================
+   V5 DÜZƏLİŞLƏRİ - YALNIZ İSTƏNİLƏN HİSSƏLƏR
+   Bu blok əvvəlki dizaynı dağıtmadan sevimlilər, slider, profil,
+   məhsul detalı və mobil ölçülər üçün üst düzəliş verir.
+   ============================================================ */
+.bottom-nav { background: linear-gradient(135deg, rgba(209, 250, 229, 0.96), rgba(187, 247, 208, 0.94)); border-top: 1px solid rgba(34, 197, 94, 0.22); box-shadow: 0 -12px 38px rgba(22, 163, 74, 0.16); }
+.nav-item { color: #065f46; }
+.nav-item:hover { background: rgba(255, 255, 255, 0.42); }
+.chip-row { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; scroll-snap-type: x proximity; cursor: grab; }
+.chip { scroll-snap-align: start; white-space: nowrap; }
+.marquee-strip { overflow: hidden; scroll-snap-type: none; mask-image: linear-gradient(90deg, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%); }
+.marquee-strip > * { animation: meyveciMarqueeLeft 42s linear infinite; }
+.marquee-strip.reverse > * { animation-name: meyveciMarqueeRight; }
+.marquee-strip:hover > * { animation-play-state: paused; }
+@keyframes meyveciMarqueeLeft { from { transform: translateX(0); } to { transform: translateX(calc(-100% - 30px)); } }
+@keyframes meyveciMarqueeRight { from { transform: translateX(calc(-100% - 30px)); } to { transform: translateX(0); } }
+.profile-hero { display: grid; place-items: center; text-align: center; gap: 8px; }
+.profile-avatar-big { width: 116px; height: 116px; border-radius: 50%; object-fit: cover; padding: 4px; background: #ffffff; box-shadow: 0 0 0 4px rgba(187, 247, 208, 0.72), 0 0 38px rgba(34, 197, 94, 0.35); animation: avatarNeon 3.2s linear infinite; }
+@keyframes avatarNeon { 0% { box-shadow: 0 0 0 4px rgba(187,247,208,.72),0 0 18px rgba(34,197,94,.35); } 50% { box-shadow: 0 0 0 6px rgba(134,239,172,.82),0 0 42px rgba(14,165,233,.35); } 100% { box-shadow: 0 0 0 4px rgba(187,247,208,.72),0 0 18px rgba(34,197,94,.35); } }
+.product-detail-grid { display: grid; grid-template-columns: minmax(280px, 0.9fr) minmax(280px, 1.1fr); gap: 22px; align-items: center; }
+.product-detail-image { position: relative; min-height: 320px; display: grid; place-items: center; border-radius: 28px; background: linear-gradient(135deg, rgba(220, 252, 231, 0.92), rgba(255, 255, 255, 0.96)); overflow: hidden; }
+.product-detail-image img { width: min(100%, 420px); max-height: 360px; object-fit: contain; filter: drop-shadow(0 16px 26px rgba(15, 122, 55, 0.16)); }
+.product-detail-info h1 { font-size: clamp(28px, 5vw, 54px); margin: 10px 0; }
+.detail-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.related-products { margin-top: 24px; }
+.past-order-note { border-radius: 18px; padding: 12px; background: rgba(220, 252, 231, 0.72); color: #047857; font-weight: 800; }
+@media (max-width: 700px) { .product-detail-grid { grid-template-columns: 1fr; gap: 14px; } .product-detail-image { min-height: 250px; } .product-detail-image img { max-height: 250px; } .profile-avatar-big { width: 104px; height: 104px; } .marquee-strip > * { animation-duration: 50s; } }
