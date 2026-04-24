@@ -43,3 +43,19 @@ Dəyişdirilən əsas fayllar:
 - `sql/supabase-fast-core-upgrade-v3.sql` — kuryer təyin etmə overload xətası, mesaj bildirişləri və icazələr üçün SQL düzəlişi əlavə edildi.
 
 Vacib: Supabase-də mütləq `sql/supabase-fast-core-upgrade-v3.sql` faylını run et.
+
+## V4 düzəlişləri
+
+Supabase-də əlavə olaraq `sql/supabase-fast-core-upgrade-v4.sql` faylını run et.
+
+Dəyişilən əsas fayllar:
+
+- `assets/js/shop.js` — ana səhifədə xəbər modalını bloklayan selector səhvi düzəldildi; buna görə index-də kataloq/məhsul/partnyor renderi dayanmayacaq.
+- `assets/js/admin.js` — sifarişdə kuryer seçimi yalnız hazırda aktiv courier rolunda olan şəxsləri göstərir; statuslara rəngli badge və icon əlavə edildi; rol courier-dən çıxanda couriers qeydi passiv edilir.
+- `assets/js/layout.js` — admin üçün yuxarıda yeni sifariş iconu əlavə edildi; bildiriş və yeni sifariş sayı realtime yenilənir; istifadəçi sifariş sayı yalnız aktiv sifarişləri sayır.
+- `assets/css/admin.css` — admin menyusu soldan yox, yuxarıda soldan-sağa düzülür; status rəngləri əlavə edildi.
+- `assets/css/style.css` — banner daha nazik/uzun edildi; banner/xəbər/partnyor kart ölçüləri balanslandı; mobil ölçülər yığcamlaşdırıldı.
+- `assets/img/icons/Legv-edildi-icon.png` — ləğv edilmiş sifariş iconu əlavə edildi.
+- `sql/supabase-fast-core-upgrade-v4.sql` — kuryer təyin etmə funksiyası, `courier_assignments.assigned_by` sütunu və yeni sifariş admin bildirişi düzəldildi.
+
+Qeyd: Kuryer təyin etmə xətası SQL səviyyəsində idi. Mütləq V4 SQL faylını Supabase SQL Editor-də run et.
