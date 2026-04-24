@@ -305,6 +305,7 @@ async function loadOrders() {
       const { error } = await supabase.rpc('assign_courier_to_order', {
         p_order_id: select.dataset.id,
         p_courier_id: select.value,
+        p_note: ''
       });
 
       toast(error ? error.message : 'Kuryer təyin edildi');

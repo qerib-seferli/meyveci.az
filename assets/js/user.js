@@ -40,20 +40,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function productRow(item) {
   const product = item.products || item;
+  const discount = getDiscount(product.price, product.old_price);
 
+  // Sevimlilər səhifəsində kart ana səhifədəki məhsul kartı ilə eyni görünür.
   return `
     <article class="product-card">
+      ${discount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
+      <button class="fav-btn active remove-fav" data-id="${product.id}" title="Sevimlilərdən çıxart" aria-label="Sevimlilərdən çıxart">♥</button>
       <a class="pic" href="product.html?id=${product.id}">
         <img src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
       </a>
-      <h3>${product.name}</h3>
-      <div class="price-row">
-        <span class="price">${money(product.price)}</span>
+      <div class="product-title-row">
+        <h3><a href="product.html?id=${product.id}">${product.name}</a></h3>
         <span class="unit-badge">${product.unit || 'ədəd'}</span>
       </div>
-      <button class="btn btn-primary add-cart" data-id="${product.id}">Səbətə at</button>
-    </article>
-  `;
+      <div class="price-row">
+        <span class="price">${money(product.price)}</span>
+        ${product.old_price ? `<span class="old-price">${money(product.old_price)}</span>` : ''}
+      </div>
+      <p class="short-desc">${product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
+      <button class="btn btn-primary cart-btn add-cart" data-id="${product.id}">Səbətə at</button>
+    </article>`;
+}
+
+function getDiscount(price, oldPrice) {
+  if (!oldPrice || Number(oldPrice) <= Number(price)) return 0;
+  return Math.round(((Number(oldPrice) - Number(price)) / Number(oldPrice)) * 100);
+}
+
+async function removeFavorite(productId) {
+  const activeUser = await requireAuth();
+  const { error } = await supabase.from('favorites').delete().eq('user_id', activeUser.id).eq('product_id', productId);
+  toast(error ? error.message : 'Sevimlilərdən çıxarıldı');
+  initFavorites();
 }
 
 async function initFavorites() {
@@ -61,7 +80,7 @@ async function initFavorites() {
 
   const { data, error } = await supabase
     .from('favorites')
-    .select('id,products(id,name,price,image_url,unit)')
+    .select('id,products(id,name,price,old_price,image_url,unit,short_description)')
     .eq('user_id', activeUser.id)
     .order('created_at', { ascending: false })
     .limit(80);
@@ -70,8 +89,12 @@ async function initFavorites() {
     ? `<div class="card">${error.message}</div>`
     : (data || []).map(productRow).join('') || '<div class="card">Sevimli məhsul yoxdur.</div>';
 
-  $$('.add-cart').forEach((button) => {
+  $('.add-cart').forEach((button) => {
     button.addEventListener('click', () => addCart(button.dataset.id));
+  });
+
+  $('.remove-fav').forEach((button) => {
+    button.addEventListener('click', () => removeFavorite(button.dataset.id));
   });
 }
 
@@ -280,7 +303,9 @@ async function initOrders() {
 
 function orderCard(order) {
   const courier = order.profiles;
+  const eta = estimateEta(order);
 
+  // Sifariş status ikonları xəritənin içində yox, status sözünün yanında göstərilir.
   return `
     <div class="card">
       <div class="section-head">
@@ -288,20 +313,17 @@ function orderCard(order) {
           <b>${order.order_code}</b>
           <p class="muted">${new Date(order.created_at).toLocaleString('az-AZ')}</p>
         </div>
-        <span class="unit-badge">${statusAz(order.status)}</span>
+        <span class="status-pill"><img src="${statusIcon(order.status)}" alt="Status">${statusAz(order.status)}</span>
       </div>
 
       <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
 
-      <div class="map-box order-track-box">
-        <div class="track-icons">
-          <img src="assets/img/icons/home-marker.png" alt="Ev">
-          <img src="assets/img/icons/${order.status === 'preparing' ? 'order-preparing.png' : order.status === 'delivered' ? 'order-delivered.png' : order.status === 'confirmed' ? 'order-confirmed.png' : 'order-delivery.png'}" alt="Status">
-          <img src="assets/img/icons/courier-marker.png" alt="Kuryer">
-        </div>
-        <div>
-          <b>Sifarişi izlə</b>
-          <p class="muted">Kuryer təyin olunandan sonra canlı xəritə məlumatı burada görünəcək.</p>
+      <div class="map-box order-track-box live-map-preview">
+        <div class="map-marker courier-marker"><img src="assets/img/icons/courier-marker.png" alt="Kuryer"></div>
+        <div class="map-marker home-marker"><img src="assets/img/icons/home-marker.png" alt="Ünvan"></div>
+        <div class="map-info">
+          <b>Canlı izləmə</b>
+          <p class="muted">${order.courier_id ? `Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı xəritə görünəcək.'}</p>
         </div>
       </div>
 
@@ -319,8 +341,26 @@ function orderCard(order) {
       ` : '<p class="muted">Kuryer hələ təyin edilməyib.</p>'}
 
       <button class="btn btn-primary open-chat" data-id="${order.id}">Admin/Kuryer ilə mesajlaş</button>
-    </div>
-  `;
+    </div>`;
+}
+
+function statusIcon(status) {
+  const map = {
+    confirmed: 'assets/img/icons/order-confirmed.png',
+    preparing: 'assets/img/icons/order-preparing.png',
+    on_the_way: 'assets/img/icons/order-delivery.png',
+    courier_near: 'assets/img/icons/order-delivery.png',
+    delivered: 'assets/img/icons/order-delivered.png',
+  };
+  return map[status] || 'assets/img/icons/order-confirmed.png';
+}
+
+function estimateEta(order) {
+  if (order.status === 'courier_near') return '15 dəqiqə';
+  if (order.status === 'on_the_way') return '35-45 dəqiqə';
+  if (order.status === 'preparing') return '45-60 dəqiqə';
+  if (order.status === 'delivered') return 'Təhvil verildi';
+  return '30-50 dəqiqə';
 }
 
 async function initProfile() {
@@ -438,10 +478,11 @@ async function openThread(id) {
     : (data || []).map((message) => `
       <div class="msg ${message.sender_id === activeUser.id ? 'me' : ''}">
         ${message.message_text}<br>
-        <small class="muted">${new Date(message.created_at).toLocaleTimeString('az-AZ')}</small>
+        <small class="muted">${new Date(message.created_at).toLocaleString('az-AZ')}</small>
       </div>
     `).join('') || '<span class="muted">Mesaj yoxdur.</span>';
 
+  await supabase.rpc('mark_thread_read', { p_thread_id: id });
   $('#chatBox').scrollTop = 999999;
 }
 

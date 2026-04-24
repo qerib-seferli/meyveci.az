@@ -96,17 +96,13 @@ function renderBanners(rows) {
     link_url: '#products',
   }];
 
+  // Banner kartı artıq ağ blok deyil: şəkil kartın özüdür, başlıq şəkilin üstündə yazılır.
   container.innerHTML = (rows.length ? rows : fallback).map((item) => `
-    <article class="card hero-slide">
-      <div>
-        <h1>${item.title || 'Meyvəçi.az'}</h1>
-        <p class="muted">Bağdan süfrənizə: təzə, keyfiyyətli və sürətli çatdırılan məhsullar.</p>
-        <a class="btn btn-primary" href="${item.link_url || '#products'}">Məhsullara bax</a>
-      </div>
-      <div class="hero-visual">
-        <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title || 'Banner'}">
-      </div>
-    </article>
+    <a class="media-slide banner-slide" href="${item.link_url || '#products'}">
+      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title || 'Banner'}">
+      <span class="media-overlay"></span>
+      <b>${item.title || 'Meyvəçi.az'}</b>
+    </a>
   `).join('');
 }
 
@@ -114,25 +110,68 @@ function renderNews(rows) {
   const container = $('#newsGrid');
   if (!container) return;
 
-  container.innerHTML = (rows.length ? rows : [{ title: 'Günün xəbərləri', excerpt: 'Tezliklə yeni kampaniyalar əlavə olunacaq.', image_url: 'assets/img/logo/Cilek-logo.png' }]).map((item) => `
-    <article class="card news-slide">
-      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title}">
-      <h3>${item.title}</h3>
-      <p class="muted">${item.excerpt || ''}</p>
-    </article>
+  const fallback = [{ title: 'Günün xəbərləri', excerpt: 'Tezliklə yeni kampaniyalar əlavə olunacaq.', body: '', image_url: 'assets/img/logo/Cilek-logo.png' }];
+
+  container.innerHTML = (rows.length ? rows : fallback).map((item) => `
+    <button class="media-slide news-slide news-open" type="button"
+      data-title="${escapeAttr(item.title || 'Xəbər')}"
+      data-excerpt="${escapeAttr(item.excerpt || '')}"
+      data-body="${escapeAttr(item.body || item.content || item.description || '')}"
+      data-image="${escapeAttr(item.image_url || 'assets/img/logo/Cilek-logo.png')}">
+      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title || 'Xəbər'}">
+      <span class="media-overlay"></span>
+      <b>${item.title || 'Xəbər'}</b>
+      <small>${item.excerpt || ''}</small>
+    </button>
   `).join('');
+
+  $('.news-open').forEach((button) => button.addEventListener('click', () => openNewsModal(button.dataset)));
 }
 
 function renderPartners(rows) {
   const container = $('#partnersGrid');
   if (!container) return;
 
+  // Partnyor kartının arxası ağ deyil: şəkil kart kimi görünür, ad aşağıda overlay olur.
   container.innerHTML = (rows.length ? rows : [{ name: 'Meyvəçi.az', image_url: 'assets/img/logo/Meyveci-logo.png' }]).map((item) => `
-    <a class="card partner-slide" href="${item.link_url || '#'}">
-      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.name}">
-      <b>${item.name}</b>
+    <a class="media-slide partner-slide" href="${item.link_url || '#'}">
+      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.name || 'Partnyor'}">
+      <span class="media-overlay"></span>
+      <b>${item.name || 'Partnyor'}</b>
     </a>
   `).join('');
+}
+
+// Xəbər detalını səhifədən çıxmadan açır: mobil və kompüterdə ekrana sığan modal.
+function openNewsModal(data) {
+  let modal = $('#newsModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'newsModal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `
+      <article class="modal-card news-modal-card">
+        <div class="modal-head">
+          <b id="newsModalTitle">Xəbər</b>
+          <button id="newsModalClose" class="mini-x" type="button">×</button>
+        </div>
+        <img id="newsModalImage" src="" alt="Xəbər">
+        <p id="newsModalExcerpt" class="muted"></p>
+        <div id="newsModalBody" class="news-body"></div>
+      </article>`;
+    document.body.appendChild(modal);
+    $('#newsModalClose')?.addEventListener('click', () => modal.classList.remove('show'));
+    modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('show'); });
+  }
+  $('#newsModalTitle').textContent = data.title || 'Xəbər';
+  $('#newsModalImage').src = data.image || 'assets/img/logo/Cilek-logo.png';
+  $('#newsModalExcerpt').textContent = data.excerpt || '';
+  $('#newsModalBody').textContent = data.body || data.excerpt || '';
+  modal.classList.add('show');
+}
+
+function escapeAttr(value) {
+  return String(value || '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 function renderCategoryChips() {

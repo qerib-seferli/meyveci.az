@@ -208,22 +208,37 @@ export async function uploadFile(bucket, file, pathPrefix = 'uploads') {
   return supabase.storage.from(bucket).getPublicUrl(filePath).data.publicUrl;
 }
 
-// Səsli bildiriş üçün qısa beep səsi yaradır.
+// Səsli bildiriş üçün Meyvəçi.az-a məxsus yumşaq iki tonlu beep.
+// Qeyd: telefon brauzerləri səsi yalnız istifadəçi səhifəyə toxunandan sonra buraxır.
+let notifyAudioContext = null;
+function getNotifyAudioContext() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return null;
+  if (!notifyAudioContext) notifyAudioContext = new AudioContext();
+  if (notifyAudioContext.state === "suspended") notifyAudioContext.resume().catch(() => {});
+  return notifyAudioContext;
+}
+document.addEventListener("pointerdown", () => getNotifyAudioContext(), { once: true });
 export function playNotifySound() {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audio = new AudioContext();
-    const oscillator = audio.createOscillator();
-    const gain = audio.createGain();
-
-    oscillator.connect(gain);
-    gain.connect(audio.destination);
-    oscillator.frequency.value = 880;
-    gain.gain.value = 0.04;
-    oscillator.start();
-    oscillator.stop(audio.currentTime + 0.16);
+    const audio = getNotifyAudioContext();
+    if (!audio) return;
+    [660, 920].forEach((freq, index) => {
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = freq;
+      oscillator.connect(gain);
+      gain.connect(audio.destination);
+      const start = audio.currentTime + index * 0.13;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.055, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+      oscillator.start(start);
+      oscillator.stop(start + 0.18);
+    });
   } catch (error) {
-    console.warn('Səsli bildiriş işləmədi:', error.message);
+    console.warn("Səsli bildiriş işləmədi:", error.message);
   }
 }
 
