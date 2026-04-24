@@ -49,7 +49,7 @@ function renderTopbar() {
           💬 <span id="messageCount" class="badge-count hide">0</span>
         </a>
 
-        <!-- Admin üçün yeni sifarişlər qısa keçidi. -->
+        <!-- Admin üçün yeni sifarişlər, kuryer üçün təyin edilmiş sifarişlər qısa keçidi. -->
         <a id="adminOrdersBtn" class="icon-btn hide" href="${root}admin/orders.html" title="Yeni sifarişlər">
           📦 <span id="newOrderCount" class="badge-count hide">0</span>
         </a>
@@ -115,6 +115,12 @@ async function hydrateUserArea() {
     panelLink.href = `${root}courier/index.html`;
     panelLink.textContent = 'Kuryer panel';
     panelLink.classList.remove('hide');
+    const courierOrdersBtn = $('#adminOrdersBtn');
+    if (courierOrdersBtn) {
+      courierOrdersBtn.href = `${root}courier/index.html`;
+      courierOrdersBtn.title = 'Təyin edilmiş sifarişlər';
+      courierOrdersBtn.classList.remove('hide');
+    }
   }
 }
 
@@ -130,7 +136,9 @@ async function refreshBadges() {
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).eq('title', 'Yeni mesaj'),
     activeProfile.role === 'admin'
       ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['pending','confirmed','preparing','on_the_way','courier_near'])
-      : Promise.resolve({ count: 0 }),
+      : activeProfile.role === 'courier'
+        ? supabase.from('orders').select('id', { count: 'exact', head: true }).eq('courier_id', activeProfile.id).not('status', 'in', '(delivered,cancelled)')
+        : Promise.resolve({ count: 0 }),
   ]);
 
   setBadge('favCount', favorites.count || 0);
@@ -202,8 +210,8 @@ async function subscribeNotifications() {
     })
     .subscribe();
 
-  // Admin panel açıq olmasa belə yeni sifariş sayı realtime yenilənir.
-  if (activeProfile.role === 'admin') {
+  // Admin və kuryer panel açıq olmasa belə sifariş sayı realtime yenilənir.
+  if (activeProfile.role === 'admin' || activeProfile.role === 'courier') {
     supabase
       .channel('admin-new-orders-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {

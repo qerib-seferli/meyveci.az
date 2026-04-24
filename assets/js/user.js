@@ -89,11 +89,13 @@ async function initFavorites() {
     ? `<div class="card">${error.message}</div>`
     : (data || []).map(productRow).join('') || '<div class="card">Sevimli məhsul yoxdur.</div>';
 
-  $('.add-cart').forEach((button) => {
+  // Sevimlilər səhifəsində bütün kartların düymələrini ayrı-ayrı işlək edirik.
+  $$('.add-cart').forEach((button) => {
     button.addEventListener('click', () => addCart(button.dataset.id));
   });
 
-  $('.remove-fav').forEach((button) => {
+  // Ürəyə toxunanda məhsul sevimlilərdən çıxır və siyahı yenilənir.
+  $$('.remove-fav').forEach((button) => {
     button.addEventListener('click', () => removeFavorite(button.dataset.id));
   });
 }
@@ -318,14 +320,18 @@ function orderCard(order) {
 
       <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
 
-      <div class="map-box order-track-box live-map-preview">
-        <div class="map-marker courier-marker"><img src="assets/img/icons/courier-marker.png" alt="Kuryer"></div>
-        <div class="map-marker home-marker"><img src="assets/img/icons/home-marker.png" alt="Ünvan"></div>
-        <div class="map-info">
-          <b>Canlı izləmə</b>
-          <p class="muted">${order.courier_id ? `Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı xəritə görünəcək.'}</p>
+      ${['delivered','cancelled'].includes(order.status) ? `
+        <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
+      ` : `
+        <div class="map-box order-track-box live-map-preview">
+          <div class="map-marker courier-marker"><img src="assets/img/icons/courier-marker.png" alt="Kuryer"></div>
+          <div class="map-marker home-marker"><img src="assets/img/icons/home-marker.png" alt="Ünvan"></div>
+          <div class="map-info">
+            <b>Canlı izləmə</b>
+            <p class="muted">${order.courier_id ? `Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı xəritə görünəcək.'}</p>
+          </div>
         </div>
-      </div>
+      `}
 
       ${courier ? `
         <div class="compact-row" style="margin-top: 12px;">
@@ -351,6 +357,7 @@ function statusIcon(status) {
     on_the_way: 'assets/img/icons/order-delivery.png',
     courier_near: 'assets/img/icons/order-delivery.png',
     delivered: 'assets/img/icons/order-delivered.png',
+    cancelled: 'assets/img/icons/Legv-edildi-icon.png',
   };
   return map[status] || 'assets/img/icons/order-confirmed.png';
 }
@@ -432,6 +439,7 @@ async function initMessages() {
 
   await loadThreads();
   $('#sendMessageForm')?.addEventListener('submit', sendMessage);
+  subscribeMessageRealtime();
 }
 
 async function loadThreads() {
@@ -484,6 +492,17 @@ async function openThread(id) {
 
   await supabase.rpc('mark_thread_read', { p_thread_id: id });
   $('#chatBox').scrollTop = 999999;
+}
+
+// Mesaj səhifəsi açıq qalanda yeni mesajlar realtime görünür, F5 tələb olunmur.
+function subscribeMessageRealtime() {
+  supabase
+    .channel('user-message-page-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+      if (currentThread) openThread(currentThread);
+      loadThreads();
+    })
+    .subscribe();
 }
 
 async function sendMessage(event) {

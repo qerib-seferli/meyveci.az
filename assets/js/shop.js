@@ -38,8 +38,9 @@ async function initHome() {
   await loadHomeData();
   setupHomeEvents();
   startAutoScroll('#bannerGrid');
-  startAutoScroll('#newsGrid');
-  startAutoScroll('#partnersGrid');
+  // Xəbərlər və partnyorlar CSS marquee ilə davamlı döngüdə hərəkət edir.
+  prepareMarquee('#newsGrid', 'left');
+  prepareMarquee('#partnersGrid', 'right');
   window.dispatchEvent(new Event('hideLoader'));
 }
 
@@ -112,7 +113,8 @@ function renderNews(rows) {
 
   const fallback = [{ title: 'Günün xəbərləri', excerpt: 'Tezliklə yeni kampaniyalar əlavə olunacaq.', body: '', image_url: 'assets/img/logo/Cilek-logo.png' }];
 
-  container.innerHTML = (rows.length ? rows : fallback).map((item) => `
+  const items = rows.length ? rows : fallback;
+  container.innerHTML = duplicateForLoop(items).map((item) => `
     <button class="media-slide news-slide news-open" type="button"
       data-title="${escapeAttr(item.title || 'Xəbər')}"
       data-excerpt="${escapeAttr(item.excerpt || '')}"
@@ -133,7 +135,8 @@ function renderPartners(rows) {
   if (!container) return;
 
   // Partnyor kartının arxası ağ deyil: şəkil kart kimi görünür, ad aşağıda overlay olur.
-  container.innerHTML = (rows.length ? rows : [{ name: 'Meyvəçi.az', image_url: 'assets/img/logo/Meyveci-logo.png' }]).map((item) => `
+  const items = rows.length ? rows : [{ name: 'Meyvəçi.az', image_url: 'assets/img/logo/Meyveci-logo.png' }];
+  container.innerHTML = duplicateForLoop(items).map((item) => `
     <a class="media-slide partner-slide" href="${item.link_url || '#'}">
       <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.name || 'Partnyor'}">
       <span class="media-overlay"></span>
@@ -168,6 +171,11 @@ function openNewsModal(data) {
   $('#newsModalExcerpt').textContent = data.excerpt || '';
   $('#newsModalBody').textContent = data.body || data.excerpt || '';
   modal.classList.add('show');
+}
+
+// Döngülü animasiya üçün eyni siyahını iki dəfə artırırıq; boşluq yaranmır.
+function duplicateForLoop(items) {
+  return [...items, ...items];
 }
 
 function escapeAttr(value) {
@@ -337,25 +345,66 @@ async function initProduct() {
     return;
   }
 
+  const discount = getDiscount(product.price, product.old_price);
+
   detail.innerHTML = `
-    <div class="card grid grid-2">
-      <div class="hero-visual">
+    <div class="card product-detail-grid">
+      <div class="product-detail-image">
+        ${discount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
         <img src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
       </div>
 
-      <div>
+      <div class="product-detail-info">
         <span class="unit-badge">${product.categories?.name || 'Məhsul'}</span>
         <h1>${product.name}</h1>
-        <p class="muted">${product.description || product.short_description || ''}</p>
-        <h2 class="price">${money(product.price)} / ${product.unit || 'ədəd'}</h2>
-        <button id="addCartDetail" class="btn btn-primary">Səbətə əlavə et</button>
-        <button id="addFavDetail" class="btn btn-soft">Sevimlilərə əlavə et</button>
+        <div class="price-row">
+          <span class="price">${money(product.price)}</span>
+          ${product.old_price ? `<span class="old-price">${money(product.old_price)}</span>` : ''}
+        </div>
+        <p><b>Ölçü vahidi:</b> ${product.unit || 'ədəd'}</p>
+        <p class="muted">${product.description || product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
+        <div class="detail-actions">
+          <button id="addCartDetail" class="btn btn-primary">Səbətə əlavə et</button>
+          <button id="addFavDetail" class="btn btn-soft">Sevimlilərə əlavə et</button>
+        </div>
       </div>
     </div>
   `;
 
   $('#addCartDetail').addEventListener('click', () => addCart(product.id));
   $('#addFavDetail').addEventListener('click', () => toggleFavorite(product.id, $('#addFavDetail')));
+  await renderRelatedProducts(product);
+}
+
+// Məhsul detalının altında eyni kateqoriyadan oxşar məhsullar göstərilir.
+async function renderRelatedProducts(product) {
+  const detail = $('#productDetail');
+  const { data } = await supabase
+    .from('products')
+    .select('*')
+    .eq('status', 'active')
+    .eq('category_id', product.category_id)
+    .neq('id', product.id)
+    .limit(5);
+
+  if (!data?.length) return;
+
+  detail.insertAdjacentHTML('beforeend', `
+    <section class="related-products">
+      <div class="section-head"><h2>Oxşar məhsullar</h2></div>
+      <div class="product-grid">${data.map(productCard).join('')}</div>
+    </section>
+  `);
+
+  $$('.related-products .add-cart').forEach((button) => button.addEventListener('click', () => addCart(button.dataset.id)));
+  $$('.related-products .fav-btn').forEach((button) => button.addEventListener('click', () => toggleFavorite(button.dataset.id, button)));
+}
+
+function prepareMarquee(selector, direction) {
+  const element = $(selector);
+  if (!element) return;
+  element.classList.add('marquee-strip');
+  if (direction === 'right') element.classList.add('reverse');
 }
 
 function startAutoScroll(selector) {

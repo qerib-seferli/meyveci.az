@@ -290,6 +290,11 @@ async function loadOrders() {
     <option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer'} ${courier.profiles?.last_name || ''} ${courier.vehicle_plate || ''}</option>
   `).join('');
 
+  if (orders.error) {
+    $('#ordersTable').innerHTML = `<tr><td colspan="6">${orders.error.message}</td></tr>`;
+    return;
+  }
+
   $('#ordersTable').innerHTML = (orders.data || []).map((order) => `
     <tr>
       <td>${order.order_code}<br><small>${order.profiles?.email || ''}</small></td>
@@ -316,11 +321,7 @@ async function loadOrders() {
     select.addEventListener('change', async () => {
       if (!select.value) return;
 
-      const { error } = await supabase.rpc('assign_courier_to_order', {
-        p_order_id: select.dataset.id,
-        p_courier_id: select.value,
-        p_note: ''
-      });
+      const { error } = await assignCourierSafe(select.dataset.id, select.value);
 
       toast(error ? error.message : 'Kuryer təyin edildi');
       loadOrders();
@@ -338,6 +339,22 @@ async function loadOrders() {
       loadOrders();
     });
   });
+}
+
+// Kuryer təyin etmə: əsas yol RPC-dir, SQL köhnə qalıbsa ehtiyat update ilə də yoxlayırıq.
+async function assignCourierSafe(orderId, courierId) {
+  const rpc = await supabase.rpc('assign_courier_to_order', {
+    p_order_id: orderId,
+    p_courier_id: courierId,
+    p_note: ''
+  });
+  if (!rpc.error) return { error: null };
+
+  const fallback = await supabase
+    .from('orders')
+    .update({ courier_id: courierId, status: 'confirmed' })
+    .eq('id', orderId);
+  return { error: fallback.error || rpc.error };
 }
 
 async function loadPayments() {
