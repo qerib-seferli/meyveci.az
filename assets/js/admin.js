@@ -29,20 +29,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const page = document.body.dataset.page;
 
-  if (page === 'admin-dashboard') dashboard();
-  if (page === 'admin-catalog') catalog();
-  if (page === 'admin-orders') ordersPayments();
-  if (page === 'admin-users') usersReviews();
-  if (page === 'admin-content') content();
-});
-
 // Sifariş statusu üçün kiçik ikon qaytarır. Ləğv statusunda xüsusi icon faylı istifadə olunur.
-// Qeyd: Bu funksiya DOMContentLoaded içində yox, faylın ümumi hissəsindədir ki,
-// loadOrders() funksiyası onu rahat çağıra bilsin və admin sifariş cədvəli boş qalmasın.
 function statusIcon(status) {
   const root = location.pathname.includes('/admin/') ? '../' : './';
   const icons = {
-    pending: `${root}assets/img/icons/order-confirmed.png`,
     confirmed: `${root}assets/img/icons/order-confirmed.png`,
     preparing: `${root}assets/img/icons/order-preparing.png`,
     on_the_way: `${root}assets/img/icons/order-delivery.png`,
@@ -51,6 +41,13 @@ function statusIcon(status) {
   };
   return icons[status] ? `<img class="status-mini-icon" src="${icons[status]}" alt="">` : '';
 }
+
+  if (page === 'admin-dashboard') dashboard();
+  if (page === 'admin-catalog') catalog();
+  if (page === 'admin-orders') ordersPayments();
+  if (page === 'admin-users') usersReviews();
+  if (page === 'admin-content') content();
+});
 
 function initTabs() {
   $$('.tab').forEach((tab) => {
@@ -283,70 +280,49 @@ async function ordersPayments() {
 }
 
 async function loadOrders() {
-  // Sifarişləri müştəri profili və ünvan məlumatı ilə birlikdə çəkirik.
-  // Bu hissə admin paneldə boş cədvəl problemini aradan qaldırır.
   const [orders, couriers] = await Promise.all([
     supabase
-      .from('orders')
-      .select(`
-        *,
-        profiles!orders_user_id_fkey(email,first_name,last_name,phone),
-        addresses(address_line,phone,full_name)
-      `)
-      .order('created_at', { ascending: false })
-      .limit(150),
-
+  .from('orders')
+  .select('*,profiles!orders_user_id_fkey(email,first_name,last_name,phone,address_line)')
+  .order('created_at', { ascending: false })
+  .limit(150),
     // Yalnız hazırda rolu courier olan və aktiv kuryer cədvəlində olan şəxslər göstərilir.
-    supabase
-      .from('couriers')
-      .select('user_id,vehicle_type,vehicle_plate,profiles!inner(email,first_name,last_name,role)')
-      .eq('is_active', true)
-      .eq('profiles.role', 'courier'),
+    supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles!inner(email,first_name,last_name,role)').eq('is_active', true).eq('profiles.role', 'courier'),
   ]);
 
-  const table = $('#ordersTable');
-  if (!table) return;
-
   const makeCourierOptions = (selectedId = '') => (couriers.data || []).map((courier) => `
-    <option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : '''}>
-      ${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer''} ${courier.profiles?.last_name || '''} ${courier.vehicle_plate || '''}
-    </option>
+    <option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer'} ${courier.profiles?.last_name || ''} ${courier.vehicle_plate || ''}</option>
   `).join('');
 
   if (orders.error) {
-    table.innerHTML = `<tr><td colspan="9">${orders.error.message}</td></tr>`;
+    $('#ordersTable').innerHTML = `<tr><td colspan="9">${orders.error.message}</td></tr>`;
     return;
   }
 
-  table.innerHTML = (orders.data || []).map((order) => {
-    const customerName = `${order.profiles?.first_name || '''} ${order.profiles?.last_name || '''}`.trim() || order.addresses?.full_name || 'Adsız müştəri';
-    const customerPhone = order.profiles?.phone || order.addresses?.phone || '—';
-    const customerAddress = order.addresses?.address_line || '—';
-
-    return `
-      <tr>
-        <td>${order.order_code}<br><small>${order.profiles?.email || '''}</small></td>
-        <td>${customerName}</td>
-        <td>${customerPhone}</td>
-        <td>${customerAddress}</td>
-        <td><span class="status-pill status-${order.status}">${statusIcon(order.status)} ${statusAz(order.status)}</span></td>
-        <td><span class="status-pill pay-${order.payment_status}">${statusAz(order.payment_status)}</span></td>
-        <td>${money(order.total_amount)}</td>
-        <td>
-          <select class="assign" data-id="${order.id}">
-            <option value="">Kuryer seç</option>
-            ${makeCourierOptions(order.courier_id)}
-          </select>
-        </td>
-        <td>
-          <button class="btn btn-soft status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
-          <button class="btn btn-soft status" data-id="${order.id}" data-s="preparing">Hazırla</button>
-          <button class="btn btn-soft status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
-          <button class="btn btn-soft status" data-id="${order.id}" data-s="delivered">Təhvil</button>
-          <button class="btn btn-danger status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
-        </td>
-      </tr>`;
-  }).join('') || '<tr><td colspan="9">Sifariş yoxdur.</td></tr>';
+  $('#ordersTable').innerHTML = (orders.data || []).map((order) => `
+    <tr>
+      <td>${order.order_code}<br><small>${order.profiles?.email || ''}</small></td>
+      <td>${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}</td>
+      <td>${order.profiles?.phone || '—'}</td>
+      <td>${order.address_text || order.profiles?.address_line || '—'}</td>
+      <td><span class="status-pill status-${order.status}">${statusIcon(order.status)} ${statusAz(order.status)}</span></td>
+      <td><span class="status-pill pay-${order.payment_status}">${statusAz(order.payment_status)}</span></td>
+      <td>${money(order.total_amount)}</td>
+      <td>
+        <select class="assign" data-id="${order.id}">
+          <option value="">Kuryer seç</option>
+          ${makeCourierOptions(order.courier_id)}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="preparing">Hazırla</button>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="delivered">Təhvil</button>
+        <button class="btn btn-danger status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="9">Sifariş yoxdur.</td></tr>';
 
   $$('.assign').forEach((select) => {
     select.addEventListener('change', async () => {
@@ -372,6 +348,22 @@ async function loadOrders() {
   });
 }
 
+// Kuryer təyin etmə: əsas yol RPC-dir, SQL köhnə qalıbsa ehtiyat update ilə də yoxlayırıq.
+async function assignCourierSafe(orderId, courierId) {
+  const rpc = await supabase.rpc('assign_courier_to_order', {
+    p_order_id: orderId,
+    p_courier_id: courierId,
+    p_note: ''
+  });
+  if (!rpc.error) return { error: null };
+
+  const fallback = await supabase
+    .from('orders')
+    .update({ courier_id: courierId, status: 'confirmed' })
+    .eq('id', orderId);
+  return { error: fallback.error || rpc.error };
+}
+
 async function loadPayments() {
   const { data } = await supabase
     .from('payments')
@@ -391,7 +383,7 @@ async function loadPayments() {
         <button class="btn btn-danger pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
+  `).join('') || '<tr><td colspan="9">Ödəniş yoxdur.</td></tr>';
 
   $$('.pay').forEach((button) => {
     button.addEventListener('click', async () => {
