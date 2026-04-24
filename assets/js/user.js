@@ -301,6 +301,9 @@ async function initOrders() {
   $$('.open-chat').forEach((button) => {
     button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
   });
+  $$('.cancel-order').forEach((button) => {
+    button.addEventListener('click', () => cancelOrder(button.dataset.id, button.dataset.status));
+  });
 }
 
 function orderCard(order) {
@@ -346,9 +349,40 @@ function orderCard(order) {
         </div>
       ` : '<p class="muted">Kuryer hələ təyin edilməyib.</p>'}
 
-      <button class="btn btn-primary open-chat" data-id="${order.id}">Admin/Kuryer ilə mesajlaş</button>
+                <div class="order-actions">
+                <button class="btn btn-primary open-chat" data-id="${order.id}">Admin/Kuryer ilə mesajlaş</button>
+              
+                ${order.status === 'pending' ? `
+                  <button class="btn btn-danger cancel-order" data-id="${order.id}" data-status="${order.status}">
+                    Sifarişi ləğv et
+                  </button>
+                ` : ''}
+              </div>
     </div>`;
 }
+
+              async function cancelOrder(orderId, status) {
+                if (status !== 'pending') {
+                  toast('Sifariş artıq təsdiqlənib. Ləğv üçün mağaza ilə əlaqə saxlayın.');
+                  return;
+                }
+              
+                if (!confirm('Sifarişi ləğv etmək istədiyinizə əminsiniz?')) return;
+              
+                const { error } = await supabase
+                  .from('orders')
+                  .update({
+                    status: 'cancelled',
+                    cancelled_by: 'user',
+                    cancel_note: 'İstifadəçi sifarişi təsdiqdən əvvəl ləğv etdi',
+                  })
+                  .eq('id', orderId)
+                  .eq('status', 'pending');
+              
+                toast(error ? error.message : 'Sifariş ləğv edildi');
+                initOrders();
+              }
+
 
 function statusIcon(status) {
   const map = {
