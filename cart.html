@@ -1,1 +1,53 @@
-<!DOCTYPE html><html lang="az"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#16a34a"><link rel="icon" href="./assets/img/logo/Cilek-logo.png"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./assets/css/style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><title>Səbət</title></head><body data-page="cart"><main class="app-shell"><div class="section-head"><h1>Səbət</h1><b id="cartTotal">0 AZN</b></div><section id="cartList" class="grid"></section><section class="card"><h2>Sifarişi tamamla</h2><form id="checkoutForm" class="form-grid"><input name="phone" placeholder="Telefon" required><input name="address" placeholder="Ünvan" required><select name="payment_method"><option value="cash">Nağd</option><option value="card_transfer">Kart köçürməsi</option><option value="pos">POS terminal</option></select><input name="transaction_ref" placeholder="Əməliyyat kodu"><input id="receiptFile" class="full" type="file" accept="image/*"><textarea class="full" name="note" placeholder="Qeyd"></textarea><button class="btn btn-primary full">Sifariş ver</button></form></section></main><script type="module" src="./assets/js/user.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="icon" href="./assets/img/logo/Cilek-logo.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Səbət | Meyvəçi.az</title>
+</head>
+<body data-page="cart">
+  <main class="app-shell">
+    <div class="section-head">
+      <h1>Səbət</h1>
+      <b id="cartTotal">0 AZN</b>
+    </div>
+
+    <section id="cartList" class="grid"></section>
+
+    <section class="card" style="margin-top: 16px;">
+      <h2>Sifarişi tamamla</h2>
+      <p class="muted">Ad, telefon və ünvan profil məlumatlarından avtomatik çəkilir. İstəsən burada dəyişə bilərsən.</p>
+
+      <form id="checkoutForm" class="form-grid">
+        <input name="full_name" placeholder="Ad Soyad" required>
+        <input name="phone" placeholder="Telefon" required>
+        <input class="full" name="address" placeholder="Ünvan" required>
+        <input name="apartment" placeholder="Bina, blok, mənzil">
+        <input name="door_code" placeholder="Qapı kodu">
+        <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
+        <input name="lng" type="number" step="any" placeholder="Longitude / xəritə uzunluğu">
+
+        <select id="paymentMethod" name="payment_method">
+          <option value="cash">Nağd</option>
+          <option value="card_transfer">Kart köçürməsi</option>
+          <option value="pos">POS terminal</option>
+          <option value="online_payment">Online payment</option>
+        </select>
+
+        <input name="transaction_ref" placeholder="Əməliyyat kodu">
+        <input id="receiptFile" class="full" type="file" accept="image/*">
+        <div id="paymentHelp" class="payment-help full"></div>
+        <textarea class="full" name="note" placeholder="Qısa qeyd: döngə, bina, blok, qapı kodu və s."></textarea>
+        <button class="btn btn-primary full">Sifariş ver</button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="./assets/js/user.js"></script>
+</body>
+</html>

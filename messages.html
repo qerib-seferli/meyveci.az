@@ -1,1 +1,38 @@
-<!DOCTYPE html><html lang="az"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#16a34a"><link rel="icon" href="./assets/img/logo/Cilek-logo.png"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./assets/css/style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><title>Mesajlar</title></head><body data-page="messages"><main class="app-shell"><div class="section-head"><h1>Onlayn mesaj</h1></div><div class="grid grid-2"><section class="card"><h3>Söhbətlər</h3><div id="threadList" class="compact-list"></div></section><section class="card"><div id="chatBox" class="chat-box"></div><form id="sendMessageForm" class="search-row" style="margin-top:10px"><input id="messageInput" placeholder="Mesaj yaz..."><button class="btn btn-primary">Göndər</button></form></section></div></main><script type="module" src="./assets/js/user.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="icon" href="./assets/img/logo/Cilek-logo.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Mesajlar | Meyvəçi.az</title>
+</head>
+<body data-page="messages">
+  <main class="app-shell">
+    <div class="section-head">
+      <h1>Onlayn mesaj</h1>
+      <p class="muted">Admin və kuryer ilə sifariş üzrə yazışma.</p>
+    </div>
+
+    <div class="grid grid-2">
+      <section class="card">
+        <h3>Söhbətlər</h3>
+        <div id="threadList" class="compact-list"></div>
+      </section>
+
+      <section class="card">
+        <div id="chatBox" class="chat-box"></div>
+        <form id="sendMessageForm" class="search-row" style="margin-top: 10px;">
+          <input id="messageInput" placeholder="Mesaj yaz...">
+          <button class="btn btn-primary">Göndər</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./assets/js/user.js"></script>
+</body>
+</html>
