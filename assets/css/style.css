@@ -6,21 +6,21 @@
 
 /* ==================== DƏYİŞƏNLƏR / RƏNG SİSTEMİ ==================== */
 :root {
-  --green: #16a34a;              /* Əsas yaşıl rəng */
-  --green-dark: #0f7a37;         /* Tünd yaşıl rəng */
-  --green-soft: #dcfce7;         /* Açıq yaşıl fon */
-  --lime: #a3e635;               /* Canlı neon yaşıl */
+  --green: #22c55e;              /* Əsas yaşıl rəng */
+  --green-dark: #047857;         /* Tünd yaşıl rəng */
+  --green-soft: #d9fbe7;         /* Açıq yaşıl fon */
+  --lime: #bef264;               /* Canlı neon yaşıl */
   --yellow: #facc15;             /* Endirim və ulduz rəngi */
   --red: #ef4444;                /* Silmə və sevimli aktiv rəngi */
   --blue: #0ea5e9;               /* Link və məlumat rəngi */
-  --text: #102016;               /* Əsas mətn rəngi */
+  --text: #132018;               /* Əsas mətn rəngi */
   --muted: #64756b;              /* Solğun mətn rəngi */
   --line: rgba(15, 122, 55, 0.14); /* Nazik sərhəd rəngi */
   --card: rgba(255, 255, 255, 0.88); /* Kartların ağ fonu */
   --shadow: 0 18px 50px rgba(15, 122, 55, 0.14); /* Yumşaq kölgə */
   --radius: 22px;                /* Ümumi yumru künc ölçüsü */
   --topbar-height: 74px;         /* Yuxarı sabit hissənin hündürlüyü */
-  --bottom-height: 78px;         /* Aşağı sabit naviqasiyanın hündürlüyü */
+  --bottom-height: 68px;         /* Aşağı sabit naviqasiyanın hündürlüyü */
 }
 
 /* ==================== SIFIRLAMA VƏ BAZA ==================== */
@@ -122,8 +122,8 @@ button {
   position: relative;
   border: 0;
   border-radius: 999px;
-  min-height: 42px;
-  padding: 10px 15px;
+  min-height: 38px;
+  padding: 8px 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -138,7 +138,8 @@ button {
 }
 
 .icon-btn {
-  width: 44px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   background: var(--green-soft);
   color: var(--green-dark);
@@ -286,7 +287,7 @@ button {
 
 .hero-slide h1 {
   margin: 0 0 10px;
-  font-size: clamp(28px, 4vw, 54px);
+  font-size: clamp(23px, 3.4vw, 42px);
   letter-spacing: -0.04em;
 }
 
@@ -343,7 +344,7 @@ textarea {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 13px 14px;
+  padding: 11px 13px;
   outline: none;
   background: rgba(255, 255, 255, 0.88);
   color: var(--text);
@@ -378,7 +379,7 @@ textarea:focus {
   flex: 0 0 auto;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 8px 13px;
   color: var(--green-dark);
   background: #ffffff;
   font-weight: 800;
@@ -479,14 +480,14 @@ textarea:focus {
   top: 14px;
   right: 14px;
   z-index: 5;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border: 0;
   border-radius: 50%;
   color: rgba(239, 68, 68, 0.62);
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .fav-btn.active {
@@ -532,7 +533,7 @@ textarea:focus {
 
 .preview-img {
   width: 58px;
-  height: 58px;
+  height: 50px;
   border-radius: 16px;
   object-fit: cover;
   background: var(--green-soft);
@@ -604,7 +605,7 @@ textarea:focus {
   z-index: 90;
   padding: 9px 10px 11px;
   backdrop-filter: blur(22px);
-  background: rgba(7, 83, 38, 0.83);
+  background: rgba(5, 95, 56, 0.86);
   border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
@@ -620,7 +621,7 @@ textarea:focus {
 .nav-item {
   position: relative;
   min-width: 0;
-  height: 58px;
+  height: 50px;
   border-radius: 20px;
   display: grid;
   place-items: center;
@@ -636,18 +637,115 @@ textarea:focus {
 }
 
 .nav-item .ico {
-  font-size: 22px;
+  font-size: 18px;
   filter: drop-shadow(0 0 8px rgba(163, 230, 53, 0.72));
 }
 
 .home-logo {
-  width: 72px;
-  height: 72px;
+  width: 58px;
+  height: 58px;
   object-fit: contain;
-  margin-top: -22px;
+  margin-top: -16px;
   filter: drop-shadow(0 10px 18px rgba(163, 230, 53, 0.48));
   animation: pulseLogo 2.6s ease-in-out infinite;
 }
+
+
+/* ==================== PROFİL PİLL VƏ BİLDİRİŞ MODALI ==================== */
+.profile-pill {
+  min-width: 0;
+  max-width: 210px;
+  min-height: 40px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green-dark);
+  background: rgba(220, 252, 231, 0.95);
+  font-weight: 900;
+  box-shadow: 0 8px 22px rgba(22, 163, 74, 0.12);
+}
+
+.profile-ico {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.profile-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(4, 120, 87, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+.modal-backdrop.show {
+  display: grid;
+}
+
+.modal-card {
+  width: min(430px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(4, 120, 87, 0.24);
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mini-x {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.notify-item {
+  text-align: left;
+  cursor: pointer;
+}
+
+.notify-item:hover {
+  border-color: rgba(34, 197, 94, 0.42);
+  background: rgba(236, 253, 245, 0.95);
+}
+
+/* Endirim göstəricisinin ətrafında neon hərəkət effekti */
+.discount-leaf::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, rgba(190, 242, 100, 0), rgba(190, 242, 100, 0.98), rgba(34, 197, 94, 0), rgba(14, 165, 233, 0.72), rgba(190, 242, 100, 0));
+  filter: blur(6px);
+  animation: neonSpin 2.4s linear infinite;
+}
+
 
 /* ==================== LOADER VƏ TOAST ==================== */
 .loader-screen {
@@ -705,6 +803,10 @@ textarea:focus {
   50% { transform: scale(1.08); }
 }
 
+@keyframes neonSpin {
+  to { transform: rotate(360deg); }
+}
+
 /* ==================== PLANŞET ÖLÇÜSÜ ==================== */
 @media (max-width: 980px) {
   .product-grid {
@@ -724,12 +826,45 @@ textarea:focus {
 /* ==================== TELEFON ÖLÇÜSÜ ==================== */
 @media (max-width: 640px) {
   .topbar {
-    padding: 8px 10px;
+    padding: 7px 8px;
+  }
+
+  body {
+    font-size: 14px;
   }
 
   .brand img {
-    width: 96px;
-    height: 42px;
+    width: 88px;
+    height: 38px;
+  }
+
+  .top-actions {
+    gap: 5px;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    font-size: 15px;
+  }
+
+  .btn {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .profile-pill {
+    max-width: 120px;
+    min-height: 34px;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .profile-ico {
+    width: 24px;
+    height: 24px;
   }
 
   .btn-label,
@@ -753,7 +888,7 @@ textarea:focus {
 
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)); /* Telefonda 2 kart */
-    gap: 11px;
+    gap: 10px;
   }
 
   .product-card {
@@ -779,5 +914,90 @@ textarea:focus {
 
   .news-slider {
     grid-auto-columns: minmax(230px, 82%);
+  }
+}
+
+
+/* ==================== ƏLAVƏ MOBİL BALANS ==================== */
+@media (max-width: 640px) {
+  .bottom-nav {
+    padding: 7px 8px 9px;
+  }
+
+  .bottom-nav-inner {
+    gap: 5px;
+  }
+
+  .nav-item {
+    height: 46px;
+    border-radius: 16px;
+    font-size: 10px;
+  }
+
+  .nav-item .ico {
+    font-size: 18px;
+  }
+
+  .home-logo {
+    width: 52px;
+    height: 52px;
+    margin-top: -14px;
+  }
+
+  .slider-strip {
+    grid-auto-columns: minmax(260px, 88%);
+  }
+
+  .chip-row {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .product-card .pic {
+    aspect-ratio: 1 / 0.88;
+  }
+
+  .price-row,
+  .product-title-row,
+  .compact-row {
+    min-width: 0;
+  }
+
+  .compact-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+}
+
+
+/* ==================== XƏRİTƏ / SİFARİŞ STATUS İKONLARI ==================== */
+.order-track-box {
+  gap: 12px;
+  text-align: center;
+}
+
+.track-icons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.track-icons img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(4, 120, 87, 0.18));
+}
+
+@media (max-width: 640px) {
+  .track-icons img {
+    width: 38px;
+    height: 38px;
   }
 }
