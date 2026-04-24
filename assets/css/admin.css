@@ -1,1 +1,132 @@
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.kpi{padding:14px;border-radius:18px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}.kpi strong{display:block;font-size:25px;color:#166534}.admin-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:10px}.admin-toolbar .filters{display:flex;gap:8px;flex-wrap:wrap}.preview-img{width:54px;height:54px;border-radius:12px;object-fit:cover;background:#f1f5f9}.receipt-img{max-width:100%;border-radius:16px}.compact-list{display:grid;gap:8px}.compact-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}@media(max-width:800px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.admin-toolbar{display:grid}.admin-toolbar .filters{display:grid}.admin-toolbar input,.admin-toolbar select,.admin-toolbar button{width:100%}}
+/* ============================================================
+   MEYVƏÇİ.AZ - ADMIN PANEL DİZAYNI
+   Admin səhifələrinin layout, sidebar, cədvəl və KPI görünüşü.
+   ============================================================ */
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.sidebar {
+  position: sticky;
+  top: 92px;
+}
+
+.side-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.side-link {
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: var(--green-dark);
+  background: rgba(220, 252, 231, 0.75);
+  font-weight: 850;
+}
+
+.side-link:hover {
+  background: var(--green);
+  color: #ffffff;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kpi {
+  border-radius: 22px;
+  padding: 18px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  box-shadow: var(--shadow);
+}
+
+.kpi span {
+  display: block;
+  opacity: 0.88;
+}
+
+.kpi strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 34px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+}
+
+.tab {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  color: var(--green-dark);
+  background: var(--green-soft);
+  font-weight: 900;
+}
+
+.tab.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--green-dark);
+  background: rgba(220, 252, 231, 0.62);
+}
+
+@media (max-width: 900px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+
+  .side-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
