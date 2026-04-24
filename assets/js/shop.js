@@ -1,15 +1,327 @@
-import { $, $$, supabase, money, toast, PLACEHOLDER, requireAuth, byId } from './core.js';
+// ============================================================
+// MEYVƏÇİ.AZ - MAĞAZA VƏ ANA SƏHİFƏ FUNKSİYALARI
+// Bu fayl ana səhifə, məhsul siyahısı, sevimli və səbət əlavə etməni idarə edir.
+// ============================================================
+
+import {
+  $,
+  $$,
+  supabase,
+  money,
+  toast,
+  PLACEHOLDER,
+  requireAuth,
+  byId,
+} from './core.js';
+
 import { initLayout } from './layout.js';
-let state={cats:[],products:[],category:'all',q:'',offset:0,limit:12};
-document.addEventListener('DOMContentLoaded',async()=>{await initLayout(); const page=document.body.dataset.page; if(page==='home') initHome(); if(page==='product') initProduct();});
-async function initHome(){await loadHome(); $('#homeSearchInput')?.addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase(); renderProducts(true)}); $('#clearHomeFilters')?.addEventListener('click',()=>{state.q='';state.category='all';$('#homeSearchInput').value='';renderChips();renderProducts(true)}); $('#loadMore')?.addEventListener('click',()=>{state.offset+=state.limit;renderProducts(false)});}
-async function loadHome(){const [c,p,b,n]=await Promise.all([supabase.from('categories').select('id,name,slug,description').eq('is_active',true).order('sort_order').limit(40),supabase.from('products').select('id,name,slug,price,old_price,unit,image_url,category_id,is_featured,stock_quantity').eq('status','active').order('is_featured',{ascending:false}).order('created_at',{ascending:false}).limit(80),supabase.from('banners').select('title,image_url,link_url').eq('is_active',true).order('sort_order').limit(3),supabase.from('news').select('title,excerpt,image_url').eq('is_active',true).order('created_at',{ascending:false}).limit(3)]); state.cats=c.data||[]; state.products=p.data||[]; renderBanners(b.data||[]); renderChips(); renderProducts(true); renderNews(n.data||[]); window.dispatchEvent(new Event('hideLoader'));}
-function renderBanners(rows){const el=$('#bannerGrid'); if(!el)return; el.innerHTML=(rows.length?rows:[{title:'Təzə məhsullar qapına qədər',image_url:'assets/img/logo/Cilek-logo.png'}]).map(x=>`<div class="card hero"><div><h1>${x.title||'Meyvəçi.az'}</h1><p class="muted">Təzə məhsulları rahat sifariş et, qapına qədər çatdıraq.</p><a class="btn btn-primary" href="#products">Məhsullara bax</a></div><div class="hero-visual"><img src="${x.image_url||'assets/img/logo/Cilek-logo.png'}"/></div></div>`).join('')}
-function renderNews(rows){const el=$('#newsGrid'); if(!el)return; el.innerHTML=rows.map(n=>`<article class="card"><h3>${n.title}</h3><p class="muted">${n.excerpt||''}</p></article>`).join('')||'<p class="muted">Hələ xəbər yoxdur.</p>'}
-function renderChips(){const el=$('#homeCategoryChips'); if(!el)return; el.innerHTML=`<button class="chip ${state.category==='all'?'active':''}" data-id="all">Hamısı</button>`+state.cats.map(c=>`<button class="chip ${state.category===c.id?'active':''}" data-id="${c.id}">${c.name}</button>`).join(''); $$('#homeCategoryChips .chip').forEach(btn=>btn.onclick=()=>{state.category=btn.dataset.id;state.offset=0;renderChips();renderProducts(true)});}
-function filtered(){return state.products.filter(p=>(state.category==='all'||p.category_id===state.category)&&(!state.q||p.name.toLowerCase().includes(state.q)))}
-function renderProducts(reset){const el=$('#productsGrid'); if(!el)return; const rows=filtered().slice(0,state.offset+state.limit); el.innerHTML=rows.map(productCard).join('')||'<div class="card"><b>Məhsul tapılmadı</b><p class="muted">Axtarışı dəyişin.</p></div>'; $$('.add-cart').forEach(b=>b.onclick=()=>addCart(b.dataset.id)); $$('.fav-btn').forEach(b=>b.onclick=()=>addFav(b.dataset.id)); const more=$('#loadMore'); if(more) more.style.display=filtered().length>rows.length?'inline-flex':'none'}
-function productCard(p){return `<article class="product-card"><button class="fav-btn" data-id="${p.id}">♡</button><a href="product.html?id=${p.id}" class="pic"><img loading="lazy" src="${p.image_url||PLACEHOLDER}"/></a><h3><a href="product.html?id=${p.id}">${p.name}</a></h3><div><span class="price">${money(p.price)}</span> <small class="muted">/${p.unit||'ədəd'}</small></div><button class="btn btn-primary cart-btn add-cart" data-id="${p.id}">Səbətə at</button></article>`}
-async function addCart(product_id){const u=await requireAuth(); if(!u)return; const {data}=await supabase.from('cart_items').select('id,quantity').eq('user_id',u.id).eq('product_id',product_id).maybeSingle(); const res=data? await supabase.from('cart_items').update({quantity:data.quantity+1}).eq('id',data.id): await supabase.from('cart_items').insert({user_id:u.id,product_id,quantity:1}); if(res.error) return toast(res.error.message); toast('Səbətə əlavə olundu')}
-async function addFav(product_id){const u=await requireAuth(); if(!u)return; const {error}=await supabase.from('favorites').upsert({user_id:u.id,product_id},{onConflict:'user_id,product_id'}); toast(error?error.message:'Sevimlilərə əlavə olundu')}
-async function initProduct(){const id=byId(); const el=$('#productDetail'); if(!id||!el){el.innerHTML='<div class="card">Məhsul tapılmadı</div>';return} const {data:p,error}=await supabase.from('products').select('*,categories(name)').eq('id',id).maybeSingle(); if(error||!p){el.innerHTML='<div class="card">Məhsul tapılmadı</div>';return} el.innerHTML=`<div class="card grid grid-2"><div class="hero-visual"><img src="${p.image_url||PLACEHOLDER}"/></div><div><span class="badge ok">${p.categories?.name||'Məhsul'}</span><h1>${p.name}</h1><p class="muted">${p.description||p.short_description||''}</p><h2 class="price">${money(p.price)} / ${p.unit||'ədəd'}</h2><button id="addCartDetail" class="btn btn-primary">Səbətə əlavə et</button><button id="addFavDetail" class="btn btn-soft">Sevimlilərə əlavə et</button></div></div>`; $('#addCartDetail').onclick=()=>addCart(p.id); $('#addFavDetail').onclick=()=>addFav(p.id);}
+
+const state = {
+  categories: [],
+  products: [],
+  favorites: new Set(),
+  category: 'all',
+  query: '',
+  visible: 12,
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await initLayout();
+
+  const page = document.body.dataset.page;
+
+  if (page === 'home') initHome();
+  if (page === 'product') initProduct();
+});
+
+async function initHome() {
+  await loadHomeData();
+  setupHomeEvents();
+  startAutoScroll('#bannerGrid');
+  startAutoScroll('#newsGrid');
+  startAutoScroll('#partnersGrid');
+  window.dispatchEvent(new Event('hideLoader'));
+}
+
+function setupHomeEvents() {
+  $('#homeSearchInput')?.addEventListener('input', (event) => {
+    state.query = event.target.value.trim().toLowerCase();
+    state.visible = 12;
+    renderProducts();
+  });
+
+  $('#clearHomeFilters')?.addEventListener('click', () => {
+    state.query = '';
+    state.category = 'all';
+    state.visible = 12;
+    $('#homeSearchInput').value = '';
+    renderCategoryChips();
+    renderProducts();
+  });
+
+  $('#loadMore')?.addEventListener('click', () => {
+    state.visible += 10;
+    renderProducts();
+  });
+}
+
+async function loadHomeData() {
+  const [categories, products, banners, news, partners, favorites] = await Promise.all([
+    supabase.from('categories').select('id,name,slug,description').eq('is_active', true).order('sort_order').limit(50),
+    supabase.from('products').select('*').eq('status', 'active').order('is_featured', { ascending: false }).order('created_at', { ascending: false }).limit(120),
+    supabase.from('banners').select('*').eq('is_active', true).order('sort_order').limit(5),
+    supabase.from('news').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(8),
+    supabase.from('partners').select('*').eq('is_active', true).order('sort_order').limit(16),
+    supabase.from('favorites').select('product_id'),
+  ]);
+
+  state.categories = categories.data || [];
+  state.products = products.data || [];
+  state.favorites = new Set((favorites.data || []).map((item) => item.product_id));
+
+  renderBanners(banners.data || []);
+  renderNews(news.data || []);
+  renderCategoryChips();
+  renderProducts();
+  renderPartners(partners.data || []);
+}
+
+function renderBanners(rows) {
+  const container = $('#bannerGrid');
+  if (!container) return;
+
+  const fallback = [{
+    title: 'Təzə məhsullar qapına qədər',
+    image_url: 'assets/img/logo/Cilek-logo.png',
+    link_url: '#products',
+  }];
+
+  container.innerHTML = (rows.length ? rows : fallback).map((item) => `
+    <article class="card hero-slide">
+      <div>
+        <h1>${item.title || 'Meyvəçi.az'}</h1>
+        <p class="muted">Bağdan süfrənizə: təzə, keyfiyyətli və sürətli çatdırılan məhsullar.</p>
+        <a class="btn btn-primary" href="${item.link_url || '#products'}">Məhsullara bax</a>
+      </div>
+      <div class="hero-visual">
+        <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title || 'Banner'}">
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderNews(rows) {
+  const container = $('#newsGrid');
+  if (!container) return;
+
+  container.innerHTML = (rows.length ? rows : [{ title: 'Günün xəbərləri', excerpt: 'Tezliklə yeni kampaniyalar əlavə olunacaq.', image_url: 'assets/img/logo/Cilek-logo.png' }]).map((item) => `
+    <article class="card news-slide">
+      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title}">
+      <h3>${item.title}</h3>
+      <p class="muted">${item.excerpt || ''}</p>
+    </article>
+  `).join('');
+}
+
+function renderPartners(rows) {
+  const container = $('#partnersGrid');
+  if (!container) return;
+
+  container.innerHTML = (rows.length ? rows : [{ name: 'Meyvəçi.az', image_url: 'assets/img/logo/Meyveci-logo.png' }]).map((item) => `
+    <a class="card partner-slide" href="${item.link_url || '#'}">
+      <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.name}">
+      <b>${item.name}</b>
+    </a>
+  `).join('');
+}
+
+function renderCategoryChips() {
+  const container = $('#homeCategoryChips');
+  if (!container) return;
+
+  container.innerHTML = `
+    <button class="chip ${state.category === 'all' ? 'active' : ''}" data-id="all">Hamısı</button>
+    ${state.categories.map((category) => `
+      <button class="chip ${state.category === category.id ? 'active' : ''}" data-id="${category.id}">${category.name}</button>
+    `).join('')}
+  `;
+
+  $$('#homeCategoryChips .chip').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.category = button.dataset.id;
+      state.visible = 12;
+      renderCategoryChips();
+      renderProducts();
+    });
+  });
+}
+
+function filteredProducts() {
+  return state.products.filter((product) => {
+    const categoryMatch = state.category === 'all' || product.category_id === state.category;
+    const searchMatch = !state.query || product.name.toLowerCase().includes(state.query);
+    return categoryMatch && searchMatch;
+  });
+}
+
+function renderProducts() {
+  const container = $('#productsGrid');
+  if (!container) return;
+
+  const rows = filteredProducts();
+  const visibleRows = rows.slice(0, state.visible);
+
+  container.innerHTML = visibleRows.map(productCard).join('') || `
+    <div class="card">
+      <b>Məhsul tapılmadı</b>
+      <p class="muted">Axtarışı və ya kateqoriyanı dəyişin.</p>
+    </div>
+  `;
+
+  $$('.add-cart').forEach((button) => {
+    button.addEventListener('click', () => addCart(button.dataset.id));
+  });
+
+  $$('.fav-btn').forEach((button) => {
+    button.addEventListener('click', () => toggleFavorite(button.dataset.id, button));
+  });
+
+  const loadMoreButton = $('#loadMore');
+  if (loadMoreButton) loadMoreButton.style.display = rows.length > visibleRows.length ? 'inline-flex' : 'none';
+}
+
+function productCard(product) {
+  const discount = getDiscount(product.price, product.old_price);
+  const isFavorite = state.favorites.has(product.id);
+
+  return `
+    <article class="product-card">
+      ${discount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
+      <button class="fav-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}" title="Sevimlilərə əlavə et">♥</button>
+
+      <a href="product.html?id=${product.id}" class="pic">
+        <img loading="lazy" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+      </a>
+
+      <div class="product-title-row">
+        <h3><a href="product.html?id=${product.id}">${product.name}</a></h3>
+        <span class="unit-badge">${product.unit || 'ədəd'}</span>
+      </div>
+
+      <div class="price-row">
+        <span class="price">${money(product.price)}</span>
+        ${product.old_price ? `<span class="old-price">${money(product.old_price)}</span>` : ''}
+      </div>
+
+      <p class="short-desc">${product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
+      <button class="btn btn-primary cart-btn add-cart" data-id="${product.id}">Səbətə at</button>
+    </article>
+  `;
+}
+
+function getDiscount(price, oldPrice) {
+  if (!oldPrice || Number(oldPrice) <= Number(price)) return 0;
+  return Math.round(((Number(oldPrice) - Number(price)) / Number(oldPrice)) * 100);
+}
+
+async function addCart(productId) {
+  const activeUser = await requireAuth();
+  if (!activeUser) return;
+
+  const { data } = await supabase
+    .from('cart_items')
+    .select('id,quantity')
+    .eq('user_id', activeUser.id)
+    .eq('product_id', productId)
+    .maybeSingle();
+
+  const response = data
+    ? await supabase.from('cart_items').update({ quantity: data.quantity + 1 }).eq('id', data.id)
+    : await supabase.from('cart_items').insert({ user_id: activeUser.id, product_id: productId, quantity: 1 });
+
+  if (response.error) return toast(response.error.message);
+
+  toast('Səbətə əlavə olundu');
+}
+
+async function toggleFavorite(productId, button) {
+  const activeUser = await requireAuth();
+  if (!activeUser) return;
+
+  if (state.favorites.has(productId)) {
+    const { error } = await supabase
+      .from('favorites')
+      .delete()
+      .eq('user_id', activeUser.id)
+      .eq('product_id', productId);
+
+    if (error) return toast(error.message);
+
+    state.favorites.delete(productId);
+    button.classList.remove('active');
+    toast('Sevimlilərdən çıxarıldı');
+    return;
+  }
+
+  const { error } = await supabase
+    .from('favorites')
+    .upsert({ user_id: activeUser.id, product_id: productId }, { onConflict: 'user_id,product_id' });
+
+  if (error) return toast(error.message);
+
+  state.favorites.add(productId);
+  button.classList.add('active');
+  toast('Sevimlilərə əlavə olundu');
+}
+
+async function initProduct() {
+  const id = byId();
+  const detail = $('#productDetail');
+
+  if (!id || !detail) {
+    detail.innerHTML = '<div class="card">Məhsul tapılmadı.</div>';
+    return;
+  }
+
+  const { data: product, error } = await supabase
+    .from('products')
+    .select('*,categories(name)')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !product) {
+    detail.innerHTML = '<div class="card">Məhsul tapılmadı.</div>';
+    return;
+  }
+
+  detail.innerHTML = `
+    <div class="card grid grid-2">
+      <div class="hero-visual">
+        <img src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+      </div>
+
+      <div>
+        <span class="unit-badge">${product.categories?.name || 'Məhsul'}</span>
+        <h1>${product.name}</h1>
+        <p class="muted">${product.description || product.short_description || ''}</p>
+        <h2 class="price">${money(product.price)} / ${product.unit || 'ədəd'}</h2>
+        <button id="addCartDetail" class="btn btn-primary">Səbətə əlavə et</button>
+        <button id="addFavDetail" class="btn btn-soft">Sevimlilərə əlavə et</button>
+      </div>
+    </div>
+  `;
+
+  $('#addCartDetail').addEventListener('click', () => addCart(product.id));
+  $('#addFavDetail').addEventListener('click', () => toggleFavorite(product.id, $('#addFavDetail')));
+}
+
+function startAutoScroll(selector) {
+  const element = $(selector);
+  if (!element) return;
+
+  setInterval(() => {
+    const next = element.scrollLeft + Math.min(360, element.clientWidth * 0.85);
+    const endReached = next >= element.scrollWidth - element.clientWidth - 8;
+    element.scrollTo({ left: endReached ? 0 : next, behavior: 'smooth' });
+  }, 4200);
+}

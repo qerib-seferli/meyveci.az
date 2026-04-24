@@ -1,7 +1,220 @@
-import { $, profile, logout, supabase, pagePath, toast } from './core.js';
-const nav=[['index.html','🏠','Ana'],['favorites.html','❤️','Sevimli'],['index.html','logo',''],['cart.html','🛒','Səbət'],['profile.html','👤','Profil']];
-export async function initLayout(){renderTop();renderBottom(); await hydrateUser(); window.addEventListener('hideLoader',()=>{const l=$('#loader'); if(l) l.style.display='none'}); setTimeout(()=>window.dispatchEvent(new Event('hideLoader')),450)}
-function renderTop(){const top=document.createElement('header');top.className='topbar';const isSub=location.pathname.includes('/admin/')||location.pathname.includes('/courier/'); const root=isSub?'../':'./';top.innerHTML=`<div class="topbar-inner"><a class="brand" href="${root}index.html"><img src="${root}assets/img/logo/Meyveci-logo.png" onerror="this.src='${root}assets/img/logo/Cilek-logo.png'"/><span>Meyvəçi.az</span></a><div class="top-actions"><button id="notifyBtn" class="icon-btn" title="Bildirişlər">🔔</button><a id="panelLink" class="btn btn-soft hide" href="#"><span class="btn-label">Panel</span></a><a class="btn btn-soft" href="${root}messages.html"><span class="btn-label">Mesaj</span></a><button id="logoutBtn" class="btn btn-danger hide"><span class="btn-label">Çıxış</span></button></div><div id="notifyDrop" class="mini-dropdown"><b>Bildirişlər</b><div id="notifyList" class="compact-list" style="margin-top:8px"><span class="muted">Bildiriş yoxdur</span></div></div></div>`;document.body.prepend(top);$('#notifyBtn')?.addEventListener('click',loadNotifications);$('#logoutBtn')?.addEventListener('click',logout)}
-function renderBottom(){if(location.pathname.includes('/admin/'))return; const root=location.pathname.includes('/courier/')?'../':'./';const b=document.createElement('nav');b.className='bottom-nav';b.innerHTML=`<div class="bottom-nav-inner">${nav.map(([href,ico,label])=>`<a class="nav-item ${href==='index.html'?'nav-home':''}" href="${root}${href}">${ico==='logo'?`<img class="home-logo" src="${root}assets/img/logo/Cilek-logo.png"/>`:`<span class="ico">${ico}</span><span>${label}</span>`}</a>`).join('')}</div>`;document.body.appendChild(b)}
-async function hydrateUser(){const p=await profile(); const root=location.pathname.includes('/admin/')||location.pathname.includes('/courier/')?'../':'./'; if(p){$('#logoutBtn')?.classList.remove('hide'); const link=$('#panelLink'); if(link&&p.role==='admin'){link.href=root+'admin/index.html';link.textContent='Admin';link.classList.remove('hide')} if(link&&p.role==='courier'){link.href=root+'courier/index.html';link.textContent='Kuryer';link.classList.remove('hide')}}}
-async function loadNotifications(){const d=$('#notifyDrop'); d?.classList.toggle('show'); if(!d?.classList.contains('show'))return; const list=$('#notifyList'); const p=await profile(); if(!p){list.innerHTML='<span class="muted">Giriş edilməyib</span>';return} const {data,error}=await supabase.from('notifications').select('id,title,body,created_at,is_read,link_url').eq('user_id',p.id).order('created_at',{ascending:false}).limit(8); if(error){list.innerHTML='<span class="muted">Bildiriş yüklənmədi</span>';return} list.innerHTML=(data||[]).map(n=>`<a class="compact-row" href="${n.link_url||'#'}"><span><b>${n.title}</b><br><small class="muted">${n.body||''}</small></span></a>`).join('')||'<span class="muted">Bildiriş yoxdur</span>';}
+// ============================================================
+// MEYVƏÇİ.AZ - SABİT HEADER, BOTTOM NAV VƏ BİLDİRİŞLƏR
+// Bu fayl bütün səhifələrə yuxarı/aşağı hissəni avtomatik əlavə edir.
+// ============================================================
+
+import { $, profile, logout, supabase, playNotifySound } from './core.js';
+
+// Aşağı menyu sırası: Sevimlilər, Səbət, Ana səhifə, Sifarişlərim, WhatsApp.
+const bottomNav = [
+  ['favorites.html', '❤️', 'Sevimlilər', 'favCount'],
+  ['cart.html', '🛒', 'Səbət', 'cartCount'],
+  ['index.html', 'logo', '', null],
+  ['orders.html', '📦', 'Sifarişlərim', 'orderCount'],
+  ['https://wa.me/994000000000', '💬', 'WhatsApp', null],
+];
+
+// Layout-un əsas başladıcı funksiyası.
+export async function initLayout() {
+  renderTopbar();
+  renderBottomNav();
+  await hydrateUserArea();
+  await refreshBadges();
+  subscribeNotifications();
+
+  window.addEventListener('hideLoader', hideLoader);
+  setTimeout(hideLoader, 550);
+}
+
+// Loader-i gizlədir.
+function hideLoader() {
+  const loader = $('#loader');
+  if (loader) loader.style.display = 'none';
+}
+
+// Yuxarı sabit başlıq hissəsini yaradır.
+function renderTopbar() {
+  const root = getRootPath();
+  const topbar = document.createElement('header');
+
+  topbar.className = 'topbar';
+  topbar.innerHTML = `
+    <div class="topbar-inner">
+      <a class="brand" href="${root}index.html" aria-label="Meyvəçi.az ana səhifə">
+        <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az" onerror="this.src='${root}assets/img/logo/Cilek-logo.png'">
+      </a>
+
+      <div class="top-actions">
+        <button id="notifyBtn" class="icon-btn" title="Bildirişlər">
+          🔔 <span id="notifyCount" class="badge-count hide">0</span>
+        </button>
+
+        <a id="panelLink" class="btn btn-soft hide" href="#">Panel</a>
+        <a id="profileLink" class="icon-btn" href="${root}profile.html" title="Profil">👤</a>
+        <button id="logoutBtn" class="btn btn-danger hide">Çıxış</button>
+      </div>
+
+      <div id="notifyDrop" class="mini-dropdown">
+        <b>Bildirişlər</b>
+        <div id="notifyList" class="compact-list" style="margin-top: 8px;">
+          <span class="muted">Bildiriş yoxdur</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.prepend(topbar);
+
+  $('#notifyBtn')?.addEventListener('click', loadNotifications);
+  $('#logoutBtn')?.addEventListener('click', logout);
+}
+
+// Aşağı sabit naviqasiyanı yaradır.
+function renderBottomNav() {
+  if (location.pathname.includes('/admin/')) return;
+
+  const root = getRootPath();
+  const nav = document.createElement('nav');
+
+  nav.className = 'bottom-nav';
+  nav.innerHTML = `
+    <div class="bottom-nav-inner">
+      ${bottomNav.map(([href, icon, label, badgeId]) => {
+        const isExternal = href.startsWith('http');
+        const url = isExternal ? href : `${root}${href}`;
+        const target = isExternal ? 'target="_blank" rel="noopener"' : '';
+        const content = icon === 'logo'
+          ? `<img class="home-logo" src="${root}assets/img/logo/Cilek-logo.png" alt="Ana səhifə">`
+          : `<span class="ico">${icon}</span><span>${label}</span>${badgeId ? `<span id="${badgeId}" class="badge-count hide">0</span>` : ''}`;
+
+        return `<a class="nav-item" href="${url}" ${target}>${content}</a>`;
+      }).join('')}
+    </div>
+  `;
+
+  document.body.appendChild(nav);
+}
+
+// İstifadəçi roluna görə header-də panel linkini göstərir.
+async function hydrateUserArea() {
+  const activeProfile = await profile();
+  const root = getRootPath();
+  const panelLink = $('#panelLink');
+
+  if (!activeProfile) return;
+
+  $('#logoutBtn')?.classList.remove('hide');
+
+  if (panelLink && activeProfile.role === 'admin') {
+    panelLink.href = `${root}admin/index.html`;
+    panelLink.textContent = 'Admin panel';
+    panelLink.classList.remove('hide');
+  }
+
+  if (panelLink && activeProfile.role === 'courier') {
+    panelLink.href = `${root}courier/index.html`;
+    panelLink.textContent = 'Kuryer panel';
+    panelLink.classList.remove('hide');
+  }
+}
+
+// Səbət, sevimli, sifariş və bildiriş saylarını icon üstündə göstərir.
+async function refreshBadges() {
+  const activeProfile = await profile();
+  if (!activeProfile) return;
+
+  const [favorites, cart, orders, notifications] = await Promise.all([
+    supabase.from('favorites').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
+    supabase.from('cart_items').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).neq('status', 'delivered'),
+    supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false),
+  ]);
+
+  setBadge('favCount', favorites.count || 0);
+  setBadge('cartCount', cart.count || 0);
+  setBadge('orderCount', orders.count || 0);
+  setBadge('notifyCount', notifications.count || 0);
+}
+
+// Badge rəqəmini yazır və sıfırdırsa gizlədir.
+function setBadge(id, count) {
+  const el = $(`#${id}`);
+  if (!el) return;
+
+  el.textContent = count > 99 ? '99+' : String(count);
+  el.classList.toggle('hide', count < 1);
+}
+
+// Bildiriş dropdown siyahısını yükləyir.
+async function loadNotifications() {
+  const dropdown = $('#notifyDrop');
+  const list = $('#notifyList');
+
+  dropdown?.classList.toggle('show');
+  if (!dropdown?.classList.contains('show')) return;
+
+  const activeProfile = await profile();
+
+  if (!activeProfile) {
+    list.innerHTML = '<span class="muted">Bildiriş görmək üçün daxil olun.</span>';
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('id,title,body,created_at,is_read,link_url')
+    .eq('user_id', activeProfile.id)
+    .order('created_at', { ascending: false })
+    .limit(12);
+
+  if (error) {
+    list.innerHTML = '<span class="muted">Bildiriş yüklənmədi.</span>';
+    return;
+  }
+
+  list.innerHTML = (data || []).map((item) => `
+    <a class="compact-row" href="${item.link_url || '#'}">
+      <span>
+        <b>${item.title}</b><br>
+        <small class="muted">${item.body || ''}</small>
+      </span>
+      ${item.is_read ? '' : '<span class="badge-count" style="position: static;">•</span>'}
+    </a>
+  `).join('') || '<span class="muted">Bildiriş yoxdur.</span>';
+
+  await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', activeProfile.id)
+    .eq('is_read', false);
+
+  setBadge('notifyCount', 0);
+}
+
+// Realtime bildiriş gələndə badge artırır və səs verir.
+async function subscribeNotifications() {
+  const activeProfile = await profile();
+  if (!activeProfile) return;
+
+  supabase
+    .channel(`notifications:${activeProfile.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${activeProfile.id}`,
+      },
+      () => {
+        refreshBadges();
+        playNotifySound();
+      }
+    )
+    .subscribe();
+}
+
+// Admin/kuryer qovluqlarından ana qovluğa çıxmaq üçün root path hesablayır.
+function getRootPath() {
+  return location.pathname.includes('/admin/') || location.pathname.includes('/courier/') ? '../' : './';
+}

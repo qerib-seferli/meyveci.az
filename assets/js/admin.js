@@ -1,21 +1,508 @@
-import { $, $$, supabase, requireRole, money, toast, formData, uploadFile, slugify, statusAz, PLACEHOLDER } from './core.js';
+// ============================================================
+// MEYVƏÇİ.AZ - ADMIN PANEL FUNKSİYALARI
+// Dashboard, məhsul/kateqoriya, sifariş, ödəniş, istifadəçi, rəy və kontent idarəsi.
+// ============================================================
+
+import {
+  $,
+  $$,
+  supabase,
+  requireRole,
+  money,
+  toast,
+  formData,
+  uploadFile,
+  slugify,
+  statusAz,
+  PLACEHOLDER,
+} from './core.js';
+
 import { initLayout } from './layout.js';
-document.addEventListener('DOMContentLoaded',async()=>{await initLayout(); const ok=await requireRole('admin'); if(!ok)return; const p=document.body.dataset.page; initTabs(); if(p==='admin-dashboard') dashboard(); if(p==='admin-catalog') catalog(); if(p==='admin-orders') ordersPayments(); if(p==='admin-users') usersReviews(); if(p==='admin-content') content();});
-function initTabs(){ $$('.tab').forEach(t=>t.onclick=()=>{const root=t.closest('.tabs-wrap')||document; $$('.tab',root).forEach(x=>x.classList.remove('active')); $$('.tab-panel',root).forEach(x=>x.classList.remove('active')); t.classList.add('active'); $('#'+t.dataset.tab)?.classList.add('active')})}
-async function dashboard(){const [p,o,u,c]=await Promise.all([supabase.from('products').select('id',{count:'exact',head:true}),supabase.from('orders').select('id',{count:'exact',head:true}),supabase.from('profiles').select('id',{count:'exact',head:true}),supabase.from('couriers').select('id',{count:'exact',head:true})]); $('#kpis').innerHTML=`<div class="kpi"><span>Məhsul</span><strong>${p.count||0}</strong></div><div class="kpi"><span>Sifariş</span><strong>${o.count||0}</strong></div><div class="kpi"><span>İstifadəçi</span><strong>${u.count||0}</strong></div><div class="kpi"><span>Kuryer</span><strong>${c.count||0}</strong></div>`; const {data}=await supabase.from('orders').select('id,order_code,status,total_amount,created_at').order('created_at',{ascending:false}).limit(5); $('#recentOrders').innerHTML=(data||[]).map(o=>`<div class="compact-row"><span><b>${o.order_code}</b><br><small>${statusAz(o.status)}</small></span><b>${money(o.total_amount)}</b></div>`).join('')||'<span class="muted">Sifariş yoxdur</span>'}
-async function catalog(){await loadCategories(); await loadProducts(); $('#catForm').onsubmit=saveCategory; $('#productForm').onsubmit=saveProduct; $('#newCat').onclick=()=>resetForm('catForm'); $('#newProduct').onclick=()=>resetForm('productForm')}
-function resetForm(id){$('#'+id).reset(); $('#'+id+' [name=id]').value=''}
-async function loadCategories(){const {data,error}=await supabase.from('categories').select('*').order('sort_order'); $('#catTable').innerHTML=error?error.message:(data||[]).map(c=>`<tr><td>${c.name}</td><td>${c.slug}</td><td>${c.is_active?'Aktiv':'Passiv'}</td><td><button class="btn btn-soft edit-cat" data-row='${JSON.stringify(c)}'>Redaktə</button><button class="btn btn-danger del-cat" data-id="${c.id}">Sil</button></td></tr>`).join(''); $$('.edit-cat').forEach(b=>b.onclick=()=>fillForm('catForm',JSON.parse(b.dataset.row))); $$('.del-cat').forEach(b=>b.onclick=async()=>{if(confirm('Silinsin?')){await supabase.from('categories').delete().eq('id',b.dataset.id);loadCategories()}})}
-async function saveCategory(e){e.preventDefault(); const f=formData(e.target); const row={name:f.name,slug:f.slug||slugify(f.name),description:f.description,sort_order:Number(f.sort_order||0),is_active:f.is_active==='on'}; const res=f.id?await supabase.from('categories').update(row).eq('id',f.id):await supabase.from('categories').insert(row); toast(res.error?res.error.message:'Kateqoriya saxlanıldı'); loadCategories(); e.target.reset()}
-function fillForm(id,row){const form=$('#'+id); Object.entries(row).forEach(([k,v])=>{if(form[k]){if(form[k].type==='checkbox')form[k].checked=!!v; else form[k].value=v??''}}); window.scrollTo({top:0,behavior:'smooth'})}
-async function loadProducts(){const {data,error}=await supabase.from('products').select('*,categories(name)').order('created_at',{ascending:false}).limit(200); const cats=await supabase.from('categories').select('id,name').order('sort_order'); $('#productCategory').innerHTML=(cats.data||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); $('#productTable').innerHTML=error?error.message:(data||[]).map(p=>`<tr><td><img class="preview-img" src="${p.image_url||PLACEHOLDER}"></td><td>${p.name}<br><small>${p.categories?.name||''}</small></td><td>${money(p.price)}</td><td>${p.stock_quantity}</td><td>${p.status}</td><td><button class="btn btn-soft edit-product" data-row='${JSON.stringify(p)}'>Redaktə</button><button class="btn btn-danger del-product" data-id="${p.id}">Sil</button></td></tr>`).join(''); $$('.edit-product').forEach(b=>b.onclick=()=>fillForm('productForm',JSON.parse(b.dataset.row))); $$('.del-product').forEach(b=>b.onclick=async()=>{if(confirm('Silinsin?')){await supabase.from('products').delete().eq('id',b.dataset.id);loadProducts()}})}
-async function saveProduct(e){e.preventDefault(); const f=formData(e.target); try{let image_url=f.image_url||null; if($('#productImage').files[0]) image_url=await uploadFile('products',$('#productImage').files[0],'products'); const row={category_id:f.category_id||null,name:f.name,slug:f.slug||slugify(f.name),price:Number(f.price||0),old_price:f.old_price?Number(f.old_price):null,stock_quantity:Number(f.stock_quantity||0),unit:f.unit||'ədəd',image_url,short_description:f.short_description,description:f.description,is_featured:f.is_featured==='on',status:f.status||'active'}; const res=f.id?await supabase.from('products').update(row).eq('id',f.id):await supabase.from('products').insert(row); toast(res.error?res.error.message:'Məhsul saxlanıldı'); loadProducts(); e.target.reset()}catch(err){toast(err.message)}}
-async function ordersPayments(){await loadOrders(); await loadPayments();}
-async function loadOrders(){const [orders,couriers]=await Promise.all([supabase.from('orders').select('*,profiles(email,first_name,last_name)').order('created_at',{ascending:false}).limit(100),supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles(email,first_name,last_name)').eq('is_active',true)]); const opts=(couriers.data||[]).map(c=>`<option value="${c.user_id}">${c.profiles?.first_name||c.profiles?.email||'Kuryer'} ${c.vehicle_plate||''}</option>`).join(''); $('#ordersTable').innerHTML=(orders.data||[]).map(o=>`<tr><td>${o.order_code}<br><small>${o.profiles?.email||''}</small></td><td>${statusAz(o.status)}</td><td>${statusAz(o.payment_status)}</td><td>${money(o.total_amount)}</td><td><select class="assign" data-id="${o.id}"><option value="">Kuryer seç</option>${opts}</select></td><td><button class="btn btn-soft status" data-id="${o.id}" data-s="preparing">Hazırla</button><button class="btn btn-soft status" data-id="${o.id}" data-s="on_the_way">Yola sal</button><button class="btn btn-danger status" data-id="${o.id}" data-s="cancelled">Ləğv</button></td></tr>`).join('')||'<tr><td colspan="6">Sifariş yoxdur</td></tr>'; $$('.assign').forEach(s=>s.onchange=async()=>{if(s.value){const {error}=await supabase.rpc('assign_courier_to_order',{p_order_id:s.dataset.id,p_courier_id:s.value}); toast(error?error.message:'Kuryer təyin edildi')}}); $$('.status').forEach(b=>b.onclick=async()=>{const {error}=await supabase.from('orders').update({status:b.dataset.s}).eq('id',b.dataset.id);toast(error?error.message:'Status dəyişdi');loadOrders()})}
-async function loadPayments(){const {data}=await supabase.from('payments').select('*,orders(order_code)').order('created_at',{ascending:false}).limit(100); $('#paymentsTable').innerHTML=(data||[]).map(p=>`<tr><td>${p.orders?.order_code||''}</td><td>${p.provider}</td><td>${money(p.amount)}</td><td>${p.status}</td><td>${p.receipt_url?`<a class="btn btn-soft" target="_blank" href="${p.receipt_url}">Çekə bax</a>`:'—'}</td><td><button class="btn btn-soft pay" data-id="${p.id}" data-s="approved">Təsdiq</button><button class="btn btn-danger pay" data-id="${p.id}" data-s="rejected">Rədd</button></td></tr>`).join('')||'<tr><td colspan="6">Ödəniş yoxdur</td></tr>'; $$('.pay').forEach(b=>b.onclick=async()=>{const {error}=await supabase.rpc('admin_update_payment_status',{p_payment_id:b.dataset.id,p_status:b.dataset.s,p_admin_note:''});toast(error?error.message:'Ödəniş yeniləndi');loadPayments()})}
-async function usersReviews(){await loadUsers(); await loadReviews();}
-async function loadUsers(){const {data}=await supabase.from('profiles').select('*').order('created_at',{ascending:false}).limit(200); $('#usersTable').innerHTML=(data||[]).map(u=>`<tr><td>${u.email}<br><small>${u.first_name||''} ${u.last_name||''}</small></td><td><select class="role" data-id="${u.id}"><option ${u.role==='user'?'selected':''}>user</option><option ${u.role==='courier'?'selected':''}>courier</option><option ${u.role==='admin'?'selected':''}>admin</option></select></td><td>${u.is_active?'Aktiv':'Passiv'}</td><td><button class="btn btn-soft active" data-id="${u.id}" data-v="${!u.is_active}">${u.is_active?'Passiv et':'Aktiv et'}</button></td></tr>`).join(''); $$('.role').forEach(s=>s.onchange=async()=>{await supabase.from('profiles').update({role:s.value}).eq('id',s.dataset.id); if(s.value==='courier') await supabase.from('couriers').upsert({user_id:s.dataset.id,is_active:true},{onConflict:'user_id'}); toast('Rol dəyişdi')}); $$('.active').forEach(b=>b.onclick=async()=>{await supabase.from('profiles').update({is_active:b.dataset.v==='true'}).eq('id',b.dataset.id);loadUsers()})}
-async function loadReviews(){const {data}=await supabase.from('reviews').select('*,products(name),profiles(email)').order('created_at',{ascending:false}).limit(100); $('#reviewsTable').innerHTML=(data||[]).map(r=>`<tr><td>${r.products?.name||''}<br><small>${r.profiles?.email||''}</small></td><td>${'⭐'.repeat(r.rating)}</td><td>${r.review_text||''}</td><td>${r.status}</td><td><button class="btn btn-soft review" data-id="${r.id}" data-s="approved">Təsdiq</button><button class="btn btn-danger review" data-id="${r.id}" data-s="rejected">Rədd</button></td></tr>`).join('')||'<tr><td colspan="5">Rəy yoxdur</td></tr>'; $$('.review').forEach(b=>b.onclick=async()=>{await supabase.from('reviews').update({status:b.dataset.s}).eq('id',b.dataset.id);loadReviews()})}
-async function content(){await loadContent('banners');await loadContent('news');await loadContent('partners'); $('#bannerForm').onsubmit=e=>saveContent(e,'banners','banners'); $('#newsForm').onsubmit=e=>saveContent(e,'news','news'); $('#partnerForm').onsubmit=e=>saveContent(e,'partners','partners')}
-async function loadContent(table){const {data}=await supabase.from(table).select('*').order('created_at',{ascending:false}).limit(80); const box=$('#'+table+'List'); if(!box)return; box.innerHTML=(data||[]).map(x=>`<div class="compact-row"><span><b>${x.title||x.name}</b><br><small>${x.is_active?'Aktiv':'Passiv'}</small></span><button class="btn btn-danger del-content" data-table="${table}" data-id="${x.id}">Sil</button></div>`).join('')||'<span class="muted">Məlumat yoxdur</span>'; $$('.del-content').forEach(b=>b.onclick=async()=>{if(confirm('Silinsin?')){await supabase.from(b.dataset.table).delete().eq('id',b.dataset.id);loadContent(b.dataset.table)}})}
-async function saveContent(e,table,bucket){e.preventDefault(); const f=formData(e.target); try{let image_url=f.image_url||null; const file=e.target.querySelector('[type=file]')?.files?.[0]; if(file) image_url=await uploadFile(bucket,file,bucket); const row={...f,image_url,is_active:f.is_active==='on'}; delete row.file; const {error}=await supabase.from(table).insert(row); toast(error?error.message:'Saxlanıldı'); e.target.reset(); loadContent(table)}catch(err){toast(err.message)}}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await initLayout();
+
+  const isAdmin = await requireRole('admin');
+  if (!isAdmin) return;
+
+  initTabs();
+
+  const page = document.body.dataset.page;
+
+  if (page === 'admin-dashboard') dashboard();
+  if (page === 'admin-catalog') catalog();
+  if (page === 'admin-orders') ordersPayments();
+  if (page === 'admin-users') usersReviews();
+  if (page === 'admin-content') content();
+});
+
+function initTabs() {
+  $$('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const root = tab.closest('.tabs-wrap') || document;
+
+      $$('.tab', root).forEach((item) => item.classList.remove('active'));
+      $$('.tab-panel', root).forEach((item) => item.classList.remove('active'));
+
+      tab.classList.add('active');
+      $(`#${tab.dataset.tab}`)?.classList.add('active');
+    });
+  });
+}
+
+async function dashboard() {
+  const [products, orders, users, couriers, messages, payments] = await Promise.all([
+    supabase.from('products').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id', { count: 'exact', head: true }),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('couriers').select('id', { count: 'exact', head: true }),
+    supabase.from('chat_messages').select('id', { count: 'exact', head: true }),
+    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+  ]);
+
+  $('#kpis').innerHTML = `
+    <div class="kpi"><span>Məhsul</span><strong>${products.count || 0}</strong></div>
+    <div class="kpi"><span>Sifariş</span><strong>${orders.count || 0}</strong></div>
+    <div class="kpi"><span>İstifadəçi</span><strong>${users.count || 0}</strong></div>
+    <div class="kpi"><span>Kuryer</span><strong>${couriers.count || 0}</strong></div>
+    <div class="kpi"><span>Yeni mesaj</span><strong>${messages.count || 0}</strong></div>
+    <div class="kpi"><span>Gözləyən ödəniş</span><strong>${payments.count || 0}</strong></div>
+  `;
+
+  const { data } = await supabase
+    .from('orders')
+    .select('id,order_code,status,payment_status,total_amount,created_at')
+    .order('created_at', { ascending: false })
+    .limit(8);
+
+  $('#recentOrders').innerHTML = (data || []).map((order) => `
+    <div class="compact-row">
+      <span><b>${order.order_code}</b><br><small>${statusAz(order.status)} • ${statusAz(order.payment_status)}</small></span>
+      <b>${money(order.total_amount)}</b>
+    </div>
+  `).join('') || '<span class="muted">Sifariş yoxdur.</span>';
+}
+
+async function catalog() {
+  await loadCategories();
+  await loadProducts();
+
+  $('#catForm').addEventListener('submit', saveCategory);
+  $('#productForm').addEventListener('submit', saveProduct);
+  $('#newCat').addEventListener('click', () => resetForm('catForm'));
+  $('#newProduct').addEventListener('click', () => resetForm('productForm'));
+}
+
+function resetForm(id) {
+  const form = $(`#${id}`);
+  form.reset();
+  if (form.id) form.id.value = '';
+}
+
+function fillForm(id, row) {
+  const form = $(`#${id}`);
+
+  Object.entries(row).forEach(([key, value]) => {
+    if (!form[key]) return;
+
+    if (form[key].type === 'checkbox') {
+      form[key].checked = Boolean(value);
+    } else {
+      form[key].value = value ?? '';
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function loadCategories() {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('sort_order');
+
+  const table = $('#catTable');
+
+  table.innerHTML = error
+    ? `<tr><td>${error.message}</td></tr>`
+    : (data || []).map((category) => `
+      <tr>
+        <td>${category.name}</td>
+        <td>${category.slug}</td>
+        <td>${category.sort_order || 0}</td>
+        <td>${category.is_active ? 'Aktiv' : 'Passiv'}</td>
+        <td>
+          <button class="btn btn-soft edit-cat" data-row='${JSON.stringify(category)}'>Redaktə</button>
+          <button class="btn btn-danger del-cat" data-id="${category.id}">Sil</button>
+        </td>
+      </tr>
+    `).join('');
+
+  $$('.edit-cat').forEach((button) => {
+    button.addEventListener('click', () => fillForm('catForm', JSON.parse(button.dataset.row)));
+  });
+
+  $$('.del-cat').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!confirm('Kateqoriya silinsin?')) return;
+      await supabase.from('categories').delete().eq('id', button.dataset.id);
+      loadCategories();
+    });
+  });
+}
+
+async function saveCategory(event) {
+  event.preventDefault();
+
+  const data = formData(event.target);
+  const row = {
+    name: data.name,
+    slug: data.slug || slugify(data.name),
+    description: data.description,
+    sort_order: Number(data.sort_order || 0),
+    is_active: data.is_active === 'on',
+  };
+
+  const response = data.id
+    ? await supabase.from('categories').update(row).eq('id', data.id)
+    : await supabase.from('categories').insert(row);
+
+  toast(response.error ? response.error.message : 'Kateqoriya saxlanıldı');
+  event.target.reset();
+  loadCategories();
+}
+
+async function loadProducts() {
+  const [products, categories] = await Promise.all([
+    supabase.from('products').select('*,categories(name)').order('created_at', { ascending: false }).limit(250),
+    supabase.from('categories').select('id,name').order('sort_order'),
+  ]);
+
+  $('#productCategory').innerHTML = '<option value="">Kateqoriya seç</option>' + (categories.data || []).map((category) => `
+    <option value="${category.id}">${category.name}</option>
+  `).join('');
+
+  $('#productTable').innerHTML = products.error
+    ? `<tr><td>${products.error.message}</td></tr>`
+    : (products.data || []).map((product) => `
+      <tr>
+        <td><img class="preview-img" src="${product.image_url || PLACEHOLDER}" alt="${product.name}"></td>
+        <td>${product.name}<br><small>${product.categories?.name || ''}</small></td>
+        <td>${money(product.price)}<br><small>${product.old_price ? money(product.old_price) : ''}</small></td>
+        <td>${product.stock_quantity}</td>
+        <td>${product.status}</td>
+        <td>
+          <button class="btn btn-soft edit-product" data-row='${JSON.stringify(product)}'>Redaktə</button>
+          <button class="btn btn-danger del-product" data-id="${product.id}">Sil</button>
+        </td>
+      </tr>
+    `).join('');
+
+  $$('.edit-product').forEach((button) => {
+    button.addEventListener('click', () => fillForm('productForm', JSON.parse(button.dataset.row)));
+  });
+
+  $$('.del-product').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!confirm('Məhsul silinsin?')) return;
+      await supabase.from('products').delete().eq('id', button.dataset.id);
+      loadProducts();
+    });
+  });
+}
+
+async function saveProduct(event) {
+  event.preventDefault();
+
+  const data = formData(event.target);
+
+  try {
+    let imageUrl = data.image_url || null;
+
+    if ($('#productImage').files[0]) {
+      imageUrl = await uploadFile('products', $('#productImage').files[0], 'products');
+    }
+
+    const row = {
+      category_id: data.category_id || null,
+      name: data.name,
+      slug: data.slug || slugify(data.name),
+      price: Number(data.price || 0),
+      old_price: data.old_price ? Number(data.old_price) : null,
+      stock_quantity: Number(data.stock_quantity || 0),
+      unit: data.unit || 'ədəd',
+      image_url: imageUrl,
+      short_description: data.short_description,
+      description: data.description,
+      is_featured: data.is_featured === 'on',
+      status: data.status || 'active',
+    };
+
+    const response = data.id
+      ? await supabase.from('products').update(row).eq('id', data.id)
+      : await supabase.from('products').insert(row);
+
+    toast(response.error ? response.error.message : 'Məhsul saxlanıldı');
+    event.target.reset();
+    loadProducts();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function ordersPayments() {
+  await loadOrders();
+  await loadPayments();
+}
+
+async function loadOrders() {
+  const [orders, couriers] = await Promise.all([
+    supabase.from('orders').select('*,profiles!orders_user_id_fkey(email,first_name,last_name,phone)').order('created_at', { ascending: false }).limit(150),
+    supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles(email,first_name,last_name)').eq('is_active', true),
+  ]);
+
+  const courierOptions = (couriers.data || []).map((courier) => `
+    <option value="${courier.user_id}">${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer'} ${courier.vehicle_plate || ''}</option>
+  `).join('');
+
+  $('#ordersTable').innerHTML = (orders.data || []).map((order) => `
+    <tr>
+      <td>${order.order_code}<br><small>${order.profiles?.email || ''}</small></td>
+      <td>${statusAz(order.status)}</td>
+      <td>${statusAz(order.payment_status)}</td>
+      <td>${money(order.total_amount)}</td>
+      <td>
+        <select class="assign" data-id="${order.id}">
+          <option value="">Kuryer seç</option>
+          ${courierOptions}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="preparing">Hazırla</button>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
+        <button class="btn btn-soft status" data-id="${order.id}" data-s="delivered">Təhvil</button>
+        <button class="btn btn-danger status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6">Sifariş yoxdur.</td></tr>';
+
+  $$('.assign').forEach((select) => {
+    select.addEventListener('change', async () => {
+      if (!select.value) return;
+
+      const { error } = await supabase.rpc('assign_courier_to_order', {
+        p_order_id: select.dataset.id,
+        p_courier_id: select.value,
+      });
+
+      toast(error ? error.message : 'Kuryer təyin edildi');
+      loadOrders();
+    });
+  });
+
+  $$('.status').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const { error } = await supabase.rpc('admin_update_order_status', {
+        p_order_id: button.dataset.id,
+        p_status: button.dataset.s,
+      });
+
+      toast(error ? error.message : 'Status dəyişdi');
+      loadOrders();
+    });
+  });
+}
+
+async function loadPayments() {
+  const { data } = await supabase
+    .from('payments')
+    .select('*,orders(order_code)')
+    .order('created_at', { ascending: false })
+    .limit(150);
+
+  $('#paymentsTable').innerHTML = (data || []).map((payment) => `
+    <tr>
+      <td>${payment.orders?.order_code || ''}</td>
+      <td>${payment.provider}</td>
+      <td>${money(payment.amount)}</td>
+      <td>${payment.status}</td>
+      <td>${payment.receipt_url ? `<a class="btn btn-soft" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
+      <td>
+        <button class="btn btn-soft pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
+        <button class="btn btn-danger pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
+
+  $$('.pay').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const { error } = await supabase.rpc('admin_update_payment_status', {
+        p_payment_id: button.dataset.id,
+        p_status: button.dataset.s,
+        p_admin_note: '',
+      });
+
+      toast(error ? error.message : 'Ödəniş yeniləndi');
+      loadPayments();
+    });
+  });
+}
+
+async function usersReviews() {
+  await loadUsers();
+  await loadReviews();
+}
+
+async function loadUsers() {
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(300);
+
+  $('#usersTable').innerHTML = (data || []).map((user) => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img class="preview-img" src="${user.avatar_url || PLACEHOLDER}" alt="${user.email}">
+          <span>${user.first_name || ''} ${user.last_name || ''}<br><small>${user.email || ''} • ${user.phone || ''}</small></span>
+        </div>
+      </td>
+      <td>${user.address_line || '—'}</td>
+      <td>
+        <select class="role" data-id="${user.id}">
+          <option ${user.role === 'user' ? 'selected' : ''}>user</option>
+          <option ${user.role === 'courier' ? 'selected' : ''}>courier</option>
+          <option ${user.role === 'admin' ? 'selected' : ''}>admin</option>
+        </select>
+      </td>
+      <td>${user.is_active ? 'Aktiv' : 'Passiv'}</td>
+      <td><button class="btn btn-soft active" data-id="${user.id}" data-v="${!user.is_active}">${user.is_active ? 'Passiv et' : 'Aktiv et'}</button></td>
+    </tr>
+  `).join('');
+
+  $$('.role').forEach((select) => {
+    select.addEventListener('change', async () => {
+      await supabase.from('profiles').update({ role: select.value }).eq('id', select.dataset.id);
+
+      if (select.value === 'courier') {
+        await supabase.from('couriers').upsert({ user_id: select.dataset.id, is_active: true }, { onConflict: 'user_id' });
+      }
+
+      toast('Rol dəyişdi');
+    });
+  });
+
+  $$('.active').forEach((button) => {
+    button.addEventListener('click', async () => {
+      await supabase.from('profiles').update({ is_active: button.dataset.v === 'true' }).eq('id', button.dataset.id);
+      loadUsers();
+    });
+  });
+}
+
+async function loadReviews() {
+  const { data } = await supabase
+    .from('reviews')
+    .select('*,products(name,image_url),profiles(email)')
+    .order('created_at', { ascending: false })
+    .limit(150);
+
+  $('#reviewsTable').innerHTML = (data || []).map((review) => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img class="preview-img" src="${review.products?.image_url || PLACEHOLDER}" alt="Məhsul">
+          <span>${review.products?.name || ''}<br><small>${review.profiles?.email || ''}</small></span>
+        </div>
+      </td>
+      <td>${'⭐'.repeat(review.rating)}</td>
+      <td>${review.review_text || ''}</td>
+      <td>${review.status}</td>
+      <td>
+        <button class="btn btn-soft review" data-id="${review.id}" data-s="approved">Təsdiq</button>
+        <button class="btn btn-danger review" data-id="${review.id}" data-s="rejected">Rədd</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="5">Rəy yoxdur.</td></tr>';
+
+  $$('.review').forEach((button) => {
+    button.addEventListener('click', async () => {
+      await supabase.from('reviews').update({ status: button.dataset.s }).eq('id', button.dataset.id);
+      loadReviews();
+    });
+  });
+}
+
+async function content() {
+  await loadContent('banners');
+  await loadContent('news');
+  await loadContent('partners');
+
+  $('#bannerForm').addEventListener('submit', (event) => saveContent(event, 'banners', 'content'));
+  $('#newsForm').addEventListener('submit', (event) => saveContent(event, 'news', 'content'));
+  $('#partnerForm').addEventListener('submit', (event) => saveContent(event, 'partners', 'content'));
+}
+
+async function loadContent(table) {
+  const map = {
+    banners: '#bannersList',
+    news: '#newsList',
+    partners: '#partnersList',
+  };
+
+  const { data } = await supabase
+    .from(table)
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  $(map[table]).innerHTML = (data || []).map((item) => `
+    <div class="compact-row">
+      <span><b>${item.title || item.name || 'Başlıqsız'}</b><br><small>${item.is_active ? 'Aktiv' : 'Passiv'}</small></span>
+      <button class="btn btn-danger del-content" data-table="${table}" data-id="${item.id}">Sil</button>
+    </div>
+  `).join('') || '<span class="muted">Məlumat yoxdur.</span>';
+
+  $$('.del-content').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!confirm('Silinsin?')) return;
+      await supabase.from(button.dataset.table).delete().eq('id', button.dataset.id);
+      loadContent(button.dataset.table);
+    });
+  });
+}
+
+async function saveContent(event, table, bucket) {
+  event.preventDefault();
+
+  const data = formData(event.target);
+
+  try {
+    let imageUrl = data.image_url || null;
+    const file = event.target.querySelector('[type="file"]')?.files?.[0];
+
+    if (file) {
+      imageUrl = await uploadFile(bucket, file, table);
+    }
+
+    const row = {
+      ...data,
+      image_url: imageUrl,
+      is_active: data.is_active === 'on',
+    };
+
+    delete row.id;
+
+    if (table === 'news') row.slug = row.slug || slugify(row.title);
+
+    const { error } = await supabase.from(table).insert(row);
+
+    toast(error ? error.message : 'Saxlanıldı');
+    event.target.reset();
+    loadContent(table);
+  } catch (error) {
+    toast(error.message);
+  }
+}
