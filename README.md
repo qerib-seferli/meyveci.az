@@ -59,3 +59,11 @@ Dəyişilən əsas fayllar:
 - `sql/supabase-fast-core-upgrade-v4.sql` — kuryer təyin etmə funksiyası, `courier_assignments.assigned_by` sütunu və yeni sifariş admin bildirişi düzəldildi.
 
 Qeyd: Kuryer təyin etmə xətası SQL səviyyəsində idi. Mütləq V4 SQL faylını Supabase SQL Editor-də run et.
+
+## V5 düzəliş qeydləri
+- `assets/js/user.js`: Sevimlilərdən çıxarma və sevimlilərdən səbətə atma işlək edildi; mesaj səhifəsinə realtime yenilənmə əlavə edildi; tamamlanmış/ləğv edilmiş sifarişlərdə xəritə gizlədildi.
+- `assets/js/shop.js`: Xəbərlər və partnyorlar dayanmadan döngülü animasiyaya salındı; məhsul detal səhifəsi genişləndirildi və oxşar məhsullar əlavə edildi.
+- `assets/js/admin.js`: Sifarişlər cədvəlində error olduqda gizlənməsin deyə mesaj göstərildi; kuryer təyin etmə üçün ehtiyat update mexanizmi əlavə edildi.
+- `assets/css/style.css`: Kateqoriya sürüşməsi, açıq alt naviqasiya rəngi, profil avatar neon animasiyası, product.html dizaynı və slider döngü stilləri əlavə edildi.
+- `profile.html`: Profil şəkli ortada daha böyük və neon animasiyalı edildi.
+- `sql/supabase-fast-core-upgrade-v5.sql`: Kuryer təyin etmə üçün `courier_assignments.assigned_by/status/note` sütunları və tək RPC funksiyası yenidən quruldu.
