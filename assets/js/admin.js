@@ -29,25 +29,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const page = document.body.dataset.page;
 
-// Sifariş statusu üçün kiçik ikon qaytarır. Ləğv statusunda xüsusi icon faylı istifadə olunur.
-function statusIcon(status) {
-  const root = location.pathname.includes('/admin/') ? '../' : './';
-  const icons = {
-    confirmed: `${root}assets/img/icons/order-confirmed.png`,
-    preparing: `${root}assets/img/icons/order-preparing.png`,
-    on_the_way: `${root}assets/img/icons/order-delivery.png`,
-    delivered: `${root}assets/img/icons/order-delivered.png`,
-    cancelled: `${root}assets/img/icons/Legv-edildi-icon.png`,
-  };
-  return icons[status] ? `<img class="status-mini-icon" src="${icons[status]}" alt="">` : '';
-}
-
   if (page === 'admin-dashboard') dashboard();
   if (page === 'admin-catalog') catalog();
   if (page === 'admin-orders') ordersPayments();
   if (page === 'admin-users') usersReviews();
   if (page === 'admin-content') content();
 });
+
+        function statusIcon(status) {
+          const root = location.pathname.includes('/admin/') ? '../' : './';
+        
+          const icons = {
+            pending: `${root}assets/img/icons/order-confirmed.png`,
+            confirmed: `${root}assets/img/icons/order-confirmed.png`,
+            preparing: `${root}assets/img/icons/order-preparing.png`,
+            on_the_way: `${root}assets/img/icons/order-delivery.png`,
+            delivered: `${root}assets/img/icons/order-delivered.png`,
+            cancelled: `${root}assets/img/icons/Legv-edildi-icon.png`,
+          };
+        
+          return icons[status]
+            ? `<img class="status-mini-icon" src="${icons[status]}" alt="">`
+            : '';
+        }
+        
+        function empty(value, fallback = '—') {
+          return value === null || value === undefined || value === '' ? fallback : value;
+        }
 
 function initTabs() {
   $$('.tab').forEach((tab) => {
@@ -280,69 +288,104 @@ async function ordersPayments() {
 }
 
 async function loadOrders() {
-  const [orders, couriers] = await Promise.all([
+  const [ordersRes, profilesRes, couriersRes] = await Promise.all([
     supabase
-  .from('orders')
-  .select('*,profiles!orders_user_id_fkey(email,first_name,last_name,phone,address_line)')
-  .order('created_at', { ascending: false })
-  .limit(150),
-    // Yalnız hazırda rolu courier olan və aktiv kuryer cədvəlində olan şəxslər göstərilir.
-    supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles!inner(email,first_name,last_name,role)').eq('is_active', true).eq('profiles.role', 'courier'),
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(150),
+
+    supabase
+      .from('profiles')
+      .select('id,email,first_name,last_name,phone,address_line,role,is_active'),
+
+    supabase
+      .from('couriers')
+      .select('user_id,vehicle_type,vehicle_plate,is_active'),
   ]);
 
-  const makeCourierOptions = (selectedId = '') => (couriers.data || []).map((courier) => `
-    <option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer'} ${courier.profiles?.last_name || ''} ${courier.vehicle_plate || ''}</option>
-  `).join('');
+  const table = $('#ordersTable');
 
-  if (orders.error) {
-    $('#ordersTable').innerHTML = `<tr><td colspan="9">${orders.error.message}</td></tr>`;
+  if (ordersRes.error) {
+    table.innerHTML = `<tr><td colspan="9">${ordersRes.error.message}</td></tr>`;
     return;
   }
 
-  $('#ordersTable').innerHTML = (orders.data || []).map((order) => `
-    <tr>
-      <td>${order.order_code}<br><small>${order.profiles?.email || ''}</small></td>
-      <td>${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}</td>
-      <td>${order.profiles?.phone || '—'}</td>
-      <td>${order.address_text || order.profiles?.address_line || '—'}</td>
-      <td><span class="status-pill status-${order.status}">${statusIcon(order.status)} ${statusAz(order.status)}</span></td>
-      <td><span class="status-pill pay-${order.payment_status}">${statusAz(order.payment_status)}</span></td>
-      <td>${money(order.total_amount)}</td>
-      <td>
-        <select class="assign" data-id="${order.id}">
-          <option value="">Kuryer seç</option>
-          ${makeCourierOptions(order.courier_id)}
-        </select>
-      </td>
-      <td>
-        <button class="btn btn-soft status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
-        <button class="btn btn-soft status" data-id="${order.id}" data-s="preparing">Hazırla</button>
-        <button class="btn btn-soft status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
-        <button class="btn btn-soft status" data-id="${order.id}" data-s="delivered">Təhvil</button>
-        <button class="btn btn-danger status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="9">Sifariş yoxdur.</td></tr>';
+  const profilesMap = new Map((profilesRes.data || []).map((profile) => [profile.id, profile]));
+
+  const activeCouriers = (couriersRes.data || [])
+    .map((courier) => ({
+      ...courier,
+      profile: profilesMap.get(courier.user_id),
+    }))
+    .filter((courier) => courier.is_active && courier.profile?.role === 'courier');
+
+  const makeCourierOptions = (selectedId = '') => activeCouriers.map((courier) => {
+    const profile = courier.profile || {};
+    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+    const label = fullName || profile.email || 'Kuryer';
+    const plate = courier.vehicle_plate ? ` • ${courier.vehicle_plate}` : '';
+
+    return `
+      <option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>
+        ${label}${plate}
+      </option>
+    `;
+  }).join('');
+
+  table.innerHTML = (ordersRes.data || []).map((order) => {
+    const profile = profilesMap.get(order.user_id) || {};
+    const customerName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Müştəri';
+
+    return `
+      <tr>
+        <td>${empty(order.order_code)}<br><small>${empty(profile.email, '')}</small></td>
+        <td>${customerName}</td>
+        <td>${empty(profile.phone)}</td>
+        <td>${empty(order.address_text || profile.address_line)}</td>
+        <td><span class="status-pill status-${order.status}">${statusIcon(order.status)} ${statusAz(order.status)}</span></td>
+        <td><span class="status-pill pay-${order.payment_status}">${statusAz(order.payment_status)}</span></td>
+        <td>${money(order.total_amount || 0)}</td>
+        <td>
+          <select class="assign" data-id="${order.id}">
+            <option value="">Kuryer seç</option>
+            ${makeCourierOptions(order.courier_id)}
+          </select>
+        </td>
+        <td>
+          <button class="btn btn-soft status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
+          <button class="btn btn-soft status" data-id="${order.id}" data-s="preparing">Hazırla</button>
+          <button class="btn btn-soft status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
+          <button class="btn btn-soft status" data-id="${order.id}" data-s="delivered">Təhvil</button>
+          <button class="btn btn-danger status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
+        </td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="9">Sifariş yoxdur.</td></tr>';
 
   $$('.assign').forEach((select) => {
     select.addEventListener('change', async () => {
       if (!select.value) return;
 
+      select.disabled = true;
       const { error } = await assignCourierSafe(select.dataset.id, select.value);
-
       toast(error ? error.message : 'Kuryer təyin edildi');
+      select.disabled = false;
       loadOrders();
     });
   });
 
   $$('.status').forEach((button) => {
     button.addEventListener('click', async () => {
+      button.disabled = true;
+
       const { error } = await supabase.rpc('admin_update_order_status', {
         p_order_id: button.dataset.id,
         p_status: button.dataset.s,
       });
 
       toast(error ? error.message : 'Status dəyişdi');
+      button.disabled = false;
       loadOrders();
     });
   });
@@ -350,19 +393,17 @@ async function loadOrders() {
 
 // Kuryer təyin etmə: əsas yol RPC-dir, SQL köhnə qalıbsa ehtiyat update ilə də yoxlayırıq.
 async function assignCourierSafe(orderId, courierId) {
-  const rpc = await supabase.rpc('assign_courier_to_order', {
-    p_order_id: orderId,
-    p_courier_id: courierId,
-    p_note: ''
-  });
-  if (!rpc.error) return { error: null };
-
-  const fallback = await supabase
+  const response = await supabase
     .from('orders')
-    .update({ courier_id: courierId, status: 'confirmed' })
+    .update({
+      courier_id: courierId,
+      status: 'on_the_way',
+    })
     .eq('id', orderId);
-  return { error: fallback.error || rpc.error };
+
+  return { error: response.error };
 }
+
 
 async function loadPayments() {
   const { data } = await supabase
