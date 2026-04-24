@@ -14,7 +14,7 @@ export const $ = (selector, root = document) => root.querySelector(selector);
 export const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
 // Saytda məhsul şəkli boş olanda göstərilən placeholder.
-export const PLACEHOLDER = './assets/img/placeholders/product-placeholder.png';
+export const PLACEHOLDER = pagePath('assets/img/placeholders/product-placeholder.png');
 
 // Session və profil məlumatını təkrar sorğu atmamaq üçün yaddaşda saxlayırıq.
 const cache = {
@@ -29,6 +29,7 @@ export function money(value) {
 
 // Kiçik bildiriş/toast göstərir.
 export function toast(message) {
+  message = friendlyError(message);
   let toastBox = $('#toast');
 
   if (!toastBox) {
@@ -42,6 +43,17 @@ export function toast(message) {
   toastBox.classList.add('show');
 
   setTimeout(() => toastBox.classList.remove('show'), 2800);
+}
+
+// Texniki Supabase/GitHub xətalarını istifadəçiyə sadə dildə göstərir.
+export function friendlyError(message) {
+  const text = String(message || 'Əməliyyat tamamlanmadı');
+  if (text.includes('403') || text.toLowerCase().includes('row-level security')) return 'Bu əməliyyat üçün icazə yoxdur. SQL düzəliş faylını Supabase-də run edin.';
+  if (text.includes('404') || text.toLowerCase().includes('not found')) return 'Məlumat və ya şəkil yolu tapılmadı.';
+  if (text.toLowerCase().includes('failed to fetch')) return 'Serverlə bağlantı alınmadı. İnterneti və Supabase ayarlarını yoxlayın.';
+  if (text.includes('duplicate key')) return 'Bu məlumat artıq mövcuddur.';
+  if (text.includes('undefined')) return 'Seçilən məlumat tapılmadı. Səhifəni yeniləyib təkrar yoxlayın.';
+  return text;
 }
 
 // URL-dən id parametrini oxuyur: product.html?id=...
@@ -99,7 +111,7 @@ export async function requireAuth() {
   const activeUser = await user();
 
   if (!activeUser) {
-    location.href = './login.html';
+    location.href = pagePath('login.html');
     return null;
   }
 
@@ -113,7 +125,7 @@ export async function requireRole(role) {
   if (!activeProfile || activeProfile.role !== role) {
     toast('Bu bölməyə giriş icazəniz yoxdur');
     setTimeout(() => {
-      location.href = '../index.html';
+      location.href = pagePath('index.html');
     }, 900);
     return null;
   }
@@ -125,7 +137,8 @@ export async function requireRole(role) {
 export async function logout() {
   await supabase.auth.signOut();
   sessionStorage.clear();
-  location.href = './login.html';
+  localStorage.removeItem('mc_notify_sound_ok');
+  location.href = pagePath('index.html');
 }
 
 // Loader-i açıb-bağlamaq üçün istifadə olunur.
@@ -212,4 +225,37 @@ export function playNotifySound() {
   } catch (error) {
     console.warn('Səsli bildiriş işləmədi:', error.message);
   }
+}
+
+
+// Bildiriş mətnlərinin içində qalan texniki status sözlərini Azərbaycan dilinə çevirir.
+export function notificationBodyAz(value) {
+  let text = String(value || '');
+  const map = {
+    pending: 'Gözləyir',
+    confirmed: 'Təsdiqləndi',
+    preparing: 'Hazırlanır',
+    on_the_way: 'Kuryerə təhvil verildi',
+    courier_near: 'Kuryer yaxınlaşır',
+    delivered: 'Məhsullar təhvil verildi',
+    cancelled: 'Ləğv edildi',
+    paid: 'Ödənildi',
+    approved: 'Təsdiqləndi',
+    rejected: 'Rədd edildi',
+    refunded: 'Geri qaytarıldı',
+  };
+  Object.entries(map).forEach(([key, label]) => { text = text.replaceAll(key, label); });
+  return text;
+}
+
+// Telefonlarda/icazəli brauzerlərdə lokasiya istəmək üçün ortaq funksiya.
+export function askLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, maximumAge: 7000, timeout: 15000 }
+    );
+  });
 }

@@ -26,6 +26,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!activeCourier) return;
 
   $('#onlineToggle')?.addEventListener('change', toggleOnline);
+
+  // Kuryer panelə daxil olan kimi online rejim aktivləşir və telefondan lokasiya icazəsi istənir.
+  const onlineToggle = $('#onlineToggle');
+
+  if (onlineToggle) {
+    onlineToggle.checked = true;
+    await toggleOnline({ target: onlineToggle });
+  }
+
   await loadCourierOrders();
 });
 
@@ -50,7 +59,7 @@ async function loadCourierOrders() {
     .from('orders')
     .select('*,profiles!orders_user_id_fkey(first_name,last_name,phone,avatar_url,address_line,apartment,door_code,lat,lng)')
     .eq('courier_id', activeCourier.id)
-    .in('status', ['confirmed', 'preparing', 'on_the_way'])
+    .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near'])
     .order('created_at', { ascending: false })
     .limit(60);
 
@@ -108,7 +117,11 @@ function orderCard(order) {
 
       <p><b>Ünvan:</b> ${address || 'Ünvan qeyd edilməyib'}</p>
 
-      <div class="map-box">
+      <div class="map-box order-track-box">
+        <div class="track-icons">
+          <img src="../assets/img/icons/courier-marker.png" alt="Kuryer">
+          <img src="../assets/img/icons/home-marker.png" alt="Müştəri ünvanı">
+        </div>
         <div>
           <b>Xəritə/lokasiya</b>
           <p class="muted">Müştərinin koordinatı: ${customer.lat || '—'}, ${customer.lng || '—'}</p>

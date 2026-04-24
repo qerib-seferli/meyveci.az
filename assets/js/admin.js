@@ -96,7 +96,8 @@ async function catalog() {
 function resetForm(id) {
   const form = $(`#${id}`);
   form.reset();
-  if (form.id) form.id.value = '';
+  const hiddenId = form.querySelector('[name="id"]');
+  if (hiddenId) hiddenId.value = '';
 }
 
 function fillForm(id, row) {
@@ -113,6 +114,14 @@ function fillForm(id, row) {
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Cədvəldə data-row içində dırnaq problemi olmaması üçün təhlükəsiz JSON yazır.
+function rowAttr(row) {
+  return JSON.stringify(row || {})
+    .replaceAll('&', '&amp;')
+    .replaceAll("'", '&#39;')
+    .replaceAll('"', '&quot;');
 }
 
 async function loadCategories() {
@@ -132,7 +141,7 @@ async function loadCategories() {
         <td>${category.sort_order || 0}</td>
         <td>${category.is_active ? 'Aktiv' : 'Passiv'}</td>
         <td>
-          <button class="btn btn-soft edit-cat" data-row='${JSON.stringify(category)}'>Redaktə</button>
+          <button class="btn btn-soft edit-cat" data-row="${rowAttr(category)}">Redaktə</button>
           <button class="btn btn-danger del-cat" data-id="${category.id}">Sil</button>
         </td>
       </tr>
@@ -145,7 +154,8 @@ async function loadCategories() {
   $$('.del-cat').forEach((button) => {
     button.addEventListener('click', async () => {
       if (!confirm('Kateqoriya silinsin?')) return;
-      await supabase.from('categories').delete().eq('id', button.dataset.id);
+      const { error } = await supabase.from('categories').delete().eq('id', button.dataset.id);
+      toast(error ? error.message : 'Kateqoriya silindi');
       loadCategories();
     });
   });
@@ -190,9 +200,9 @@ async function loadProducts() {
         <td>${product.name}<br><small>${product.categories?.name || ''}</small></td>
         <td>${money(product.price)}<br><small>${product.old_price ? money(product.old_price) : ''}</small></td>
         <td>${product.stock_quantity}</td>
-        <td>${product.status}</td>
+        <td>${statusAz(product.status)}</td>
         <td>
-          <button class="btn btn-soft edit-product" data-row='${JSON.stringify(product)}'>Redaktə</button>
+          <button class="btn btn-soft edit-product" data-row="${rowAttr(product)}">Redaktə</button>
           <button class="btn btn-danger del-product" data-id="${product.id}">Sil</button>
         </td>
       </tr>
@@ -205,7 +215,8 @@ async function loadProducts() {
   $$('.del-product').forEach((button) => {
     button.addEventListener('click', async () => {
       if (!confirm('Məhsul silinsin?')) return;
-      await supabase.from('products').delete().eq('id', button.dataset.id);
+      const { error } = await supabase.from('products').delete().eq('id', button.dataset.id);
+      toast(error ? error.message : 'Məhsul silindi');
       loadProducts();
     });
   });
@@ -326,7 +337,7 @@ async function loadPayments() {
       <td>${payment.orders?.order_code || ''}</td>
       <td>${payment.provider}</td>
       <td>${money(payment.amount)}</td>
-      <td>${payment.status}</td>
+      <td>${statusAz(payment.status)}</td>
       <td>${payment.receipt_url ? `<a class="btn btn-soft" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
       <td>
         <button class="btn btn-soft pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
@@ -384,19 +395,32 @@ async function loadUsers() {
 
   $$('.role').forEach((select) => {
     select.addEventListener('change', async () => {
-      await supabase.from('profiles').update({ role: select.value }).eq('id', select.dataset.id);
+      const userId = select.dataset.id;
+      if (!userId || userId === 'undefined') return toast('İstifadəçi ID tapılmadı');
 
-      if (select.value === 'courier') {
-        await supabase.from('couriers').upsert({ user_id: select.dataset.id, is_active: true }, { onConflict: 'user_id' });
+      select.disabled = true;
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: select.value })
+        .eq('id', userId);
+
+      if (!error && select.value === 'courier') {
+        await supabase
+          .from('couriers')
+          .upsert({ user_id: userId, is_active: true }, { onConflict: 'user_id' });
       }
 
-      toast('Rol dəyişdi');
+      toast(error ? error.message : 'Rol dəyişdi');
+      select.disabled = false;
     });
   });
 
   $$('.active').forEach((button) => {
     button.addEventListener('click', async () => {
-      await supabase.from('profiles').update({ is_active: button.dataset.v === 'true' }).eq('id', button.dataset.id);
+      if (!button.dataset.id || button.dataset.id === 'undefined') return toast('İstifadəçi ID tapılmadı');
+      const { error } = await supabase.from('profiles').update({ is_active: button.dataset.v === 'true' }).eq('id', button.dataset.id);
+      toast(error ? error.message : 'Status yeniləndi');
       loadUsers();
     });
   });
@@ -419,7 +443,7 @@ async function loadReviews() {
       </td>
       <td>${'⭐'.repeat(review.rating)}</td>
       <td>${review.review_text || ''}</td>
-      <td>${review.status}</td>
+      <td>${statusAz(review.status)}</td>
       <td>
         <button class="btn btn-soft review" data-id="${review.id}" data-s="approved">Təsdiq</button>
         <button class="btn btn-danger review" data-id="${review.id}" data-s="rejected">Rədd</button>

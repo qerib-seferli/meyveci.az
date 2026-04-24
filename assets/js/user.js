@@ -15,6 +15,7 @@ import {
   uploadFile,
   PLACEHOLDER,
   statusAz,
+  askLocation,
 } from './core.js';
 
 import { initLayout } from './layout.js';
@@ -201,7 +202,7 @@ function updatePaymentHelp() {
   }
 
   if (method === 'online_payment') {
-    help.innerHTML = '<b>Online payment:</b> gələcək mərhələdə bank/payment inteqrasiyası qoşulduqda avtomatik ödəniş aktiv olacaq.';
+    help.innerHTML = '<b>Online ödəniş:</b> gələcək mərhələdə bank/payment inteqrasiyası qoşulduqda avtomatik ödəniş aktiv olacaq.';
   }
 
   help.classList.add('show');
@@ -212,6 +213,19 @@ async function checkout(event) {
 
   const data = formData(event.target);
   const receiptFile = $('#receiptFile')?.files?.[0];
+
+  // Sifariş tamamlananda telefondan/browserdən lokasiya icazəsi istəyirik.
+  if (!data.lat || !data.lng) {
+    toast('Çatdırılma üçün lokasiya icazəsi istənir...');
+    const locationPoint = await askLocation();
+
+    if (locationPoint) {
+      data.lat = locationPoint.lat;
+      data.lng = locationPoint.lng;
+      if ($('#checkoutForm')?.lat) $('#checkoutForm').lat.value = locationPoint.lat;
+      if ($('#checkoutForm')?.lng) $('#checkoutForm').lng.value = locationPoint.lng;
+    }
+  }
 
   try {
     let receiptUrl = null;
@@ -279,7 +293,12 @@ function orderCard(order) {
 
       <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
 
-      <div class="map-box">
+      <div class="map-box order-track-box">
+        <div class="track-icons">
+          <img src="assets/img/icons/home-marker.png" alt="Ev">
+          <img src="assets/img/icons/${order.status === 'preparing' ? 'order-preparing.png' : order.status === 'delivered' ? 'order-delivered.png' : order.status === 'confirmed' ? 'order-confirmed.png' : 'order-delivery.png'}" alt="Status">
+          <img src="assets/img/icons/courier-marker.png" alt="Kuryer">
+        </div>
         <div>
           <b>Sifarişi izlə</b>
           <p class="muted">Kuryer təyin olunandan sonra canlı xəritə məlumatı burada görünəcək.</p>

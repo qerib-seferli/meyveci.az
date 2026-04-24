@@ -197,7 +197,7 @@ function productCard(product) {
   return `
     <article class="product-card">
       ${discount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
-      <button class="fav-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}" title="Sevimlilərə əlavə et">♥</button>
+      <button class="fav-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}" title="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}" aria-label="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}">♥</button>
 
       <a href="product.html?id=${product.id}" class="pic">
         <img loading="lazy" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
@@ -259,6 +259,8 @@ async function toggleFavorite(productId, button) {
 
     state.favorites.delete(productId);
     button.classList.remove('active');
+    button.title = 'Sevimlilərə əlavə et';
+    button.setAttribute('aria-label', 'Sevimlilərə əlavə et');
     toast('Sevimlilərdən çıxarıldı');
     return;
   }
@@ -271,6 +273,8 @@ async function toggleFavorite(productId, button) {
 
   state.favorites.add(productId);
   button.classList.add('active');
+  button.title = 'Sevimlilərdən çıxart';
+  button.setAttribute('aria-label', 'Sevimlilərdən çıxart');
   toast('Sevimlilərə əlavə olundu');
 }
 

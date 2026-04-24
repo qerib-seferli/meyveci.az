@@ -3,7 +3,7 @@
 // Bu fayl bütün səhifələrə yuxarı/aşağı hissəni avtomatik əlavə edir.
 // ============================================================
 
-import { $, profile, logout, supabase, playNotifySound } from './core.js';
+import { $, profile, logout, supabase, playNotifySound, notificationBodyAz } from './core.js';
 
 // Aşağı menyu sırası: Sevimlilər, Səbət, Ana səhifə, Sifarişlərim, WhatsApp.
 const bottomNav = [
@@ -11,7 +11,7 @@ const bottomNav = [
   ['cart.html', '🛒', 'Səbət', 'cartCount'],
   ['index.html', 'logo', '', null],
   ['orders.html', '📦', 'Sifarişlərim', 'orderCount'],
-  ['https://wa.me/994000000000', '💬', 'WhatsApp', null],
+  ['https://wa.me/994993909595', '💬', 'WhatsApp', null],
 ];
 
 // Layout-un əsas başladıcı funksiyası.
@@ -50,12 +50,12 @@ function renderTopbar() {
         </button>
 
         <a id="panelLink" class="btn btn-soft hide" href="#">Panel</a>
-        <a id="profileLink" class="icon-btn" href="${root}profile.html" title="Profil">👤</a>
+        <a id="profileLink" class="profile-pill" href="${root}profile.html" title="Profil"><span class="profile-ico">👤</span><span id="topUserName" class="profile-name">Profil</span></a>
         <button id="logoutBtn" class="btn btn-danger hide">Çıxış</button>
       </div>
 
       <div id="notifyDrop" class="mini-dropdown">
-        <b>Bildirişlər</b>
+        <div class="modal-head"><b>Bildirişlər</b><button id="notifyClose" class="mini-x" type="button">×</button></div>
         <div id="notifyList" class="compact-list" style="margin-top: 8px;">
           <span class="muted">Bildiriş yoxdur</span>
         </div>
@@ -66,7 +66,13 @@ function renderTopbar() {
   document.body.prepend(topbar);
 
   $('#notifyBtn')?.addEventListener('click', loadNotifications);
+  $('#notifyClose')?.addEventListener('click', () => $('#notifyDrop')?.classList.remove('show'));
   $('#logoutBtn')?.addEventListener('click', logout);
+
+  document.addEventListener('click', (event) => {
+    const item = event.target.closest('.notify-item');
+    if (item) openNotificationModal(item.dataset.title, item.dataset.body);
+  });
 }
 
 // Aşağı sabit naviqasiyanı yaradır.
@@ -104,6 +110,10 @@ async function hydrateUserArea() {
   if (!activeProfile) return;
 
   $('#logoutBtn')?.classList.remove('hide');
+
+  const fullName = `${activeProfile.first_name || ''} ${activeProfile.last_name || ''}`.trim();
+  const topUserName = $('#topUserName');
+  if (topUserName) topUserName.textContent = fullName || activeProfile.email || 'Profil';
 
   if (panelLink && activeProfile.role === 'admin') {
     panelLink.href = `${root}admin/index.html`;
@@ -172,15 +182,20 @@ async function loadNotifications() {
     return;
   }
 
-  list.innerHTML = (data || []).map((item) => `
-    <a class="compact-row" href="${item.link_url || '#'}">
-      <span>
-        <b>${item.title}</b><br>
-        <small class="muted">${item.body || ''}</small>
-      </span>
-      ${item.is_read ? '' : '<span class="badge-count" style="position: static;">•</span>'}
-    </a>
-  `).join('') || '<span class="muted">Bildiriş yoxdur.</span>';
+  list.innerHTML = (data || []).map((item) => {
+    const title = item.title || 'Bildiriş';
+    const body = notificationBodyAz(item.body || '');
+
+    return `
+      <button class="compact-row notify-item" type="button" data-title="${escapeAttr(title)}" data-body="${escapeAttr(body)}">
+        <span>
+          <b>${title}</b><br>
+          <small class="muted">${body}</small>
+        </span>
+        ${item.is_read ? '' : '<span class="badge-count" style="position: static;">•</span>'}
+      </button>
+    `;
+  }).join('') || '<span class="muted">Bildiriş yoxdur.</span>';
 
   await supabase
     .from('notifications')
@@ -217,4 +232,41 @@ async function subscribeNotifications() {
 // Admin/kuryer qovluqlarından ana qovluğa çıxmaq üçün root path hesablayır.
 function getRootPath() {
   return location.pathname.includes('/admin/') || location.pathname.includes('/courier/') ? '../' : './';
+}
+
+
+// Bildirişin detallı mətnini GitHub linkinə getmədən, səhifə içində modal kimi açır.
+function openNotificationModal(title, body) {
+  let modal = $('#notifyModal');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'notifyModal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `
+      <div class="modal-card">
+        <div class="modal-head">
+          <b id="notifyModalTitle">Bildiriş</b>
+          <button id="notifyModalClose" class="mini-x" type="button">×</button>
+        </div>
+        <p id="notifyModalBody" class="muted"></p>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    $('#notifyModalClose')?.addEventListener('click', () => modal.classList.remove('show'));
+    modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('show'); });
+  }
+
+  $('#notifyModalTitle').textContent = title || 'Bildiriş';
+  $('#notifyModalBody').textContent = body || '';
+  modal.classList.add('show');
+}
+
+// HTML atributlarında problem yaratmasın deyə sadə escape.
+function escapeAttr(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
