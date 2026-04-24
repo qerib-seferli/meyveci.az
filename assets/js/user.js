@@ -508,7 +508,7 @@ async function openThread(id) {
 
   const { data, error } = await supabase
     .from('chat_messages')
-    .select('id,message_text,sender_id,created_at,profiles(first_name,last_name)')
+    .select('id,message_text,sender_id,created_at,is_read,profiles(first_name,last_name,phone)')
     .eq('thread_id', id)
     .order('created_at')
     .limit(120);
@@ -518,9 +518,11 @@ async function openThread(id) {
   $('#chatBox').innerHTML = error
     ? error.message
     : (data || []).map((message) => `
-      <div class="msg ${message.sender_id === activeUser.id ? 'me' : ''}">
-        ${message.message_text}<br>
-        <small class="muted">${new Date(message.created_at).toLocaleString('az-AZ')}</small>
+      <div class="msg ${message.sender_id === activeUser.id ? 'me' : ''} ${!message.is_read && message.sender_id !== activeUser.id ? 'unread-message' : ''}">
+          <b>${message.profiles?.first_name || ''} ${message.profiles?.last_name || ''}</b>
+          <small class="muted"> • ${message.profiles?.phone || 'Telefon yoxdur'} • ${new Date(message.created_at).toLocaleString('az-AZ')}</small>
+          <br>
+          ${message.message_text}
       </div>
     `).join('') || '<span class="muted">Mesaj yoxdur.</span>';
 
