@@ -130,3 +130,78 @@ th {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* ============================================================
+   V4 ADMIN NAV DÜZƏLİŞİ
+   Sol menyu artıq yuxarıda soldan-sağa düzülür; aşağıda səhifə məlumatları açılır.
+   ============================================================ */
+.admin-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.sidebar {
+  position: sticky;
+  top: var(--topbar-height);
+  z-index: 40;
+  padding: 14px;
+}
+
+.side-nav {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.side-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.side-link {
+  flex: 0 0 auto;
+  min-width: max-content;
+  padding: 11px 15px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-weight: 900;
+  background: rgba(220,252,231,.9);
+  color: #047857;
+}
+
+.status-pending { color: #a16207; background: #fef9c3; }
+.status-confirmed { color: #0369a1; background: #e0f2fe; }
+.status-preparing { color: #7c3aed; background: #ede9fe; }
+.status-on_the_way,
+.status-courier_near { color: #0f766e; background: #ccfbf1; }
+.status-delivered { color: #15803d; background: #dcfce7; }
+.status-cancelled { color: #b91c1c; background: #fee2e2; }
+
+.pay-paid,
+.pay-approved { color: #15803d; background: #dcfce7; }
+
+.status-mini-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    top: 62px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .side-link {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
