@@ -28,3 +28,18 @@ Bu paketdə aşağıdakılar düzəldildi:
 
 Supabase-də əlavə run ediləcək fayl:
 `sql/supabase-fast-core-upgrade-v2.sql`
+
+## V3 düzəliş qeydləri
+
+Dəyişdirilən əsas fayllar:
+
+- `assets/js/layout.js` — yuxarı header-ə ayrıca mesaj butonu əlavə edildi, bildiriş modalı tarix/saat ilə düzəldildi, istifadəçi adında yalnız ad göstərildi.
+- `assets/js/shop.js` — banner, xəbər və partnyor kartları yenidən quruldu; xəbərlər səhifədən çıxmadan modalda açılır.
+- `assets/js/user.js` — sevimlilər kartları ana səhifə məhsul kartı ilə eyniləşdirildi; sifariş status ikonları, canlı xəritə önizləməsi və mesaj tarix/saatı əlavə edildi.
+- `assets/js/admin.js` — kuryer təyin etmə RPC çağırışı `p_note` ilə sabitləşdirildi.
+- `assets/js/core.js` — bildiriş/mesaj üçün iki tonlu xüsusi səs sistemi əlavə edildi.
+- `assets/css/style.css` — mobil balans, banner/xəbər/partnyor ölçüləri, modal, status ikonları, xəritə markerləri və səbət ümumi məbləğ görünüşü yeniləndi.
+- `cart.html` — checkout formuna mobil yığcam sinif əlavə edildi.
+- `sql/supabase-fast-core-upgrade-v3.sql` — kuryer təyin etmə overload xətası, mesaj bildirişləri və icazələr üçün SQL düzəlişi əlavə edildi.
+
+Vacib: Supabase-də mütləq `sql/supabase-fast-core-upgrade-v3.sql` faylını run et.
