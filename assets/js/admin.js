@@ -29,6 +29,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const page = document.body.dataset.page;
 
+// Sifariş statusu üçün kiçik ikon qaytarır. Ləğv statusunda xüsusi icon faylı istifadə olunur.
+function statusIcon(status) {
+  const root = location.pathname.includes('/admin/') ? '../' : './';
+  const icons = {
+    confirmed: `${root}assets/img/icons/order-confirmed.png`,
+    preparing: `${root}assets/img/icons/order-preparing.png`,
+    on_the_way: `${root}assets/img/icons/order-delivery.png`,
+    delivered: `${root}assets/img/icons/order-delivered.png`,
+    cancelled: `${root}assets/img/icons/Legv-edildi-icon.png`,
+  };
+  return icons[status] ? `<img class="status-mini-icon" src="${icons[status]}" alt="">` : '';
+}
+
   if (page === 'admin-dashboard') dashboard();
   if (page === 'admin-catalog') catalog();
   if (page === 'admin-orders') ordersPayments();
@@ -269,23 +282,24 @@ async function ordersPayments() {
 async function loadOrders() {
   const [orders, couriers] = await Promise.all([
     supabase.from('orders').select('*,profiles!orders_user_id_fkey(email,first_name,last_name,phone)').order('created_at', { ascending: false }).limit(150),
-    supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles(email,first_name,last_name)').eq('is_active', true),
+    // Yalnız hazırda rolu courier olan və aktiv kuryer cədvəlində olan şəxslər göstərilir.
+    supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles!inner(email,first_name,last_name,role)').eq('is_active', true).eq('profiles.role', 'courier'),
   ]);
 
-  const courierOptions = (couriers.data || []).map((courier) => `
-    <option value="${courier.user_id}">${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer'} ${courier.vehicle_plate || ''}</option>
+  const makeCourierOptions = (selectedId = '') => (couriers.data || []).map((courier) => `
+    <option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${courier.profiles?.first_name || courier.profiles?.email || 'Kuryer'} ${courier.profiles?.last_name || ''} ${courier.vehicle_plate || ''}</option>
   `).join('');
 
   $('#ordersTable').innerHTML = (orders.data || []).map((order) => `
     <tr>
       <td>${order.order_code}<br><small>${order.profiles?.email || ''}</small></td>
-      <td>${statusAz(order.status)}</td>
-      <td>${statusAz(order.payment_status)}</td>
+      <td><span class="status-pill status-${order.status}">${statusIcon(order.status)} ${statusAz(order.status)}</span></td>
+      <td><span class="status-pill pay-${order.payment_status}">${statusAz(order.payment_status)}</span></td>
       <td>${money(order.total_amount)}</td>
       <td>
         <select class="assign" data-id="${order.id}">
           <option value="">Kuryer seç</option>
-          ${courierOptions}
+          ${makeCourierOptions(order.courier_id)}
         </select>
       </td>
       <td>
@@ -407,9 +421,18 @@ async function loadUsers() {
         .eq('id', userId);
 
       if (!error && select.value === 'courier') {
+        // Rol courier ediləndə kuryer cədvəlində aktiv qeyd avtomatik yaradılır.
         await supabase
           .from('couriers')
           .upsert({ user_id: userId, is_active: true }, { onConflict: 'user_id' });
+      }
+
+      if (!error && select.value !== 'courier') {
+        // Şəxs artıq kuryer deyilsə, sifariş təyin etmə siyahısından gizlədilir.
+        await supabase
+          .from('couriers')
+          .update({ is_active: false })
+          .eq('user_id', userId);
       }
 
       toast(error ? error.message : 'Rol dəyişdi');

@@ -125,7 +125,7 @@ function renderNews(rows) {
     </button>
   `).join('');
 
-  $('.news-open').forEach((button) => button.addEventListener('click', () => openNewsModal(button.dataset)));
+  $$('.news-open').forEach((button) => button.addEventListener('click', () => openNewsModal(button.dataset)));
 }
 
 function renderPartners(rows) {

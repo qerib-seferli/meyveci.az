@@ -49,6 +49,11 @@ function renderTopbar() {
           💬 <span id="messageCount" class="badge-count hide">0</span>
         </a>
 
+        <!-- Admin üçün yeni sifarişlər qısa keçidi. -->
+        <a id="adminOrdersBtn" class="icon-btn hide" href="${root}admin/orders.html" title="Yeni sifarişlər">
+          📦 <span id="newOrderCount" class="badge-count hide">0</span>
+        </a>
+
         <a id="panelLink" class="btn btn-soft hide" href="#">Panel</a>
         <a id="profileLink" class="profile-pill" href="${root}profile.html" title="Profil"><span class="profile-ico">👤</span><span id="topUserName" class="profile-name">Profil</span></a>
         <button id="logoutBtn" class="btn btn-danger hide">Çıxış</button>
@@ -104,6 +109,7 @@ async function hydrateUserArea() {
     panelLink.href = `${root}admin/index.html`;
     panelLink.textContent = 'Admin panel';
     panelLink.classList.remove('hide');
+    $('#adminOrdersBtn')?.classList.remove('hide');
   }
   if (panelLink && activeProfile.role === 'courier') {
     panelLink.href = `${root}courier/index.html`;
@@ -116,12 +122,15 @@ async function refreshBadges() {
   const activeProfile = await profile();
   if (!activeProfile) return;
 
-  const [favorites, cart, orders, notifications, messages] = await Promise.all([
+  const [favorites, cart, orders, notifications, messages, newOrders] = await Promise.all([
     supabase.from('favorites').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
     supabase.from('cart_items').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
-    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).neq('status', 'delivered'),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).not('status', 'in', '(delivered,cancelled)'),
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).neq('title', 'Yeni mesaj'),
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).eq('title', 'Yeni mesaj'),
+    activeProfile.role === 'admin'
+      ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['pending','confirmed','preparing','on_the_way','courier_near'])
+      : Promise.resolve({ count: 0 }),
   ]);
 
   setBadge('favCount', favorites.count || 0);
@@ -129,6 +138,7 @@ async function refreshBadges() {
   setBadge('orderCount', orders.count || 0);
   setBadge('notifyCount', notifications.count || 0);
   setBadge('messageCount', messages.count || 0);
+  setBadge('newOrderCount', newOrders.count || 0);
 }
 
 function setBadge(id, count) {
@@ -186,11 +196,22 @@ async function subscribeNotifications() {
   if (!activeProfile) return;
   supabase
     .channel(`notifications:${activeProfile.id}`)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${activeProfile.id}` }, () => {
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${activeProfile.id}` }, () => {
       refreshBadges();
       playNotifySound();
     })
     .subscribe();
+
+  // Admin panel açıq olmasa belə yeni sifariş sayı realtime yenilənir.
+  if (activeProfile.role === 'admin') {
+    supabase
+      .channel('admin-new-orders-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        refreshBadges();
+        playNotifySound();
+      })
+      .subscribe();
+  }
 }
 
 function openNotificationModal(title, body, dateText = '') {

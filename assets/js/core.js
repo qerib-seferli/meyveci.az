@@ -52,6 +52,7 @@ export function friendlyError(message) {
   if (text.includes('404') || text.toLowerCase().includes('not found')) return 'Məlumat və ya şəkil yolu tapılmadı.';
   if (text.toLowerCase().includes('failed to fetch')) return 'Serverlə bağlantı alınmadı. İnterneti və Supabase ayarlarını yoxlayın.';
   if (text.includes('duplicate key')) return 'Bu məlumat artıq mövcuddur.';
+  if (text.includes('assigned_by') || text.includes('courier_assignments')) return 'Kuryer təyinat cədvəli yenilənməyib. SQL v4 faylını Supabase-də run edin.';
   if (text.includes('undefined')) return 'Seçilən məlumat tapılmadı. Səhifəni yeniləyib təkrar yoxlayın.';
   return text;
 }
