@@ -281,7 +281,11 @@ async function ordersPayments() {
 
 async function loadOrders() {
   const [orders, couriers] = await Promise.all([
-    supabase.from('orders').select('*,profiles!orders_user_id_fkey(email,first_name,last_name,phone)').order('created_at', { ascending: false }).limit(150),
+    supabase
+  .from('orders')
+  .select('*,profiles!orders_user_id_fkey(email,first_name,last_name,phone,address_line)')
+  .order('created_at', { ascending: false })
+  .limit(150),
     // Yalnız hazırda rolu courier olan və aktiv kuryer cədvəlində olan şəxslər göstərilir.
     supabase.from('couriers').select('user_id,vehicle_type,vehicle_plate,profiles!inner(email,first_name,last_name,role)').eq('is_active', true).eq('profiles.role', 'courier'),
   ]);
@@ -291,13 +295,16 @@ async function loadOrders() {
   `).join('');
 
   if (orders.error) {
-    $('#ordersTable').innerHTML = `<tr><td colspan="6">${orders.error.message}</td></tr>`;
+    $('#ordersTable').innerHTML = `<tr><td colspan="9">${orders.error.message}</td></tr>`;
     return;
   }
 
   $('#ordersTable').innerHTML = (orders.data || []).map((order) => `
     <tr>
       <td>${order.order_code}<br><small>${order.profiles?.email || ''}</small></td>
+      <td>${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}</td>
+      <td>${order.profiles?.phone || '—'}</td>
+      <td>${order.address_text || order.profiles?.address_line || '—'}</td>
       <td><span class="status-pill status-${order.status}">${statusIcon(order.status)} ${statusAz(order.status)}</span></td>
       <td><span class="status-pill pay-${order.payment_status}">${statusAz(order.payment_status)}</span></td>
       <td>${money(order.total_amount)}</td>
@@ -315,7 +322,7 @@ async function loadOrders() {
         <button class="btn btn-danger status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="6">Sifariş yoxdur.</td></tr>';
+  `).join('') || '<tr><td colspan="9">Sifariş yoxdur.</td></tr>';
 
   $$('.assign').forEach((select) => {
     select.addEventListener('change', async () => {
@@ -376,7 +383,7 @@ async function loadPayments() {
         <button class="btn btn-danger pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
+  `).join('') || '<tr><td colspan="9">Ödəniş yoxdur.</td></tr>';
 
   $$('.pay').forEach((button) => {
     button.addEventListener('click', async () => {
