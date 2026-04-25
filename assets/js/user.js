@@ -506,29 +506,34 @@ async function drawRouteForOrder(orderId, from, to) {
   const mapData = userOrderMaps.get(orderId);
   if (!mapData) return;
 
+  if (mapData.routeLayer) {
+    mapData.map.removeLayer(mapData.routeLayer);
+  }
+
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
-
     const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.routes || !data.routes[0]) return;
-
-    if (mapData.routeLayer) {
-      mapData.map.removeLayer(mapData.routeLayer);
+    if (data.routes && data.routes[0]) {
+      mapData.routeLayer = L.geoJSON(data.routes[0].geometry, {
+        style: { color: '#16a34a', weight: 5, opacity: 0.9 },
+      }).addTo(mapData.map);
+    } else {
+      mapData.routeLayer = L.polyline(
+        [[from.lat, from.lng], [to.lat, to.lng]],
+        { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+      ).addTo(mapData.map);
     }
-
-    mapData.routeLayer = L.geoJSON(data.routes[0].geometry, {
-      style: {
-        color: '#16a34a',
-        weight: 4,
-        opacity: 0.85,
-      },
-    }).addTo(mapData.map);
 
     userOrderMaps.set(orderId, mapData);
   } catch (e) {
-    console.log('route error', e);
+    mapData.routeLayer = L.polyline(
+      [[from.lat, from.lng], [to.lat, to.lng]],
+      { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+    ).addTo(mapData.map);
+
+    userOrderMaps.set(orderId, mapData);
   }
 }
 
