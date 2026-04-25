@@ -333,7 +333,7 @@ function orderCard(order) {
           <div class="map-marker home-marker"><img src="assets/img/icons/home-marker.png" alt="Ünvan"></div>
           <div class="map-info">
             <b>Canlı izləmə</b>
-            <p class="muted">${order.courier_id ? `Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı xəritə görünəcək.'}</p>
+            <p class="muted">${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}</p>
           </div>
         </div>
       `}
