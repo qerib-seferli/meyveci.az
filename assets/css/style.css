@@ -1347,3 +1347,89 @@ textarea:focus {
   50% { box-shadow: 0 0 18px rgba(34, 197, 94, 0.75); }
   100% { box-shadow: 0 0 4px rgba(34, 197, 94, 0.35); }
 }
+
+/* ============================================================
+   KURYER / USER CANLI XƏRİTƏ VƏ MESAJ DÜZƏLİŞLƏRİ
+   Bu hissə Leaflet xəritə, profil avatarı, mesaj meta məlumatları və aktiv status düymələri üçündür.
+   ============================================================ */
+
+.order-live-map {
+  min-height: 280px;
+  height: 280px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  box-shadow: 0 14px 35px rgba(22, 163, 74, 0.12);
+}
+
+.order-live-map .leaflet-container,
+.order-live-map.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+}
+
+.map-note {
+  margin-top: -4px;
+  font-size: 13px;
+}
+
+.customer-mini {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.32);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.08);
+}
+
+.customer-card-row {
+  align-items: center;
+}
+
+.courier-actions .active-status {
+  color: #064e3b;
+  border-color: rgba(34, 197, 94, 0.65);
+  background: linear-gradient(135deg, rgba(187, 247, 208, 0.95), rgba(134, 239, 172, 0.75));
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.34);
+}
+
+.msg-meta {
+  display: block;
+  margin-top: 3px;
+  opacity: 0.78;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.unread-message {
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  animation: unreadMessageNeon 1.2s infinite;
+}
+
+@keyframes unreadMessageNeon {
+  0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.25); }
+  50% { box-shadow: 0 0 22px rgba(34, 197, 94, 0.75); }
+}
+
+@media (max-width: 640px) {
+  .order-live-map {
+    min-height: 230px;
+    height: 230px;
+  }
+
+  .customer-card-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-card-row .btn {
+    width: 100%;
+  }
+}
