@@ -20,6 +20,7 @@ let activeCourier = null;
 let watchId = null;
 let courierPosition = null;
 const courierMaps = new Map();
+let followCourier = false;
 
 // Səhifə açılan kimi kuryer yoxlanır, online edilir və sifarişlər yüklənir.
 document.addEventListener('DOMContentLoaded', async () => {
@@ -120,6 +121,14 @@ function bindCourierButtons() {
       location.href = `../messages.html?order=${button.dataset.id}`;
     });
   });
+
+  $$('.follow-courier-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      followCourier = !followCourier;
+      button.classList.toggle('active-status', followCourier);
+      button.textContent = followCourier ? '📍 İzləmə aktivdir' : '📍 Kuryeri izlə';
+    });
+  });
 }
 
 // Kuryer kartı: müştəri şəkli, adı, telefon, sifariş ünvanı, xəritə və statuslar.
@@ -152,6 +161,11 @@ function orderCard(order, customer = {}, location = {}) {
 
       <p><b>Ünvan:</b> ${address || 'Ünvan qeyd edilməyib'}</p>
 
+      <div class="map-toolbar">
+        <button class="btn btn-soft follow-courier-toggle" type="button">
+          📍 Kuryeri izlə
+        </button>
+      </div>
       <div class="map-box order-live-map" id="courierMap-${order.id}"></div>
       <p class="muted map-note" id="courierMapNote-${order.id}">
         Müştəri: ${customer?.lat || order.lat || '—'}, ${customer?.lng || order.lng || '—'} • Kuryer: ${location?.lat || '—'}, ${location?.lng || '—'}
@@ -353,8 +367,9 @@ async function saveCourierLocationToOrders(lat, lng, coords = {}) {
     toast(upsertError.message);
     return;
   }
-
-  await loadCourierOrders();
+  
+  // Bu xəritənin “əsib yenilənməsi” problemi
+  // await loadCourierOrders();
 }
 
 
@@ -389,7 +404,9 @@ function updateCourierMapsLive(lat, lng) {
     }
     
     // kuryer iconu marker kimi hərəkət edəcək, amma xəritə özü səni məcburi uzaqlaşdırmayacaq
-    // mapData.map.panTo(point, { animate: true, duration: 0.8 });
+    if (followCourier) {
+      mapData.map.panTo(point, { animate: true, duration: 0.8 });
+      }
   });
 }
 
