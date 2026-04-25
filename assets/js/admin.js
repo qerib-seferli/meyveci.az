@@ -391,17 +391,26 @@ async function loadOrders() {
   });
 }
 
-// Kuryer təyin etmə: əsas yol RPC-dir, SQL köhnə qalıbsa ehtiyat update ilə də yoxlayırıq.
+// Kuryer təyin etmə.
+// Vacib: bu RPC həm orders.courier_id yazır, həm də həmin sifarişin mesaj söhbətini kuryerə bağlayır.
 async function assignCourierSafe(orderId, courierId) {
-  const response = await supabase
-    .from('orders')
-    .update({
-      courier_id: courierId,
-      status: 'on_the_way',
-    })
-    .eq('id', orderId);
+  const response = await supabase.rpc('assign_courier_to_order', {
+    p_order_id: orderId,
+    p_courier_id: courierId,
+    p_note: 'Admin paneldən kuryer təyin edildi',
+  });
 
-  return { error: response.error };
+  // Əgər SQL patch hələ run edilməyibsə, ən azından sifarişin özünü yeniləməyə çalışırıq.
+  if (response.error) {
+    const fallback = await supabase
+      .from('orders')
+      .update({ courier_id: courierId, status: 'on_the_way' })
+      .eq('id', orderId);
+
+    return { error: fallback.error || response.error };
+  }
+
+  return { error: null };
 }
 
 

@@ -287,16 +287,33 @@ async function checkout(event) {
 async function initOrders() {
   const activeUser = await requireAuth();
 
+  // Sifarişləri ayrıca, kuryer profilini ayrıca oxuyuruq.
+  // Bu üsul Supabase foreign key adı dəyişəndə də ekranın boş qalmasının qarşısını alır.
   const { data, error } = await supabase
     .from('orders')
-    .select('*,profiles!orders_courier_id_fkey(first_name,last_name,phone,avatar_url)')
+    .select('*')
     .eq('user_id', activeUser.id)
     .order('created_at', { ascending: false })
     .limit(60);
 
+  const courierIds = [...new Set((data || []).map((order) => order.courier_id).filter(Boolean))];
+  const orderIds = [...new Set((data || []).map((order) => order.id).filter(Boolean))];
+
+  const [{ data: couriers }, { data: locations }] = await Promise.all([
+    courierIds.length
+      ? supabase.from('profiles').select('id,email,first_name,last_name,phone,avatar_url').in('id', courierIds)
+      : Promise.resolve({ data: [] }),
+    orderIds.length
+      ? supabase.from('courier_locations').select('*').in('order_id', orderIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const couriersMap = new Map((couriers || []).map((courier) => [courier.id, courier]));
+  const locationsMap = new Map((locations || []).map((location) => [location.order_id, location]));
+
   $('#ordersList').innerHTML = error
     ? `<div class="card">${error.message}</div>`
-    : (data || []).map(orderCard).join('') || '<div class="card">Sifariş yoxdur.</div>';
+    : (data || []).map((order) => orderCard(order, couriersMap.get(order.courier_id), locationsMap.get(order.id))).join('') || '<div class="card">Sifariş yoxdur.</div>';
 
   $$('.open-chat').forEach((button) => {
     button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
@@ -306,15 +323,17 @@ async function initOrders() {
   $$('.cancel-order').forEach((button) => {
     button.addEventListener('click', () => cancelOrder(button.dataset.id));
   });
+
+  initUserOrderMaps(data || [], couriersMap, locationsMap);
+  subscribeOrderTracking(activeUser.id);
 }
 
-function orderCard(order) {
-  const courier = order.profiles;
-  const eta = estimateEta(order);
+function orderCard(order, courier = null, courierLocation = null) {
+  const eta = estimateEta(order, courierLocation);
 
   // Sifariş status ikonları xəritənin içində yox, status sözünün yanında göstərilir.
   return `
-    <div class="card">
+    <div class="card" data-order-id="${order.id}">
       <div class="section-head">
         <div>
           <b>${order.order_code}</b>
@@ -328,26 +347,22 @@ function orderCard(order) {
       ${['delivered','cancelled'].includes(order.status) ? `
         <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
       ` : `
-        <div class="map-box order-track-box live-map-preview">
-          <div class="map-marker courier-marker"><img src="assets/img/icons/courier-marker.png" alt="Kuryer"></div>
-          <div class="map-marker home-marker"><img src="assets/img/icons/home-marker.png" alt="Ünvan"></div>
-          <div class="map-info">
-            <b>Canlı izləmə</b>
-            <p class="muted">${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}</p>
-          </div>
-        </div>
+        <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
+        <p class="muted map-note" id="userMapNote-${order.id}">
+          ${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}
+        </p>
       `}
 
       ${courier ? `
         <div class="compact-row" style="margin-top: 12px;">
           <div style="display:flex;align-items:center;gap:10px;">
-            <img class="preview-img" src="${courier.avatar_url || PLACEHOLDER}" alt="Kuryer">
+            <img class="preview-img customer-avatar" src="${courier.avatar_url || PLACEHOLDER}" alt="Kuryer">
             <div>
               <b>${courier.first_name || ''} ${courier.last_name || ''}</b><br>
               <small class="muted">${courier.phone || 'Telefon yoxdur'}</small>
             </div>
           </div>
-          <a class="btn btn-soft" href="tel:${courier.phone || ''}">Zəng</a>
+          ${courier.phone ? `<a class="btn btn-soft" href="tel:${courier.phone}">Zəng</a>` : ''}
         </div>
       ` : '<p class="muted">Kuryer hələ təyin edilməyib.</p>'}
 
@@ -358,6 +373,102 @@ function orderCard(order) {
         ` : ''}
       </div>
     </div>`;
+}
+
+// Leaflet/OpenStreetMap canlı xəritəsini göstərir.
+function initUserOrderMaps(orders, couriersMap, locationsMap) {
+  if (!window.L) return;
+
+  orders.forEach((order) => {
+    if (['delivered', 'cancelled'].includes(order.status)) return;
+
+    const location = locationsMap.get(order.id) || {};
+    const customerLat = Number(order.lat);
+    const customerLng = Number(order.lng);
+    const courierLat = Number(location.lat);
+    const courierLng = Number(location.lng);
+    const mapEl = $(`#userOrderMap-${order.id}`);
+
+    if (!mapEl) return;
+
+    const center = validMapPoint(courierLat, courierLng)
+      ? [courierLat, courierLng]
+      : validMapPoint(customerLat, customerLng)
+        ? [customerLat, customerLng]
+        : [40.4093, 49.8671];
+
+    const map = L.map(mapEl, { zoomControl: false }).setView(center, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(map);
+
+    const courierIcon = makeUserMapIcon('assets/img/icons/courier-marker.png');
+    const homeIcon = makeUserMapIcon('assets/img/icons/home-marker.png');
+    const points = [];
+
+    if (validMapPoint(customerLat, customerLng)) {
+      const marker = L.marker([customerLat, customerLng], { icon: homeIcon }).addTo(map).bindPopup('Sizin ünvanınız');
+      points.push(marker.getLatLng());
+    }
+
+    if (validMapPoint(courierLat, courierLng)) {
+      const marker = L.marker([courierLat, courierLng], { icon: courierIcon }).addTo(map).bindPopup('Kuryer');
+      points.push(marker.getLatLng());
+    }
+
+    if (points.length > 1) map.fitBounds(points, { padding: [30, 30] });
+    setTimeout(() => map.invalidateSize(), 150);
+  });
+}
+
+function makeUserMapIcon(url) {
+  return L.icon({
+    iconUrl: url,
+    iconSize: [42, 42],
+    iconAnchor: [21, 42],
+    popupAnchor: [0, -36],
+  });
+}
+
+function validMapPoint(lat, lng) {
+  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+}
+
+function estimateEta(order, location = {}) {
+  const aLat = Number(location?.lat);
+  const aLng = Number(location?.lng);
+  const bLat = Number(order.lat);
+  const bLng = Number(order.lng);
+
+  if (validMapPoint(aLat, aLng) && validMapPoint(bLat, bLng)) {
+    const km = distanceKm(aLat, aLng, bLat, bLng);
+    const minutes = Math.max(5, Math.round((km / 22) * 60));
+    if (minutes >= 60) return `${Math.floor(minutes / 60)} saat ${minutes % 60} dəqiqə`;
+    return `${minutes} dəqiqə`;
+  }
+
+  if (order.status === 'courier_near') return '15 dəqiqə';
+  if (order.status === 'on_the_way') return '35-45 dəqiqə';
+  if (order.status === 'preparing') return '45-60 dəqiqə';
+  if (order.status === 'delivered') return 'Təhvil verildi';
+  return '30-50 dəqiqə';
+}
+
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Sifariş/lokasiya dəyişəndə istifadəçinin xəritəsi və statusu realtime yenilənir.
+function subscribeOrderTracking(userId) {
+  supabase
+    .channel(`user-orders-live-${userId}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => initOrders())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, () => initOrders())
+    .subscribe();
 }
 
 // Sifarişi ləğv etmə RPC ilə edilir.
@@ -397,14 +508,6 @@ function statusIcon(status) {
     cancelled: 'assets/img/icons/Legv-edildi-icon.png',
   };
   return map[status] || 'assets/img/icons/order-confirmed.png';
-}
-
-function estimateEta(order) {
-  if (order.status === 'courier_near') return '15 dəqiqə';
-  if (order.status === 'on_the_way') return '35-45 dəqiqə';
-  if (order.status === 'preparing') return '45-60 dəqiqə';
-  if (order.status === 'delivered') return 'Təhvil verildi';
-  return '30-50 dəqiqə';
 }
 
 async function initProfile() {
@@ -470,18 +573,21 @@ async function initProfile() {
 async function initMessages() {
   const orderId = new URLSearchParams(location.search).get('order');
 
-if (orderId) {
-  const { data: threadId } = await supabase.rpc('create_or_get_order_thread', {
-    p_order_id: orderId,
-  });
+  // Sifarişdən gələndə həmin sifariş üçün söhbəti avtomatik açırıq.
+  if (orderId) {
+    const { data: threadId, error } = await supabase.rpc('create_or_get_order_thread', {
+      p_order_id: orderId,
+    });
 
-  if (threadId) {
-    await loadThreads(threadId);
-    $('#sendMessageForm')?.addEventListener('submit', sendMessage);
-    subscribeMessageRealtime();
-    return;
+    if (error) toast(error.message);
+
+    if (threadId) {
+      await loadThreads(threadId);
+      $('#sendMessageForm')?.addEventListener('submit', sendMessage);
+      subscribeMessageRealtime();
+      return;
+    }
   }
-}
 
   await loadThreads();
   $('#sendMessageForm')?.addEventListener('submit', sendMessage);
@@ -491,7 +597,7 @@ if (orderId) {
 async function loadThreads(autoOpenThreadId = null) {
   const { data, error } = await supabase
     .from('chat_threads')
-    .select('id,title,order_id,last_message_at')
+    .select('id,title,order_id,last_message_at,courier_id')
     .order('last_message_at', { ascending: false, nullsFirst: false })
     .limit(50);
 
@@ -502,11 +608,24 @@ async function loadThreads(autoOpenThreadId = null) {
     return;
   }
 
-  list.innerHTML = (data || []).map((thread) => `
-    <button class="compact-row thread" data-id="${thread.id}">
-      <span>${thread.title || 'Söhbət'}<br><small class="muted">${thread.order_id || ''}</small></span>
-    </button>
-  `).join('') || '<span class="muted">Söhbət yoxdur.</span>';
+  const orderIds = [...new Set((data || []).map((thread) => thread.order_id).filter(Boolean))];
+  const { data: orders } = orderIds.length
+    ? await supabase.from('orders').select('id,order_code,user_id,courier_id').in('id', orderIds)
+    : { data: [] };
+  const ordersMap = new Map((orders || []).map((order) => [order.id, order]));
+
+  list.innerHTML = (data || []).map((thread) => {
+    const order = ordersMap.get(thread.order_id) || {};
+    return `
+      <button class="compact-row thread" data-id="${thread.id}">
+        <span>
+          ${thread.title || 'Söhbət'}<br>
+          <small class="muted">${order.order_code || thread.order_id || ''}</small>
+        </span>
+        <small class="muted">${thread.last_message_at ? new Date(thread.last_message_at).toLocaleString('az-AZ') : ''}</small>
+      </button>
+    `;
+  }).join('') || '<span class="muted">Söhbət yoxdur.</span>';
 
   $$('.thread').forEach((button) => {
     button.addEventListener('click', () => openThread(button.dataset.id));
@@ -519,26 +638,48 @@ async function loadThreads(autoOpenThreadId = null) {
 async function openThread(id) {
   currentThread = id;
 
+  // Mesajları ayrıca, profilləri ayrıca oxuyuruq.
+  // Beləliklə kuryer öz yazdığı mesajı da, müştərinin cavabını da görə bilir.
   const { data, error } = await supabase
     .from('chat_messages')
-    .select('id,message_text,sender_id,created_at,profiles(first_name,last_name)')
+    .select('id,message_text,sender_id,sender_role,sender_name,sender_phone,created_at,is_read')
     .eq('thread_id', id)
     .order('created_at')
-    .limit(120);
+    .limit(160);
 
   const activeUser = await requireAuth();
+  const senderIds = [...new Set((data || []).map((message) => message.sender_id).filter(Boolean))];
+  const { data: profiles } = senderIds.length
+    ? await supabase.from('profiles').select('id,first_name,last_name,phone,role').in('id', senderIds)
+    : { data: [] };
+
+  const profilesMap = new Map((profiles || []).map((profile) => [profile.id, profile]));
 
   $('#chatBox').innerHTML = error
     ? error.message
-    : (data || []).map((message) => `
-      <div class="msg ${message.sender_id === activeUser.id ? 'me' : ''}">
-        ${message.message_text}<br>
-        <small class="muted">${new Date(message.created_at).toLocaleString('az-AZ')}</small>
-      </div>
-    `).join('') || '<span class="muted">Mesaj yoxdur.</span>';
+    : (data || []).map((message) => {
+      const sender = profilesMap.get(message.sender_id) || {};
+      const fullName = message.sender_name || `${sender.first_name || ''} ${sender.last_name || ''}`.trim() || 'İstifadəçi';
+      const role = message.sender_role || sender.role || 'user';
+      const phone = message.sender_phone || sender.phone || 'Telefon yoxdur';
+      const isMe = message.sender_id === activeUser.id;
+
+      return `
+        <div class="msg ${isMe ? 'me' : ''} ${!message.is_read && !isMe ? 'unread-message' : ''}">
+          <b>${fullName}</b>
+          <small class="msg-meta">${roleAz(role)} • ${phone} • ${new Date(message.created_at).toLocaleString('az-AZ')}</small>
+          <br>${message.message_text}
+        </div>
+      `;
+    }).join('') || '<span class="muted">Mesaj yoxdur.</span>';
 
   await supabase.rpc('mark_thread_read', { p_thread_id: id });
   $('#chatBox').scrollTop = 999999;
+}
+
+function roleAz(role) {
+  const map = { admin: 'Admin', courier: 'Kuryer', user: 'Müştəri' };
+  return map[role] || role || 'İstifadəçi';
 }
 
 // Mesaj səhifəsi açıq qalanda yeni mesajlar realtime görünür, F5 tələb olunmur.
@@ -547,7 +688,10 @@ function subscribeMessageRealtime() {
     .channel('user-message-page-live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
       if (currentThread) openThread(currentThread);
-      loadThreads();
+      loadThreads(currentThread);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_threads' }, () => {
+      loadThreads(currentThread);
     })
     .subscribe();
 }
