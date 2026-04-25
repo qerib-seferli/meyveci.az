@@ -92,7 +92,7 @@ async function loadCourierOrders() {
 function orderCard(order) {
   const customer = order.profiles || {};
   const customerPhone = customer.phone || '';
-  const address = [customer.address_line, customer.apartment, customer.door_code].filter(Boolean).join(', ');
+  const address = order.address_text || [customer.address_line, customer.apartment, customer.door_code].filter(Boolean).join(', ');
 
   return `
     <article class="card courier-card">
@@ -133,7 +133,7 @@ function orderCard(order) {
         <button class="btn btn-soft courier-status" data-id="${order.id}" data-s="on_the_way">Yoldayam</button>
         <button class="btn btn-soft courier-status" data-id="${order.id}" data-s="courier_near">Yaxınlaşıram</button>
         <button class="btn btn-primary courier-status" data-id="${order.id}" data-s="delivered">Təhvil verdim</button>
-        <button class="btn btn-soft open-chat" data-id="${order.id}">Mesaj</button>
+        <button class="btn btn-soft open-chat" data-id="${order.id}">Müştəriyə mesaj yaz</button>
       </div>
     </article>
   `;
