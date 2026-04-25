@@ -402,8 +402,8 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
       attribution: '&copy; OpenStreetMap',
     }).addTo(map);
 
-    const courierIcon = makeUserMapIcon('assets/img/icons/courier-marker.png');
-    const homeIcon = makeUserMapIcon('assets/img/icons/home-marker.png');
+    const courierIcon = makeUserMapIcon('./assets/img/icons/courier-marker.png');
+    const homeIcon = makeUserMapIcon('./assets/img/icons/home-marker.png');
     const points = [];
 
     if (validMapPoint(customerLat, customerLng)) {
@@ -417,6 +417,11 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
     }
 
     if (points.length > 1) map.fitBounds(points, { padding: [30, 30] });
+
+    if (validMapPoint(courierLat, courierLng) && validMapPoint(customerLat, customerLng)) {
+        drawRoute(map, { lat: courierLat, lng: courierLng }, { lat: customerLat, lng: customerLng });
+    }
+    
     setTimeout(() => map.invalidateSize(), 150);
   });
 }
@@ -461,6 +466,28 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
+
+async function drawRoute(map, from, to) {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.routes && data.routes[0]) {
+      L.geoJSON(data.routes[0].geometry, {
+        style: {
+          color: '#16a34a',
+          weight: 4,
+          opacity: 0.8
+        }
+      }).addTo(map);
+    }
+  } catch (e) {
+    console.log('route error', e);
+  }
+}
+
 
 // Sifariş/lokasiya dəyişəndə istifadəçinin xəritəsi və statusu realtime yenilənir.
 function subscribeOrderTracking(userId) {
