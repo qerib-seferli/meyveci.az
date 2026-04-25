@@ -324,7 +324,32 @@ async function initOrders() {
   $$('.cancel-order').forEach((button) => {
     button.addEventListener('click', () => cancelOrder(button.dataset.id));
   });
+  // İstifadəçi də kuryeri izləmə butonu olsun.
+  $$('.follow-user-courier').forEach((button) => {
+  button.addEventListener('click', () => {
+    const orderId = button.dataset.id;
+    const mapData = userOrderMaps.get(orderId);
 
+    if (!mapData || !mapData.courierMarker) {
+      toast('Kuryerin konumu hələ görünmür');
+      return;
+    }
+
+    mapData.followCourier = !mapData.followCourier;
+    button.classList.toggle('active-status', mapData.followCourier);
+    button.textContent = mapData.followCourier ? '📍 İzləmə aktivdir' : '📍 Kuryeri izlə';
+
+    if (mapData.followCourier) {
+      mapData.map.panTo(mapData.courierMarker.getLatLng(), {
+        animate: true,
+        duration: 0.8,
+      });
+    }
+
+    userOrderMaps.set(orderId, mapData);
+  });
+});
+  
   initUserOrderMaps(data || [], couriersMap, locationsMap);
   subscribeOrderTracking(activeUser.id);
 }
@@ -348,6 +373,11 @@ function orderCard(order, courier = null, courierLocation = null) {
       ${['delivered','cancelled'].includes(order.status) ? `
         <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
       ` : `
+        <div class="map-toolbar">
+          <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
+            📍 Kuryeri izlə
+          </button>
+        </div>
         <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
         <p class="muted map-note" id="userMapNote-${order.id}">
           ${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}
@@ -449,6 +479,7 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
       routeLayer,
       customerLat,
       customerLng,
+      followCourier: false,
     });
 
     if (validMapPoint(courierLat, courierLng) && validMapPoint(customerLat, customerLng)) {
@@ -589,7 +620,9 @@ function subscribeOrderTracking(userId) {
         }
       }
 
-      mapData.map.panTo(courierPoint, { animate: true, duration: 0.8 });
+      if (mapData.followCourier) {
+          mapData.map.panTo(courierPoint, { animate: true, duration: 0.8 });
+        }
       userOrderMaps.set(location.order_id, mapData);
     })
     .subscribe();
