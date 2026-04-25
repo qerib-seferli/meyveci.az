@@ -250,6 +250,35 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Kuryerin hazırki koordinatını bütün aktiv sifarişlərinə yazır.
+// Bu məlumat müştəri tərəfində marker və yol xətti üçün istifadə olunur.
+async function saveCourierLocationToOrders(lat, lng, coords = {}) {
+  if (!activeCourier || !validPoint(Number(lat), Number(lng))) return;
+
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('courier_id', activeCourier.id)
+    .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near']);
+
+  if (error) {
+    toast(error.message);
+    return;
+  }
+
+  await Promise.all((orders || []).map((order) => supabase
+    .from('courier_locations')
+    .upsert({
+      order_id: order.id,
+      courier_id: activeCourier.id,
+      lat: Number(lat),
+      lng: Number(lng),
+      speed: coords.speed ?? null,
+      heading: coords.heading ?? null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'order_id,courier_id' })
+  ));
+}
 
 // Kuryer hərəkət etdikcə xəritədə marker reload olmadan yerini dəyişir.
 function updateCourierMapsLive(lat, lng) {
@@ -271,6 +300,7 @@ function updateCourierMapsLive(lat, lng) {
 }
 
 
+
 // Kuryerin canlı lokasiyasını aktiv sifarişlərə yazır.
 function startLocationSharing() {
   if (!navigator.geolocation) {
@@ -280,36 +310,34 @@ function startLocationSharing() {
 
   watchId = navigator.geolocation.watchPosition(
     async (position) => {
-      courierPosition = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
-      
-      updateCourierMapsLive(courierPosition.lat, courierPosition.lng);
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
 
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('courier_id', activeCourier.id)
-        .in('status', ['on_the_way', 'courier_near']);
+      courierPosition = { lat, lng };
 
-      await Promise.all((orders || []).map((order) => supabase
-        .from('courier_locations')
-        .upsert({
-          order_id: order.id,
-          courier_id: activeCourier.id,
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          speed: position.coords.speed,
-          heading: position.coords.heading,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'order_id,courier_id' })
-      ));
+      // Kuryer paneldə markeri realtime hərəkət etdirir
+      updateCourierMapsLive(lat, lng);
+
+      // 🔥 ƏSAS DÜZƏLİŞ BURDADIR
+      // artıq manual query yox, helper function istifadə edirik
+      await saveCourierLocationToOrders(
+        lat,
+        lng,
+        position.coords
+      );
     },
-    () => toast('Lokasiya icazəsi verilmədi'),
-    { enableHighAccuracy: true, maximumAge: 7000, timeout: 15000 }
+    (err) => {
+      console.log(err);
+      toast('Lokasiya icazəsi verilmədi');
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 15000,
+    }
   );
 }
+
 
 function stopLocationSharing() {
   if (watchId !== null) {
