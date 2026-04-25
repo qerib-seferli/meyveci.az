@@ -416,15 +416,17 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
       points.push(marker.getLatLng());
     }
 
-    if (points.length > 1) map.fitBounds(points, { padding: [30, 30] });
-
+    if (points.length > 1) {
+      map.fitBounds(points, { padding: [30, 30] });
+    }
+    
     if (validMapPoint(courierLat, courierLng) && validMapPoint(customerLat, customerLng)) {
-        drawRoute(map, { lat: courierLat, lng: courierLng }, { lat: customerLat, lng: customerLng });
+      drawRoute(map, { lat: courierLat, lng: courierLng }, { lat: customerLat, lng: customerLng });
     }
     
     setTimeout(() => map.invalidateSize(), 150);
-  });
-}
+      });
+    }
 
 function makeUserMapIcon(url) {
   return L.icon({
