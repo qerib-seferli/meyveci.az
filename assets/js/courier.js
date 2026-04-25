@@ -206,7 +206,25 @@ function initCourierMaps(orders, profilesMap, locationsMap) {
     if (homeMarker) points.push(homeMarker.getLatLng());
     if (points.length > 1) map.fitBounds(points, { padding: [30, 30] });
 
-    courierMaps.set(order.id, { map, courierMarker, homeMarker, courierIcon, homeIcon });
+    courierMaps.set(order.id, {
+      map,
+      courierMarker,
+      homeMarker,
+      courierIcon,
+      homeIcon,
+      routeLayer: null,
+      customerLat,
+      customerLng,
+    });
+
+    if (validPoint(courierLat, courierLng) && validPoint(customerLat, customerLng)) {
+        drawCourierRoute(
+          order.id,
+          { lat: courierLat, lng: courierLng },
+          { lat: customerLat, lng: customerLng }
+        );
+      }
+        
     setTimeout(() => map.invalidateSize(), 150);
   });
 }
@@ -248,6 +266,41 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function drawCourierRoute(orderId, from, to) {
+  const mapData = courierMaps.get(orderId);
+  if (!mapData) return;
+
+  if (mapData.routeLayer) {
+    mapData.map.removeLayer(mapData.routeLayer);
+  }
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.routes && data.routes[0]) {
+      mapData.routeLayer = L.geoJSON(data.routes[0].geometry, {
+        style: { color: '#16a34a', weight: 5, opacity: 0.9 },
+      }).addTo(mapData.map);
+    } else {
+      mapData.routeLayer = L.polyline(
+        [[from.lat, from.lng], [to.lat, to.lng]],
+        { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+      ).addTo(mapData.map);
+    }
+
+    courierMaps.set(orderId, mapData);
+  } catch (e) {
+    mapData.routeLayer = L.polyline(
+      [[from.lat, from.lng], [to.lat, to.lng]],
+      { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+    ).addTo(mapData.map);
+
+    courierMaps.set(orderId, mapData);
+  }
 }
 
 
@@ -320,6 +373,21 @@ function updateCourierMapsLive(lat, lng) {
         .bindPopup('Kuryer');
     }
 
+    const customerLat = Number(mapData.customerLat);
+    const customerLng = Number(mapData.customerLng);
+    
+    if (validPoint(customerLat, customerLng)) {
+      const orderId = [...courierMaps.entries()].find(([, value]) => value === mapData)?.[0];
+    
+      if (orderId) {
+        drawCourierRoute(
+          orderId,
+          { lat: Number(lat), lng: Number(lng) },
+          { lat: customerLat, lng: customerLng }
+        );
+      }
+    }
+    
     mapData.map.panTo(point, { animate: true, duration: 0.8 });
   });
 }
