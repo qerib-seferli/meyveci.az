@@ -21,6 +21,7 @@ import {
 import { initLayout } from './layout.js';
 
 let currentThread = null;
+let userOrderMaps = new Map();
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -375,9 +376,16 @@ function orderCard(order, courier = null, courierLocation = null) {
     </div>`;
 }
 
+
 // Leaflet/OpenStreetMap canlı xəritəsini göstərir.
 function initUserOrderMaps(orders, couriersMap, locationsMap) {
   if (!window.L) return;
+
+  // Köhnə xəritələri təmizləyirik ki, təkrar render zamanı xəritə daşmasın.
+  userOrderMaps.forEach((mapData) => {
+    mapData.map.remove();
+  });
+  userOrderMaps.clear();
 
   orders.forEach((order) => {
     if (['delivered', 'cancelled'].includes(order.status)) return;
@@ -398,35 +406,59 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
         : [40.4093, 49.8671];
 
     const map = L.map(mapEl, { zoomControl: false }).setView(center, 13);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap',
     }).addTo(map);
 
     const courierIcon = makeUserMapIcon('./assets/img/icons/courier-marker.png');
     const homeIcon = makeUserMapIcon('./assets/img/icons/home-marker.png');
+
+    let courierMarker = null;
+    let homeMarker = null;
+    let routeLayer = null;
+
     const points = [];
 
     if (validMapPoint(customerLat, customerLng)) {
-      const marker = L.marker([customerLat, customerLng], { icon: homeIcon }).addTo(map).bindPopup('Sizin ünvanınız');
-      points.push(marker.getLatLng());
+      homeMarker = L.marker([customerLat, customerLng], { icon: homeIcon })
+        .addTo(map)
+        .bindPopup('Sizin ünvanınız');
+
+      points.push(homeMarker.getLatLng());
     }
 
     if (validMapPoint(courierLat, courierLng)) {
-      const marker = L.marker([courierLat, courierLng], { icon: courierIcon }).addTo(map).bindPopup('Kuryer');
-      points.push(marker.getLatLng());
+      courierMarker = L.marker([courierLat, courierLng], { icon: courierIcon })
+        .addTo(map)
+        .bindPopup('Kuryer');
+
+      points.push(courierMarker.getLatLng());
     }
 
     if (points.length > 1) {
       map.fitBounds(points, { padding: [30, 30] });
     }
-    
+
+    userOrderMaps.set(order.id, {
+      map,
+      courierMarker,
+      homeMarker,
+      courierIcon,
+      homeIcon,
+      routeLayer,
+      customerLat,
+      customerLng,
+    });
+
     if (validMapPoint(courierLat, courierLng) && validMapPoint(customerLat, customerLng)) {
-      drawRoute(map, { lat: courierLat, lng: courierLng }, { lat: customerLat, lng: customerLng });
+      drawRouteForOrder(order.id, { lat: courierLat, lng: courierLng }, { lat: customerLat, lng: customerLng });
     }
-    
-    setTimeout(() => map.invalidateSize(), 150);
-      });
-    }
+
+    setTimeout(() => map.invalidateSize(), 200);
+  });
+}
+
 
 function makeUserMapIcon(url) {
   return L.icon({
@@ -469,36 +501,95 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-async function drawRoute(map, from, to) {
+
+async function drawRouteForOrder(orderId, from, to) {
+  const mapData = userOrderMaps.get(orderId);
+  if (!mapData) return;
+
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
 
     const res = await fetch(url);
     const data = await res.json();
 
-    if (data.routes && data.routes[0]) {
-      L.geoJSON(data.routes[0].geometry, {
-        style: {
-          color: '#16a34a',
-          weight: 4,
-          opacity: 0.8
-        }
-      }).addTo(map);
+    if (!data.routes || !data.routes[0]) return;
+
+    if (mapData.routeLayer) {
+      mapData.map.removeLayer(mapData.routeLayer);
     }
+
+    mapData.routeLayer = L.geoJSON(data.routes[0].geometry, {
+      style: {
+        color: '#16a34a',
+        weight: 4,
+        opacity: 0.85,
+      },
+    }).addTo(mapData.map);
+
+    userOrderMaps.set(orderId, mapData);
   } catch (e) {
     console.log('route error', e);
   }
 }
 
 
-// Sifariş/lokasiya dəyişəndə istifadəçinin xəritəsi və statusu realtime yenilənir.
+// Sifariş/lokasiya dəyişəndə istifadəçinin xəritəsi realtime yenilənir.
+// Kuryer hərəkət edəndə artıq bütün səhifə yox, sadəcə marker və yol xətti yenilənir.
 function subscribeOrderTracking(userId) {
   supabase
     .channel(`user-orders-live-${userId}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => initOrders())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, () => initOrders())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+      initOrders();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, (payload) => {
+      const location = payload.new;
+      if (!location) return;
+
+      const mapData = userOrderMaps.get(location.order_id);
+      if (!mapData) return;
+
+      const courierLat = Number(location.lat);
+      const courierLng = Number(location.lng);
+
+      if (!validMapPoint(courierLat, courierLng)) return;
+
+      const courierPoint = [courierLat, courierLng];
+
+      if (mapData.courierMarker) {
+        mapData.courierMarker.setLatLng(courierPoint);
+      } else {
+        mapData.courierMarker = L.marker(courierPoint, { icon: mapData.courierIcon })
+          .addTo(mapData.map)
+          .bindPopup('Kuryer');
+      }
+
+      const customerLat = Number(mapData.customerLat);
+      const customerLng = Number(mapData.customerLng);
+
+      if (validMapPoint(customerLat, customerLng)) {
+        drawRouteForOrder(
+          location.order_id,
+          { lat: courierLat, lng: courierLng },
+          { lat: customerLat, lng: customerLng }
+        );
+
+        const eta = estimateEta(
+          { lat: customerLat, lng: customerLng },
+          { lat: courierLat, lng: courierLng }
+        );
+
+        const note = $(`#userMapNote-${location.order_id}`);
+        if (note) {
+          note.textContent = `Kuryer canlı hərəkətdədir • Təxmini çatma vaxtı: ${eta}`;
+        }
+      }
+
+      mapData.map.panTo(courierPoint, { animate: true, duration: 0.8 });
+      userOrderMaps.set(location.order_id, mapData);
+    })
     .subscribe();
 }
+
 
 // Sifarişi ləğv etmə RPC ilə edilir.
 // Beləliklə RLS və status qaydası backend tərəfdə də qorunur.
