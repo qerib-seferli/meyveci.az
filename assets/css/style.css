@@ -1472,3 +1472,50 @@ textarea:focus {
   width: 100% !important;
   height: 100% !important;
 }
+
+
+
+
+/* Müştəri sifarişlərim xəritəsi daşmasın */
+.order-live-map {
+  width: 100% !important;
+  height: 260px !important;
+  max-height: 260px !important;
+  min-height: 260px !important;
+  overflow: hidden !important;
+  border-radius: 22px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 14px;
+  contain: paint;
+}
+
+/* Leaflet xəritənin kartdan çıxmasının qarşısını alır */
+.order-live-map .leaflet-container,
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 260px !important;
+  border-radius: 22px;
+  overflow: hidden !important;
+}
+
+/* Leaflet layer-lər başqa sifariş kartlarının üstünə çıxmasın */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 2 !important;
+}
+
+@media (max-width: 768px) {
+  .order-live-map {
+    height: 220px !important;
+    max-height: 220px !important;
+    min-height: 220px !important;
+  }
+
+  .order-live-map .leaflet-container,
+  .leaflet-container {
+    max-height: 220px !important;
+  }
+}
