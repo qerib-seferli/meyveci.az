@@ -1519,3 +1519,13 @@ textarea:focus {
     max-height: 220px !important;
   }
 }
+
+
+
+/* Xəritə attribution yazısını çox kiçik və gözə batmayan edirik */
+.leaflet-control-attribution {
+  font-size: 9px !important;
+  opacity: 0.35 !important;
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-radius: 8px 0 0 0 !important;
+}
