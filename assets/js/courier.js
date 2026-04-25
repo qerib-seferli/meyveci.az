@@ -250,6 +250,27 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+
+// Kuryer hərəkət etdikcə xəritədə marker reload olmadan yerini dəyişir.
+function updateCourierMapsLive(lat, lng) {
+  if (!validPoint(Number(lat), Number(lng))) return;
+
+  courierMaps.forEach((mapData) => {
+    const point = [Number(lat), Number(lng)];
+
+    if (mapData.courierMarker) {
+      mapData.courierMarker.setLatLng(point);
+    } else {
+      mapData.courierMarker = L.marker(point, { icon: mapData.courierIcon })
+        .addTo(mapData.map)
+        .bindPopup('Kuryer');
+    }
+
+    mapData.map.panTo(point, { animate: true, duration: 0.8 });
+  });
+}
+
+
 // Kuryerin canlı lokasiyasını aktiv sifarişlərə yazır.
 function startLocationSharing() {
   if (!navigator.geolocation) {
@@ -263,6 +284,8 @@ function startLocationSharing() {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
+      
+      updateCourierMapsLive(courierPosition.lat, courierPosition.lng);
 
       const { data: orders } = await supabase
         .from('orders')
@@ -301,6 +324,27 @@ function subscribeCourierLive() {
     .channel('courier-panel-live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadCourierOrders())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => loadCourierOrders())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, () => loadCourierOrders())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, (payload) => {
+      const location = payload.new;
+      if (!location) return;
+
+      const mapData = courierMaps.get(location.order_id);
+      if (!mapData) return;
+
+      const lat = Number(location.lat);
+      const lng = Number(location.lng);
+
+      if (!validPoint(lat, lng)) return;
+
+      const point = [lat, lng];
+
+      if (mapData.courierMarker) {
+        mapData.courierMarker.setLatLng(point);
+      } else {
+        mapData.courierMarker = L.marker(point, { icon: mapData.courierIcon })
+          .addTo(mapData.map)
+          .bindPopup('Kuryer');
+      }
+    })
     .subscribe();
 }
