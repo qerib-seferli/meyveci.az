@@ -388,7 +388,8 @@ function updateCourierMapsLive(lat, lng) {
       }
     }
     
-    mapData.map.panTo(point, { animate: true, duration: 0.8 });
+    // kuryer iconu marker kimi hərəkət edəcək, amma xəritə özü səni məcburi uzaqlaşdırmayacaq
+    // mapData.map.panTo(point, { animate: true, duration: 0.8 });
   });
 }
 
