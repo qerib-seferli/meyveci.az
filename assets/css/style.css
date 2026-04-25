@@ -1433,3 +1433,28 @@ textarea:focus {
     width: 100%;
   }
 }
+
+
+
+
+/* Xəritə container fix */
+.map-container {
+  width: 100%;
+  max-width: 100%;
+  height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Mobil fix */
+@media (max-width: 768px) {
+  .map-container {
+    height: 220px;
+  }
+}
+
+/* Leaflet fix */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+}
