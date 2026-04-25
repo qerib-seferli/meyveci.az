@@ -250,35 +250,60 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+
 // Kuryerin hazırki koordinatını bütün aktiv sifarişlərinə yazır.
 // Bu məlumat müştəri tərəfində marker və yol xətti üçün istifadə olunur.
 async function saveCourierLocationToOrders(lat, lng, coords = {}) {
-  if (!activeCourier || !validPoint(Number(lat), Number(lng))) return;
+  if (!activeCourier || !validPoint(Number(lat), Number(lng))) {
+    console.log('Lokasiya yazılmadı:', { activeCourier, lat, lng });
+    toast('Kuryer və ya lokasiya məlumatı düzgün deyil');
+    return;
+  }
 
   const { data: orders, error } = await supabase
     .from('orders')
-    .select('id')
+    .select('id, order_code, status, courier_id')
     .eq('courier_id', activeCourier.id)
     .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near']);
+
+  console.log('Lokasiya yazılacaq sifarişlər:', orders, error);
 
   if (error) {
     toast(error.message);
     return;
   }
 
-  await Promise.all((orders || []).map((order) => supabase
+  if (!orders || orders.length === 0) {
+    console.log('Aktiv sifariş tapılmadı. activeCourier:', activeCourier.id);
+    toast('Lokasiya yazılacaq aktiv sifariş tapılmadı');
+    return;
+  }
+
+  const rows = orders.map((order) => ({
+    order_id: order.id,
+    courier_id: activeCourier.id,
+    lat: Number(lat),
+    lng: Number(lng),
+    speed: coords.speed ?? null,
+    heading: coords.heading ?? null,
+    updated_at: new Date().toISOString(),
+  }));
+
+  const { data, error: upsertError } = await supabase
     .from('courier_locations')
-    .upsert({
-      order_id: order.id,
-      courier_id: activeCourier.id,
-      lat: Number(lat),
-      lng: Number(lng),
-      speed: coords.speed ?? null,
-      heading: coords.heading ?? null,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'order_id,courier_id' })
-  ));
+    .upsert(rows, { onConflict: 'order_id,courier_id' })
+    .select();
+
+  console.log('Lokasiya yazma cavabı:', data, upsertError);
+
+  if (upsertError) {
+    toast(upsertError.message);
+    return;
+  }
+
+  await loadCourierOrders();
 }
+
 
 // Kuryer hərəkət etdikcə xəritədə marker reload olmadan yerini dəyişir.
 function updateCourierMapsLive(lat, lng) {
