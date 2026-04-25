@@ -470,16 +470,25 @@ async function initProfile() {
 async function initMessages() {
   const orderId = new URLSearchParams(location.search).get('order');
 
-  if (orderId) {
-    await supabase.rpc('create_or_get_order_thread', { p_order_id: orderId });
+if (orderId) {
+  const { data: threadId } = await supabase.rpc('create_or_get_order_thread', {
+    p_order_id: orderId,
+  });
+
+  if (threadId) {
+    await loadThreads(threadId);
+    $('#sendMessageForm')?.addEventListener('submit', sendMessage);
+    subscribeMessageRealtime();
+    return;
   }
+}
 
   await loadThreads();
   $('#sendMessageForm')?.addEventListener('submit', sendMessage);
   subscribeMessageRealtime();
 }
 
-async function loadThreads() {
+async function loadThreads(autoOpenThreadId = null) {
   const { data, error } = await supabase
     .from('chat_threads')
     .select('id,title,order_id,last_message_at')
@@ -503,7 +512,8 @@ async function loadThreads() {
     button.addEventListener('click', () => openThread(button.dataset.id));
   });
 
-  if (data?.[0]) openThread(data[0].id);
+  if (autoOpenThreadId) openThread(autoOpenThreadId);
+  else if (data?.[0]) openThread(data[0].id);
 }
 
 async function openThread(id) {
