@@ -69,6 +69,27 @@ function renderTopbar() {
   $('#notifyBtn')?.addEventListener('click', loadNotifications);
   $('#notifyClose')?.addEventListener('click', () => $('#notifyDrop')?.classList.remove('show'));
   $('#logoutBtn')?.addEventListener('click', logout);
+
+              $('#messageBtn')?.addEventListener('click', async (event) => {
+                event.preventDefault();
+              
+                const activeProfile = await profile();
+                const href = $('#messageBtn')?.href;
+              
+                if (activeProfile) {
+                  await supabase
+                    .from('notifications')
+                    .update({ is_read: true })
+                    .eq('user_id', activeProfile.id)
+                    .eq('title', 'Yeni mesaj')
+                    .eq('is_read', false);
+              
+                  setBadge('messageCount', 0);
+                }
+              
+                if (href) location.href = href;
+              });
+                
   document.addEventListener('click', (event) => {
     const item = event.target.closest('.notify-item');
     if (item) openNotificationModal(item.dataset.title, item.dataset.body, item.dataset.date);
