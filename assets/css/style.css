@@ -1810,20 +1810,9 @@ BANNER
 
 /*==========================================================================================================*/
 
-/* Ortadakı çiyələk iconunu böyüt və yuxarı çıxart */
+/* Ortadakı çiyələk iconu — Wolt/Uber style floating button */
 .bottom-nav {
-  overflow: visible !important; /* 🔥 əsas məsələ budur */
-}
-
-.bottom-nav .home-logo {
-  width: 80px !important;
-  height: 80px !important;
-
-  margin-top: -34px !important; /* yuxarı çıxardır */
-  position: relative;
-  z-index: 15; /* üstə çıxsın */
-
-  filter: drop-shadow(0 8px 18px rgba(34,197,94,0.4));
+  overflow: visible !important;
 }
 
 .bottom-nav .nav-item {
@@ -1831,7 +1820,99 @@ BANNER
 }
 
 .bottom-nav .nav-item:nth-child(3) {
-  transform: translateY(-6px);
+  transform: translateY(-18px);
+  z-index: 20;
+}
+
+/* Dairə fon */
+.bottom-nav .nav-item:nth-child(3)::before {
+  content: "";
+  position: absolute;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 25%, #ffffff 0%, #ecfdf5 38%, #bbf7d0 100%);
+  box-shadow:
+    0 12px 30px rgba(34, 197, 94, 0.32),
+    0 0 0 6px rgba(255, 255, 255, 0.75);
+  z-index: -2;
+}
+
+/* 3 rəngli neon çevrə */
+.bottom-nav .nav-item:nth-child(3)::after {
+  content: "";
+  position: absolute;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #22c55e,
+    #bef264,
+    #facc15,
+    #22c55e
+  );
+  z-index: -3;
+  animation: strawberryRingSpin 2.8s linear infinite;
+  filter: blur(1px);
+}
+
+/* Çiyələk iconu */
+.bottom-nav .home-logo {
+  width: 58px !important;
+  height: 58px !important;
+  margin-top: 0 !important;
+  position: relative;
+  z-index: 5;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 8px 16px rgba(34, 197, 94, 0.42))
+    drop-shadow(0 0 8px rgba(250, 204, 21, 0.35));
+  transition: transform 0.25s ease;
+}
+
+/* Hover / klik effekti */
+.bottom-nav .nav-item:nth-child(3):hover .home-logo {
+  transform: scale(1.08);
+}
+
+.bottom-nav .nav-item:nth-child(3):active .home-logo {
+  animation: strawberrySpin 0.55s ease;
+}
+
+/* Animasiyalar */
+@keyframes strawberryRingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes strawberrySpin {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  to {
+    transform: rotate(360deg) scale(1.08);
+  }
+}
+
+/* Mobil balans */
+@media (max-width: 640px) {
+  .bottom-nav .nav-item:nth-child(3)::before {
+    width: 70px;
+    height: 70px;
+  }
+
+  .bottom-nav .nav-item:nth-child(3)::after {
+    width: 78px;
+    height: 78px;
+  }
+
+  .bottom-nav .home-logo {
+    width: 52px !important;
+    height: 52px !important;
+  }
 }
 
 /*=======================================================================================================*/
