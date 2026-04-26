@@ -1816,14 +1816,22 @@ BANNER
 }
 
 .bottom-nav .home-logo {
-  width: 90px !important;
-  height: 90px !important;
+  width: 80px !important;
+  height: 80px !important;
 
   margin-top: -34px !important; /* yuxarı çıxardır */
   position: relative;
   z-index: 15; /* üstə çıxsın */
 
   filter: drop-shadow(0 8px 18px rgba(34,197,94,0.4));
+}
+
+.bottom-nav .nav-item {
+  position: relative;
+}
+
+.bottom-nav .nav-item:nth-child(3) {
+  transform: translateY(-6px);
 }
 
 /*=======================================================================================================*/
