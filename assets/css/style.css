@@ -1598,3 +1598,15 @@ textarea:focus {
     width: auto;
   }
 }
+
+
+
+/* TELEFONDA PRODİLDƏ ÇIXIŞ BUTONU STİLİ*/
+@media (max-width: 768px) {
+  body[data-page="profile"] #logoutBtn {
+    position: fixed;
+    bottom: 80px;
+    left: 12px;
+    right: 12px;
+  }
+}
