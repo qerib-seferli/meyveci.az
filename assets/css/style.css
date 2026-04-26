@@ -1769,54 +1769,45 @@ textarea:focus {
 BANNER 
 =================================================================================================================*/
 
-/* Banner kartlar - premium gold glow */
+/* Banner kartlara 4px və gold glow */
+.banner-slide,
+.news-slide,
 .banner-card,
 .news-card {
   border-radius: 4px !important;
   position: relative;
-  overflow: hidden;
+  overflow: visible !important; /* glow kəsilməsin */
 
-  /* əsas çərçivə */
-  border: 1px solid rgba(255, 215, 0, 0.35);
+  border: 1px solid rgba(255, 215, 0, 0.35) !important;
 
-  /* gold glow */
   box-shadow:
-    0 0 8px rgba(255, 215, 0, 0.25),
-    0 0 18px rgba(255, 215, 0, 0.15),
-    inset 0 0 10px rgba(255, 215, 0, 0.08);
+    0 0 6px rgba(255, 215, 0, 0.25),
+    0 0 14px rgba(255, 215, 0, 0.18);
 }
 
-/* Parlayan animasiyalı kənar */
-.banner-card::before,
-.news-card::before {
+/* Neon gold animasiya */
+.banner-slide::after,
+.news-slide::after,
+.banner-card::after,
+.news-card::after {
   content: "";
   position: absolute;
-  inset: -1px;
+  inset: -2px;
   border-radius: 4px;
 
   background: linear-gradient(
     120deg,
     transparent,
-    rgba(255, 215, 0, 0.4),
+    rgba(255, 215, 0, 0.45),
     transparent
   );
 
   opacity: 0.6;
-  animation: goldGlowMove 3s linear infinite;
+  animation: goldMove 3s linear infinite;
   pointer-events: none;
 }
 
-/* hover zamanı daha da premium */
-.banner-card:hover,
-.news-card:hover {
-  box-shadow:
-    0 0 12px rgba(255, 215, 0, 0.4),
-    0 0 28px rgba(255, 215, 0, 0.25),
-    inset 0 0 12px rgba(255, 215, 0, 0.1);
-}
-
-/* animasiya */
-@keyframes goldGlowMove {
+@keyframes goldMove {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
