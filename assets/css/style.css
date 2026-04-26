@@ -1764,3 +1764,63 @@ textarea:focus {
     border-radius: 14px !important;
   }
 }
+
+/*================================================================================================================
+BANNER 
+=================================================================================================================*/
+
+/* Banner kartlar - premium gold glow */
+.banner-card,
+.news-card {
+  border-radius: 4px !important;
+  position: relative;
+  overflow: hidden;
+
+  /* əsas çərçivə */
+  border: 1px solid rgba(255, 215, 0, 0.35);
+
+  /* gold glow */
+  box-shadow:
+    0 0 8px rgba(255, 215, 0, 0.25),
+    0 0 18px rgba(255, 215, 0, 0.15),
+    inset 0 0 10px rgba(255, 215, 0, 0.08);
+}
+
+/* Parlayan animasiyalı kənar */
+.banner-card::before,
+.news-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 4px;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 215, 0, 0.4),
+    transparent
+  );
+
+  opacity: 0.6;
+  animation: goldGlowMove 3s linear infinite;
+  pointer-events: none;
+}
+
+/* hover zamanı daha da premium */
+.banner-card:hover,
+.news-card:hover {
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.4),
+    0 0 28px rgba(255, 215, 0, 0.25),
+    inset 0 0 12px rgba(255, 215, 0, 0.1);
+}
+
+/* animasiya */
+@keyframes goldGlowMove {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/*==========================================================================================================*/
+
+
