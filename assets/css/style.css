@@ -1672,3 +1672,55 @@ textarea:focus {
 .section {
   overflow: visible !important;
 }
+
+
+
+
+
+
+/* Partnyor kartlarını bir az balacalaşdırır */
+.partner-slide {
+  flex: 0 0 260px !important;
+  width: 260px !important;
+  min-width: 260px !important;
+  height: 145px !important;
+  margin-right: 18px !important;
+}
+
+@media (max-width: 640px) {
+  .partner-slide {
+    flex-basis: 210px !important;
+    width: 210px !important;
+    min-width: 210px !important;
+    height: 120px !important;
+    margin-right: 14px !important;
+  }
+}
+
+/* Xəbərlər və partnyorlar barmaqla sağa-sola sürüşsün */
+.news-slider,
+.partner-slider,
+.marquee-strip {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
+  scroll-snap-type: x proximity !important;
+  cursor: grab;
+}
+
+.news-slider > *,
+.partner-slider > *,
+.marquee-strip > * {
+  scroll-snap-align: start;
+}
+
+/* Mobil toxunuş zamanı animasiya istifadəçini narahat etməsin */
+.news-slider:hover > *,
+.partner-slider:hover > *,
+.marquee-strip:hover > *,
+.news-slider:active > *,
+.partner-slider:active > *,
+.marquee-strip:active > * {
+  animation-play-state: paused !important;
+}
