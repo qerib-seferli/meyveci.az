@@ -19,7 +19,8 @@ export async function initLayout() {
   renderBottomNav();
   await hydrateUserArea();
   await refreshBadges();
-  subscribeNotifications();
+  await subscribeNotifications();
+  initSoundUnlock();
   window.addEventListener('hideLoader', hideLoader);
   setTimeout(hideLoader, 550);
 }
@@ -220,28 +221,72 @@ async function loadNotifications() {
   setBadge('notifyCount', 0);
 }
 
-async function subscribeNotifications() {
-  const activeProfile = await profile();
-  if (!activeProfile) return;
-  supabase
-    .channel(`notifications:${activeProfile.id}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${activeProfile.id}` }, () => {
-      refreshBadges();
-      playNotifySound();
-    })
-    .subscribe();
-
-  // Admin və kuryer panel açıq olmasa belə sifariş sayı realtime yenilənir.
-  if (activeProfile.role === 'admin' || activeProfile.role === 'courier') {
-    supabase
-      .channel('admin-new-orders-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        refreshBadges();
-        playNotifySound();
-      })
-      .subscribe();
-  }
-}
+        async function subscribeNotifications() {
+          const activeProfile = await profile();
+          if (!activeProfile) return;
+        
+          supabase
+            .channel(`notifications-live-${activeProfile.id}`)
+            .on(
+              'postgres_changes',
+              {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'notifications',
+                filter: `user_id=eq.${activeProfile.id}`,
+              },
+              (payload) => {
+                const item = payload.new;
+        
+                refreshBadges();
+                playNotifySound();
+        
+                if (item?.title === 'Yeni mesaj') {
+                  showRealtimeToast('💬 Yeni mesaj', notificationBodyAz(item.body || 'Sizə yeni mesaj gəldi.'));
+                } else {
+                  showRealtimeToast(item?.title || 'Yeni bildiriş', notificationBodyAz(item?.body || 'Yeni bildiriş gəldi.'));
+                }
+              }
+            )
+            .on(
+              'postgres_changes',
+              {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'notifications',
+                filter: `user_id=eq.${activeProfile.id}`,
+              },
+              () => {
+                refreshBadges();
+              }
+            )
+            .subscribe();
+        
+          if (activeProfile.role === 'admin' || activeProfile.role === 'courier') {
+            supabase
+              .channel(`orders-badge-live-${activeProfile.id}`)
+              .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'orders' },
+                () => {
+                  refreshBadges();
+                }
+              )
+              .subscribe();
+          }
+        
+          supabase
+            .channel(`chat-badge-live-${activeProfile.id}`)
+            .on(
+              'postgres_changes',
+              { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+              () => {
+                refreshBadges();
+              }
+            )
+            .subscribe();
+        }
+    }
 
 function openNotificationModal(title, body, dateText = '') {
   let modal = $('#notifyModal');
@@ -271,4 +316,47 @@ function getRootPath() {
 
 function escapeAttr(value) {
   return String(value || '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+
+
+function showRealtimeToast(title, body = '') {
+  let box = $('#realtimeToast');
+
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'realtimeToast';
+    box.className = 'realtime-toast';
+    box.innerHTML = `
+      <button class="realtime-toast-x" type="button">×</button>
+      <b id="realtimeToastTitle"></b>
+      <p id="realtimeToastBody"></p>
+    `;
+    document.body.appendChild(box);
+
+    box.querySelector('.realtime-toast-x')?.addEventListener('click', () => {
+      box.classList.remove('show');
+    });
+  }
+
+  $('#realtimeToastTitle').textContent = title || 'Yeni bildiriş';
+  $('#realtimeToastBody').textContent = body || '';
+
+  box.classList.add('show');
+
+  clearTimeout(window.__meyveciToastTimer);
+  window.__meyveciToastTimer = setTimeout(() => {
+    box.classList.remove('show');
+  }, 6500);
+}
+
+function initSoundUnlock() {
+  const unlock = () => {
+    playNotifySound();
+    document.removeEventListener('click', unlock);
+    document.removeEventListener('touchstart', unlock);
+  };
+
+  document.addEventListener('click', unlock, { once: true });
+  document.addEventListener('touchstart', unlock, { once: true });
 }
