@@ -6,6 +6,9 @@
 
 import { $, profile, logout, supabase, playNotifySound, notificationBodyAz } from './core.js';
 
+let notificationPollTimer = null;
+let lastNotificationTime = new Date().toISOString();
+
 const bottomNav = [
   ['favorites.html', '❤️', 'Sevimlilər', 'favCount'],
   ['cart.html', '🛒', 'Səbət', 'cartCount'],
@@ -20,7 +23,7 @@ export async function initLayout() {
   await hydrateUserArea();
   await refreshBadges();
   await subscribeNotifications();
-  // initSoundUnlock();    SAYTA TOXUNANDA SƏS EDİR 
+  startNotificationPolling();
   window.addEventListener('hideLoader', hideLoader);
   setTimeout(hideLoader, 550);
 }
@@ -221,71 +224,45 @@ async function loadNotifications() {
   setBadge('notifyCount', 0);
 }
 
-        async function subscribeNotifications() {
-          const activeProfile = await profile();
-          if (!activeProfile) return;
-        
-          supabase
-            .channel(`notifications-live-${activeProfile.id}`)
-            .on(
-              'postgres_changes',
-              {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'notifications',
-                filter: `user_id=eq.${activeProfile.id}`,
-              },
-              (payload) => {
-                const item = payload.new;
-        
-                refreshBadges();
-                playNotifySound();
-        
-                if (item?.title === 'Yeni mesaj') {
-                  showRealtimeToast('💬 Yeni mesaj', notificationBodyAz(item.body || 'Sizə yeni mesaj gəldi.'));
-                } else {
-                  showRealtimeToast(item?.title || 'Yeni bildiriş', notificationBodyAz(item?.body || 'Yeni bildiriş gəldi.'));
-                }
-              }
-            )
-            .on(
-              'postgres_changes',
-              {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'notifications',
-                filter: `user_id=eq.${activeProfile.id}`,
-              },
-              () => {
-                refreshBadges();
-              }
-            )
-            .subscribe();
-        
-          if (activeProfile.role === 'admin' || activeProfile.role === 'courier') {
-            supabase
-              .channel(`orders-badge-live-${activeProfile.id}`)
-              .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'orders' },
-                () => {
-                  refreshBadges();
-                }
-              )
-              .subscribe();
-          }
-        
-          supabase
-            .channel(`chat-badge-live-${activeProfile.id}`)
-            .on(
-              'postgres_changes',
-              { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-              () => {
-                refreshBadges();
-              }
-            )
-            .subscribe();
-        }
+
+
+
+async function subscribeNotifications() {
+  const activeProfile = await profile();
+  if (!activeProfile) return;
+
+  supabase
+    .channel(`notifications-live-${activeProfile.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${activeProfile.id}`,
+      },
+      (payload) => {
+        handleIncomingNotification(payload.new);
+      }
+    )
+    .subscribe((status) => {
+      console.log('Notification realtime status:', status);
+    });
+
+  if (activeProfile.role === 'admin' || activeProfile.role === 'courier') {
+    supabase
+      .channel(`orders-badge-live-${activeProfile.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => refreshBadges()
+      )
+      .subscribe();
+  }
+}
+
+
+
 
 function openNotificationModal(title, body, dateText = '') {
   let modal = $('#notifyModal');
@@ -318,6 +295,76 @@ function escapeAttr(value) {
 }
 
 
+
+function showRealtimeToast(title, body = '') {
+  let box = $('#realtimeToast');
+
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'realtimeToast';
+    box.className = 'realtime-toast';
+    box.innerHTML = `
+      <button class="realtime-toast-x" type="button">×</button>
+      <b id="realtimeToastTitle"></b>
+      <p id="realtimeToastBody"></p>
+    `;
+    document.body.appendChild(box);
+
+    box.querySelector('.realtime-toast-x')?.addEventListener('click', () => {
+      box.classList.remove('show');
+    });
+  }
+
+  $('#realtimeToastTitle').textContent = title || 'Yeni bildiriş';
+  $('#realtimeToastBody').textContent = body || '';
+
+  box.classList.add('show');
+
+  clearTimeout(window.__meyveciToastTimer);
+  window.__meyveciToastTimer = setTimeout(() => {
+    box.classList.remove('show');
+  }, 6500);
+}
+
+
+
+
+async function startNotificationPolling() {
+  const activeProfile = await profile();
+  if (!activeProfile) return;
+
+  if (notificationPollTimer) clearInterval(notificationPollTimer);
+
+  notificationPollTimer = setInterval(async () => {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('id,title,body,created_at,is_read')
+      .eq('user_id', activeProfile.id)
+      .eq('is_read', false)
+      .gt('created_at', lastNotificationTime)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error || !data?.length) return;
+
+    handleIncomingNotification(data[0]);
+  }, 5000);
+}
+
+function handleIncomingNotification(item) {
+  if (!item) return;
+
+  lastNotificationTime = item.created_at || new Date().toISOString();
+
+  refreshBadges();
+  playNotifySound();
+
+  if (item.title === 'Yeni mesaj') {
+    showRealtimeToast('💬 Yeni mesaj', notificationBodyAz(item.body || 'Yeni mesajınız var.'));
+  } else {
+    showRealtimeToast(item.title || 'Yeni bildiriş', notificationBodyAz(item.body || 'Yeni bildiriş gəldi.'));
+  }
+}
 
 function showRealtimeToast(title, body = '') {
   let box = $('#realtimeToast');
