@@ -22,6 +22,7 @@ import { initLayout } from './layout.js';
 
 let currentThread = null;
 let userOrderMaps = new Map();
+let userTrackingTimer = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -487,6 +488,7 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
     }
 
     setTimeout(() => map.invalidateSize(), 200);
+    setTimeout(() => refreshUserCourierLocations(), 500);
   });
 }
 
@@ -569,6 +571,85 @@ async function drawRouteForOrder(orderId, from, to) {
 }
 
 
+
+
+async function refreshUserCourierLocations() {
+  const orderIds = [...userOrderMaps.keys()];
+
+  if (!orderIds.length) return;
+
+  const { data, error } = await supabase
+    .from('courier_locations')
+    .select('*')
+    .in('order_id', orderIds);
+
+  if (error) {
+    console.log('Müştəri xəritəsi lokasiya oxuma xətası:', error);
+    return;
+  }
+
+  (data || []).forEach((location) => {
+    updateUserCourierMarker(location);
+  });
+}
+
+function updateUserCourierMarker(location) {
+  if (!location) return;
+
+  const mapData = userOrderMaps.get(location.order_id);
+  if (!mapData) return;
+
+  const courierLat = Number(location.lat);
+  const courierLng = Number(location.lng);
+
+  if (!validMapPoint(courierLat, courierLng)) return;
+
+  const courierPoint = [courierLat, courierLng];
+
+  if (mapData.courierMarker) {
+    mapData.courierMarker.setLatLng(courierPoint);
+  } else {
+    mapData.courierMarker = L.marker(courierPoint, { icon: mapData.courierIcon })
+      .addTo(mapData.map)
+      .bindPopup('Kuryer');
+  }
+
+  const customerLat = Number(mapData.customerLat);
+  const customerLng = Number(mapData.customerLng);
+
+  if (validMapPoint(customerLat, customerLng)) {
+    drawRouteForOrder(
+      location.order_id,
+      { lat: courierLat, lng: courierLng },
+      { lat: customerLat, lng: customerLng }
+    );
+
+    const eta = estimateEta(
+      { lat: customerLat, lng: customerLng },
+      { lat: courierLat, lng: courierLng }
+    );
+
+    const note = $(`#userMapNote-${location.order_id}`);
+
+    if (note) {
+      note.textContent = `Kuryer canlı hərəkətdədir • Təxmini çatma vaxtı: ${eta}`;
+    }
+  }
+
+  if (mapData.followCourier) {
+    mapData.map.panTo(courierPoint, {
+      animate: true,
+      duration: 0.8,
+    });
+  }
+
+  mapData.map.invalidateSize();
+  userOrderMaps.set(location.order_id, mapData);
+}
+
+
+
+
 // Sifariş/lokasiya dəyişəndə istifadəçinin xəritəsi realtime yenilənir.
 // Kuryer hərəkət edəndə artıq bütün səhifə yox, sadəcə marker və yol xətti yenilənir.
 function subscribeOrderTracking(userId) {
@@ -578,54 +659,15 @@ function subscribeOrderTracking(userId) {
       initOrders();
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, (payload) => {
-      const location = payload.new;
-      if (!location) return;
-
-      const mapData = userOrderMaps.get(location.order_id);
-      if (!mapData) return;
-
-      const courierLat = Number(location.lat);
-      const courierLng = Number(location.lng);
-
-      if (!validMapPoint(courierLat, courierLng)) return;
-
-      const courierPoint = [courierLat, courierLng];
-
-      if (mapData.courierMarker) {
-        mapData.courierMarker.setLatLng(courierPoint);
-      } else {
-        mapData.courierMarker = L.marker(courierPoint, { icon: mapData.courierIcon })
-          .addTo(mapData.map)
-          .bindPopup('Kuryer');
-      }
-
-      const customerLat = Number(mapData.customerLat);
-      const customerLng = Number(mapData.customerLng);
-
-      if (validMapPoint(customerLat, customerLng)) {
-        drawRouteForOrder(
-          location.order_id,
-          { lat: courierLat, lng: courierLng },
-          { lat: customerLat, lng: customerLng }
-        );
-
-        const eta = estimateEta(
-          { lat: customerLat, lng: customerLng },
-          { lat: courierLat, lng: courierLng }
-        );
-
-        const note = $(`#userMapNote-${location.order_id}`);
-        if (note) {
-          note.textContent = `Kuryer canlı hərəkətdədir • Təxmini çatma vaxtı: ${eta}`;
-        }
-      }
-
-      if (mapData.followCourier) {
-          mapData.map.panTo(courierPoint, { animate: true, duration: 0.8 });
-        }
-      userOrderMaps.set(location.order_id, mapData);
+      updateUserCourierMarker(payload.new);
     })
     .subscribe();
+
+  if (userTrackingTimer) clearInterval(userTrackingTimer);
+
+  userTrackingTimer = setInterval(() => {
+    refreshUserCourierLocations();
+  }, 5000);
 }
 
 
