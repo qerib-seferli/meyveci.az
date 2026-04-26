@@ -1610,3 +1610,16 @@ textarea:focus {
     right: 12px;
   }
 }
+
+@media (max-width: 768px) {
+  body[data-page="profile"] #logoutBtn:not(.hide) {
+    display: block !important;
+    position: fixed;
+    bottom: 84px;
+    left: 14px;
+    right: 14px;
+    width: calc(100% - 28px);
+    z-index: 99999;
+    border-radius: 18px;
+  }
+}
