@@ -1609,7 +1609,7 @@ textarea:focus {
     left: 12px;
     right: 12px;
   }
-}*/
+}
 
 @media (max-width: 768px) {
   body[data-page="profile"] #logoutBtn:not(.hide) {
@@ -1621,5 +1621,11 @@ textarea:focus {
     width: calc(100% - 28px);
     z-index: 99999;
     border-radius: 18px;
+  }
+}*/
+
+@media (max-width: 768px) {
+  body[data-page="profile"] #logoutBtn {
+    display: block !important;
   }
 }
