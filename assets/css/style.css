@@ -1608,3 +1608,36 @@ textarea:focus {
     display: block !important;
   }
 }
+
+
+
+/* Banner / xəbər / partnyor lentində sağ-sol kölgəni silir */
+.slider-strip,
+.marquee-strip {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* Partnyorlar da sağdan sola hərəkət etsin */
+.marquee-strip.reverse > * {
+  animation-name: meyveciMarqueeLeft !important;
+}
+
+/* Partnyor şəkil kartı daha təmiz və neon çərçivəli görünsün */
+.partner-slide {
+  background: transparent !important;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35),
+              0 0 18px rgba(34, 197, 94, 0.22) !important;
+  border: 1px solid rgba(34, 197, 94, 0.45) !important;
+}
+
+.partner-slide img {
+  object-fit: contain !important;
+  background: transparent !important;
+  padding: 0 !important;
+  filter: none !important;
+}
+
+.partner-slide .media-overlay {
+  background: linear-gradient(180deg, transparent 58%, rgba(4, 47, 46, 0.45) 100%) !important;
+}
