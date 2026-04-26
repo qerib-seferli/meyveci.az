@@ -1641,3 +1641,34 @@ textarea:focus {
 .partner-slide .media-overlay {
   background: linear-gradient(180deg, transparent 58%, rgba(4, 47, 46, 0.45) 100%) !important;
 }
+
+
+
+/* Əgər partnyor adı şəkilin üstündə görünməsin, yalnız şəkil qalsın istəyirsənsə bunu da əlavə et */
+/* .partner-slide b {
+  display: none !important;
+}*/
+
+
+/* Partnyor / banner lentini full ekran et */
+.slider-strip,
+.marquee-strip {
+  width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* İçindəki boşluqları sıfırla */
+.marquee {
+  padding: 0 !important;
+  gap: 12px !important;
+}
+
+/* Əgər parent container sıxırsa onu da açırıq */
+.container,
+.wrap,
+.section {
+  overflow: visible !important;
+}
