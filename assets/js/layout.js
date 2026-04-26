@@ -20,7 +20,7 @@ export async function initLayout() {
   await hydrateUserArea();
   await refreshBadges();
   await subscribeNotifications();
-  initSoundUnlock();
+  // initSoundUnlock();    SAYTA TOXUNANDA SƏS EDİR 
   window.addEventListener('hideLoader', hideLoader);
   setTimeout(hideLoader, 550);
 }
@@ -347,15 +347,4 @@ function showRealtimeToast(title, body = '') {
   window.__meyveciToastTimer = setTimeout(() => {
     box.classList.remove('show');
   }, 6500);
-}
-
-function initSoundUnlock() {
-  const unlock = () => {
-    playNotifySound();
-    document.removeEventListener('click', unlock);
-    document.removeEventListener('touchstart', unlock);
-  };
-
-  document.addEventListener('click', unlock, { once: true });
-  document.addEventListener('touchstart', unlock, { once: true });
 }
