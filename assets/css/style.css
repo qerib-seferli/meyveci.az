@@ -1771,9 +1771,7 @@ BANNER
 
 /* Banner kartlara 4px və gold glow */
 .banner-slide,
-.news-slide,
-.banner-card,
-.news-card {
+.banner-card {
   border-radius: 4px !important;
   position: relative;
   overflow: visible !important; /* glow kəsilməsin */
@@ -1787,9 +1785,7 @@ BANNER
 
 /* Neon gold animasiya */
 .banner-slide::after,
-.news-slide::after,
-.banner-card::after,
-.news-card::after {
+.banner-card::after {
   content: "";
   position: absolute;
   inset: -2px;
