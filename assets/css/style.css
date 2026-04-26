@@ -1644,10 +1644,13 @@ textarea:focus {
 
 
 
-/* Əgər partnyor adı şəkilin üstündə görünməsin, yalnız şəkil qalsın istəyirsənsə bunu da əlavə et */
-/* .partner-slide b {
-  display: none !important;
-}*/
+/* Partnyor kartındakı adı daha kiçik görünsün */
+.partner-slide b {
+  display: block !important;   /* əvvəlki none varsa sil */
+  font-size: 11px !important;  /* ölçü kiçildi */
+  opacity: 0.7;                /* biraz solğun */
+  margin-top: 4px;
+}
 
 
 /* Partnyor / banner lentini full ekran et */
