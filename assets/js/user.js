@@ -399,7 +399,7 @@ function orderCard(order, courier = null, courierLocation = null) {
       ` : '<p class="muted">Kuryer hələ təyin edilməyib.</p>'}
 
       <div class="order-actions">
-        <button class="btn btn-primary open-chat" data-id="${order.id}">Admin/Kuryer ilə mesajlaş</button>
+        <button class="btn btn-primary open-chat" data-id="${order.id}">Kuryerə Yaz</button>
         ${order.status === 'pending' ? `
           <button class="btn btn-danger cancel-order" data-id="${order.id}">Sifarişi ləğv et</button>
         ` : ''}
