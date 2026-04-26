@@ -286,7 +286,6 @@ async function loadNotifications() {
             )
             .subscribe();
         }
-    }
 
 function openNotificationModal(title, body, dateText = '') {
   let modal = $('#notifyModal');
