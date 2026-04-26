@@ -1728,7 +1728,7 @@ textarea:focus {
 
 
 
-/* Kompüterdə kateqoriyalar 2 sətirdə görünsün */
+/* Kompüterdə kateqoriyalar 2 sətirdə görünsün 
 @media (min-width: 769px) {
   .chip-row {
     flex-wrap: wrap !important;
@@ -1738,5 +1738,19 @@ textarea:focus {
 
   .chip {
     flex: 0 0 auto;
+  }
+}*/
+
+
+/* Kompüterdə kateqoriya chip-ləri daha kompakt görünsün */
+@media (min-width: 769px) {
+  .chip-row {
+    gap: 7px !important;
+  }
+
+  .chip {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    border-radius: 14px !important;
   }
 }
