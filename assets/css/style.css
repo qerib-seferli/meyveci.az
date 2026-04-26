@@ -1602,22 +1602,9 @@ textarea:focus {
 
 
 /* TELEFONDA PROFİL SƏHİFƏSİNDƏ ÇIXIŞ BUTONU */
-@media (max-width: 768px) {
-  body[data-page="profile"] #logoutBtn {
-    display: flex !important;
-    position: fixed !important;
-    left: 16px !important;
-    right: 16px !important;
-    bottom: 86px !important;
-    width: calc(100% - 32px) !important;
-    height: 46px !important;
-    z-index: 100000 !important;
-    border-radius: 18px !important;
-  }
-}
 
-/*@media (max-width: 768px) {
+@media (max-width: 768px) {
   body[data-page="profile"] #logoutBtn {
     display: block !important;
   }
-}*/
+}
