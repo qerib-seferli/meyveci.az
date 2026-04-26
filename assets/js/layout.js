@@ -132,13 +132,13 @@ async function hydrateUserArea() {
 
   if (panelLink && activeProfile.role === 'admin') {
     panelLink.href = `${root}admin/index.html`;
-    panelLink.textContent = 'Admin panel';
+    panelLink.textContent = 'Admin';
     panelLink.classList.remove('hide');
     $('#adminOrdersBtn')?.classList.remove('hide');
   }
   if (panelLink && activeProfile.role === 'courier') {
     panelLink.href = `${root}courier/index.html`;
-    panelLink.textContent = 'Kuryer panel';
+    panelLink.textContent = 'Kuryer';
     panelLink.classList.remove('hide');
     const courierOrdersBtn = $('#adminOrdersBtn');
     if (courierOrdersBtn) {
