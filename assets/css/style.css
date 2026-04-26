@@ -1810,33 +1810,20 @@ BANNER
 
 /*==========================================================================================================*/
 
-/* Ortadakı çiyələk iconu Wolt/Uber kimi yuxarı çıxmış görünür */
+/* Ortadakı çiyələk iconunu böyüt və yuxarı çıxart */
 .bottom-nav {
-  overflow: visible !important;
+  overflow: visible !important; /* 🔥 əsas məsələ budur */
 }
 
 .bottom-nav .home-logo {
-  width: 66px !important;
-  height: 66px !important;
-  margin-top: -24px !important;
+  width: 90px !important;
+  height: 90px !important;
+
+  margin-top: -34px !important; /* yuxarı çıxardır */
   position: relative;
-  z-index: 10;
-  filter: drop-shadow(0 10px 20px rgba(34, 197, 94, 0.45));
-  transition: transform 0.25s ease;
-}
+  z-index: 15; /* üstə çıxsın */
 
-/* Klikləyəndə fırlanma */
-.bottom-nav .nav-item:active .home-logo {
-  animation: strawberrySpin 0.55s ease;
-}
-
-@keyframes strawberrySpin {
-  from {
-    transform: rotate(0deg) scale(1);
-  }
-  to {
-    transform: rotate(360deg) scale(1.08);
-  }
+  filter: drop-shadow(0 8px 18px rgba(34,197,94,0.4));
 }
 
 /*=======================================================================================================*/
