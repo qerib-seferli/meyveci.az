@@ -1678,24 +1678,31 @@ textarea:focus {
 
 
 
-/* Partnyor kartlarını bir az balacalaşdırır */
+/* Partnyor kartlarını daha kompakt və düz kənarlı edirik */
 .partner-slide {
-  flex: 0 0 260px !important;
-  width: 260px !important;
-  min-width: 260px !important;
-  height: 145px !important;
-  margin-right: 18px !important;
+  flex: 0 0 220px !important;   /* 260 → 220 */
+  width: 220px !important;
+  min-width: 220px !important;
+  height: 125px !important;     /* 145 → 125 */
+  margin-right: 12px !important; /* 18 → 12 */
+  
+  border-radius: 0 !important;  /* 🔥 yuvarlaq kənarları silir */
+  box-shadow: 0 0 10px rgba(34,197,94,0.18) !important; /* daha soft neon */
 }
 
+/* Mobil üçün */
 @media (max-width: 640px) {
   .partner-slide {
-    flex-basis: 210px !important;
-    width: 210px !important;
-    min-width: 210px !important;
-    height: 120px !important;
-    margin-right: 14px !important;
+    flex-basis: 180px !important;  /* 210 → 180 */
+    width: 180px !important;
+    min-width: 180px !important;
+    height: 105px !important;      /* 120 → 105 */
+    margin-right: 10px !important; /* 14 → 10 */
+
+    border-radius: 0 !important;
   }
 }
+
 
 /* Xəbərlər və partnyorlar barmaqla sağa-sola sürüşsün */
 .news-slider,
@@ -1728,7 +1735,7 @@ textarea:focus {
 
 
 
-/* Kompüterdə kateqoriyalar 2 sətirdə görünsün 
+/* Kompüterdə kateqoriyalar 2 sətirdə görünsün */
 @media (min-width: 769px) {
   .chip-row {
     flex-wrap: wrap !important;
@@ -1739,7 +1746,7 @@ textarea:focus {
   .chip {
     flex: 0 0 auto;
   }
-}*/
+}
 
 
 /* Kompüterdə kateqoriya chip-ləri daha kompakt görünsün */
