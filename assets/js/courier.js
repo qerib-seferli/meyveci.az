@@ -110,6 +110,10 @@ function bindCourierButtons() {
         p_status: button.dataset.s,
       });
 
+      if (!statusError) {
+        await createCourierStatusNotification(button.dataset.id, button.dataset.s);
+      }
+      
       toast(statusError ? statusError.message : 'Status yeniləndi');
       button.disabled = false;
       loadCourierOrders();
@@ -130,6 +134,38 @@ function bindCourierButtons() {
     });
   });
 }
+
+
+async function createCourierStatusNotification(orderId, status) {
+  const titleMap = {
+    on_the_way: 'Kuryer yoldadır',
+    courier_near: 'Kuryer yaxınlaşır',
+    delivered: 'Sifariş təhvil verildi',
+  };
+
+  const bodyMap = {
+    on_the_way: 'Kuryer sifarişinizi çatdırmaq üçün yola çıxdı.',
+    courier_near: 'Kuryer ünvanınıza yaxınlaşır.',
+    delivered: 'Sifarişiniz təhvil verildi.',
+  };
+
+  const { data: order } = await supabase
+    .from('orders')
+    .select('id,user_id,order_code')
+    .eq('id', orderId)
+    .maybeSingle();
+
+  if (!order?.user_id) return;
+
+  await supabase.from('notifications').insert({
+    user_id: order.user_id,
+    title: titleMap[status] || 'Sifariş statusu yeniləndi',
+    body: `${order.order_code || 'Sifariş'}: ${bodyMap[status] || 'Sifarişinizin statusu dəyişdi.'}`,
+    link_url: `orders.html?track=${orderId}`,
+    is_read: false,
+  });
+}
+
 
 // Kuryer kartı: müştəri şəkli, adı, telefon, sifariş ünvanı, xəritə və statuslar.
 function orderCard(order, customer = {}, location = {}) {
