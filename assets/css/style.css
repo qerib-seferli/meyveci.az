@@ -1810,4 +1810,23 @@ BANNER
 
 /*==========================================================================================================*/
 
+/* Ortadakı çiyələk iconunu böyüt və yuxarı çıxart */
+.bottom-nav {
+  overflow: visible !important; /* 🔥 əsas məsələ budur */
+}
+
+.bottom-nav .home-logo {
+  width: 72px !important;
+  height: 72px !important;
+
+  margin-top: -28px !important; /* yuxarı çıxardır */
+  position: relative;
+  z-index: 10; /* üstə çıxsın */
+
+  filter: drop-shadow(0 8px 18px rgba(34,197,94,0.4));
+}
+
+
+/*=============================================================================================*/
+
 
