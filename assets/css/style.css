@@ -1724,3 +1724,19 @@ textarea:focus {
 .marquee-strip:active > * {
   animation-play-state: paused !important;
 }
+
+
+
+
+/* Kompüterdə kateqoriyalar 2 sətirdə görünsün */
+@media (min-width: 769px) {
+  .chip-row {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    max-height: none !important;
+  }
+
+  .chip {
+    flex: 0 0 auto;
+  }
+}
