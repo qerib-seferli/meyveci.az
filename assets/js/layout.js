@@ -296,7 +296,7 @@ function escapeAttr(value) {
 
 
 
-function showRealtimeToast(title, body = '') {
+/*function showRealtimeToast(title, body = '') {
   let box = $('#realtimeToast');
 
   if (!box) {
@@ -324,7 +324,7 @@ function showRealtimeToast(title, body = '') {
   window.__meyveciToastTimer = setTimeout(() => {
     box.classList.remove('show');
   }, 6500);
-}
+}*/
 
 
 
