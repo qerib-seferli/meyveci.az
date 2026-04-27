@@ -1770,8 +1770,7 @@ BANNER
 =================================================================================================================*/
 
 /* ================================
-   MEYVƏÇİ.AZ - DESKTOP 1 BANNER SLIDER
-   1 banner görünür, sağdan-sola animasiyalı keçid
+   MEYVƏÇİ.AZ - MOVING BANNER CARDS
 ================================ */
 
 .banner-slider,
@@ -1780,26 +1779,32 @@ BANNER
   width: 100%;
   position: relative;
   overflow: hidden !important;
-  border-radius: 4px;
+  padding: 10px 0 18px;
 }
 
-/* Track */
+/* Hərəkət edən sıra */
 .banner-track,
 .banner-list,
 .banner-wrapper {
   display: flex;
-  width: 100%;
-  gap: 0;
-  padding: 0;
-  overflow: visible !important;
-  animation: bannerSlideLeft 18s infinite ease-in-out;
+  gap: 16px;
+  width: max-content;
+  padding: 6px 10px;
+  animation: bannerMarquee 28s linear infinite;
 }
 
-/* Desktopda hər kart tam ekran enində olsun */
+/* Hover zamanı dayansın */
+.banner-slider:hover .banner-track,
+.banners-slider:hover .banner-list,
+.hero-banners:hover .banner-wrapper {
+  animation-play-state: paused;
+}
+
+/* Kart */
 .banner-slide,
 .banner-card {
-  flex: 0 0 100%;
-  width: 100%;
+  flex: 0 0 420px;          /* kompüterdə kart eni */
+  width: 420px;
   position: relative;
 
   border-radius: 4px !important;
@@ -1816,7 +1821,7 @@ BANNER
   transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
-/* Gold yalnız kənarda qalsın */
+/* Gold yalnız kənarda */
 .banner-slide::before,
 .banner-card::before {
   content: "";
@@ -1825,17 +1830,18 @@ BANNER
   z-index: 3;
   pointer-events: none;
   border-radius: 4px;
+
   border: 1px solid rgba(255, 215, 0, 0.75);
   box-shadow: inset 0 0 8px rgba(255, 215, 0, 0.18);
 }
 
-/* Üstdən keçən gold effekt tam bağlandı */
+/* Köhnə içəridən keçən gold animasiya bağlanır */
 .banner-slide::after,
 .banner-card::after {
   display: none !important;
 }
 
-/* Şəkil tam görünsün */
+/* Şəkil tam 2x1 görünsün */
 .banner-slide img,
 .banner-card img {
   display: block;
@@ -1846,77 +1852,88 @@ BANNER
   object-fit: contain !important;
   object-position: center !important;
 
-  border-radius: 4px;
   background: #fff;
+  border-radius: 4px;
 }
 
 /* Hover effekti */
-.banner-slider:hover .banner-track,
-.banners-slider:hover .banner-list,
-.hero-banners:hover .banner-wrapper {
-  animation-play-state: paused;
-}
-
 .banner-slide:hover,
 .banner-card:hover {
-  transform: scale(0.995);
+  transform: translateY(-4px) scale(1.015);
   box-shadow:
-    0 0 0 1px rgba(255, 215, 0, 0.30),
-    0 0 14px rgba(255, 215, 0, 0.30),
-    0 8px 22px rgba(0, 0, 0, 0.12);
+    0 0 0 1px rgba(255, 215, 0, 0.35),
+    0 0 16px rgba(255, 215, 0, 0.35),
+    0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
-/* Banner adı daha balaca */
+/* Banner adı kartın altında balaca görünsün */
 .banner-title,
 .banner-card-title {
-  margin-top: 4px;
-  font-size: 11px !important;
-  font-weight: 500;
-  line-height: 1.2;
-  text-align: center;
-  color: rgba(25, 25, 25, 0.60);
+  display: block;
+  position: static !important;
+  margin: 5px 0 0 !important;
+
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+  color: rgba(20, 20, 20, 0.55) !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
-/* 3 banner üçün sağdan-sola keçid */
-@keyframes bannerSlideLeft {
-  0%, 25% {
+/* Sağdan sola sonsuz hərəkət */
+@keyframes bannerMarquee {
+  from {
     transform: translateX(0);
   }
 
-  33%, 58% {
-    transform: translateX(-100%);
-  }
-
-  66%, 91% {
-    transform: translateX(-200%);
-  }
-
-  100% {
-    transform: translateX(0);
+  to {
+    transform: translateX(-50%);
   }
 }
 
-/* Mobil: swipe rahat olsun */
+/* Planşet */
+@media (max-width: 1024px) {
+  .banner-slide,
+  .banner-card {
+    flex-basis: 360px;
+    width: 360px;
+  }
+}
+
+/* Mobil */
 @media (max-width: 768px) {
   .banner-track,
   .banner-list,
   .banner-wrapper {
+    width: 100%;
     overflow-x: auto !important;
+    animation: none !important;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    animation: none !important;
+    padding: 5px;
+  }
+
+  .banner-track::-webkit-scrollbar,
+  .banner-list::-webkit-scrollbar,
+  .banner-wrapper::-webkit-scrollbar {
+    display: none;
   }
 
   .banner-slide,
   .banner-card {
-    flex: 0 0 100%;
+    flex: 0 0 92%;
+    width: 92%;
     scroll-snap-align: center;
   }
 
   .banner-title,
   .banner-card-title {
-    font-size: 10px !important;
-    margin-top: 3px;
+    font-size: 9px !important;
+    margin-top: 4px !important;
   }
 }
 
