@@ -1769,127 +1769,118 @@ textarea:focus {
 BANNER 
 =================================================================================================================*/
 
-/* ================================
-   MEYVƏÇİ.AZ - MOVING BANNER CARDS
-================================ */
+/* ============================================================
+   FINAL BANNER FIX - ŞƏKİL KƏSİLMƏSİN + AD ALTDA OLSUN
+   ============================================================ */
 
 .banner-slider,
 .banners-slider,
-.hero-banners {
-  width: 100%;
-  position: relative;
+.hero-banners,
+.slider-strip.marquee-strip {
+  width: 100% !important;
   overflow: hidden !important;
-  padding: 10px 0 18px;
 }
 
-/* Hərəkət edən sıra */
+/* Track sağdan sola hərəkət etsin */
 .banner-track,
 .banner-list,
-.banner-wrapper {
-  display: flex;
-  gap: 16px;
-  width: max-content;
-  padding: 6px 10px;
-  animation: bannerMarquee 28s linear infinite;
+.banner-wrapper,
+.marquee-strip {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  width: max-content !important;
+  overflow: visible !important;
+  animation: bannerMarquee 32s linear infinite !important;
 }
 
-/* Hover zamanı dayansın */
+/* Hover edəndə dayansın */
 .banner-slider:hover .banner-track,
 .banners-slider:hover .banner-list,
-.hero-banners:hover .banner-wrapper {
-  animation-play-state: paused;
+.hero-banners:hover .banner-wrapper,
+.marquee-strip:hover {
+  animation-play-state: paused !important;
 }
 
-/* Kart */
+/* Banner kart */
 .banner-slide,
 .banner-card {
-  flex: 0 0 420px;          /* kompüterdə kart eni */
-  width: 420px;
-  position: relative;
+  flex: 0 0 420px !important;
+  width: 420px !important;
+  min-width: 420px !important;
+
+  height: auto !important;          /* ƏSAS: əvvəlki 150px-i söndürür */
+  min-height: auto !important;
+  max-height: none !important;
+
+  display: flex !important;
+  flex-direction: column !important;
 
   border-radius: 4px !important;
-  overflow: hidden !important;
+  overflow: visible !important;     /* ad altda rahat görünsün */
+  background: transparent !important;
 
-  background: #fff;
-  border: 1px solid rgba(255, 215, 0, 0.45) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 
+/* Şəkil ayrıca qutu kimi */
+.banner-slide img,
+.banner-card img {
+  width: 100% !important;
+  height: auto !important;
+
+  aspect-ratio: 1774 / 887 !important;
+  object-fit: contain !important;   /* ƏSAS: kənarlar kəsilmir */
+  object-position: center !important;
+
+  display: block !important;
+  border-radius: 4px !important;
+
+  background: #fff !important;
+
+  border: 1px solid rgba(255, 215, 0, 0.55) !important;
   box-shadow:
     0 0 0 1px rgba(255, 215, 0, 0.18),
-    0 0 10px rgba(255, 215, 0, 0.20),
-    0 0 18px rgba(255, 215, 0, 0.12);
-
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+    0 0 12px rgba(255, 215, 0, 0.22),
+    0 0 22px rgba(255, 215, 0, 0.12) !important;
 }
 
-/* Gold yalnız kənarda */
-.banner-slide::before,
-.banner-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  border-radius: 4px;
+/* Banner adını şəklin üstündən çıxarıb altına salır */
+.banner-slide b,
+.banner-card b,
+.banner-title,
+.banner-card-title {
+  position: static !important;
+  inset: auto !important;
 
-  border: 1px solid rgba(255, 215, 0, 0.75);
-  box-shadow: inset 0 0 8px rgba(255, 215, 0, 0.18);
+  display: block !important;
+  margin: 5px 0 0 !important;
+
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+
+  color: rgba(20, 20, 20, 0.55) !important;
+  background: transparent !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
-/* Köhnə içəridən keçən gold animasiya bağlanır */
+/* Overlay varsa bağla */
+.banner-slide .media-overlay,
+.banner-card .media-overlay,
 .banner-slide::after,
 .banner-card::after {
   display: none !important;
 }
 
-/* Şəkil tam 2x1 görünsün */
-.banner-slide img,
-.banner-card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 1;
-
-  object-fit: contain !important;
-  object-position: center !important;
-
-  background: #fff;
-  border-radius: 4px;
-}
-
-/* Hover effekti */
-.banner-slide:hover,
-.banner-card:hover {
-  transform: translateY(-4px) scale(1.015);
-  box-shadow:
-    0 0 0 1px rgba(255, 215, 0, 0.35),
-    0 0 16px rgba(255, 215, 0, 0.35),
-    0 10px 24px rgba(0, 0, 0, 0.14);
-}
-
-/* Banner adı kartın altında balaca görünsün */
-.banner-title,
-.banner-card-title {
-  display: block;
-  position: static !important;
-  margin: 5px 0 0 !important;
-
-  font-size: 10px !important;
-  font-weight: 500 !important;
-  line-height: 1.2 !important;
-  text-align: center !important;
-  color: rgba(20, 20, 20, 0.55) !important;
-
-  background: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-/* Sağdan sola sonsuz hərəkət */
+/* Sağdan sola hərəkət */
 @keyframes bannerMarquee {
   from {
     transform: translateX(0);
   }
-
   to {
     transform: translateX(-50%);
   }
@@ -1899,8 +1890,9 @@ BANNER
 @media (max-width: 1024px) {
   .banner-slide,
   .banner-card {
-    flex-basis: 360px;
-    width: 360px;
+    flex-basis: 360px !important;
+    width: 360px !important;
+    min-width: 360px !important;
   }
 }
 
@@ -1908,32 +1900,28 @@ BANNER
 @media (max-width: 768px) {
   .banner-track,
   .banner-list,
-  .banner-wrapper {
-    width: 100%;
+  .banner-wrapper,
+  .marquee-strip {
+    width: 100% !important;
     overflow-x: auto !important;
     animation: none !important;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    padding: 5px;
-  }
-
-  .banner-track::-webkit-scrollbar,
-  .banner-list::-webkit-scrollbar,
-  .banner-wrapper::-webkit-scrollbar {
-    display: none;
+    scroll-snap-type: x mandatory !important;
+    padding: 4px !important;
   }
 
   .banner-slide,
   .banner-card {
-    flex: 0 0 92%;
-    width: 92%;
-    scroll-snap-align: center;
+    flex: 0 0 92% !important;
+    width: 92% !important;
+    min-width: 92% !important;
+    scroll-snap-align: center !important;
   }
 
+  .banner-slide b,
+  .banner-card b,
   .banner-title,
   .banner-card-title {
     font-size: 9px !important;
-    margin-top: 4px !important;
   }
 }
 
