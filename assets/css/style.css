@@ -1928,6 +1928,130 @@ BANNER
 /*==========================================================================================================*/
 
 /* ============================================================
+   FINAL FIX - XƏBƏRLƏR VƏ PARTNYORLAR SAĞDAN KƏSİLMƏSİN
+   Banner hissəsinə toxunmur
+   ============================================================ */
+
+/* Xəbər və partnyor lentini app-shell içində saxlayırıq */
+.news-slider,
+.partner-slider {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+
+  display: flex !important;
+  gap: 16px !important;
+
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+
+  padding: 6px 0 14px !important;
+
+  scroll-snap-type: x mandatory !important;
+  scroll-padding-left: 0 !important;
+
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* Full-screen edən köhnə qaydanı söndürür */
+.news-slider.slider-strip,
+.partner-slider.slider-strip,
+.news-slider.marquee-strip,
+.partner-slider.marquee-strip {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* İçindəki kartlar düzgün sıraya otursun */
+.news-slider > *,
+.partner-slider > * {
+  flex-shrink: 0 !important;
+  scroll-snap-align: start !important;
+}
+
+/* Xəbər kartları */
+.news-slide {
+  flex: 0 0 370px !important;
+  width: 370px !important;
+  min-width: 370px !important;
+  max-width: 370px !important;
+
+  height: 210px !important;
+  margin-right: 0 !important;
+
+  border-radius: 22px !important;
+  overflow: hidden !important;
+}
+
+/* Xəbər şəkli tam kartı doldursun */
+.news-slide img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+/* Partnyor kartları */
+.partner-slide {
+  flex: 0 0 220px !important;
+  width: 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+
+  height: 125px !important;
+  margin-right: 0 !important;
+
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+/* Partnyor logo kəsilməsin */
+.partner-slide img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border-radius: inherit !important;
+}
+
+/* Sağda son kart yarımçıq qalmasın deyə sonda nəfəs payı */
+.news-slider::after,
+.partner-slider::after {
+  content: "";
+  flex: 0 0 12px;
+}
+
+/* Mobil */
+@media (max-width: 640px) {
+  .news-slider,
+  .partner-slider {
+    gap: 12px !important;
+    padding: 5px 0 12px !important;
+  }
+
+  .news-slide {
+    flex: 0 0 calc(100vw - 40px) !important;
+    width: calc(100vw - 40px) !important;
+    min-width: calc(100vw - 40px) !important;
+    max-width: calc(100vw - 40px) !important;
+    height: 190px !important;
+  }
+
+  .partner-slide {
+    flex: 0 0 180px !important;
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+    height: 105px !important;
+  }
+}
+
+
+/* ============================================================
    PREMIUM FLOATING HOME BUTTON — ÇİYƏLƏK ICON
    Dairə daha kompakt, icon daha iri, neon çevrə daha incə.
    ============================================================ */
