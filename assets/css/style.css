@@ -2575,6 +2575,118 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
 }
 
 
+
+/* ============================================================
+   FINAL RESPONSIVE FIX - Banner / News / Partner
+   ============================================================ */
+
+/* Desktopda banner canlı xəbər lentinin üstünə çıxmasın */
+@media (min-width: 901px) {
+  #bannerGrid {
+    top: 92px !important;
+  }
+
+  body[data-page="home"] main.app-shell > section:nth-of-type(2) {
+    margin-top: 0 !important;
+  }
+}
+
+/* Telefonda banner avtomatik hərəkət etməsin, barmaqla sürüşsün */
+@media (max-width: 900px) {
+  #bannerGrid {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    animation: none !important;
+    transform: none !important;
+    display: flex !important;
+    gap: 12px !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-padding-inline: 5vw !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    padding: 4px 0 12px !important;
+  }
+
+  #bannerGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-banner-card {
+    flex: 0 0 88vw !important;
+    width: 88vw !important;
+    min-width: 88vw !important;
+    scroll-snap-align: center !important;
+    margin: 0 auto !important;
+  }
+
+  /* Telefonda yalnız böyük xəbər kartı görünsün */
+  .home-side-news {
+    display: none !important;
+  }
+
+  #newsGrid {
+    display: block !important;
+  }
+
+  .home-main-news {
+    width: 100% !important;
+    min-height: 220px !important;
+  }
+
+  .home-main-news img {
+    min-height: 220px !important;
+  }
+
+  .home-main-news b {
+    font-size: 17px !important;
+    bottom: 50px !important;
+  }
+
+  .home-main-news small {
+    font-size: 11px !important;
+    bottom: 18px !important;
+  }
+}
+
+/* Partnyorlar həm desktop, həm mobil barmaqla sürüşsün */
+#partnersGrid {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x !important;
+  cursor: grab;
+}
+
+#partnersGrid::-webkit-scrollbar {
+  display: none;
+}
+
+#partnersGrid:active {
+  cursor: grabbing;
+}
+
+/* Mobil partnyorda animasiyanı söndürürük ki, barmaqla rahat sürüşsün */
+@media (max-width: 900px) {
+  #partnersGrid {
+    width: 100% !important;
+    max-width: 100% !important;
+    animation: none !important;
+    transform: none !important;
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x proximity !important;
+    padding: 4px 0 14px !important;
+  }
+
+  .home-partner-card {
+    scroll-snap-align: start !important;
+  }
+}
+
+
 /*==================================================================================================================================================*/
 
 
