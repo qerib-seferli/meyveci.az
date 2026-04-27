@@ -254,78 +254,7 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* ==================== ANA SƏHİFƏ SLIDERLƏR ==================== */
-.slider-strip {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(290px, 2fr);
-  gap: 14px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
 
-.slider-strip::-webkit-scrollbar {
-  display: none;
-}
-
-.hero-slide,
-.news-slide,
-.partner-slide {
-  scroll-snap-align: start;
-}
-
-.hero-slide {
-  min-height: 230px;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: center;
-  gap: 18px;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(220, 252, 231, 0.96), rgba(255, 255, 255, 0.92));
-}
-
-.hero-slide h1 {
-  margin: 0 0 10px;
-  font-size: clamp(23px, 3.4vw, 42px);
-  letter-spacing: -0.04em;
-}
-
-.hero-visual {
-  min-height: 180px;
-  display: grid;
-  place-items: center;
-  border-radius: 24px;
-  background: radial-gradient(circle, rgba(163, 230, 53, 0.34), rgba(22, 163, 74, 0.12));
-}
-
-.hero-visual img {
-  width: 100%;
-  max-height: 220px;
-  object-fit: contain;
-  animation: floatFruit 4s ease-in-out infinite;
-}
-
-.news-slider {
-  grid-auto-columns: minmax(230px, 32%);
-}
-
-.news-slide img,
-.partner-slide img {
-  width: 100%;
-  height: 150px;
-  border-radius: 18px;
-  object-fit: cover;
-  background: var(--green-soft);
-}
-
-.partner-slider {
-  grid-auto-columns: minmax(180px, 220px);
-}
-
-.partner-slide {
-  text-align: center;
-}
 
 /* ==================== AXTARIŞ VƏ KATEQORİYA ==================== */
 .search-card {
@@ -1011,84 +940,6 @@ textarea:focus {
 .top-actions .icon-btn { flex: 0 0 auto; }
 #messageBtn { text-decoration: none; }
 
-/* Banner və partnyor kartları: ağ kart yox, şəkilin özü kart kimi görünür. */
-.media-slide {
-  position: relative;
-  width: 370px;
-  min-width: 370px;
-  height: 210px;
-  margin-right: 30px;
-  border: 1px solid rgba(34, 197, 94, 0.18);
-  border-radius: 26px;
-  overflow: hidden;
-  background: transparent;
-  box-shadow: 0 18px 44px rgba(15, 122, 55, 0.16), 0 0 24px rgba(132, 204, 22, 0.12);
-  scroll-snap-align: start;
-  text-align: left;
-}
-
-.media-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
-  transition: transform 0.45s ease;
-}
-
-.media-slide:hover img { transform: scale(1.05); }
-
-.media-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 38%, rgba(4, 47, 46, 0.72) 100%);
-  pointer-events: none;
-}
-
-.media-slide b {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 18px;
-  z-index: 2;
-  color: #ffffff;
-  font-size: 22px;
-  line-height: 1.1;
-  text-shadow: 0 4px 18px rgba(0,0,0,0.38);
-}
-
-.news-slide {
-  border: 0;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-}
-
-.news-slide small {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 10px;
-  z-index: 2;
-  color: rgba(255,255,255,0.88);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.news-slide b { bottom: 52px; font-size: 18px; }
-.partner-slide b { text-align: center; bottom: 16px; }
-.banner-slide b { font-size: 24px; }
-
-/* Soldan-sağa keçid hissəsində yumşaq kölgə effekti. */
-.slider-strip {
-  position: relative;
-  grid-auto-columns: auto;
-  gap: 0;
-  padding: 2px 0 8px;
-  -webkit-overflow-scrolling: touch;
-}
-
 /* Xəbər modalı: heç bir cihazda ekrandan daşmasın. */
 .news-modal-card {
   width: min(720px, 94vw);
@@ -1211,79 +1062,6 @@ textarea:focus {
 
 
 /* ============================================================
-   V4 ANA SƏHİFƏ SLIDER VƏ KART BALANSI
-   Banner daha nazik/uzun, xəbər və partnyor kartları şəkil-kart kimi saxlanır.
-   ============================================================ */
-.slider-strip {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  gap: 0;
-  padding: 4px 0 12px;
-  mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
-}
-
-.media-slide {
-  flex: 0 0 370px;
-  width: 370px;
-  min-width: 370px;
-  margin-right: 30px;
-}
-
-.banner-slide {
-  height: 150px;
-  border-radius: 24px;
-}
-
-.banner-slide b {
-  font-size: 22px;
-  bottom: 16px;
-}
-
-.news-slide {
-  height: 210px;
-}
-
-.partner-slide {
-  height: 190px;
-}
-
-.product-grid {
-  align-items: stretch;
-}
-
-@media (min-width: 900px) {
-  .product-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .media-slide {
-    flex-basis: calc(100vw - 34px);
-    width: calc(100vw - 34px);
-    min-width: calc(100vw - 34px);
-    margin-right: 16px;
-  }
-
-  .banner-slide {
-    height: 132px;
-  }
-
-  .news-slide {
-    height: 190px;
-  }
-
-  .partner-slide {
-    height: 175px;
-  }
-
-  .banner-slide b {
-    font-size: 18px;
-  }
-}
-
-/* ============================================================
    V5 DÜZƏLİŞLƏRİ - YALNIZ İSTƏNİLƏN HİSSƏLƏR
    Bu blok əvvəlki dizaynı dağıtmadan sevimlilər, slider, profil,
    məhsul detalı və mobil ölçülər üçün üst düzəliş verir.
@@ -1293,12 +1071,6 @@ textarea:focus {
 .nav-item:hover { background: rgba(255, 255, 255, 0.42); }
 .chip-row { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; scroll-snap-type: x proximity; cursor: grab; }
 .chip { scroll-snap-align: start; white-space: nowrap; }
-.marquee-strip { overflow: hidden; scroll-snap-type: none; mask-image: linear-gradient(90deg, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%); }
-.marquee-strip > * { animation: meyveciMarqueeLeft 42s linear infinite; }
-.marquee-strip.reverse > * { animation-name: meyveciMarqueeRight; }
-.marquee-strip:hover > * { animation-play-state: paused; }
-@keyframes meyveciMarqueeLeft { from { transform: translateX(0); } to { transform: translateX(calc(-100% - 30px)); } }
-@keyframes meyveciMarqueeRight { from { transform: translateX(calc(-100% - 30px)); } to { transform: translateX(0); } }
 .profile-hero { display: grid; place-items: center; text-align: center; gap: 8px; }
 .profile-avatar-big { width: 116px; height: 116px; border-radius: 50%; object-fit: cover; padding: 4px; background: #ffffff; box-shadow: 0 0 0 4px rgba(187, 247, 208, 0.72), 0 0 38px rgba(34, 197, 94, 0.35); animation: avatarNeon 3.2s linear infinite; }
 @keyframes avatarNeon { 0% { box-shadow: 0 0 0 4px rgba(187,247,208,.72),0 0 18px rgba(34,197,94,.35); } 50% { box-shadow: 0 0 0 6px rgba(134,239,172,.82),0 0 42px rgba(14,165,233,.35); } 100% { box-shadow: 0 0 0 4px rgba(187,247,208,.72),0 0 18px rgba(34,197,94,.35); } }
@@ -1310,9 +1082,6 @@ textarea:focus {
 .related-products { margin-top: 24px; }
 .past-order-note { border-radius: 18px; padding: 12px; background: rgba(220, 252, 231, 0.72); color: #047857; font-weight: 800; }
 @media (max-width: 700px) { .product-detail-grid { grid-template-columns: 1fr; gap: 14px; } .product-detail-image { min-height: 250px; } .product-detail-image img { max-height: 250px; } .profile-avatar-big { width: 104px; height: 104px; } .marquee-strip > * { animation-duration: 50s; } }
-
-
-
 
 
 
@@ -1623,45 +1392,6 @@ textarea:focus {
   animation-name: meyveciMarqueeLeft !important;
 }
 
-/* Partnyor şəkil kartı daha təmiz və neon çərçivəli görünsün */
-.partner-slide {
-  background: transparent !important;
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35),
-              0 0 18px rgba(34, 197, 94, 0.22) !important;
-  border: 1px solid rgba(34, 197, 94, 0.45) !important;
-}
-
-.partner-slide img {
-  object-fit: contain !important;
-  background: transparent !important;
-  padding: 0 !important;
-  filter: none !important;
-}
-
-.partner-slide .media-overlay {
-  background: linear-gradient(180deg, transparent 58%, rgba(4, 47, 46, 0.45) 100%) !important;
-}
-
-
-
-/* Partnyor kartındakı adı daha kiçik görünsün */
-.partner-slide b {
-  display: block !important;   /* əvvəlki none varsa sil */
-  font-size: 11px !important;  /* ölçü kiçildi */
-  opacity: 0.7;                /* biraz solğun */
-  margin-top: 4px;
-}
-
-
-/* Partnyor / banner lentini full ekran et */
-.slider-strip,
-.marquee-strip {
-  width: 100vw !important;
-  margin-left: calc(50% - 50vw) !important;
-  margin-right: calc(50% - 50vw) !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
 
 /* İçindəki boşluqları sıfırla */
 .marquee {
@@ -1675,67 +1405,6 @@ textarea:focus {
 .section {
   overflow: visible !important;
 }
-
-
-
-
-
-
-/* Partnyor kartlarını daha kompakt və düz kənarlı edirik */
-.partner-slide {
-  flex: 0 0 220px !important;   /* 260 → 220 */
-  width: 220px !important;
-  min-width: 220px !important;
-  height: 125px !important;     /* 145 → 125 */
-  margin-right: 12px !important; /* 18 → 12 */
-  
-  border-radius: 6px !important;  /* 🔥 yuvarlaq kənarları 0 etsən silir  */
-  box-shadow: 0 0 10px rgba(34,197,94,0.18) !important; /* daha soft neon */
-}
-
-/* Mobil üçün */
-@media (max-width: 640px) {
-  .partner-slide {
-    flex-basis: 180px !important;  /* 210 → 180 */
-    width: 180px !important;
-    min-width: 180px !important;
-    height: 105px !important;      /* 120 → 105 */
-    margin-right: 10px !important; /* 14 → 10 */
-
-    border-radius: 0 !important;
-  }
-}
-
-
-/* Xəbərlər və partnyorlar barmaqla sağa-sola sürüşsün */
-.news-slider,
-.partner-slider,
-.marquee-strip {
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  touch-action: pan-x !important;
-  scroll-snap-type: x proximity !important;
-  cursor: grab;
-}
-
-.news-slider > *,
-.partner-slider > *,
-.marquee-strip > * {
-  scroll-snap-align: start;
-}
-
-/* Mobil toxunuş zamanı animasiya istifadəçini narahat etməsin */
-.news-slider:hover > *,
-.partner-slider:hover > *,
-.marquee-strip:hover > *,
-.news-slider:active > *,
-.partner-slider:active > *,
-.marquee-strip:active > * {
-  animation-play-state: paused !important;
-}
-
-
 
 
 /* Kompüterdə kateqoriyalar 2 sətirdə görünsün */
@@ -1925,131 +1594,6 @@ BANNER
   }
 }
 
-/*==========================================================================================================*/
-
-/* ============================================================
-   FINAL FIX - XƏBƏRLƏR VƏ PARTNYORLAR SAĞDAN KƏSİLMƏSİN
-   Banner hissəsinə toxunmur
-   ============================================================ */
-
-/* Xəbər və partnyor lentini app-shell içində saxlayırıq */
-.news-slider,
-.partner-slider {
-  width: 100% !important;
-  max-width: 100% !important;
-
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-
-  display: flex !important;
-  gap: 16px !important;
-
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-
-  padding: 6px 0 14px !important;
-
-  scroll-snap-type: x mandatory !important;
-  scroll-padding-left: 0 !important;
-
-  mask-image: none !important;
-  -webkit-mask-image: none !important;
-}
-
-/* Full-screen edən köhnə qaydanı söndürür */
-.news-slider.slider-strip,
-.partner-slider.slider-strip,
-.news-slider.marquee-strip,
-.partner-slider.marquee-strip {
-  width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-/* İçindəki kartlar düzgün sıraya otursun */
-.news-slider > *,
-.partner-slider > * {
-  flex-shrink: 0 !important;
-  scroll-snap-align: start !important;
-}
-
-/* Xəbər kartları */
-.news-slide {
-  flex: 0 0 370px !important;
-  width: 370px !important;
-  min-width: 370px !important;
-  max-width: 370px !important;
-
-  height: 210px !important;
-  margin-right: 0 !important;
-
-  border-radius: 22px !important;
-  overflow: hidden !important;
-}
-
-/* Xəbər şəkli tam kartı doldursun */
-.news-slide img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  border-radius: inherit !important;
-}
-
-/* Partnyor kartları */
-.partner-slide {
-  flex: 0 0 220px !important;
-  width: 220px !important;
-  min-width: 220px !important;
-  max-width: 220px !important;
-
-  height: 125px !important;
-  margin-right: 0 !important;
-
-  border-radius: 6px !important;
-  overflow: hidden !important;
-}
-
-/* Partnyor logo kəsilməsin */
-.partner-slide img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  border-radius: inherit !important;
-}
-
-/* Sağda son kart yarımçıq qalmasın deyə sonda nəfəs payı */
-.news-slider::after,
-.partner-slider::after {
-  content: "";
-  flex: 0 0 12px;
-}
-
-/* Mobil */
-@media (max-width: 640px) {
-  .news-slider,
-  .partner-slider {
-    gap: 12px !important;
-    padding: 5px 0 12px !important;
-  }
-
-  .news-slide {
-    flex: 0 0 calc(100vw - 40px) !important;
-    width: calc(100vw - 40px) !important;
-    min-width: calc(100vw - 40px) !important;
-    max-width: calc(100vw - 40px) !important;
-    height: 190px !important;
-  }
-
-  .partner-slide {
-    flex: 0 0 180px !important;
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
-    height: 105px !important;
-  }
-}
-
 
 /* ============================================================
    PREMIUM FLOATING HOME BUTTON — ÇİYƏLƏK ICON
@@ -2188,3 +1732,391 @@ BANNER
 /*=======================================================================================================*/
 
 
+
+/* ============================================================
+   MEYVƏÇİ.AZ - HOME SHOWCASE
+   Solda böyük xəbər, ortada 3 xəbər, sağda 2 banner
+   ============================================================ */
+
+.home-showcase {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.45fr 0.9fr 0.85fr;
+  gap: 16px;
+  align-items: stretch;
+  margin: 18px 0 26px;
+}
+
+/* Böyük xəbər */
+.showcase-main-news {
+  min-height: 410px;
+}
+
+/* Orta 3 xəbər */
+.showcase-mini-news {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 14px;
+}
+
+/* Sağ 2 banner */
+.showcase-banners {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 14px;
+}
+
+/* Xəbər kartları */
+.news-card,
+.news-slide {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ecfdf5;
+  box-shadow: 0 14px 34px rgba(15, 122, 55, 0.14);
+  cursor: pointer;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.news-card:hover,
+.news-slide:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px rgba(15, 122, 55, 0.22);
+}
+
+/* Böyük xəbərin hündürlüyü */
+.showcase-main-news .news-card,
+.showcase-main-news .news-slide {
+  height: 100%;
+  min-height: 410px;
+}
+
+/* Şəkil */
+.news-card img,
+.news-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  transition: transform 0.45s ease;
+}
+
+.news-card:hover img,
+.news-slide:hover img {
+  transform: scale(1.045);
+}
+
+/* Şəkilin üstündə qaranlıq gradient */
+.news-card::after,
+.news-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 38%,
+    rgba(0, 0, 0, 0.68) 100%
+  );
+  pointer-events: none;
+}
+
+/* Xəbər başlığı şəkilin aşağı solunda */
+.news-card b,
+.news-slide b {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 900;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.showcase-main-news .news-card b,
+.showcase-main-news .news-slide b {
+  font-size: clamp(26px, 3vw, 42px);
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+}
+
+/* Qısa mətn varsa böyük xəbərdə görünsün */
+.news-card small,
+.news-slide small {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 48px;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.showcase-main-news .news-card small,
+.showcase-main-news .news-slide small {
+  left: 24px;
+  right: 24px;
+  bottom: 78px;
+  font-size: 15px;
+}
+
+/* Planşet */
+@media (max-width: 1024px) {
+  .home-showcase {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .showcase-main-news {
+    grid-column: 1 / -1;
+  }
+
+  .showcase-main-news .news-card,
+  .showcase-main-news .news-slide {
+    min-height: 330px;
+  }
+}
+
+/* Mobil */
+@media (max-width: 700px) {
+  .home-showcase {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .showcase-main-news .news-card,
+  .showcase-main-news .news-slide {
+    min-height: 250px;
+  }
+
+  .showcase-mini-news {
+    grid-template-rows: none;
+    grid-template-columns: 1fr;
+  }
+
+  .showcase-banners {
+    grid-template-rows: none;
+    grid-template-columns: 1fr;
+  }
+
+  .news-card,
+  .news-slide {
+    min-height: 180px;
+  }
+
+  .news-card b,
+  .news-slide b {
+    font-size: 17px;
+  }
+}
+
+
+/* ============================================================
+   MEYVƏÇİ.AZ - BANNER CARDS
+   2x1 banner, ad kartın altında
+   ============================================================ */
+
+.banner-card,
+.banner-slide {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 0.28s ease;
+}
+
+.banner-card:hover,
+.banner-slide:hover {
+  transform: translateY(-4px);
+}
+
+.banner-card img,
+.banner-slide img {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.16),
+    0 0 14px rgba(255, 215, 0, 0.22),
+    0 12px 28px rgba(15, 122, 55, 0.12);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.banner-card:hover img,
+.banner-slide:hover img {
+  transform: scale(1.015);
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.28),
+    0 0 20px rgba(255, 215, 0, 0.32),
+    0 16px 34px rgba(15, 122, 55, 0.18);
+}
+
+/* Banner adı şəkilin altında */
+.banner-card b,
+.banner-slide b,
+.banner-title,
+.banner-card-title {
+  position: static !important;
+  display: block;
+  margin-top: 6px;
+  color: rgba(19, 32, 24, 0.66);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: none;
+  background: transparent;
+}
+
+/* Sağ tərəfdəki showcase bannerlər */
+.showcase-banners .banner-card,
+.showcase-banners .banner-slide {
+  min-height: 0;
+}
+
+/* Mobil */
+@media (max-width: 700px) {
+  .banner-card b,
+  .banner-slide b,
+  .banner-title,
+  .banner-card-title {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+}
+
+
+/* ============================================================
+   MEYVƏÇİ.AZ - PARTNER MARQUEE
+   Partnyor şəkli + adı altda, sağdan sola hərəkət
+   ============================================================ */
+
+.partner-section {
+  width: 100%;
+  margin: 26px 0;
+  overflow: hidden;
+}
+
+.partner-slider,
+.partner-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: max-content;
+  animation: partnerMoveLeft 34s linear infinite;
+}
+
+.partner-section:hover .partner-slider,
+.partner-section:hover .partner-track,
+.partner-slider:hover,
+.partner-track:hover {
+  animation-play-state: paused;
+}
+
+.partner-card,
+.partner-slide {
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 220px;
+  overflow: visible;
+  text-align: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.partner-card img,
+.partner-slide img {
+  width: 100%;
+  height: 125px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.12),
+    0 0 16px rgba(34, 197, 94, 0.18);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.partner-card:hover img,
+.partner-slide:hover img {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.22),
+    0 0 22px rgba(34, 197, 94, 0.28);
+}
+
+/* Partnyor adı şəklin altında */
+.partner-card b,
+.partner-slide b,
+.partner-title {
+  position: static !important;
+  display: block;
+  margin-top: 6px;
+  color: rgba(19, 32, 24, 0.62);
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: none;
+  background: transparent;
+}
+
+/* Sonsuz sağdan sola hərəkət */
+@keyframes partnerMoveLeft {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Mobil */
+@media (max-width: 700px) {
+  .partner-slider,
+  .partner-track {
+    gap: 12px;
+    animation-duration: 42s;
+  }
+
+  .partner-card,
+  .partner-slide {
+    flex-basis: 170px;
+    width: 170px;
+    min-width: 170px;
+  }
+
+  .partner-card img,
+  .partner-slide img {
+    height: 96px;
+    padding: 8px;
+  }
+
+  .partner-card b,
+  .partner-slide b,
+  .partner-title {
+    font-size: 10px;
+  }
+}
