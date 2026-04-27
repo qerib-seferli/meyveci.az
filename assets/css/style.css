@@ -1945,6 +1945,20 @@ BANNER
 
 /*=======================================================================================================*/
 
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
+.section-head h1 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.section-head .muted {
+  font-size: 14px;
+  color: #6b7280;
+}
 
 
