@@ -1732,391 +1732,254 @@ BANNER
 /*=======================================================================================================*/
 
 
-
 /* ============================================================
-   MEYVƏÇİ.AZ - HOME SHOWCASE
-   Solda böyük xəbər, ortada 3 xəbər, sağda 2 banner
+   FINAL HOME FIX - Mövcud index.html üçün
+   Banner + Xəbər + Partnyor tam düzəliş
    ============================================================ */
 
-.home-showcase {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1.45fr 0.9fr 0.85fr;
-  gap: 16px;
-  align-items: stretch;
-  margin: 18px 0 26px;
+/* Ümumi lent reset */
+#bannerGrid,
+#newsGrid,
+#partnersGrid {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 4px 0 14px !important;
+  display: flex !important;
+  gap: 16px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
 }
 
-/* Böyük xəbər */
-.showcase-main-news {
-  min-height: 410px;
+#bannerGrid::-webkit-scrollbar,
+#newsGrid::-webkit-scrollbar,
+#partnersGrid::-webkit-scrollbar {
+  display: none;
 }
 
-/* Orta 3 xəbər */
-.showcase-mini-news {
-  display: grid;
-  grid-template-rows: repeat(3, 1fr);
-  gap: 14px;
+/* =========================
+   ENDİRİM KAMPANİYALARI
+   ========================= */
+
+#bannerGrid > * {
+  flex: 0 0 430px !important;
+  width: 430px !important;
+  min-width: 430px !important;
+  height: auto !important;
+  overflow: visible !important;
+  scroll-snap-align: start !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-/* Sağ 2 banner */
-.showcase-banners {
-  display: grid;
-  grid-template-rows: repeat(2, 1fr);
-  gap: 14px;
+#bannerGrid img {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 2 / 1 !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  border: 1px solid rgba(255, 215, 0, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.16),
+    0 0 14px rgba(255, 215, 0, 0.22),
+    0 12px 28px rgba(15, 122, 55, 0.12) !important;
 }
 
-/* Xəbər kartları */
-.news-card,
-.news-slide {
-  position: relative;
-  display: block;
-  width: 100%;
-  min-height: 120px;
-  overflow: hidden;
-  border-radius: 18px;
-  background: #ecfdf5;
-  box-shadow: 0 14px 34px rgba(15, 122, 55, 0.14);
-  cursor: pointer;
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+#bannerGrid b,
+#bannerGrid .banner-title,
+#bannerGrid small {
+  position: static !important;
+  display: block !important;
+  margin-top: 6px !important;
+  text-align: center !important;
+  color: rgba(19, 32, 24, 0.58) !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  background: transparent !important;
+  text-shadow: none !important;
 }
 
-.news-card:hover,
-.news-slide:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 44px rgba(15, 122, 55, 0.22);
+/* =========================
+   GÜNÜN XƏBƏRLƏRİ
+   ========================= */
+
+#newsGrid {
+  gap: 14px !important;
 }
 
-/* Böyük xəbərin hündürlüyü */
-.showcase-main-news .news-card,
-.showcase-main-news .news-slide {
-  height: 100%;
-  min-height: 410px;
+#newsGrid > * {
+  flex: 0 0 300px !important;
+  width: 300px !important;
+  min-width: 300px !important;
+  height: 175px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  scroll-snap-align: start !important;
+  background: #ecfdf5 !important;
+  box-shadow: 0 12px 28px rgba(15, 122, 55, 0.14) !important;
 }
 
-/* Şəkil */
-.news-card img,
-.news-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
-  transition: transform 0.45s ease;
+#newsGrid img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+  transition: transform 0.35s ease !important;
 }
 
-.news-card:hover img,
-.news-slide:hover img {
-  transform: scale(1.045);
+#newsGrid > *:hover img {
+  transform: scale(1.05);
 }
 
-/* Şəkilin üstündə qaranlıq gradient */
-.news-card::after,
-.news-slide::after {
+#newsGrid > *::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    transparent 38%,
-    rgba(0, 0, 0, 0.68) 100%
+    transparent 30%,
+    rgba(0, 0, 0, 0.72) 100%
   );
   pointer-events: none;
 }
 
-/* Xəbər başlığı şəkilin aşağı solunda */
-.news-card b,
-.news-slide b {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
-  z-index: 2;
-  color: #ffffff;
-  font-size: 18px;
-  line-height: 1.15;
-  font-weight: 900;
-  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+#newsGrid b {
+  position: absolute !important;
+  left: 14px !important;
+  right: 14px !important;
+  bottom: 34px !important;
+  z-index: 2 !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.45) !important;
 }
 
-.showcase-main-news .news-card b,
-.showcase-main-news .news-slide b {
-  font-size: clamp(26px, 3vw, 42px);
-  bottom: 24px;
-  left: 24px;
-  right: 24px;
+#newsGrid small {
+  position: absolute !important;
+  left: 14px !important;
+  right: 14px !important;
+  bottom: 12px !important;
+  z-index: 2 !important;
+  color: rgba(255,255,255,0.86) !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
 }
 
-/* Qısa mətn varsa böyük xəbərdə görünsün */
-.news-card small,
-.news-slide small {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 48px;
-  z-index: 2;
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 13px;
-  line-height: 1.35;
+/* =========================
+   PARTNYORLAR
+   ========================= */
+
+#partnersGrid {
+  animation: partnersMove 36s linear infinite !important;
+  width: max-content !important;
+  overflow: visible !important;
 }
 
-.showcase-main-news .news-card small,
-.showcase-main-news .news-slide small {
-  left: 24px;
-  right: 24px;
-  bottom: 78px;
-  font-size: 15px;
+section:has(#partnersGrid) {
+  overflow: hidden !important;
 }
 
-/* Planşet */
-@media (max-width: 1024px) {
-  .home-showcase {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .showcase-main-news {
-    grid-column: 1 / -1;
-  }
-
-  .showcase-main-news .news-card,
-  .showcase-main-news .news-slide {
-    min-height: 330px;
-  }
+section:has(#partnersGrid):hover #partnersGrid {
+  animation-play-state: paused !important;
 }
 
-/* Mobil */
-@media (max-width: 700px) {
-  .home-showcase {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .showcase-main-news .news-card,
-  .showcase-main-news .news-slide {
-    min-height: 250px;
-  }
-
-  .showcase-mini-news {
-    grid-template-rows: none;
-    grid-template-columns: 1fr;
-  }
-
-  .showcase-banners {
-    grid-template-rows: none;
-    grid-template-columns: 1fr;
-  }
-
-  .news-card,
-  .news-slide {
-    min-height: 180px;
-  }
-
-  .news-card b,
-  .news-slide b {
-    font-size: 17px;
-  }
+#partnersGrid > * {
+  flex: 0 0 220px !important;
+  width: 220px !important;
+  min-width: 220px !important;
+  height: auto !important;
+  overflow: visible !important;
+  text-align: center !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-
-/* ============================================================
-   MEYVƏÇİ.AZ - BANNER CARDS
-   2x1 banner, ad kartın altında
-   ============================================================ */
-
-.banner-card,
-.banner-slide {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  overflow: visible;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  cursor: pointer;
-  transition: transform 0.28s ease;
-}
-
-.banner-card:hover,
-.banner-slide:hover {
-  transform: translateY(-4px);
-}
-
-.banner-card img,
-.banner-slide img {
-  width: 100%;
-  aspect-ratio: 2 / 1;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid rgba(255, 215, 0, 0.55);
-  box-shadow:
-    0 0 0 1px rgba(255, 215, 0, 0.16),
-    0 0 14px rgba(255, 215, 0, 0.22),
-    0 12px 28px rgba(15, 122, 55, 0.12);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-}
-
-.banner-card:hover img,
-.banner-slide:hover img {
-  transform: scale(1.015);
-  box-shadow:
-    0 0 0 1px rgba(255, 215, 0, 0.28),
-    0 0 20px rgba(255, 215, 0, 0.32),
-    0 16px 34px rgba(15, 122, 55, 0.18);
-}
-
-/* Banner adı şəkilin altında */
-.banner-card b,
-.banner-slide b,
-.banner-title,
-.banner-card-title {
-  position: static !important;
-  display: block;
-  margin-top: 6px;
-  color: rgba(19, 32, 24, 0.66);
-  font-size: 11px;
-  line-height: 1.25;
-  font-weight: 700;
-  text-align: center;
-  text-shadow: none;
-  background: transparent;
-}
-
-/* Sağ tərəfdəki showcase bannerlər */
-.showcase-banners .banner-card,
-.showcase-banners .banner-slide {
-  min-height: 0;
-}
-
-/* Mobil */
-@media (max-width: 700px) {
-  .banner-card b,
-  .banner-slide b,
-  .banner-title,
-  .banner-card-title {
-    font-size: 10px;
-    margin-top: 5px;
-  }
-}
-
-
-/* ============================================================
-   MEYVƏÇİ.AZ - PARTNER MARQUEE
-   Partnyor şəkli + adı altda, sağdan sola hərəkət
-   ============================================================ */
-
-.partner-section {
-  width: 100%;
-  margin: 26px 0;
-  overflow: hidden;
-}
-
-.partner-slider,
-.partner-track {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  width: max-content;
-  animation: partnerMoveLeft 34s linear infinite;
-}
-
-.partner-section:hover .partner-slider,
-.partner-section:hover .partner-track,
-.partner-slider:hover,
-.partner-track:hover {
-  animation-play-state: paused;
-}
-
-.partner-card,
-.partner-slide {
-  flex: 0 0 220px;
-  width: 220px;
-  min-width: 220px;
-  overflow: visible;
-  text-align: center;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-}
-
-.partner-card img,
-.partner-slide img {
-  width: 100%;
-  height: 125px;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  padding: 10px;
-  border-radius: 10px;
-  background: #ffffff;
-  border: 1px solid rgba(34, 197, 94, 0.35);
+#partnersGrid img {
+  width: 100% !important;
+  height: 125px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
   box-shadow:
     0 0 0 1px rgba(34, 197, 94, 0.12),
-    0 0 16px rgba(34, 197, 94, 0.18);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+    0 0 16px rgba(34, 197, 94, 0.18) !important;
 }
 
-.partner-card:hover img,
-.partner-slide:hover img {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow:
-    0 0 0 1px rgba(34, 197, 94, 0.22),
-    0 0 22px rgba(34, 197, 94, 0.28);
-}
-
-/* Partnyor adı şəklin altında */
-.partner-card b,
-.partner-slide b,
-.partner-title {
+#partnersGrid b,
+#partnersGrid small {
   position: static !important;
-  display: block;
-  margin-top: 6px;
-  color: rgba(19, 32, 24, 0.62);
-  font-size: 11px;
-  line-height: 1.2;
-  font-weight: 700;
-  text-align: center;
-  text-shadow: none;
-  background: transparent;
+  display: block !important;
+  margin-top: 6px !important;
+  color: rgba(19, 32, 24, 0.62) !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  background: transparent !important;
+  text-shadow: none !important;
 }
 
-/* Sonsuz sağdan sola hərəkət */
-@keyframes partnerMoveLeft {
+@keyframes partnersMove {
   from {
     transform: translateX(0);
   }
-
   to {
     transform: translateX(-50%);
   }
 }
 
-/* Mobil */
-@media (max-width: 700px) {
-  .partner-slider,
-  .partner-track {
-    gap: 12px;
-    animation-duration: 42s;
+/* =========================
+   MOBİL / PLANŞET
+   ========================= */
+
+@media (max-width: 768px) {
+  #bannerGrid > * {
+    flex-basis: 88% !important;
+    width: 88% !important;
+    min-width: 88% !important;
   }
 
-  .partner-card,
-  .partner-slide {
-    flex-basis: 170px;
-    width: 170px;
-    min-width: 170px;
+  #newsGrid > * {
+    flex-basis: 82% !important;
+    width: 82% !important;
+    min-width: 82% !important;
+    height: 190px !important;
   }
 
-  .partner-card img,
-  .partner-slide img {
-    height: 96px;
-    padding: 8px;
+  #partnersGrid {
+    animation: none !important;
+    width: 100% !important;
+    overflow-x: auto !important;
   }
 
-  .partner-card b,
-  .partner-slide b,
-  .partner-title {
-    font-size: 10px;
+  #partnersGrid > * {
+    flex-basis: 170px !important;
+    width: 170px !important;
+    min-width: 170px !important;
+  }
+
+  #partnersGrid img {
+    height: 96px !important;
   }
 }
