@@ -2703,7 +2703,7 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
   }
 
   .home-banner-card:hover img {
-    transform: scale(1.18) !important;
+    transform: scale(1.10) !important;
     transform-origin: center center !important;
   }
 
@@ -2723,6 +2723,35 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
   }
 }
 
+
+/* Banner hover zamanı hər şeyin üstünə çıxsın */
+@media (min-width: 901px) {
+
+  #bannerGrid {
+    position: relative;
+    z-index: 20;
+  }
+
+  .home-banner-card {
+    position: relative;
+    z-index: 30;
+  }
+
+  .home-banner-card:hover {
+    z-index: 9999 !important;
+  }
+
+  .home-banner-card:hover img {
+    position: relative;
+    z-index: 9999;
+  }
+
+  /* Axtarış hissəsini aşağı prioritet edirik */
+  .search-card {
+    position: relative;
+    z-index: 1 !important;
+  }
+}
 
 /*==================================================================================================================================================*/
 
