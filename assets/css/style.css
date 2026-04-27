@@ -2203,6 +2203,378 @@ section:has(#partnersGrid):hover #partnersGrid {
   }
 }
 
+
+/* ============================================================
+   MEYVƏÇİ.AZ - FINAL COSMETIC PRO FIX
+   Xəbər rotasiya, banner rotasiya, ticker, mobil düzəliş
+   ============================================================ */
+
+/* Ümumi yuxarı blok ölçüləri daha balanslı */
+@media (min-width: 901px) {
+  #newsGrid {
+    grid-template-columns: minmax(0, 1.28fr) minmax(230px, 0.62fr) !important;
+    width: calc(100% - 390px) !important;
+    max-width: calc(100% - 390px) !important;
+    min-height: 350px !important;
+  }
+
+  #bannerGrid {
+    right: 0 !important;
+    top: 44px !important;
+    width: 365px !important;
+    max-width: 365px !important;
+    gap: 12px !important;
+  }
+
+  .home-main-news {
+    min-height: 350px !important;
+    border-radius: 22px !important;
+  }
+
+  .home-main-news img {
+    min-height: 350px !important;
+  }
+
+  .home-main-news b {
+    font-size: clamp(21px, 2.05vw, 31px) !important;
+    bottom: 64px !important;
+    left: 20px !important;
+    right: 20px !important;
+  }
+
+  .home-main-news small {
+    bottom: 25px !important;
+    left: 20px !important;
+    right: 20px !important;
+    font-size: 13px !important;
+  }
+
+  .home-mini-news {
+    min-height: 105px !important;
+    border-radius: 15px !important;
+  }
+
+  .home-mini-news img {
+    min-height: 105px !important;
+  }
+
+  .home-mini-news b {
+    font-size: 11px !important;
+    line-height: 1.12 !important;
+    bottom: 9px !important;
+  }
+
+  .home-banner-card {
+    display: none !important;
+    opacity: 0;
+    transform: translateX(20px) scale(0.98);
+  }
+
+  .home-banner-card.show {
+    display: block !important;
+    animation: bannerFadeIn 0.55s ease both;
+  }
+
+  .home-banner-card img {
+    border-radius: 8px !important;
+    width: 100% !important;
+    aspect-ratio: 2 / 1 !important;
+    object-fit: contain !important;
+  }
+
+  .home-banner-card b {
+    font-size: 10px !important;
+    margin-top: 4px !important;
+  }
+}
+
+/* Bannerlər ekranın sol-sağ boşluğunu pozmasın */
+#bannerGrid,
+#newsGrid,
+#partnersGrid {
+  box-sizing: border-box !important;
+}
+
+/* Kampaniya kartı axtarışın üstünə düşməsin */
+body[data-page="home"] main.app-shell > section:nth-of-type(2) {
+  margin-bottom: 24px !important;
+}
+
+.search-card {
+  position: relative;
+  z-index: 5;
+}
+
+/* Banner keçid animasiyası */
+@keyframes bannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.97);
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Xəbər kartları dəyişəndə yumşaq giriş */
+.home-main-news,
+.home-mini-news {
+  animation: newsCardSoftIn 0.55s ease both !important;
+}
+
+@keyframes newsCardSoftIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   CANLI XƏBƏR LENTİ
+   ============================================================ */
+
+.news-ticker {
+  width: 100%;
+  margin: 4px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 7px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(236, 253, 245, 0.86));
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  box-shadow:
+    0 12px 30px rgba(15, 122, 55, 0.12),
+    0 0 18px rgba(236, 72, 153, 0.14);
+}
+
+.ticker-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 16px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ec4899, #16a34a);
+  box-shadow:
+    0 0 14px rgba(236, 72, 153, 0.32),
+    0 0 20px rgba(34, 197, 94, 0.22);
+}
+
+.ticker-badge img {
+  width: 42px;
+  height: 32px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #ffffff;
+}
+
+.ticker-badge span {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.ticker-line {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ticker-track {
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  animation: tickerMoveLeft 28s linear infinite;
+}
+
+.news-ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-track span {
+  position: relative;
+  color: #065f46;
+  font-size: 13px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.ticker-track span::after {
+  content: "●";
+  position: absolute;
+  right: -21px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ec4899;
+  font-size: 9px;
+}
+
+@keyframes tickerMoveLeft {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ============================================================
+   MOBİL DÜZƏLİŞLƏR
+   ============================================================ */
+
+@media (max-width: 900px) {
+  #bannerGrid {
+    scroll-snap-type: x mandatory !important;
+    scroll-padding-inline: 5vw !important;
+    justify-content: flex-start !important;
+    animation: mobileBannerMove 22s linear infinite !important;
+    width: max-content !important;
+    overflow: visible !important;
+  }
+
+  body[data-page="home"] main.app-shell > section:nth-of-type(1) {
+    overflow: hidden !important;
+  }
+
+  .home-banner-card {
+    flex: 0 0 88vw !important;
+    width: 88vw !important;
+    min-width: 88vw !important;
+    scroll-snap-align: center !important;
+    margin: 0 1vw !important;
+  }
+
+  .home-banner-card img {
+    border-radius: 10px !important;
+    animation: goldPulseBanner 2.2s ease-in-out infinite;
+  }
+
+  .home-banner-card b {
+    font-size: 10px !important;
+    margin-top: 4px !important;
+  }
+
+  @keyframes mobileBannerMove {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes goldPulseBanner {
+    0%, 100% {
+      box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.20),
+        0 0 10px rgba(255, 215, 0, 0.20),
+        0 10px 24px rgba(15, 122, 55, 0.10);
+    }
+
+    50% {
+      box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.68),
+        0 0 24px rgba(255, 215, 0, 0.48),
+        0 12px 30px rgba(15, 122, 55, 0.16);
+    }
+  }
+
+  .news-ticker {
+    border-radius: 15px;
+    padding: 6px;
+    margin-bottom: 12px;
+  }
+
+  .ticker-badge {
+    padding: 5px 9px 5px 5px;
+  }
+
+  .ticker-badge img {
+    width: 34px;
+    height: 28px;
+  }
+
+  .ticker-badge span {
+    font-size: 10px;
+  }
+
+  .ticker-track span {
+    font-size: 12px;
+  }
+
+  .home-main-news {
+    min-height: 220px !important;
+  }
+
+  .home-main-news img {
+    min-height: 220px !important;
+  }
+
+  .home-main-news b {
+    font-size: 18px !important;
+    line-height: 1.12 !important;
+    bottom: 54px !important;
+  }
+
+  .home-main-news small {
+    font-size: 12px !important;
+    bottom: 18px !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .home-side-news {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-mini-news {
+    min-height: 120px !important;
+  }
+
+  .home-mini-news img {
+    min-height: 120px !important;
+  }
+
+  .home-mini-news b {
+    font-size: 12px !important;
+  }
+
+  #partnersGrid {
+    overflow-x: auto !important;
+    animation: partnerMarqueeFinal 38s linear infinite !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+  }
+
+  section:has(#partnersGrid) {
+    overflow: hidden !important;
+  }
+
+  .home-partner-card {
+    flex: 0 0 170px !important;
+    width: 170px !important;
+    min-width: 170px !important;
+  }
+}
+
+
 /*==================================================================================================================================================*/
 
 
