@@ -1812,7 +1812,7 @@ BANNER
 
 /* ============================================================
    PREMIUM FLOATING HOME BUTTON — ÇİYƏLƏK ICON
-   Ortadakı ana səhifə iconu Wolt/Uber style floating görünüş alır.
+   Dairə daha kompakt, icon daha iri, neon çevrə daha incə.
    ============================================================ */
 
 .bottom-nav {
@@ -1824,32 +1824,32 @@ BANNER
 }
 
 .bottom-nav .nav-item:nth-child(3) {
-  transform: translateY(-18px);
+  transform: translateY(-17px);
   z-index: 30;
 }
 
-/* Əsas dairə fon */
+/* Əsas dairə fon — kiçildildi */
 .bottom-nav .nav-item:nth-child(3)::before {
   content: "";
   position: absolute;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 35% 25%, #ffffff 0%, #ecfdf5 38%, #bbf7d0 100%);
+    radial-gradient(circle at 35% 25%, #ffffff 0%, #ecfdf5 42%, #bbf7d0 100%);
   box-shadow:
-    0 10px 28px rgba(34, 197, 94, 0.32),
-    0 0 0 5px rgba(255, 255, 255, 0.78),
-    inset 0 0 14px rgba(34, 197, 94, 0.14);
+    0 8px 22px rgba(34, 197, 94, 0.26),
+    0 0 0 4px rgba(255, 255, 255, 0.72),
+    inset 0 0 10px rgba(34, 197, 94, 0.12);
   z-index: -2;
 }
 
-/* 3 rəngli animasiyalı neon çevrə */
+/* Neon çevrə — daha balaca və incə */
 .bottom-nav .nav-item:nth-child(3)::after {
   content: "";
   position: absolute;
-  width: 76px;
-  height: 76px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
@@ -1860,31 +1860,32 @@ BANNER
     #22c55e
   );
   z-index: -3;
-  filter: blur(2px);
-  opacity: 0.9;
+  filter: blur(1.4px);
+  opacity: 0.82;
   animation: strawberryRingSpin 2.8s linear infinite, strawberryGlowPulse 2.4s ease-in-out infinite;
 }
 
-/* Çiyələk icon */
+/* Çiyələk icon — böyüdü */
 .bottom-nav .home-logo {
-  width: 70px !important;
-  height: 70px !important;
+  width: 60px !important;
+  height: 60px !important;
   margin-top: 0 !important;
   position: relative;
   z-index: 5;
   object-fit: contain;
+  transform: translateY(-2px);
   filter:
-    drop-shadow(0 8px 16px rgba(34, 197, 94, 0.42))
-    drop-shadow(0 0 8px rgba(250, 204, 21, 0.38));
+    drop-shadow(0 8px 15px rgba(34, 197, 94, 0.42))
+    drop-shadow(0 0 7px rgba(250, 204, 21, 0.34));
   transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 /* Hover effekti */
 .bottom-nav .nav-item:nth-child(3):hover .home-logo {
-  transform: scale(1.08) translateY(-1px);
+  transform: translateY(-3px) scale(1.07);
   filter:
     drop-shadow(0 10px 20px rgba(34, 197, 94, 0.52))
-    drop-shadow(0 0 12px rgba(250, 204, 21, 0.52));
+    drop-shadow(0 0 11px rgba(250, 204, 21, 0.48));
 }
 
 /* Klikdə fırlanma */
@@ -1902,44 +1903,44 @@ BANNER
 /* Neon nəfəs alma effekti */
 @keyframes strawberryGlowPulse {
   0%, 100% {
-    opacity: 0.72;
-    filter: blur(2px);
+    opacity: 0.65;
+    filter: blur(1.3px);
   }
   50% {
-    opacity: 1;
-    filter: blur(3px);
+    opacity: 0.92;
+    filter: blur(2px);
   }
 }
 
 /* Klikdə icon fırlanır */
 @keyframes strawberrySpin {
   from {
-    transform: rotate(0deg) scale(1);
+    transform: translateY(-2px) rotate(0deg) scale(1);
   }
   to {
-    transform: rotate(360deg) scale(1.1);
+    transform: translateY(-2px) rotate(360deg) scale(1.08);
   }
 }
 
 /* Mobil balans */
 @media (max-width: 640px) {
   .bottom-nav .nav-item:nth-child(3) {
-    transform: translateY(-16px);
+    transform: translateY(-15px);
   }
 
   .bottom-nav .nav-item:nth-child(3)::before {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
   }
 
   .bottom-nav .nav-item:nth-child(3)::after {
-    width: 60px;
-    height: 60px;
+    width: 62px;
+    height: 62px;
   }
 
   .bottom-nav .home-logo {
-    width: 55px !important;
-    height: 55px !important;
+    width: 56px !important;
+    height: 56px !important;
   }
 }
 
