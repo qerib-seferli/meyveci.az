@@ -521,5 +521,5 @@ function startCampaignRotation() {
         card.classList.add('show');
       });
     }, 80);
-  }, 3200);
+  }, 4000);  // Bannerlərin dəyişmə saniyəsin 4 saniyə etdim
 }
