@@ -42,6 +42,9 @@ async function initHome() {
   // Banner, xəbər və partnyorlar artıq xüsusi CSS layout ilə idarə olunur.
   // Köhnə auto scroll və marquee sistemi söndürüldü.
   //startAutoScroll('#bannerGrid');
+  startCampaignRotation();
+  startNewsRotation();
+  
   // Xəbərlər və partnyorlar CSS marquee ilə davamlı döngüdə hərəkət edir.
   //prepareMarquee('#newsGrid', 'left');
   //prepareMarquee('#partnersGrid', 'right');
@@ -103,8 +106,8 @@ function renderBanners(rows) {
 
   const items = rows.length ? rows : fallback;
 
-  container.innerHTML = items.map((item) => `
-    <a class="home-banner-card" href="${item.link_url || '#products'}">
+  container.innerHTML = items.map((item, index) => `
+    <a class="home-banner-card ${index < 2 ? 'show' : ''}" href="${item.link_url || '#products'}" data-banner-index="${index}">
       <img src="${item.image_url || 'assets/img/logo/Cilek-logo.png'}" alt="${item.title || 'Banner'}">
       <b>${item.title || 'Meyvəçi.az'}</b>
     </a>
@@ -125,11 +128,16 @@ function renderNews(rows) {
   }];
 
   const items = rows.length ? rows : fallback;
+  window.meyveciNewsItems = items;
+
+  renderNewsTicker(items);
+
   const mainItem = items[0];
   const sideItems = items.slice(1, 4);
 
   container.innerHTML = `
     <button class="home-main-news news-open" type="button"
+      data-news-index="0"
       data-title="${escapeAttr(mainItem.title || 'Xəbər')}"
       data-excerpt="${escapeAttr(mainItem.excerpt || '')}"
       data-body="${escapeAttr(mainItem.body || mainItem.content || mainItem.description || '')}"
@@ -141,8 +149,9 @@ function renderNews(rows) {
     </button>
 
     <div class="home-side-news">
-      ${sideItems.map((item) => `
+      ${sideItems.map((item, index) => `
         <button class="home-mini-news news-open" type="button"
+          data-news-index="${index + 1}"
           data-title="${escapeAttr(item.title || 'Xəbər')}"
           data-excerpt="${escapeAttr(item.excerpt || '')}"
           data-body="${escapeAttr(item.body || item.content || item.description || '')}"
@@ -451,4 +460,66 @@ function startAutoScroll(selector) {
     const endReached = next >= element.scrollWidth - element.clientWidth - 8;
     element.scrollTo({ left: endReached ? 0 : next, behavior: 'smooth' });
   }, 4200);
+}
+
+
+
+
+
+function renderNewsTicker(items) {
+  const newsSection = $('#newsGrid')?.closest('section');
+  if (!newsSection || $('#newsTicker')) return;
+
+  const ticker = document.createElement('div');
+  ticker.id = 'newsTicker';
+  ticker.className = 'news-ticker';
+
+  const firstImage = items[0]?.image_url || 'assets/img/logo/Cilek-logo.png';
+
+  ticker.innerHTML = `
+    <div class="ticker-badge">
+      <img src="${firstImage}" alt="Xəbər">
+      <span>CANLI XƏBƏR</span>
+    </div>
+    <div class="ticker-line">
+      <div class="ticker-track">
+        ${duplicateForLoop(items).map((item) => `
+          <span>${item.title || 'Xəbər'}</span>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  newsSection.insertBefore(ticker, newsSection.querySelector('.section-head'));
+}
+
+function startNewsRotation() {
+  setInterval(() => {
+    const items = window.meyveciNewsItems || [];
+    if (items.length < 2) return;
+
+    items.push(items.shift());
+    renderNews(items);
+  }, 5200);
+}
+
+function startCampaignRotation() {
+  setInterval(() => {
+    const cards = $$('#bannerGrid .home-banner-card');
+    if (cards.length <= 2) return;
+
+    cards.forEach((card) => card.classList.remove('show'));
+
+    const first = cards[0];
+    const second = cards[1];
+
+    $('#bannerGrid').appendChild(first);
+    $('#bannerGrid').appendChild(second);
+
+    setTimeout(() => {
+      $$('#bannerGrid .home-banner-card').slice(0, 2).forEach((card) => {
+        card.classList.add('show');
+      });
+    }, 80);
+  }, 3200);
 }
