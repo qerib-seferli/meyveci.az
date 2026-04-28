@@ -26,6 +26,103 @@ let allUserThreadOrdersMap = new Map();
 let userOrderMaps = new Map();
 let userTrackingTimer = null;
 
+const AZ_CITY_REGIONS = [
+  'Abşeron',
+  'Ağcabədi',
+  'Ağdam',
+  'Ağdaş',
+  'Ağdərə',
+  'Ağstafa',
+  'Ağsu',
+  'Alabaşlı',
+  'Astara',
+  'Babək',
+  'Bakı',
+  'Balakən',
+  'Beyləqan',
+  'Bərdə',
+  'Biləsuvar',
+  'Culfa',
+  'Cəbrayıl',
+  'Cəlilabad',
+  'Daşkəsən',
+  'Dəliməmmədli',
+  'Füzuli',
+  'Goranboy',
+  'Göyçay',
+  'Göygöl',
+  'Göytəpə',
+  'Gədəbəy',
+  'Gəncə',
+  'Hacıqabul',
+  'Horadiz',
+  'Xaçmaz',
+  'Xankəndi',
+  'Xocalı',
+  'Xocavənd',
+  'Xudat',
+  'Xızı',
+  'İmişli',
+  'İsmayıllı',
+  'Kəlbəcər',
+  'Kəngərli',
+  'Kürdəmir',
+  'Laçın',
+  'Lerik',
+  'Liman',
+  'Lənkəran',
+  'Masallı',
+  'Mingəçevir',
+  'Naftalan',
+  'Naxçıvan',
+  'Neftçala',
+  'Oğuz',
+  'Ordubad',
+  'Qax',
+  'Qazax',
+  'Qobustan',
+  'Quba',
+  'Qubadlı',
+  'Qusar',
+  'Qəbələ',
+  'Saatlı',
+  'Sabirabad',
+  'Salyan',
+  'Samux',
+  'Siyəzən',
+  'Sumqayıt',
+  'Sədərək',
+  'Tərtər',
+  'Tovuz',
+  'Ucar',
+  'Xırdalan',
+  'Yardımlı',
+  'Yevlax',
+  'Zaqatala',
+  'Zəngilan',
+  'Zərdab',
+  'Şabran',
+  'Şahbuz',
+  'Şamaxı',
+  'Şəki',
+  'Şəmkir',
+  'Şərur',
+  'Şirvan',
+  'Şuşa',
+];
+
+function fillCityRegionSelect(form, selectedValue = '') {
+  const select = form?.city_region;
+  if (!select) return;
+
+  select.innerHTML = `
+    <option value="">Şəhər / rayon seçin</option>
+    ${AZ_CITY_REGIONS.map((city) => `
+      <option value="${city}" ${city === selectedValue ? 'selected' : ''}>${city}</option>
+    `).join('')}
+  `;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
 
@@ -138,6 +235,7 @@ async function fillCheckoutFromProfile() {
 
   form.full_name.value = `${activeProfile.first_name || ''} ${activeProfile.last_name || ''}`.trim();
   form.phone.value = activeProfile.phone || '';
+  fillCityRegionSelect(form, activeProfile.city_region || '');
   form.address.value = activeProfile.address_line || '';
   form.apartment.value = activeProfile.apartment || '';
   form.door_code.value = activeProfile.door_code || '';
@@ -263,6 +361,18 @@ async function checkout(event) {
       receiptUrl = await uploadFile('receipts', receiptFile, 'receipts');
     }
 
+    await supabase
+      .from('profiles')
+      .update({
+        city_region: data.city_region || null,
+        address_line: data.address || null,
+        apartment: data.apartment || null,
+        door_code: data.door_code || null,
+        lat: data.lat ? Number(data.lat) : null,
+        lng: data.lng ? Number(data.lng) : null,
+      })
+      .eq('id', (await requireAuth()).id);
+        
     const { data: orderId, error } = await supabase.rpc('create_order_from_cart_fast', {
       p_full_name: data.full_name,
       p_phone: data.phone,
@@ -278,8 +388,16 @@ async function checkout(event) {
     });
 
     if (error) throw error;
-
+    
+    await supabase
+      .from('orders')
+      .update({
+        city_region: data.city_region || null,
+      })
+      .eq('id', orderId);
+    
     toast('Sifariş adminə göndərildi');
+    
     setTimeout(() => {
       location.href = `orders.html?track=${orderId}`;
     }, 900);
@@ -372,6 +490,7 @@ function orderCard(order, courier = null, courierLocation = null) {
       </div>
 
       <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
+      <p><b>Ünvan:</b> ${[order.city_region, order.address_text, order.apartment, order.door_code].filter(Boolean).join(', ') || 'Ünvan qeyd edilməyib'}</p>
 
       ${['delivered','cancelled'].includes(order.status) ? `
         <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
@@ -725,6 +844,7 @@ async function initProfile() {
   form.first_name.value = activeProfile.first_name || '';
   form.last_name.value = activeProfile.last_name || '';
   form.phone.value = activeProfile.phone || '';
+  fillCityRegionSelect(form, activeProfile.city_region || '');
   form.address_line.value = activeProfile.address_line || '';
   form.apartment.value = activeProfile.apartment || '';
   form.door_code.value = activeProfile.door_code || '';
@@ -755,6 +875,7 @@ async function initProfile() {
           first_name: data.first_name,
           last_name: data.last_name,
           phone: data.phone,
+          city_region: data.city_region,
           address_line: data.address_line,
           apartment: data.apartment,
           door_code: data.door_code,
