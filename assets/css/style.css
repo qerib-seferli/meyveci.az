@@ -2817,7 +2817,7 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
   }
 }
 
-
+/*============================================================================*/
 
 /* Mesaj göndərmə formu */
 .chat-send-form {
@@ -2897,48 +2897,100 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
   cursor: zoom-in;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.55);
+  transition: 0.25s ease;
 }
 
-/* Şəkil zoom modal */
+.chat-image-message:hover {
+  transform: scale(1.03);
+}
+
+/* Şəkil zoom modal - PRO */
 .image-zoom-modal {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  display: none;
+
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  background: rgba(15, 23, 42, 0.82);
-  backdrop-filter: blur(10px);
+
+  width: 100vw;
+  height: 100vh;
+  padding: 22px;
+
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity 0.28s ease, visibility 0.28s ease;
 }
 
 .image-zoom-modal.show {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .image-zoom-modal img {
-  max-width: min(96vw, 950px);
-  max-height: 88vh;
+  display: block;
+
+  max-width: calc(100vw - 44px);
+  max-height: calc(100vh - 44px);
+
+  width: auto;
+  height: auto;
+  object-fit: contain;
+
+  margin: auto;
   border-radius: 22px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 35px 95px rgba(0, 0, 0, 0.55);
+
+  transform: scale(0.86);
+  transition: transform 0.28s ease;
+}
+
+.image-zoom-modal.show img {
+  transform: scale(1);
 }
 
 .image-zoom-close {
   position: fixed;
   top: 18px;
   right: 22px;
+
   width: 46px;
   height: 46px;
+
   border: 0;
   border-radius: 50%;
-  background: #ef4444;
+
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
+
   font-size: 30px;
   font-weight: 900;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   cursor: pointer;
   z-index: 100000;
+
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
+  transition: 0.25s ease;
 }
 
+.image-zoom-close:hover {
+  transform: scale(1.08) rotate(90deg);
+}
+
+/* Mobil uyğunlaşdırma */
 @media (max-width: 768px) {
   .chat-send-form {
     gap: 6px;
@@ -2957,6 +3009,24 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
   .chat-image-message {
     width: 150px;
     max-height: 190px;
+  }
+
+  .image-zoom-modal {
+    padding: 12px;
+  }
+
+  .image-zoom-modal img {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 80px);
+    border-radius: 18px;
+  }
+
+  .image-zoom-close {
+    top: 12px;
+    right: 12px;
+    width: 42px;
+    height: 42px;
+    font-size: 26px;
   }
 }
 
