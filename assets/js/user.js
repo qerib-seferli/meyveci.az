@@ -988,7 +988,7 @@ async function sendMessage(event) {
 
     const { error } = await supabase.rpc('send_chat_message', {
       p_thread_id: currentThread,
-      p_message_text: text || '',
+      p_message_text: text || (attachmentUrl ? 'Şəkil göndərildi' : ''),
       p_attachment_url: attachmentUrl,
       p_attachment_type: attachmentUrl ? 'image' : null,
     });
