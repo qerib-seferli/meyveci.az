@@ -3057,7 +3057,7 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
 
 /*=========================================================*/
 
-/* Şəhər / rayon select - premium görünüş */
+/* Şəhər / rayon select - premium və soft görünüş */
 select {
   min-height: 48px;
   width: 100%;
@@ -3065,12 +3065,15 @@ select {
   border: 1px solid rgba(22, 163, 74, 0.18);
   background: rgba(255, 255, 255, 0.78);
   padding: 0 42px 0 16px;
+
   font-size: 15px;
-  font-weight: 600;
-  color: #0f2a1d;
+  font-weight: 500;
+  color: #334155; /* əvvəlki qara yox, soft rəng */
+
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+
   cursor: pointer;
   transition: 0.25s ease;
 
@@ -3079,6 +3082,11 @@ select {
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 16px;
+}
+
+/* placeholder kimi ilk option */
+select:invalid {
+  color: #94a3b8;
 }
 
 /* hover */
@@ -3094,10 +3102,17 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
 }
 
-/* MOBİL üçün əlavə tweak */
+/* option-lar üçün (desktop-da təsir edir) */
+select option {
+  color: #0f172a;
+  background: #fff;
+}
+
+/* MOBİL üçün balans */
 @media (max-width: 600px) {
   select {
-    font-size: 16px; /* iOS zoom problemi fix */
+    font-size: 16px; /* iOS zoom fix */
+    padding-right: 36px;
   }
 }
 
