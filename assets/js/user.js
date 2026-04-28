@@ -959,6 +959,8 @@ function subscribeMessageRealtime() {
 }
 
 
+
+
 async function sendMessage(event) {
   event.preventDefault();
 
@@ -973,45 +975,39 @@ async function sendMessage(event) {
     return toast('Mesaj və ya şəkil əlavə edin');
   }
 
-  let attachmentUrl = null;
-
   try {
+    let attachmentUrl = null;
+
     if (imageFile) {
       attachmentUrl = await uploadFile('chat-attachments', imageFile, 'messages');
+
+      if (!attachmentUrl) {
+        return toast('Şəkil yolu tapılmadı');
+      }
     }
 
     const { error } = await supabase.rpc('send_chat_message', {
       p_thread_id: currentThread,
-      p_message_text: text || 'Şəkil göndərildi',
+      p_message_text: text || '',
+      p_attachment_url: attachmentUrl,
+      p_attachment_type: attachmentUrl ? 'image' : null,
     });
 
     if (error) throw error;
 
-    if (attachmentUrl) {
-      const activeUser = await requireAuth();
-
-      await supabase
-        .from('chat_messages')
-        .update({
-          attachment_url: attachmentUrl,
-          attachment_type: 'image',
-        })
-        .eq('thread_id', currentThread)
-        .eq('sender_id', activeUser.id)
-        .order('created_at', { ascending: false })
-        .limit(1);
-    }
-
     $('#messageInput').value = '';
+
     if ($('#chatGalleryInput')) $('#chatGalleryInput').value = '';
     if ($('#chatCameraInput')) $('#chatCameraInput').value = '';
     if ($('#chatImagePreview')) $('#chatImagePreview').innerHTML = '';
 
-    openThread(currentThread);
+    await openThread(currentThread);
   } catch (error) {
     toast(error.message);
   }
 }
+
+
 
 
 
