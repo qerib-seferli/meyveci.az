@@ -2817,4 +2817,148 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
   }
 }
 
+
+
+/* Mesaj göndərmə formu */
+.chat-send-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-send-form input#messageInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-file-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: rgba(22, 163, 74, 0.12);
+  border: 1px solid rgba(22, 163, 74, 0.22);
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.10);
+  transition: 0.25s ease;
+  flex: 0 0 auto;
+}
+
+.chat-file-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: rgba(22, 163, 74, 0.20);
+}
+
+/* Şəkil preview */
+.chat-image-preview {
+  margin-top: 8px;
+}
+
+.chat-preview-box {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.chat-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-preview-box button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+/* Mesaj içində göndərilən şəkil */
+.chat-image-message {
+  display: block;
+  width: 180px;
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  margin-top: 10px;
+  border-radius: 18px;
+  cursor: zoom-in;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+/* Şəkil zoom modal */
+.image-zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.image-zoom-modal.show {
+  display: flex;
+}
+
+.image-zoom-modal img {
+  max-width: min(96vw, 950px);
+  max-height: 88vh;
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.image-zoom-close {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  font-size: 30px;
+  font-weight: 900;
+  cursor: pointer;
+  z-index: 100000;
+}
+
+@media (max-width: 768px) {
+  .chat-send-form {
+    gap: 6px;
+  }
+
+  .chat-file-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .chat-send-form .btn {
+    padding-inline: 13px;
+  }
+
+  .chat-image-message {
+    width: 150px;
+    max-height: 190px;
+  }
+}
+
+
 /*=========================================================*/
