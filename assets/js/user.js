@@ -787,6 +787,7 @@ async function initMessages() {
       await loadThreads(threadId);
       $('#sendMessageForm')?.addEventListener('submit', sendMessage);
       subscribeMessageRealtime();
+      initChatImageTools();
       return;
     }
   }
@@ -794,6 +795,7 @@ async function initMessages() {
   await loadThreads();
   $('#sendMessageForm')?.addEventListener('submit', sendMessage);
   subscribeMessageRealtime();
+  initChatImageTools();
 }
 
 //=============================================================================
@@ -891,7 +893,7 @@ async function openThread(id) {
   // Beləliklə kuryer öz yazdığı mesajı da, müştərinin cavabını da görə bilir.
   const { data, error } = await supabase
     .from('chat_messages')
-    .select('id,message_text,sender_id,sender_role,sender_name,sender_phone,created_at,is_read')
+    .select('id,message_text,attachment_url,attachment_type,sender_id,sender_role,sender_name,sender_phone,created_at,is_read')
     .eq('thread_id', id)
     .order('created_at')
     .limit(160);
@@ -917,13 +919,24 @@ async function openThread(id) {
         <div class="msg ${isMe ? 'me' : ''} ${!message.is_read && !isMe ? 'unread-message' : ''}">
           <b>${fullName}</b>
           <small class="msg-meta">${roleAz(role)} • ${phone} • ${new Date(message.created_at).toLocaleString('az-AZ')}</small>
-          <br>${message.message_text}
+          <br>${message.message_text || ''}
+          ${message.attachment_url ? `
+            <img 
+              class="chat-image-message" 
+              src="${message.attachment_url}" 
+              alt="Göndərilən şəkil"
+              data-zoom="${message.attachment_url}"
+            >
+          ` : ''}
         </div>
       `;
     }).join('') || '<span class="muted">Mesaj yoxdur.</span>';
 
   await supabase.rpc('mark_thread_read', { p_thread_id: id });
   $('#chatBox').scrollTop = 999999;
+  $$('.chat-image-message').forEach((img) => {
+  img.addEventListener('click', () => openImageZoom(img.dataset.zoom));
+});
 }
 
 function roleAz(role) {
@@ -945,21 +958,116 @@ function subscribeMessageRealtime() {
     .subscribe();
 }
 
+
 async function sendMessage(event) {
   event.preventDefault();
 
   if (!currentThread) return toast('Söhbət seçilməyib');
 
   const text = $('#messageInput').value.trim();
-  if (!text) return;
+  const galleryFile = $('#chatGalleryInput')?.files?.[0];
+  const cameraFile = $('#chatCameraInput')?.files?.[0];
+  const imageFile = galleryFile || cameraFile;
 
-  const { error } = await supabase.rpc('send_chat_message', {
-    p_thread_id: currentThread,
-    p_message_text: text,
+  if (!text && !imageFile) {
+    return toast('Mesaj və ya şəkil əlavə edin');
+  }
+
+  let attachmentUrl = null;
+
+  try {
+    if (imageFile) {
+      attachmentUrl = await uploadFile('chat-attachments', imageFile, 'messages');
+    }
+
+    const { error } = await supabase.rpc('send_chat_message', {
+      p_thread_id: currentThread,
+      p_message_text: text || 'Şəkil göndərildi',
+    });
+
+    if (error) throw error;
+
+    if (attachmentUrl) {
+      const activeUser = await requireAuth();
+
+      await supabase
+        .from('chat_messages')
+        .update({
+          attachment_url: attachmentUrl,
+          attachment_type: 'image',
+        })
+        .eq('thread_id', currentThread)
+        .eq('sender_id', activeUser.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+    }
+
+    $('#messageInput').value = '';
+    if ($('#chatGalleryInput')) $('#chatGalleryInput').value = '';
+    if ($('#chatCameraInput')) $('#chatCameraInput').value = '';
+    if ($('#chatImagePreview')) $('#chatImagePreview').innerHTML = '';
+
+    openThread(currentThread);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+
+
+function initChatImageTools() {
+  const galleryInput = $('#chatGalleryInput');
+  const cameraInput = $('#chatCameraInput');
+  const preview = $('#chatImagePreview');
+
+  [galleryInput, cameraInput].forEach((input) => {
+    if (!input || input.dataset.ready === '1') return;
+
+    input.dataset.ready = '1';
+
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file || !preview) return;
+
+      preview.innerHTML = `
+        <div class="chat-preview-box">
+          <img src="${URL.createObjectURL(file)}" alt="Seçilmiş şəkil">
+          <button type="button" id="removeChatImage">×</button>
+        </div>
+      `;
+
+      $('#removeChatImage')?.addEventListener('click', () => {
+        input.value = '';
+        preview.innerHTML = '';
+      });
+    });
   });
 
-  if (error) return toast(error.message);
+  $('#closeImageZoom')?.addEventListener('click', closeImageZoom);
 
-  $('#messageInput').value = '';
-  openThread(currentThread);
+  $('#imageZoomModal')?.addEventListener('click', (event) => {
+    if (event.target.id === 'imageZoomModal') closeImageZoom();
+  });
 }
+
+function openImageZoom(url) {
+  const modal = $('#imageZoomModal');
+  const img = $('#zoomImage');
+
+  if (!modal || !img) return;
+
+  img.src = url;
+  modal.classList.add('show');
+}
+
+function closeImageZoom() {
+  const modal = $('#imageZoomModal');
+  const img = $('#zoomImage');
+
+  if (!modal || !img) return;
+
+  modal.classList.remove('show');
+  img.src = '';
+}
+
+
