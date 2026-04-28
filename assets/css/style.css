@@ -2755,4 +2755,66 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
 
 /*==================================================================================================================================================*/
 
+/* Mesaj səhifəsi - söhbət başlığı və axtarış */
+.thread-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
 
+.thread-head h3 {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.thread-search {
+  width: 220px;
+  max-width: 100%;
+  border: 1px solid rgba(22, 163, 74, 0.22);
+  border-radius: 999px;
+  padding: 11px 15px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+}
+
+.thread-search:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
+}
+
+.thread-list-limited {
+  max-height: 370px;
+  overflow: hidden;
+}
+
+.thread {
+  width: 100%;
+  cursor: pointer;
+}
+
+.thread.active-thread {
+  border-color: rgba(22, 163, 74, 0.55);
+  background: rgba(34, 197, 94, 0.10);
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.10);
+}
+
+@media (max-width: 768px) {
+  .thread-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .thread-search {
+    width: 100%;
+  }
+
+  .thread-list-limited {
+    max-height: 155px;
+  }
+}
+
+/*=========================================================*/
