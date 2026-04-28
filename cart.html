@@ -26,7 +26,10 @@
       <form id="checkoutForm" class="form-grid checkout-compact">
         <input name="full_name" placeholder="Ad Soyad" required>
         <input name="phone" placeholder="Telefon" required>
-        <input class="full" name="address" placeholder="Ünvan" required>
+        <select name="city_region" required>
+          <option value="">Şəhər / rayon seçin</option>
+        </select>
+        <input name="address" placeholder="Ünvan" required>
         <input name="apartment" placeholder="Bina, blok, mənzil">
         <input name="door_code" placeholder="Qapı kodu">
         <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
