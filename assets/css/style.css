@@ -3011,3 +3011,43 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
 }
 
 /*=========================================================*/
+
+/* Telefon + avatar upload yan-yana */
+.phone-avatar-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Telefon input geniş qalsın */
+.phone-avatar-row input[name="phone"] {
+  flex: 1;
+}
+
+/* Avatar upload button */
+.avatar-upload {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: rgba(22, 163, 74, 0.12);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.15);
+  transition: 0.25s;
+  font-size: 18px;
+}
+
+/* hover effekt */
+.avatar-upload:hover {
+  transform: scale(1.08);
+  background: rgba(22, 163, 74, 0.2);
+}
+
+/* real input gizlədilir */
+.avatar-upload input {
+  display: none;
+}
+
+/*=========================================================*/
