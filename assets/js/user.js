@@ -1046,6 +1046,10 @@ function initChatImageTools() {
   });
 }
 
+
+
+/**======= ŞƏKİL ZOOM ===============================================*/
+
 function openImageZoom(url) {
   const modal = $('#imageZoomModal');
   const img = $('#zoomImage');
@@ -1054,6 +1058,8 @@ function openImageZoom(url) {
 
   img.src = url;
   modal.classList.add('show');
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
 }
 
 function closeImageZoom() {
@@ -1064,6 +1070,7 @@ function closeImageZoom() {
 
   modal.classList.remove('show');
   img.src = '';
+  document.documentElement.style.overflow = '';
+  document.body.style.overflow = '';
 }
-
-
+/*===================================================================*/
