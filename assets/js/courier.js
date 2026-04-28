@@ -81,7 +81,7 @@ async function loadCourierOrders() {
 
   const [{ data: profiles }, { data: locations }] = await Promise.all([
     userIds.length
-      ? supabase.from('profiles').select('id,email,first_name,last_name,phone,avatar_url,address_line,apartment,door_code,lat,lng').in('id', userIds)
+      ? supabase.from('profiles').select('id,email,first_name,last_name,phone,avatar_url,city_region,address_line,apartment,door_code,lat,lng').in('id', userIds)
       : Promise.resolve({ data: [] }),
     orderIds.length
       ? supabase.from('courier_locations').select('*').in('order_id', orderIds)
@@ -171,7 +171,14 @@ async function createCourierStatusNotification(orderId, status) {
 function orderCard(order, customer = {}, location = {}) {
   const customerPhone = customer?.phone || order.phone || '';
   const customerName = `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim() || order.full_name || customer?.email || 'Müştəri';
-  const address = order.address_text || [customer?.address_line, customer?.apartment, customer?.door_code].filter(Boolean).join(', ');
+  
+    const address = [
+    order.city_region || customer?.city_region,
+    order.address_text || customer?.address_line,
+    order.apartment || customer?.apartment,
+    order.door_code || customer?.door_code,
+  ].filter(Boolean).join(', ');
+  
   const eta = estimateEta(order, customer, location);
 
   return `
