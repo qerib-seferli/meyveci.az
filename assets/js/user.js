@@ -21,6 +21,8 @@ import {
 import { initLayout } from './layout.js';
 
 let currentThread = null;
+let allUserThreads = [];
+let allUserThreadOrdersMap = new Map();
 let userOrderMaps = new Map();
 let userTrackingTimer = null;
 
@@ -794,6 +796,8 @@ async function initMessages() {
   subscribeMessageRealtime();
 }
 
+//=============================================================================
+
 async function loadThreads(autoOpenThreadId = null) {
   const { data, error } = await supabase
     .from('chat_threads')
@@ -809,15 +813,45 @@ async function loadThreads(autoOpenThreadId = null) {
   }
 
   const orderIds = [...new Set((data || []).map((thread) => thread.order_id).filter(Boolean))];
+
   const { data: orders } = orderIds.length
     ? await supabase.from('orders').select('id,order_code,user_id,courier_id').in('id', orderIds)
     : { data: [] };
-  const ordersMap = new Map((orders || []).map((order) => [order.id, order]));
 
-  list.innerHTML = (data || []).map((thread) => {
-    const order = ordersMap.get(thread.order_id) || {};
+  allUserThreads = data || [];
+  allUserThreadOrdersMap = new Map((orders || []).map((order) => [order.id, order]));
+
+  renderThreadList(autoOpenThreadId);
+  setupThreadSearch();
+
+  if (autoOpenThreadId) openThread(autoOpenThreadId);
+  else if (data?.[0] && !currentThread) openThread(data[0].id);
+}
+
+
+function getThreadLimit() {
+  return window.innerWidth <= 768 ? 2 : 5;
+}
+
+function renderThreadList(autoOpenThreadId = null) {
+  const list = $('#threadList');
+  const searchValue = ($('#threadSearch')?.value || '').trim().toLowerCase();
+
+  let filteredThreads = allUserThreads.filter((thread) => {
+    const order = allUserThreadOrdersMap.get(thread.order_id) || {};
+    const orderCode = String(order.order_code || thread.order_id || '').toLowerCase();
+    const title = String(thread.title || '').toLowerCase();
+
+    return !searchValue || orderCode.includes(searchValue) || title.includes(searchValue);
+  });
+
+  filteredThreads = filteredThreads.slice(0, getThreadLimit());
+
+  list.innerHTML = filteredThreads.map((thread) => {
+    const order = allUserThreadOrdersMap.get(thread.order_id) || {};
+
     return `
-      <button class="compact-row thread" data-id="${thread.id}">
+      <button class="compact-row thread ${currentThread === thread.id ? 'active-thread' : ''}" data-id="${thread.id}">
         <span>
           ${thread.title || 'Söhbət'}<br>
           <small class="muted">${order.order_code || thread.order_id || ''}</small>
@@ -825,18 +859,33 @@ async function loadThreads(autoOpenThreadId = null) {
         <small class="muted">${thread.last_message_at ? new Date(thread.last_message_at).toLocaleString('az-AZ') : ''}</small>
       </button>
     `;
-  }).join('') || '<span class="muted">Söhbət yoxdur.</span>';
+  }).join('') || '<span class="muted">Söhbət tapılmadı.</span>';
 
   $$('.thread').forEach((button) => {
     button.addEventListener('click', () => openThread(button.dataset.id));
   });
-
-  if (autoOpenThreadId) openThread(autoOpenThreadId);
-  else if (data?.[0]) openThread(data[0].id);
 }
+
+function setupThreadSearch() {
+  const input = $('#threadSearch');
+  if (!input || input.dataset.ready === '1') return;
+
+  input.dataset.ready = '1';
+
+  input.addEventListener('input', () => {
+    renderThreadList(currentThread);
+  });
+
+  window.addEventListener('resize', () => {
+    renderThreadList(currentThread);
+  });
+}
+
+//=====================================================================
 
 async function openThread(id) {
   currentThread = id;
+  renderThreadList(currentThread);
 
   // Mesajları ayrıca, profilləri ayrıca oxuyuruq.
   // Beləliklə kuryer öz yazdığı mesajı da, müştərinin cavabını da görə bilir.
