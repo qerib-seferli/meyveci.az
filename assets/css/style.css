@@ -3012,42 +3012,47 @@ body[data-page="home"] main.app-shell > section:nth-of-type(2) {
 
 /*=========================================================*/
 
-/* Telefon + avatar upload yan-yana */
-.phone-avatar-row {
+/* Profil şəkli seç inputu - telefon inputunun sağında */
+.avatar-upload-field {
+  min-height: 48px;
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 163, 74, 0.18);
+  background: rgba(255, 255, 255, 0.78);
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  cursor: pointer;
+  color: #0f2a1d;
+  font-weight: 700;
+  transition: 0.25s ease;
 }
 
-/* Telefon input geniş qalsın */
-.phone-avatar-row input[name="phone"] {
-  flex: 1;
+.avatar-upload-field:hover {
+  background: rgba(220, 252, 231, 0.75);
+  border-color: rgba(22, 163, 74, 0.35);
+  transform: translateY(-1px);
 }
 
-/* Avatar upload button */
-.avatar-upload {
-  width: 44px;
-  height: 44px;
+.avatar-upload-field input {
+  display: none;
+}
+
+.avatar-upload-icon {
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  cursor: pointer;
-  background: rgba(22, 163, 74, 0.12);
-  border: 1px solid rgba(22, 163, 74, 0.25);
-  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.15);
-  transition: 0.25s;
-  font-size: 18px;
+  background: rgba(22, 163, 74, 0.14);
+  flex: 0 0 auto;
 }
 
-/* hover effekt */
-.avatar-upload:hover {
-  transform: scale(1.08);
-  background: rgba(22, 163, 74, 0.2);
-}
-
-/* real input gizlədilir */
-.avatar-upload input {
-  display: none;
+.avatar-upload-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /*=========================================================*/
