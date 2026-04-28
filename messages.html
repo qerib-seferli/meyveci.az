@@ -18,9 +18,13 @@
     </div>
 
     <div class="grid grid-2">
-      <section class="card">
-        <h3>Söhbətlər</h3>
-        <div id="threadList" class="compact-list"></div>
+      <section class="card message-thread-card">
+        <div class="thread-head">
+          <h3>Söhbətlər</h3>
+          <input id="threadSearch" class="thread-search" type="search" placeholder="Sifariş kodu axtar...">
+        </div>
+      
+        <div id="threadList" class="compact-list thread-list-limited"></div>
       </section>
 
       <section class="card">
