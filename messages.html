@@ -29,10 +29,28 @@
 
       <section class="card">
         <div id="chatBox" class="chat-box"></div>
-        <form id="sendMessageForm" class="search-row" style="margin-top: 10px;">
+        <form id="sendMessageForm" class="chat-send-form" style="margin-top: 10px;">
+          <label class="chat-file-btn" title="Qaleriyadan şəkil seç">
+            🖼️
+            <input id="chatGalleryInput" type="file" accept="image/*" hidden>
+          </label>
+        
+          <label class="chat-file-btn" title="Kamera ilə şəkil çək">
+            📷
+            <input id="chatCameraInput" type="file" accept="image/*" capture="environment" hidden>
+          </label>
+        
           <input id="messageInput" placeholder="Mesaj yaz...">
+        
           <button class="btn btn-primary">Göndər</button>
         </form>
+        
+        <div id="chatImagePreview" class="chat-image-preview"></div>
+        
+        <div id="imageZoomModal" class="image-zoom-modal">
+          <button id="closeImageZoom" class="image-zoom-close" type="button">×</button>
+          <img id="zoomImage" src="" alt="Şəkil">
+        </div>
       </section>
     </div>
   </main>
