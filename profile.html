@@ -22,8 +22,13 @@
       <form id="profileForm" class="form-grid">
         <input name="first_name" placeholder="Ad">
         <input name="last_name" placeholder="Soyad">
-        <input name="phone" placeholder="Telefon">
-        <input id="avatarFile" type="file" accept="image/*">
+            <div class="phone-avatar-row">
+              <input name="phone" placeholder="Telefon">
+              <label class="avatar-upload">
+                <input id="avatarFile" type="file" accept="image/*">
+                📷 Profil şəkli seç
+              </label>
+            </div>
         <select name="city_region" required>
           <option value="">Şəhər / rayon seçin</option>
         </select>
