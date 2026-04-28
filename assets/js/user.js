@@ -1012,6 +1012,12 @@ async function sendMessage(event) {
 
 
 function initChatImageTools() {
+  const modal = $('#imageZoomModal');
+
+    if (modal && modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+  
   const galleryInput = $('#chatGalleryInput');
   const cameraInput = $('#chatCameraInput');
   const preview = $('#chatImagePreview');
@@ -1056,8 +1062,13 @@ function openImageZoom(url) {
 
   if (!modal || !img) return;
 
+  if (modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
+
   img.src = url;
   modal.classList.add('show');
+
   document.documentElement.style.overflow = 'hidden';
   document.body.style.overflow = 'hidden';
 }
@@ -1070,7 +1081,9 @@ function closeImageZoom() {
 
   modal.classList.remove('show');
   img.src = '';
+
   document.documentElement.style.overflow = '';
   document.body.style.overflow = '';
 }
+
 /*===================================================================*/
