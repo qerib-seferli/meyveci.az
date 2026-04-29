@@ -1368,18 +1368,6 @@ textarea:focus {
   }
 }
 
-
-
-/* TELEFONDA PROFİL SƏHİFƏSİNDƏ ÇIXIŞ BUTONU */
-
-@media (max-width: 768px) {
-  body[data-page="profile"] #logoutBtn {
-    display: block !important;
-  }
-}
-
-
-
 /* Banner / xəbər / partnyor lentində sağ-sol kölgəni silir */
 .slider-strip,
 .marquee-strip {
@@ -3155,3 +3143,26 @@ select option {
 }
 
 /*=========================================================*/
+
+/* ============================== Profil səhifəsində mobil çıxış düyməsi =============================== */
+.mobile-logout-slot {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body[data-page="profile"] .mobile-logout-slot {
+    display: block;
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: -2px;
+  }
+
+  body[data-page="profile"] .mobile-logout-slot #logoutBtn {
+    display: inline-flex !important;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 2px;
+  }
+}
+
+/*===============================================================*/
