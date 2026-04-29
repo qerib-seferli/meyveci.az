@@ -3124,6 +3124,7 @@ select option {
   align-items: center;
   gap: 10px;
   width: 100%;
+  overflow: hidden;
 }
 
 /* input həmişə yer alsın */
