@@ -146,7 +146,7 @@ async function hydrateUserArea() {
   }
   if (panelLink && activeProfile.role === 'courier') {
     panelLink.href = `${root}courier/index.html`;
-    panelLink.textContent = '👨‍💼';
+    panelLink.textContent = '🚚';
     panelLink.classList.remove('hide');
     const courierOrdersBtn = $('#adminOrdersBtn');
     if (courierOrdersBtn) {
