@@ -58,8 +58,9 @@ async function toggleOnline(event) {
   }
 }
 
-// Təyin olunmuş aktiv sifarişləri gətirir.
-// Qeyd: müştəri profilini ayrıca oxuyuruq ki, Supabase FK adı dəyişsə belə kuryer paneli dağılmasın.
+
+//======================================================================================================
+
 async function loadCourierOrders() {
   const { data: orders, error } = await supabase
     .from('orders')
@@ -79,25 +80,38 @@ async function loadCourierOrders() {
   const userIds = [...new Set((orders || []).map((order) => order.user_id).filter(Boolean))];
   const orderIds = [...new Set((orders || []).map((order) => order.id).filter(Boolean))];
 
-  const [{ data: profiles }, { data: locations }] = await Promise.all([
+  const [{ data: profiles }, { data: locations }, { data: payments }] = await Promise.all([
     userIds.length
       ? supabase.from('profiles').select('id,email,first_name,last_name,phone,avatar_url,city_region,address_line,apartment,door_code,lat,lng').in('id', userIds)
       : Promise.resolve({ data: [] }),
+
     orderIds.length
       ? supabase.from('courier_locations').select('*').in('order_id', orderIds)
+      : Promise.resolve({ data: [] }),
+
+    orderIds.length
+      ? supabase.from('payments').select('*').in('order_id', orderIds)
       : Promise.resolve({ data: [] }),
   ]);
 
   const profilesMap = new Map((profiles || []).map((profile) => [profile.id, profile]));
   const locationsMap = new Map((locations || []).map((location) => [location.order_id, location]));
+  const paymentsMap = new Map((payments || []).map((payment) => [payment.order_id, payment]));
 
   list.innerHTML = (orders || [])
-    .map((order) => orderCard(order, profilesMap.get(order.user_id), locationsMap.get(order.id)))
+    .map((order) => orderCard(
+      order,
+      profilesMap.get(order.user_id),
+      locationsMap.get(order.id),
+      paymentsMap.get(order.id)
+    ))
     .join('') || '<div class="card">Hazırda təyin olunmuş sifariş yoxdur.</div>';
 
   bindCourierButtons();
   initCourierMaps(orders || [], profilesMap, locationsMap);
 }
+
+//======================================================================================================
 
 // Kart düymələrinə klik hadisələri qoşulur.
 function bindCourierButtons() {
@@ -167,19 +181,21 @@ async function createCourierStatusNotification(orderId, status) {
 }
 
 
-// Kuryer kartı: müştəri şəkli, adı, telefon, sifariş ünvanı, xəritə və statuslar.
-function orderCard(order, customer = {}, location = {}) {
+// ==============================================================================================
+
+function orderCard(order, customer = {}, location = {}, payment = null) {
   const customerPhone = customer?.phone || order.phone || '';
   const customerName = `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim() || order.full_name || customer?.email || 'Müştəri';
-  
-    const address = [
+
+  const address = [
     order.city_region || customer?.city_region,
     order.address_text || customer?.address_line,
     order.apartment || customer?.apartment,
     order.door_code || customer?.door_code,
   ].filter(Boolean).join(', ');
-  
+
   const eta = estimateEta(order, customer, location);
+  const paymentText = courierPaymentText(order, payment);
 
   return `
     <article class="card courier-card" data-order-id="${order.id}">
@@ -188,7 +204,11 @@ function orderCard(order, customer = {}, location = {}) {
           <b>${order.order_code}</b>
           <p class="muted">${statusAz(order.status)} • ${money(order.total_amount)}</p>
         </div>
-        <span class="unit-badge">ETA: ${eta}</span>
+        <span class="unit-badge" id="courierEta-${order.id}">ETA: ${eta}</span>
+      </div>
+
+      <div class="courier-payment-info">
+        ${paymentText}
       </div>
 
       <div class="compact-row customer-card-row">
@@ -204,16 +224,17 @@ function orderCard(order, customer = {}, location = {}) {
 
       <p><b>Ünvan:</b> ${address || 'Ünvan qeyd edilməyib'}</p>
 
-        <div class="map-toolbar">
-          <button class="btn btn-soft follow-courier-toggle" type="button">
-            📍 Kuryeri izlə
-          </button>
-          ${mapNavigationLinks(order.lat || customer?.lat, order.lng || customer?.lng)}
-        </div>
-        
+      <div class="map-toolbar">
+        <button class="btn btn-soft follow-courier-toggle" type="button">
+          📍 Kuryeri izlə
+        </button>
+        ${mapNavigationLinks(order.lat || customer?.lat, order.lng || customer?.lng)}
+      </div>
+
       <div class="map-box order-live-map" id="courierMap-${order.id}"></div>
+
       <p class="muted map-note" id="courierMapNote-${order.id}">
-        Müştəri: ${customer?.lat || order.lat || '—'}, ${customer?.lng || order.lng || '—'} • Kuryer: ${location?.lat || '—'}, ${location?.lng || '—'}
+        Marşrut hesablanır...
       </p>
 
       <div class="courier-actions">
@@ -225,6 +246,93 @@ function orderCard(order, customer = {}, location = {}) {
     </article>
   `;
 }
+
+//==========================================================================================================
+
+function courierPaymentText(order, payment = null) {
+  const method = order.payment_method || payment?.provider || '';
+  const status = order.payment_status || payment?.status || '';
+  const amount = Number(payment?.amount || order.total_amount || 0);
+  const amountText = money(amount);
+
+  if (method === 'cash') {
+    return `
+      <b>💵 Nağd ödəniş</b>
+      <span>Müştəri kuryerə nağd ${amountText} ödəyəcək.</span>
+    `;
+  }
+
+  if (method === 'card_transfer') {
+    if (status === 'paid' || status === 'approved') {
+      return `
+        <b>💳 Kart köçürməsi</b>
+        <span>Müştəri kart köçürməsi ilə ${amountText} ödəniş edib. Müştəridən nağd pul tələb etmə.</span>
+      `;
+    }
+
+    return `
+      <b>💳 Kart köçürməsi</b>
+      <span>Müştəri ${amountText} məbləği karta köçürmə yolu ilə ödəməlidir. Status hələ təsdiqlənməyib.</span>
+    `;
+  }
+
+  if (method === 'pos') {
+    return `
+      <b>🏧 POS terminal</b>
+      <span>POS terminal hazır olsun. Müştəri ${amountText} məbləği POS vasitəsilə ödəyəcək.</span>
+    `;
+  }
+
+  if (method === 'online_payment' || method === 'online') {
+    if (status === 'paid' || status === 'approved') {
+      return `
+        <b>🌐 Online ödəniş</b>
+        <span>${amountText} online ödəniş edilib. Müştəridən əlavə pul tələb etmə.</span>
+      `;
+    }
+
+    return `
+      <b>🌐 Online ödəniş</b>
+      <span>Online ödəniş seçilib. Məbləğ: ${amountText}. Status hələ təsdiqlənməyib.</span>
+    `;
+  }
+
+  return `
+    <b>💰 Ödəniş</b>
+    <span>Məbləğ: ${amountText}</span>
+  `;
+}
+
+function formatRouteDuration(seconds = 0) {
+  const minutes = Math.max(1, Math.round(Number(seconds) / 60));
+
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return rest ? `${hours} saat ${rest} dəqiqə` : `${hours} saat`;
+  }
+
+  return `${minutes} dəqiqə`;
+}
+
+function updateCourierRouteInfo(orderId, distanceMeters, durationSeconds) {
+  const km = Number(distanceMeters) / 1000;
+  const kmText = km >= 10 ? km.toFixed(0) : km.toFixed(1);
+  const durationText = formatRouteDuration(durationSeconds);
+
+  const etaBadge = $(`#courierEta-${orderId}`);
+  const note = $(`#courierMapNote-${orderId}`);
+
+  if (etaBadge) {
+    etaBadge.textContent = `ETA: ${durationText}`;
+  }
+
+  if (note) {
+    note.textContent = `Marşrut: ${kmText} km • Təxmini çatma vaxtı: ${durationText}`;
+  }
+}
+
+//==========================================================================================================
 
 // Leaflet xəritələrini yaradır və markerləri göstərir.
 function initCourierMaps(orders, profilesMap, locationsMap) {
@@ -344,6 +452,8 @@ function mapNavigationLinks(lat, lng) {
   `;
 }
 
+//=======================================================================================
+
 async function drawCourierRoute(orderId, from, to) {
   const mapData = courierMaps.get(orderId);
   if (!mapData) return;
@@ -358,14 +468,21 @@ async function drawCourierRoute(orderId, from, to) {
     const data = await res.json();
 
     if (data.routes && data.routes[0]) {
-      mapData.routeLayer = L.geoJSON(data.routes[0].geometry, {
+      const route = data.routes[0];
+
+      mapData.routeLayer = L.geoJSON(route.geometry, {
         style: { color: '#16a34a', weight: 5, opacity: 0.9 },
       }).addTo(mapData.map);
+
+      updateCourierRouteInfo(orderId, route.distance, route.duration);
     } else {
       mapData.routeLayer = L.polyline(
         [[from.lat, from.lng], [to.lat, to.lng]],
         { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
       ).addTo(mapData.map);
+
+      const fallbackKm = distanceKm(from.lat, from.lng, to.lat, to.lng);
+      updateCourierRouteInfo(orderId, fallbackKm * 1000, Math.max(300, (fallbackKm / 22) * 3600));
     }
 
     courierMaps.set(orderId, mapData);
@@ -375,9 +492,14 @@ async function drawCourierRoute(orderId, from, to) {
       { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
     ).addTo(mapData.map);
 
+    const fallbackKm = distanceKm(from.lat, from.lng, to.lat, to.lng);
+    updateCourierRouteInfo(orderId, fallbackKm * 1000, Math.max(300, (fallbackKm / 22) * 3600));
+
     courierMaps.set(orderId, mapData);
   }
 }
+
+//========================================================================================
 
 
 // Kuryerin hazırki koordinatını bütün aktiv sifarişlərinə yazır.
