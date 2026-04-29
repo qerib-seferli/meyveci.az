@@ -3116,4 +3116,44 @@ select option {
   }
 }
 
+/*======[Məhsul adı ilə axtar........] [Sıfırla]===========*/
+
+/* SEARCH ROW FIX - FULL CSS SOLUTION */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* input həmişə yer alsın */
+.search-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* button sıxılmasın */
+.search-row .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* MOBİL FIX */
+@media (max-width: 768px) {
+  .search-row {
+    flex-wrap: nowrap !important; /* ALT-ALTA QADAĞAN */
+  }
+
+  .search-row input {
+    flex: 1;
+    width: 100%;
+  }
+
+  .search-row .btn {
+    flex: 0 0 auto;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
+
 /*=========================================================*/
