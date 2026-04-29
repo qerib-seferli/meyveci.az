@@ -204,11 +204,13 @@ function orderCard(order, customer = {}, location = {}) {
 
       <p><b>Ünvan:</b> ${address || 'Ünvan qeyd edilməyib'}</p>
 
-      <div class="map-toolbar">
-        <button class="btn btn-soft follow-courier-toggle" type="button">
-          📍 Kuryeri izlə
-        </button>
-      </div>
+        <div class="map-toolbar">
+          <button class="btn btn-soft follow-courier-toggle" type="button">
+            📍 Kuryeri izlə
+          </button>
+          ${mapNavigationLinks(order.lat || customer?.lat, order.lng || customer?.lng)}
+        </div>
+        
       <div class="map-box order-live-map" id="courierMap-${order.id}"></div>
       <p class="muted map-note" id="courierMapNote-${order.id}">
         Müştəri: ${customer?.lat || order.lat || '—'}, ${customer?.lng || order.lng || '—'} • Kuryer: ${location?.lat || '—'}, ${location?.lng || '—'}
@@ -323,6 +325,23 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function mapNavigationLinks(lat, lng) {
+  const destLat = Number(lat);
+  const destLng = Number(lng);
+
+  if (!validPoint(destLat, destLng)) return '';
+
+  const wazeUrl = `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
+  const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
+  const appleUrl = `https://maps.apple.com/?daddr=${destLat},${destLng}&dirflg=d`;
+
+  return `
+    <a class="btn btn-soft map-nav-btn" href="${wazeUrl}" target="_blank" rel="noopener">🧭 Waze</a>
+    <a class="btn btn-soft map-nav-btn" href="${googleUrl}" target="_blank" rel="noopener">🗺️ Google</a>
+    <a class="btn btn-soft map-nav-btn" href="${appleUrl}" target="_blank" rel="noopener">🍎 Apple</a>
+  `;
 }
 
 async function drawCourierRoute(orderId, from, to) {
