@@ -3273,4 +3273,43 @@ select option {
   }
 }
 
+/*============== [Müştəri info]      [📞 Zəng] [💬 Mesaj] ====================*/
+
+.customer-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.customer-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.customer-actions .btn {
+  white-space: nowrap;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* Mobil düzülüş */
+@media (max-width: 640px) {
+  .customer-card-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-actions {
+    width: 100%;
+  }
+
+  .customer-actions .btn {
+    flex: 1;
+    width: 100%;
+  }
+}
+
 /*===============================================================*/
