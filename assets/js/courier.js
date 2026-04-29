@@ -220,6 +220,7 @@ function orderCard(order, customer = {}, location = {}, payment = null) {
           </span>
         </div>
         ${customerPhone ? `<a class="btn btn-soft" href="tel:${customerPhone}">Zəng</a>` : ''}
+        <button class="btn btn-soft open-chat" data-id="${order.id}">Müştəriyə mesaj yaz</button>
       </div>
 
       <p><b>Ünvan:</b> ${address || 'Ünvan qeyd edilməyib'}</p>
@@ -241,7 +242,7 @@ function orderCard(order, customer = {}, location = {}, payment = null) {
         <button class="btn btn-soft courier-status ${order.status === 'on_the_way' ? 'active-status' : ''}" data-id="${order.id}" data-s="on_the_way">Yoldayam</button>
         <button class="btn btn-soft courier-status ${order.status === 'courier_near' ? 'active-status' : ''}" data-id="${order.id}" data-s="courier_near">Yaxınlaşıram</button>
         <button class="btn btn-primary courier-status ${order.status === 'delivered' ? 'active-status' : ''}" data-id="${order.id}" data-s="delivered">Təhvil verdim</button>
-        <button class="btn btn-soft open-chat" data-id="${order.id}">Müştəriyə mesaj yaz</button>
+        
       </div>
     </article>
   `;
