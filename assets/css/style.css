@@ -3207,3 +3207,70 @@ select option {
 }
 
 /*===============================================================*/
+
+/* Kuryer panelində ödəniş məlumatı */
+.courier-payment-info {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 163, 74, 0.18);
+  background: rgba(220, 252, 231, 0.72);
+  color: #064e3b;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.08);
+}
+
+.courier-payment-info b {
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.courier-payment-info span {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Kuryer xəritə düymələri bütün cihazlarda səliqəli düzülsün */
+.map-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.map-toolbar .btn,
+.map-nav-btn {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.map-nav-btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .map-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .map-toolbar .btn,
+  .map-nav-btn {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+
+  .courier-payment-info {
+    padding: 11px 12px;
+    border-radius: 16px;
+  }
+}
+
+/*===============================================================*/
