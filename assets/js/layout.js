@@ -135,6 +135,7 @@ async function hydrateUserArea() {
   if (!activeProfile) return;
 
   $('#logoutBtn')?.classList.remove('hide');
+  setupResponsiveLogout();
   const topUserName = $('#topUserName');
   if (topUserName) topUserName.textContent = (activeProfile.first_name || '').trim() || activeProfile.email || 'Profil';
 
@@ -403,3 +404,42 @@ function showRealtimeToast(title, body = '') {
     box.classList.remove('show');
   }, 6500);
 }
+
+
+
+/*====================================== Bu hissə çıxış düyməsi üçündür===================================================*/
+function setupResponsiveLogout() {
+  const logoutBtn = $('#logoutBtn');
+  const profileLink = $('#profileLink');
+  const slot = $('#mobileLogoutSlot');
+
+  if (!logoutBtn || !profileLink) return;
+
+  function moveLogout() {
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile && slot) {
+      // Telefonda yalnız profile.html səhifəsində Yadda saxla düyməsinin altına köçürürük.
+      slot.appendChild(logoutBtn);
+      logoutBtn.classList.remove('hide');
+      logoutBtn.classList.add('mobile-profile-logout');
+      logoutBtn.classList.add('full');
+      return;
+    }
+
+    // Desktopda əvvəlki yerinə — profilin sağına qaytarırıq.
+    profileLink.insertAdjacentElement('afterend', logoutBtn);
+    logoutBtn.classList.remove('mobile-profile-logout');
+    logoutBtn.classList.remove('full');
+    logoutBtn.classList.remove('hide');
+  }
+
+  moveLogout();
+
+  if (!window.__meyveciLogoutMoveReady) {
+    window.__meyveciLogoutMoveReady = true;
+    window.addEventListener('resize', moveLogout);
+  }
+}
+
+/*==========================================================================================================*/
