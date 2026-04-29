@@ -495,11 +495,12 @@ function orderCard(order, courier = null, courierLocation = null) {
       ${['delivered','cancelled'].includes(order.status) ? `
         <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
       ` : `
-        <div class="map-toolbar">
-          <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
-            📍 Kuryeri izlə
-          </button>
-        </div>
+          <div class="map-toolbar">
+            <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
+              📍 Kuryeri izlə
+            </button>
+            ${mapNavigationLinks(order.lat, order.lng)}
+          </div>
         <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
         <p class="muted map-note" id="userMapNote-${order.id}">
           ${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}
@@ -655,6 +656,22 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function mapNavigationLinks(lat, lng) {
+  const destLat = Number(lat);
+  const destLng = Number(lng);
+
+  if (!validMapPoint(destLat, destLng)) return '';
+
+  const wazeUrl = `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
+  const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
+  const appleUrl = `https://maps.apple.com/?daddr=${destLat},${destLng}&dirflg=d`;
+
+  return `
+    <a class="btn btn-soft map-nav-btn" href="${wazeUrl}" target="_blank" rel="noopener">🧭 Waze</a>
+    <a class="btn btn-soft map-nav-btn" href="${googleUrl}" target="_blank" rel="noopener">🗺️ Google</a>
+    <a class="btn btn-soft map-nav-btn" href="${appleUrl}" target="_blank" rel="noopener">🍎 Apple</a>
+  `;
+}
 
 async function drawRouteForOrder(orderId, from, to) {
   const mapData = userOrderMaps.get(orderId);
