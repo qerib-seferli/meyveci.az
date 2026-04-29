@@ -664,7 +664,7 @@ function mapNavigationLinks(lat, lng) {
 
   const wazeUrl = `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
-  const appleUrl = `https://maps.apple.com/?daddr=${destLat},${destLng}&dirflg=d`;
+  const appleUrl = `https://maps.apple.com/?saddr=Current%20Location&daddr=${destLat},${destLng}&dirflg=d`;
 
   return `
     <a class="btn btn-soft map-nav-btn" href="${wazeUrl}" target="_blank" rel="noopener">🧭 Waze</a>
