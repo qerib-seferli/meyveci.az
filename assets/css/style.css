@@ -3118,42 +3118,39 @@ select option {
 
 /*======[Məhsul adı ilə axtar........] [Sıfırla]===========*/
 
-/* SEARCH ROW FIX - FULL CSS SOLUTION */
-.search-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  overflow: hidden;
+/* ANA SƏHİFƏ AXTARIŞ - SON DÜZƏLİŞ */
+.search-card .search-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
 }
 
-/* input həmişə yer alsın */
-.search-row input {
-  flex: 1 1 auto;
-  min-width: 0;
+.search-card .search-row #homeSearchInput {
+  width: 100% !important;
+  min-width: 0 !important;
 }
 
-/* button sıxılmasın */
-.search-row .btn {
-  flex: 0 0 auto;
-  white-space: nowrap;
+.search-card .search-row #clearHomeFilters {
+  width: auto !important;
+  min-width: 74px !important;
+  max-width: 86px !important;
+  padding: 9px 10px !important;
+  white-space: nowrap !important;
 }
 
-/* MOBİL FIX */
+/* Telefon */
 @media (max-width: 768px) {
-  .search-row {
-    flex-wrap: nowrap !important; /* ALT-ALTA QADAĞAN */
+  .search-card .search-row {
+    grid-template-columns: minmax(0, 1fr) 74px !important;
   }
 
-  .search-row input {
-    flex: 1;
-    width: 100%;
-  }
-
-  .search-row .btn {
-    flex: 0 0 auto;
-    font-size: 13px;
-    padding: 8px 12px;
+  .search-card .search-row #clearHomeFilters {
+    min-width: 74px !important;
+    max-width: 74px !important;
+    font-size: 13px !important;
+    padding: 8px 6px !important;
   }
 }
 
