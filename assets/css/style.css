@@ -3274,6 +3274,7 @@ select option {
 }
 
 /*============== [Müştəri info]      [📞 Zəng] [💬 Mesaj] ====================*/
+/* ==== CUSTOMER ACTIONS (Zəng + Mesaj) ==== */
 
 .customer-card-row {
   display: flex;
@@ -3293,9 +3294,21 @@ select option {
   white-space: nowrap;
   padding: 8px 12px;
   font-size: 13px;
+
+  /* 🎨 DESIGN */
+  border-radius: 14px;
+  background: rgba(22,163,74,0.08);
+  border: 1px solid rgba(22,163,74,0.2);
+  transition: 0.2s ease;
 }
 
-/* Mobil düzülüş */
+.customer-actions .btn:hover {
+  background: #16a34a;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* 📱 Mobil düzülüş */
 @media (max-width: 640px) {
   .customer-card-row {
     flex-direction: column;
