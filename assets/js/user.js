@@ -1388,7 +1388,7 @@ async function openOrderItemsModal(orderId) {
             <div>
               <b>${cleanText(name)}</b>
               <small>
-              Sifariş: ${formatQty(item.quantity)} ${cleanText(unitLabel(unit))} • 
+              Sifariş verildi: ${formatQty(item.quantity)} ${cleanText(unitLabel(unit))}  •  
               Vahid qiymət: ${money(item.unit_price || 0)}
               </small>
             </div>
