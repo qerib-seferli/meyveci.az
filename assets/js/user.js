@@ -16,6 +16,7 @@ import {
   PLACEHOLDER,
   statusAz,
   askLocation,
+  updateMyPresence,
 } from './core.js';
 
 import { initLayout } from './layout.js';
@@ -28,6 +29,7 @@ let allUserThreadCouriersMap = new Map();
 let allUserThreadUnreadMap = new Map();
 let userOrderMaps = new Map();
 let userTrackingTimer = null;
+let presenceTimer = null;
 
 const AZ_CITY_REGIONS = [
   'Abşeron',
@@ -914,6 +916,8 @@ async function initProfile() {
 }
 
 async function initMessages() {
+  await startPresenceLive();
+
   const orderId = new URLSearchParams(location.search).get('order');
 
   // Sifarişdən gələndə həmin sifariş üçün söhbəti avtomatik açırıq.
@@ -1003,7 +1007,9 @@ async function loadThreads(autoOpenThreadId = null) {
           apartment,
           door_code,
           bio,
-          is_active
+          is_active,
+          is_online,
+          last_seen
         `)
       .in('id', profileIds)
     : { data: [] };
@@ -1251,9 +1257,29 @@ function getOrderCode(thread = {}, order = {}) {
 function isProfileOnline(profileData = {}) {
   if (!profileData || !Object.keys(profileData).length) return false;
 
-  // Səndə hələ real online column yoxdur.
-  // Ona görə müvəqqəti olaraq aktiv hesabları yaşıl göstəririk.
-  return profileData.is_active === true;
+  const lastSeen = profileData.last_seen ? new Date(profileData.last_seen).getTime() : 0;
+  const now = Date.now();
+
+  return profileData.is_online === true && now - lastSeen <= 7000;
+}
+
+
+async function startPresenceLive() {
+  await updateMyPresence(true);
+
+  if (presenceTimer) clearInterval(presenceTimer);
+
+  presenceTimer = setInterval(() => {
+    updateMyPresence(true);
+  }, 5000);
+
+  window.addEventListener('beforeunload', () => {
+    updateMyPresence(false);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    updateMyPresence(!document.hidden);
+  });
 }
 
 //====================================================================================
@@ -1370,6 +1396,9 @@ function subscribeMessageRealtime() {
       loadThreads(currentThread);
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_threads' }, () => {
+      loadThreads(currentThread);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
       loadThreads(currentThread);
     })
     .subscribe();
