@@ -1519,20 +1519,52 @@ function closeProfileInfoModal() {
 function subscribeMessageRealtime() {
   supabase
     .channel('user-message-page-live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
-      if (currentThread) openThread(currentThread);
-      loadThreads(currentThread);
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_threads' }, () => {
-      loadThreads(currentThread);
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-      loadThreads(currentThread);
-    })
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+      async (payload) => {
+        const newMessage = payload.new;
+
+        // Əgər mesaj açıq olan söhbətə gəlibsə, mesaj qutusu dərhal yenilənsin.
+        if (newMessage.thread_id === currentThread) {
+          await openThread(currentThread);
+          await loadThreads(currentThread);
+          return;
+        }
+
+        // Əgər başqa söhbətə gəlibsə, soldakı badge dərhal artsın.
+        const oldCount = allUserThreadUnreadMap.get(newMessage.thread_id) || 0;
+        allUserThreadUnreadMap.set(newMessage.thread_id, oldCount + 1);
+
+        await loadThreads(currentThread);
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
+      async () => {
+        if (currentThread) await openThread(currentThread);
+        await loadThreads(currentThread);
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'chat_threads' },
+      async () => {
+        await loadThreads(currentThread);
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'profiles' },
+      async () => {
+        await loadThreads(currentThread);
+      }
+    )
     .subscribe();
 }
 
-
+//=============================================================================================
 
 
 async function sendMessage(event) {
