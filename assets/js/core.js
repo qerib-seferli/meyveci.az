@@ -275,3 +275,21 @@ export function askLocation() {
     );
   });
 }
+
+
+//======================================================================================
+
+export async function updateMyPresence(isOnline = true) {
+  const activeUser = await user();
+  if (!activeUser) return;
+
+  await supabase
+    .from('profiles')
+    .update({
+      last_seen: new Date().toISOString(),
+      is_online: isOnline,
+    })
+    .eq('id', activeUser.id);
+}
+
+//=======================================================================================
