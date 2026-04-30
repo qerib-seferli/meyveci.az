@@ -1274,6 +1274,13 @@ function formatQty(value) {
   return Number.isInteger(number) ? number : number.toFixed(2).replace(/\.?0+$/, '');
 }
 
+function unitLabel(unit = '') {
+  const text = String(unit || 'ədəd').trim();
+
+  // Əgər unit bazada "1 kq" kimi yazılıbsa, modalda qarışıqlıq olmasın deyə "kq" göstəririk.
+  return text.replace(/^1\s+/i, '');
+}
+
 function getOrderCode(thread = {}, order = {}) {
   if (order.order_code) return order.order_code;
 
@@ -1316,6 +1323,10 @@ async function openOrderItemsModal(orderId) {
   const modal = $('#orderItemsModal');
   const body = $('#orderItemsBody');
 
+  if (modal && modal.parentElement !== document.body) {
+  document.body.appendChild(modal);
+  }
+  
   if (!modal || !body || !orderId) return;
 
   body.innerHTML = '<p class="muted">Məhsullar yüklənir...</p>';
@@ -1377,8 +1388,8 @@ async function openOrderItemsModal(orderId) {
             <div>
               <b>${cleanText(name)}</b>
               <small>
-                Sifariş: ${formatQty(item.quantity)} ${cleanText(unit)} • 
-                Vahid qiymət: ${money(item.unit_price || 0)}
+              Sifariş: ${formatQty(item.quantity)} ${cleanText(unitLabel(unit))} • 
+              Vahid qiymət: ${money(item.unit_price || 0)}
               </small>
             </div>
 
