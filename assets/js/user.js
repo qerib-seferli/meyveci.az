@@ -1254,6 +1254,25 @@ function roleAz(role) {
   return map[role] || role || 'İstifadəçi';
 }
 
+function paymentStatusAz(status) {
+  const map = {
+    pending: 'Gözləyir',
+    paid: 'Təsdiqləndi',
+    approved: 'Təsdiqləndi',
+    confirmed: 'Təsdiqləndi',
+    rejected: 'Rədd edildi',
+    cancelled: 'Rədd edildi',
+    failed: 'Rədd edildi',
+    refunded: 'Geri qaytarıldı',
+  };
+
+  return map[status] || status || 'Gözləyir';
+}
+
+function formatQty(value) {
+  const number = Number(value || 0);
+  return Number.isInteger(number) ? number : number.toFixed(2).replace(/\.?0+$/, '');
+}
 
 function getOrderCode(thread = {}, order = {}) {
   if (order.order_code) return order.order_code;
@@ -1322,14 +1341,28 @@ async function openOrderItemsModal(orderId) {
       .in('id', productIds)
     : { data: [] };
 
+  const { data: payment } = await supabase
+  .from('payments')
+  .select('status,amount')
+  .eq('order_id', orderId)
+  .order('created_at', { ascending: false })
+  .limit(1)
+  .maybeSingle();
+  
   const productsMap = new Map((products || []).map((product) => [product.id, product]));
   const total = (items || []).reduce((sum, item) => sum + Number(item.line_total || 0), 0);
 
   body.innerHTML = `
-    <div class="order-items-head">
-      <h3>Sifariş məhsulları</h3>
-      <span>${money(total)}</span>
-    </div>
+      <div class="order-items-head">
+        <h3>Sifariş məhsulları</h3>
+      
+        <div class="order-items-summary">
+          <span class="payment-status-pill payment-${payment?.status || 'pending'}">
+            ${paymentStatusAz(payment?.status || 'pending')}
+          </span>
+          <span class="order-items-total">${money(total)}</span>
+        </div>
+      </div>
 
     <div class="order-items-list">
       ${(items || []).map((item) => {
@@ -1343,7 +1376,10 @@ async function openOrderItemsModal(orderId) {
 
             <div>
               <b>${cleanText(name)}</b>
-              <small>${Number(item.quantity || 0)} ${cleanText(unit)} × ${money(item.unit_price || 0)}</small>
+              <small>
+                Sifariş: ${formatQty(item.quantity)} ${cleanText(unit)} • 
+                Vahid qiymət: ${money(item.unit_price || 0)}
+              </small>
             </div>
 
             <strong>${money(item.line_total || 0)}</strong>
