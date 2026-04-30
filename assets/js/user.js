@@ -993,21 +993,24 @@ async function loadThreads(autoOpenThreadId = null) {
 
   const { data: profiles } = profileIds.length
     ? await supabase
-      .from('profiles')
-      .select(`
-        id,
-        email,
-        first_name,
-        last_name,
-        phone,
-        role,
-        avatar_url,
-        city_region,
-        address_line,
-        apartment,
-        door_code,
-        bio
-      `)
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          first_name,
+          last_name,
+          phone,
+          role,
+          avatar_url,
+          city_region,
+          address_line,
+          apartment,
+          door_code,
+          bio,
+          is_online,
+          online,
+          last_seen
+        `)
       .in('id', profileIds)
     : { data: [] };
 
@@ -1064,22 +1067,22 @@ function renderThreadList(autoOpenThreadId = null) {
     const customer = allUserThreadCustomersMap.get(thread.order_id) || {};
     const courier = allUserThreadCouriersMap.get(thread.order_id) || {};
 
-    const haystack = [
+    const orderCode = getOrderCode(thread, order);
+
+    const searchText = [
       thread.title,
-      thread.order_id,
-      order.order_code,
+      orderCode,
       order.full_name,
       order.phone,
       order.city_region,
       order.address_text,
       customer.first_name,
       customer.last_name,
-      customer.phone,
       courier.first_name,
       courier.last_name,
     ].join(' ').toLowerCase();
 
-    return !searchValue || haystack.includes(searchValue);
+    return !searchValue || searchText.includes(searchValue);
   });
 
   filteredThreads = filteredThreads.slice(0, getThreadLimit());
@@ -1089,6 +1092,8 @@ function renderThreadList(autoOpenThreadId = null) {
     const customer = allUserThreadCustomersMap.get(thread.order_id) || {};
     const courier = allUserThreadCouriersMap.get(thread.order_id) || {};
     const unreadCount = allUserThreadUnreadMap.get(thread.id) || 0;
+
+    const orderCode = getOrderCode(thread, order);
 
     const customerName = cleanText(
       order.full_name ||
@@ -1101,52 +1106,50 @@ function renderThreadList(autoOpenThreadId = null) {
       'Kuryer təyin edilməyib'
     );
 
-    const shortAddress = cleanText(
-      [order.city_region, order.address_text].filter(Boolean).join(' • ') ||
-      'Ünvan yoxdur'
-    );
+    const customerOnline = isProfileOnline(customer);
+    const courierOnline = isProfileOnline(courier);
 
     return `
-      <article class="thread-pro-card ${currentThread === thread.id ? 'active-thread' : ''}" data-id="${thread.id}">
-        <div class="thread-pro-main">
-          <button class="thread-profile-click thread-customer-avatar-btn" type="button" data-profile-type="customer" data-order-id="${thread.order_id}">
-            <img class="thread-customer-avatar" src="${customer.avatar_url || PLACEHOLDER}" alt="${customerName}">
-          </button>
+      <article class="thread-mini-card ${currentThread === thread.id ? 'active-thread' : ''}" data-id="${thread.id}">
+        <button class="thread-mini-avatar thread-profile-click" type="button" data-profile-type="customer" data-order-id="${thread.order_id}">
+          <img src="${customer.avatar_url || PLACEHOLDER}" alt="${customerName}">
+        </button>
 
-          <div class="thread-pro-content">
-            <div class="thread-pro-top">
-              <button class="thread-profile-click thread-person-name" type="button" data-profile-type="customer" data-order-id="${thread.order_id}">
-                ${customerName}
-              </button>
+        <div class="thread-mini-body">
+          <div class="thread-mini-top">
+            <button class="thread-mini-name thread-profile-click" type="button" data-profile-type="customer" data-order-id="${thread.order_id}">
+              <span class="online-dot ${customerOnline ? 'online' : 'offline'}"></span>
+              ${customerName}
+            </button>
 
+            <div class="thread-mini-right">
               ${unreadCount ? `<span class="thread-unread-badge">${unreadCount}</span>` : ''}
-            </div>
-
-            <div class="thread-order-code">
-              <span>№ ${cleanText(order.order_code || thread.order_id || 'Sifariş')}</span>
               <small>${formatThreadTime(thread.last_message_at)}</small>
             </div>
+          </div>
 
-            <div class="thread-info-grid">
-              <span>📞 ${cleanText(order.phone || customer.phone || 'Telefon yoxdur')}</span>
-              <span>📍 ${shortAddress}</span>
-              <span>💰 ${money(order.total_amount || 0)}</span>
-              <span>📦 ${statusAz(order.status)}</span>
-            </div>
+          <div class="thread-mini-code">${cleanText(orderCode)}</div>
 
-            <div class="thread-courier-row">
-              <span>Kuryer:</span>
-              <button class="thread-profile-click thread-courier-name" type="button" data-profile-type="courier" data-order-id="${thread.order_id}" ${courier.id ? '' : 'disabled'}>
-                ${courierName}
-              </button>
-            </div>
+          <div class="thread-mini-info">
+            <span>📞 ${cleanText(order.phone || customer.phone || 'Telefon yoxdur')}</span>
+            <span>📍 ${cleanText([order.city_region, order.address_text].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</span>
+            <span>💰 ${money(order.total_amount || 0)}</span>
+            <span>📦 ${statusAz(order.status)}</span>
+          </div>
+
+          <div class="thread-mini-courier">
+            <span>Kuryer:</span>
+            <button class="thread-profile-click" type="button" data-profile-type="courier" data-order-id="${thread.order_id}" ${courier.id ? '' : 'disabled'}>
+              <span class="online-dot ${courierOnline ? 'online' : 'offline'}"></span>
+              ${courierName}
+            </button>
           </div>
         </div>
       </article>
     `;
   }).join('') || '<span class="muted">Söhbət tapılmadı.</span>';
 
-  $$('.thread-pro-card').forEach((card) => {
+  $$('.thread-mini-card').forEach((card) => {
     card.addEventListener('click', () => openThread(card.dataset.id));
   });
 
@@ -1154,10 +1157,7 @@ function renderThreadList(autoOpenThreadId = null) {
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-
-      const orderId = button.dataset.orderId;
-      const type = button.dataset.profileType;
-      openProfileInfoModal(orderId, type);
+      openProfileInfoModal(button.dataset.orderId, button.dataset.profileType);
     });
   });
 }
@@ -1243,6 +1243,30 @@ async function openThread(id) {
 function roleAz(role) {
   const map = { admin: 'Admin', courier: 'Kuryer', user: 'Müştəri' };
   return map[role] || role || 'İstifadəçi';
+}
+
+
+function getOrderCode(thread = {}, order = {}) {
+  if (order.order_code) return order.order_code;
+
+  const title = String(thread.title || '');
+  const match = title.match(/MV-\d{8}-[A-Z0-9]+/i);
+
+  return match ? match[0] : `№ ${String(thread.order_id || '').slice(0, 8)}`;
+}
+
+function isProfileOnline(profileData = {}) {
+  if (!profileData || !Object.keys(profileData).length) return false;
+
+  if (profileData.is_online === true || profileData.online === true) return true;
+
+  if (profileData.last_seen) {
+    const lastSeen = new Date(profileData.last_seen).getTime();
+    const now = Date.now();
+    return now - lastSeen < 2 * 60 * 1000;
+  }
+
+  return false;
 }
 
 //====================================================================================
