@@ -1045,8 +1045,11 @@ async function loadThreads(autoOpenThreadId = null) {
   setupThreadSearch();
   initProfileInfoModal();
 
-  if (autoOpenThreadId) openThread(autoOpenThreadId);
-  else if (threads?.[0] && !currentThread) openThread(threads[0].id);
+  if (autoOpenThreadId && currentThread !== autoOpenThreadId) {
+    openThread(autoOpenThreadId);
+  } else if (threads?.[0] && !currentThread) {
+    openThread(threads[0].id);
+  }
 }
 
 //=========mesaj siyahısı LİMİTSİZ================================================================
@@ -1241,11 +1244,15 @@ async function openThread(id) {
     allUserThreadUnreadMap.set(id, 0);
     renderThreadList(currentThread);
     
-    $('#chatBox').scrollTop = 999999;
-  
-  $$('.chat-image-message').forEach((img) => {
-  img.addEventListener('click', () => openImageZoom(img.dataset.zoom));
-});
+    const chatBox = $('#chatBox');
+    if (chatBox) {
+      const isNearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 90;
+      if (isNearBottom) chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    $$('.chat-image-message').forEach((img) => {
+    img.addEventListener('click', () => openImageZoom(img.dataset.zoom));
+  });
 }
 
 function roleAz(role) {
@@ -1525,40 +1532,41 @@ function subscribeMessageRealtime() {
       async (payload) => {
         const newMessage = payload.new;
 
-        // Əgər mesaj açıq olan söhbətə gəlibsə, mesaj qutusu dərhal yenilənsin.
         if (newMessage.thread_id === currentThread) {
           await openThread(currentThread);
-          await loadThreads(currentThread);
+          await loadThreads();
           return;
         }
 
-        // Əgər başqa söhbətə gəlibsə, soldakı badge dərhal artsın.
-        const oldCount = allUserThreadUnreadMap.get(newMessage.thread_id) || 0;
-        allUserThreadUnreadMap.set(newMessage.thread_id, oldCount + 1);
-
-        await loadThreads(currentThread);
-      }
-    )
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
-      async () => {
-        if (currentThread) await openThread(currentThread);
-        await loadThreads(currentThread);
+        await loadThreads();
       }
     )
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'chat_threads' },
       async () => {
-        await loadThreads(currentThread);
+        await loadThreads();
       }
     )
     .on(
       'postgres_changes',
-      { event: '*', schema: 'public', table: 'profiles' },
-      async () => {
-        await loadThreads(currentThread);
+      { event: 'UPDATE', schema: 'public', table: 'profiles' },
+      (payload) => {
+        const updatedProfile = payload.new;
+
+        allUserThreadCustomersMap.forEach((customer, orderId) => {
+          if (customer?.id === updatedProfile.id) {
+            allUserThreadCustomersMap.set(orderId, updatedProfile);
+          }
+        });
+
+        allUserThreadCouriersMap.forEach((courier, orderId) => {
+          if (courier?.id === updatedProfile.id) {
+            allUserThreadCouriersMap.set(orderId, updatedProfile);
+          }
+        });
+
+        renderThreadList(currentThread);
       }
     )
     .subscribe();
