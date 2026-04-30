@@ -1223,7 +1223,7 @@ async function openThread(id) {
       return `
         <div class="msg ${isMe ? 'me' : ''} ${!message.is_read && !isMe ? 'unread-message' : ''}">
           <b>${fullName}</b>
-          <small class="msg-meta">${roleAz(role)} • ${phone} • ${new Date(message.created_at).toLocaleString('az-AZ')}</small>
+          <small class="msg-meta">${roleAz(role)} • ${new Date(message.created_at).toLocaleString('az-AZ')}</small>
           <br>${message.message_text || ''}
           ${message.attachment_url ? `
             <img 
