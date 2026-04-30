@@ -1132,7 +1132,9 @@ function renderThreadList(autoOpenThreadId = null) {
           <div class="thread-mini-info">
             <span>📞 ${cleanText(customer.phone || 'Telefon yoxdur')}</span>
             <span>📍 ${cleanText([customer.city_region || order.city_region, customer.address_line].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</span>
-            <span>💰 ${money(order.total_amount || 0)}</span>
+            <button class="thread-order-items-btn" type="button" data-order-id="${order.id}">
+              💰 ${money(order.total_amount || 0)}
+            </button>
             <span>📦 ${statusAz(order.status)}</span>
           </div>
 
@@ -1152,6 +1154,14 @@ function renderThreadList(autoOpenThreadId = null) {
     card.addEventListener('click', () => openThread(card.dataset.id));
   });
 
+  $$('.thread-order-items-btn').forEach((button) => {
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openOrderItemsModal(button.dataset.orderId);
+  });
+});
+  
   $$('.thread-profile-click').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -1282,6 +1292,72 @@ async function startPresenceLive() {
   });
 }
 
+
+async function openOrderItemsModal(orderId) {
+  const modal = $('#orderItemsModal');
+  const body = $('#orderItemsBody');
+
+  if (!modal || !body || !orderId) return;
+
+  body.innerHTML = '<p class="muted">Məhsullar yüklənir...</p>';
+  modal.classList.add('show');
+
+  const { data: items, error } = await supabase
+    .from('order_items')
+    .select('id,order_id,product_id,product_name,quantity,unit_price,line_total')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    body.innerHTML = `<p class="muted">${cleanText(error.message)}</p>`;
+    return;
+  }
+
+  const productIds = [...new Set((items || []).map((item) => item.product_id).filter(Boolean))];
+
+  const { data: products } = productIds.length
+    ? await supabase
+      .from('products')
+      .select('id,name,image_url,unit')
+      .in('id', productIds)
+    : { data: [] };
+
+  const productsMap = new Map((products || []).map((product) => [product.id, product]));
+  const total = (items || []).reduce((sum, item) => sum + Number(item.line_total || 0), 0);
+
+  body.innerHTML = `
+    <div class="order-items-head">
+      <h3>Sifariş məhsulları</h3>
+      <span>${money(total)}</span>
+    </div>
+
+    <div class="order-items-list">
+      ${(items || []).map((item) => {
+        const product = productsMap.get(item.product_id) || {};
+        const name = item.product_name || product.name || 'Məhsul';
+        const unit = product.unit || 'ədəd';
+
+        return `
+          <div class="order-item-row">
+            <img src="${product.image_url || PLACEHOLDER}" alt="${cleanText(name)}">
+
+            <div>
+              <b>${cleanText(name)}</b>
+              <small>${Number(item.quantity || 0)} ${cleanText(unit)} × ${money(item.unit_price || 0)}</small>
+            </div>
+
+            <strong>${money(item.line_total || 0)}</strong>
+          </div>
+        `;
+      }).join('') || '<p class="muted">Bu sifarişdə məhsul tapılmadı.</p>'}
+    </div>
+  `;
+}
+
+function closeOrderItemsModal() {
+  $('#orderItemsModal')?.classList.remove('show');
+}
+
 //====================================================================================
 
 function cleanText(value) {
@@ -1325,6 +1401,12 @@ function initProfileInfoModal() {
 
   $('#profileInfoModal')?.addEventListener('click', (event) => {
     if (event.target.id === 'profileInfoModal') closeProfileInfoModal();
+  });
+
+  $('#closeOrderItemsModal')?.addEventListener('click', closeOrderItemsModal);
+
+  $('#orderItemsModal')?.addEventListener('click', (event) => {
+    if (event.target.id === 'orderItemsModal') closeOrderItemsModal();
   });
 }
 
