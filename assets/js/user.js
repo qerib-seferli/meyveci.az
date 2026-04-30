@@ -969,27 +969,23 @@ async function loadThreads(autoOpenThreadId = null) {
         order_code,
         user_id,
         courier_id,
-        full_name,
-        phone,
-        city_region,
-        address_text,
-        apartment,
-        door_code,
-        total_amount,
         status,
+        payment_method,
         payment_status,
-        created_at
+        customer_note,
+        total_amount,
+        created_at,
+        city_region
       `)
       .in('id', orderIds)
     : { data: [] };
 
-  const profileIds = [
-    ...new Set(
-      (orders || [])
-        .flatMap((order) => [order.user_id, order.courier_id])
-        .filter(Boolean)
-    ),
-  ];
+      const profileIds = [
+        ...new Set([
+          ...(threads || []).flatMap((thread) => [thread.user_id, thread.courier_id]),
+          ...(orders || []).flatMap((order) => [order.user_id, order.courier_id]),
+        ].filter(Boolean)),
+      ];
 
   const { data: profiles } = profileIds.length
     ? await supabase
@@ -1007,9 +1003,7 @@ async function loadThreads(autoOpenThreadId = null) {
           apartment,
           door_code,
           bio,
-          is_online,
-          online,
-          last_seen
+          is_active
         `)
       .in('id', profileIds)
     : { data: [] };
@@ -1096,7 +1090,6 @@ function renderThreadList(autoOpenThreadId = null) {
     const orderCode = getOrderCode(thread, order);
 
     const customerName = cleanText(
-      order.full_name ||
       `${customer.first_name || ''} ${customer.last_name || ''}`.trim() ||
       'Müştəri'
     );
@@ -1131,8 +1124,8 @@ function renderThreadList(autoOpenThreadId = null) {
           <div class="thread-mini-code">${cleanText(orderCode)}</div>
 
           <div class="thread-mini-info">
-            <span>📞 ${cleanText(order.phone || customer.phone || 'Telefon yoxdur')}</span>
-            <span>📍 ${cleanText([order.city_region, order.address_text].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</span>
+            <span>📞 ${cleanText(customer.phone || 'Telefon yoxdur')}</span>
+            <span>📍 ${cleanText([customer.city_region || order.city_region, customer.address_line].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</span>
             <span>💰 ${money(order.total_amount || 0)}</span>
             <span>📦 ${statusAz(order.status)}</span>
           </div>
@@ -1258,15 +1251,9 @@ function getOrderCode(thread = {}, order = {}) {
 function isProfileOnline(profileData = {}) {
   if (!profileData || !Object.keys(profileData).length) return false;
 
-  if (profileData.is_online === true || profileData.online === true) return true;
-
-  if (profileData.last_seen) {
-    const lastSeen = new Date(profileData.last_seen).getTime();
-    const now = Date.now();
-    return now - lastSeen < 2 * 60 * 1000;
-  }
-
-  return false;
+  // Səndə hələ real online column yoxdur.
+  // Ona görə müvəqqəti olaraq aktiv hesabları yaşıl göstəririk.
+  return profileData.is_active === true;
 }
 
 //====================================================================================
