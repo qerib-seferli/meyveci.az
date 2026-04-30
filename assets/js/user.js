@@ -1244,11 +1244,15 @@ async function openThread(id) {
     allUserThreadUnreadMap.set(id, 0);
     renderThreadList(currentThread);
     
-    const chatBox = $('#chatBox');
-    if (chatBox) {
-      const isNearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 90;
-      if (isNearBottom) chatBox.scrollTop = chatBox.scrollHeight;
-    }
+      const chatBox = $('#chatBox');
+      if (chatBox) {
+        setTimeout(() => {
+          chatBox.scrollTo({
+            top: chatBox.scrollHeight,
+            behavior: 'smooth',
+          });
+        }, 80);
+      }
     
     $$('.chat-image-message').forEach((img) => {
     img.addEventListener('click', () => openImageZoom(img.dataset.zoom));
