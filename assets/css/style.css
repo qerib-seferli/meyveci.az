@@ -3802,4 +3802,17 @@ select option {
     transform: translateY(-50%) scale(1.18);
   }
 }
+
+/* Avatar şəkli daha yumşaq və PRO görünsün */
+.thread-mini-avatar {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.15);
+}
+
+/* İstəsən konteyner də uyğun olsun */
+.thread-mini-avatar img {
+  border-radius: 16px !important;
+}
+
 /*=======================================================================================*/
