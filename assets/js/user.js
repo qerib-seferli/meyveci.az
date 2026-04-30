@@ -1049,12 +1049,11 @@ async function loadThreads(autoOpenThreadId = null) {
   else if (threads?.[0] && !currentThread) openThread(threads[0].id);
 }
 
-//================================================================================================
+//=========mesaj siyahısı LİMİTSİZ================================================================
 
-
-function getThreadLimit() {
-  return window.innerWidth <= 768 ? 2 : 5;
-}
+      function getThreadLimit() {
+        return Infinity;
+      }
 
 //================================================================================================
 
