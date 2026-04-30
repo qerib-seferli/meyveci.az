@@ -23,6 +23,9 @@ import { initLayout } from './layout.js';
 let currentThread = null;
 let allUserThreads = [];
 let allUserThreadOrdersMap = new Map();
+let allUserThreadCustomersMap = new Map();
+let allUserThreadCouriersMap = new Map();
+let allUserThreadUnreadMap = new Map();
 let userOrderMaps = new Map();
 let userTrackingTimer = null;
 
@@ -939,6 +942,8 @@ async function initMessages() {
 //=============================================================================
 
 async function loadThreads(autoOpenThreadId = null) {
+  const activeUser = await requireAuth();
+
   const { data, error } = await supabase
     .from('chat_threads')
     .select('id,title,order_id,last_message_at,courier_id')
@@ -952,26 +957,103 @@ async function loadThreads(autoOpenThreadId = null) {
     return;
   }
 
-  const orderIds = [...new Set((data || []).map((thread) => thread.order_id).filter(Boolean))];
+  const threads = data || [];
+  const threadIds = [...new Set(threads.map((thread) => thread.id).filter(Boolean))];
+  const orderIds = [...new Set(threads.map((thread) => thread.order_id).filter(Boolean))];
 
   const { data: orders } = orderIds.length
-    ? await supabase.from('orders').select('id,order_code,user_id,courier_id').in('id', orderIds)
+    ? await supabase
+      .from('orders')
+      .select(`
+        id,
+        order_code,
+        user_id,
+        courier_id,
+        full_name,
+        phone,
+        city_region,
+        address_text,
+        apartment,
+        door_code,
+        total_amount,
+        status,
+        payment_status,
+        created_at
+      `)
+      .in('id', orderIds)
     : { data: [] };
 
-  allUserThreads = data || [];
+  const profileIds = [
+    ...new Set(
+      (orders || [])
+        .flatMap((order) => [order.user_id, order.courier_id])
+        .filter(Boolean)
+    ),
+  ];
+
+  const { data: profiles } = profileIds.length
+    ? await supabase
+      .from('profiles')
+      .select(`
+        id,
+        email,
+        first_name,
+        last_name,
+        phone,
+        role,
+        avatar_url,
+        city_region,
+        address_line,
+        apartment,
+        door_code,
+        bio
+      `)
+      .in('id', profileIds)
+    : { data: [] };
+
+  const { data: unreadMessages } = threadIds.length
+    ? await supabase
+      .from('chat_messages')
+      .select('id,thread_id,sender_id,is_read')
+      .in('thread_id', threadIds)
+      .eq('is_read', false)
+      .neq('sender_id', activeUser.id)
+    : { data: [] };
+
+  const profilesMap = new Map((profiles || []).map((item) => [item.id, item]));
+  const unreadMap = new Map();
+
+  (unreadMessages || []).forEach((message) => {
+    unreadMap.set(message.thread_id, (unreadMap.get(message.thread_id) || 0) + 1);
+  });
+
+  allUserThreads = threads;
   allUserThreadOrdersMap = new Map((orders || []).map((order) => [order.id, order]));
+  allUserThreadCustomersMap = new Map();
+  allUserThreadCouriersMap = new Map();
+  allUserThreadUnreadMap = unreadMap;
+
+  (orders || []).forEach((order) => {
+    if (order.user_id) allUserThreadCustomersMap.set(order.id, profilesMap.get(order.user_id) || {});
+    if (order.courier_id) allUserThreadCouriersMap.set(order.id, profilesMap.get(order.courier_id) || {});
+  });
 
   renderThreadList(autoOpenThreadId);
   setupThreadSearch();
+  initProfileInfoModal();
 
   if (autoOpenThreadId) openThread(autoOpenThreadId);
-  else if (data?.[0] && !currentThread) openThread(data[0].id);
+  else if (threads?.[0] && !currentThread) openThread(threads[0].id);
 }
+
+//================================================================================================
 
 
 function getThreadLimit() {
   return window.innerWidth <= 768 ? 2 : 5;
 }
+
+//================================================================================================
 
 function renderThreadList(autoOpenThreadId = null) {
   const list = $('#threadList');
@@ -979,32 +1061,108 @@ function renderThreadList(autoOpenThreadId = null) {
 
   let filteredThreads = allUserThreads.filter((thread) => {
     const order = allUserThreadOrdersMap.get(thread.order_id) || {};
-    const orderCode = String(order.order_code || thread.order_id || '').toLowerCase();
-    const title = String(thread.title || '').toLowerCase();
+    const customer = allUserThreadCustomersMap.get(thread.order_id) || {};
+    const courier = allUserThreadCouriersMap.get(thread.order_id) || {};
 
-    return !searchValue || orderCode.includes(searchValue) || title.includes(searchValue);
+    const haystack = [
+      thread.title,
+      thread.order_id,
+      order.order_code,
+      order.full_name,
+      order.phone,
+      order.city_region,
+      order.address_text,
+      customer.first_name,
+      customer.last_name,
+      customer.phone,
+      courier.first_name,
+      courier.last_name,
+    ].join(' ').toLowerCase();
+
+    return !searchValue || haystack.includes(searchValue);
   });
 
   filteredThreads = filteredThreads.slice(0, getThreadLimit());
 
   list.innerHTML = filteredThreads.map((thread) => {
     const order = allUserThreadOrdersMap.get(thread.order_id) || {};
+    const customer = allUserThreadCustomersMap.get(thread.order_id) || {};
+    const courier = allUserThreadCouriersMap.get(thread.order_id) || {};
+    const unreadCount = allUserThreadUnreadMap.get(thread.id) || 0;
+
+    const customerName = cleanText(
+      order.full_name ||
+      `${customer.first_name || ''} ${customer.last_name || ''}`.trim() ||
+      'Müştəri'
+    );
+
+    const courierName = cleanText(
+      `${courier.first_name || ''} ${courier.last_name || ''}`.trim() ||
+      'Kuryer təyin edilməyib'
+    );
+
+    const shortAddress = cleanText(
+      [order.city_region, order.address_text].filter(Boolean).join(' • ') ||
+      'Ünvan yoxdur'
+    );
 
     return `
-      <button class="compact-row thread ${currentThread === thread.id ? 'active-thread' : ''}" data-id="${thread.id}">
-        <span>
-          ${thread.title || 'Söhbət'}<br>
-          <small class="muted">${order.order_code || thread.order_id || ''}</small>
-        </span>
-        <small class="muted">${thread.last_message_at ? new Date(thread.last_message_at).toLocaleString('az-AZ') : ''}</small>
-      </button>
+      <article class="thread-pro-card ${currentThread === thread.id ? 'active-thread' : ''}" data-id="${thread.id}">
+        <div class="thread-pro-main">
+          <button class="thread-profile-click thread-customer-avatar-btn" type="button" data-profile-type="customer" data-order-id="${thread.order_id}">
+            <img class="thread-customer-avatar" src="${customer.avatar_url || PLACEHOLDER}" alt="${customerName}">
+          </button>
+
+          <div class="thread-pro-content">
+            <div class="thread-pro-top">
+              <button class="thread-profile-click thread-person-name" type="button" data-profile-type="customer" data-order-id="${thread.order_id}">
+                ${customerName}
+              </button>
+
+              ${unreadCount ? `<span class="thread-unread-badge">${unreadCount}</span>` : ''}
+            </div>
+
+            <div class="thread-order-code">
+              <span>№ ${cleanText(order.order_code || thread.order_id || 'Sifariş')}</span>
+              <small>${formatThreadTime(thread.last_message_at)}</small>
+            </div>
+
+            <div class="thread-info-grid">
+              <span>📞 ${cleanText(order.phone || customer.phone || 'Telefon yoxdur')}</span>
+              <span>📍 ${shortAddress}</span>
+              <span>💰 ${money(order.total_amount || 0)}</span>
+              <span>📦 ${statusAz(order.status)}</span>
+            </div>
+
+            <div class="thread-courier-row">
+              <span>Kuryer:</span>
+              <button class="thread-profile-click thread-courier-name" type="button" data-profile-type="courier" data-order-id="${thread.order_id}" ${courier.id ? '' : 'disabled'}>
+                ${courierName}
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
     `;
   }).join('') || '<span class="muted">Söhbət tapılmadı.</span>';
 
-  $$('.thread').forEach((button) => {
-    button.addEventListener('click', () => openThread(button.dataset.id));
+  $$('.thread-pro-card').forEach((card) => {
+    card.addEventListener('click', () => openThread(card.dataset.id));
+  });
+
+  $$('.thread-profile-click').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const orderId = button.dataset.orderId;
+      const type = button.dataset.profileType;
+      openProfileInfoModal(orderId, type);
+    });
   });
 }
+
+//================================================================================================
 
 function setupThreadSearch() {
   const input = $('#threadSearch');
@@ -1070,8 +1228,13 @@ async function openThread(id) {
       `;
     }).join('') || '<span class="muted">Mesaj yoxdur.</span>';
 
-  await supabase.rpc('mark_thread_read', { p_thread_id: id });
-  $('#chatBox').scrollTop = 999999;
+    await supabase.rpc('mark_thread_read', { p_thread_id: id });
+    
+    allUserThreadUnreadMap.set(id, 0);
+    renderThreadList(currentThread);
+    
+    $('#chatBox').scrollTop = 999999;
+  
   $$('.chat-image-message').forEach((img) => {
   img.addEventListener('click', () => openImageZoom(img.dataset.zoom));
 });
@@ -1081,6 +1244,111 @@ function roleAz(role) {
   const map = { admin: 'Admin', courier: 'Kuryer', user: 'Müştəri' };
   return map[role] || role || 'İstifadəçi';
 }
+
+//====================================================================================
+
+function cleanText(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function formatThreadTime(value) {
+  if (!value) return 'Vaxt yoxdur';
+
+  const date = new Date(value);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHour = Math.floor(diffMin / 60);
+
+  if (diffMin < 1) return 'İndi';
+  if (diffMin < 60) return `${diffMin} dəq əvvəl`;
+  if (diffHour < 24) return `${diffHour} saat əvvəl`;
+
+  return date.toLocaleString('az-AZ', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function initProfileInfoModal() {
+  const modal = $('#profileInfoModal');
+
+  if (modal && modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
+
+  $('#closeProfileInfoModal')?.addEventListener('click', closeProfileInfoModal);
+
+  $('#profileInfoModal')?.addEventListener('click', (event) => {
+    if (event.target.id === 'profileInfoModal') closeProfileInfoModal();
+  });
+}
+
+function openProfileInfoModal(orderId, type = 'customer') {
+  const modal = $('#profileInfoModal');
+  const body = $('#profileInfoBody');
+
+  if (!modal || !body) return;
+
+  const order = allUserThreadOrdersMap.get(orderId) || {};
+  const profileData = type === 'courier'
+    ? allUserThreadCouriersMap.get(orderId)
+    : allUserThreadCustomersMap.get(orderId);
+
+  if (!profileData || !Object.keys(profileData).length) {
+    toast(type === 'courier' ? 'Kuryer profili hələ təyin edilməyib' : 'Müştəri profili tapılmadı');
+    return;
+  }
+
+  const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() || order.full_name || 'Profil';
+  const role = roleAz(profileData.role || (type === 'courier' ? 'courier' : 'user'));
+
+  body.innerHTML = `
+    <div class="profile-info-hero">
+      <img src="${profileData.avatar_url || PLACEHOLDER}" alt="${cleanText(fullName)}">
+      <div>
+        <h3>${cleanText(fullName)}</h3>
+        <span>${cleanText(role)}</span>
+      </div>
+    </div>
+
+    <div class="profile-info-list">
+      <div><b>Email</b><span>${cleanText(profileData.email || 'Email yoxdur')}</span></div>
+      <div><b>Telefon</b><span>${cleanText(profileData.phone || order.phone || 'Telefon yoxdur')}</span></div>
+      <div><b>Rol</b><span>${cleanText(role)}</span></div>
+      <div><b>Şəhər / rayon</b><span>${cleanText(profileData.city_region || order.city_region || 'Qeyd edilməyib')}</span></div>
+      <div><b>Ünvan</b><span>${cleanText(profileData.address_line || order.address_text || 'Qeyd edilməyib')}</span></div>
+      <div><b>Mənzil / blok</b><span>${cleanText(profileData.apartment || order.apartment || 'Qeyd edilməyib')}</span></div>
+      <div><b>Qapı kodu</b><span>${cleanText(profileData.door_code || order.door_code || 'Qeyd edilməyib')}</span></div>
+      <div class="profile-info-full"><b>Bio / qeydlər</b><span>${cleanText(profileData.bio || 'Qeyd yoxdur')}</span></div>
+    </div>
+  `;
+
+  modal.classList.add('show');
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProfileInfoModal() {
+  const modal = $('#profileInfoModal');
+  if (!modal) return;
+
+  modal.classList.remove('show');
+
+  if (!$('#imageZoomModal')?.classList.contains('show')) {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+}
+
+//====================================================================================
 
 // Mesaj səhifəsi açıq qalanda yeni mesajlar realtime görünür, F5 tələb olunmur.
 function subscribeMessageRealtime() {
