@@ -223,7 +223,7 @@ async function loadNotifications() {
       <button class="compact-row notify-item" type="button" data-title="${escapeAttr(title)}" data-body="${escapeAttr(body)}" data-date="${escapeAttr(dateText)}">
         <span>
           <b>${title}</b><br>
-          <small class="muted">${body}</small><br>
+          <small class="muted">${highlightNotificationBody(body)}</small><br>
           <small class="muted">${dateText}</small>
         </span>
         ${item.is_read ? '' : '<span class="badge-count" style="position: static;">•</span>'}
@@ -298,6 +298,12 @@ function openNotificationModal(title, body, dateText = '') {
 
 function getRootPath() {
   return location.pathname.includes('/admin/') || location.pathname.includes('/courier/') ? '../' : './';
+}
+
+function highlightNotificationBody(body = '') {
+  return escapeAttr(body)
+    .replace(/(MV-\d{8}-[A-Z0-9]+)/g, '<b class="notify-code">$1</b>')
+    .replace(/(\d+(?:\.\d{2})?\sAZN)/g, '<b class="notify-price">$1</b>');
 }
 
 function escapeAttr(value) {
