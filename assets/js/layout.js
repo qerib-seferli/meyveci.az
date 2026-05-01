@@ -376,7 +376,7 @@ async function startNotificationPolling() {
     playNotifySound();
     showRealtimeToast(item.title || 'Yeni bildiriş', notificationBodyAz(item.body || 'Yeni bildiriş gəldi.'));
   }
-}
+
 
 function showRealtimeToast(title, body = '') {
   let box = $('#realtimeToast');
