@@ -206,8 +206,9 @@ async function loadNotifications() {
     .from('notifications')
     .select('id,title,body,created_at,is_read,link_url')
     .eq('user_id', activeProfile.id)
+    .neq('title', 'Yeni mesaj')
     .order('created_at', { ascending: false })
-    .limit(16);
+    .limit(99);
 
   if (error) {
     list.innerHTML = '<span class="muted">Bildiriş yüklənmədi.</span>';
@@ -360,17 +361,19 @@ async function startNotificationPolling() {
   }, 5000);
 }
 
-function handleIncomingNotification(item) {
-  if (!item) return;
-
-  lastNotificationTime = item.created_at || new Date().toISOString();
-
-  refreshBadges();
-  playNotifySound();
-
-  if (item.title === 'Yeni mesaj') {
-    showRealtimeToast('💬 Yeni mesaj', notificationBodyAz(item.body || 'Yeni mesajınız var.'));
-  } else {
+  function handleIncomingNotification(item) {
+    if (!item) return;
+  
+    lastNotificationTime = item.created_at || new Date().toISOString();
+  
+    refreshBadges();
+  
+    if (item.title === 'Yeni mesaj') {
+      playNotifySound();
+      return;
+    }
+  
+    playNotifySound();
     showRealtimeToast(item.title || 'Yeni bildiriş', notificationBodyAz(item.body || 'Yeni bildiriş gəldi.'));
   }
 }
