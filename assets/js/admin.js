@@ -304,9 +304,30 @@ async function loadCourierMonitor() {
         </span>
         <div class="admin-device-mini">
           <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
-          <span class="mini-badge ${Number(device.battery_level || 0) <= 15 ? 'mini-red' : 'mini-green'}">🔋 ${safe(device.battery_level, '?')}%</span>
-          <span class="mini-badge ${device.network_status === 'offline' ? 'mini-red' : 'mini-blue'}">🌐 ${safe(device.network_status, 'bilinmir')}</span>
-          <span class="mini-badge ${loc.lat && loc.lng ? 'mini-green' : 'mini-yellow'}">📍 ${loc.lat && loc.lng ? 'GPS var' : 'GPS yoxdur'}</span>
+          
+          <span class="mini-badge ${
+            device.battery_level === null || device.battery_level === undefined
+              ? 'mini-blue'
+              : Number(device.battery_level) <= 15
+                ? 'mini-red'
+                : 'mini-green'
+          }">
+            🔋 ${device.battery_level === null || device.battery_level === undefined ? 'dəstək yoxdur' : `${device.battery_level}%`}
+          </span>
+          
+          <span class="mini-badge ${
+            online
+              ? 'mini-green'
+              : device.network_status === 'offline'
+                ? 'mini-red'
+                : 'mini-blue'
+          }">
+            🌐 ${online ? 'internet var' : device.network_status === 'offline' ? 'internet yoxdur' : 'bilinmir'}
+          </span>
+          
+          <span class="mini-badge ${loc.lat && loc.lng ? 'mini-green' : 'mini-yellow'}">
+            📍 ${loc.lat && loc.lng ? 'GPS var' : 'GPS yoxdur'}
+          </span>
         </div>
       </div>
     `;
@@ -434,12 +455,17 @@ async function createAlertOnce(type, courierId, orderId, severity, title, body) 
 }
 
 async function loadAdminAlerts() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('admin_alerts')
-    .select('*,profiles:courier_id(first_name,last_name,email,phone)')
+    .select('*')
     .eq('is_resolved', false)
     .order('created_at', { ascending: false })
     .limit(20);
+
+  if (error) {
+    $('#adminAlertsList').innerHTML = `<span class="muted">${error.message}</span>`;
+    return;
+  }
 
   const critical = (data || []).filter((a) => a.severity === 'critical');
 
@@ -465,7 +491,11 @@ async function loadAdminAlerts() {
 
   $$('.resolve-alert').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      await supabase.from('admin_alerts').update({ is_resolved: true, resolved_at: new Date().toISOString() }).eq('id', btn.dataset.id);
+      await supabase
+        .from('admin_alerts')
+        .update({ is_resolved: true, resolved_at: new Date().toISOString() })
+        .eq('id', btn.dataset.id);
+
       loadAdminAlerts();
     });
   });
