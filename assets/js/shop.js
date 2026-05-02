@@ -551,9 +551,9 @@ async function loadProductReviews(productId) {
   const box = $('#productReviews');
   if (!box) return;
 
-  const { data, error } = await supabase
+  const { data: reviews, error } = await supabase
     .from('reviews')
-    .select('*,profiles(first_name,last_name,email,avatar_url)')
+    .select('*')
     .eq('product_id', productId)
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
@@ -564,15 +564,30 @@ async function loadProductReviews(productId) {
     return;
   }
 
-  box.innerHTML = (data || []).map((review) => {
-    const name = `${review.profiles?.first_name || ''} ${review.profiles?.last_name || ''}`.trim() || review.profiles?.email || 'Müştəri';
+  const userIds = [...new Set((reviews || []).map((r) => r.user_id).filter(Boolean))];
+
+  const { data: profiles } = userIds.length
+    ? await supabase
+      .from('profiles')
+      .select('id,first_name,last_name,email,avatar_url')
+      .in('id', userIds)
+    : { data: [] };
+
+  const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+  box.innerHTML = (reviews || []).map((review) => {
+    const p = profileMap.get(review.user_id) || {};
+    const name = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email || 'Müştəri';
+    const dateText = review.created_at ? new Date(review.created_at).toLocaleString('az-AZ') : '';
+
     return `
       <div class="compact-row">
         <div style="display:flex;gap:10px;align-items:center;">
-          <img class="preview-img customer-avatar" src="${review.profiles?.avatar_url || PLACEHOLDER}" alt="${name}">
+          <img class="preview-img customer-avatar" src="${p.avatar_url || PLACEHOLDER}" alt="${name}">
           <span>
             <b>${name}</b><br>
-            <small>${'⭐'.repeat(Number(review.rating || 0))}</small><br>
+            <small>${'⭐'.repeat(Number(review.rating || 0))} ${Number(review.rating || 0)}/5</small><br>
+            <small class="muted">${dateText}</small><br>
             <small class="muted">${review.review_text || ''}</small>
           </span>
         </div>
@@ -580,6 +595,7 @@ async function loadProductReviews(productId) {
     `;
   }).join('') || '<span class="muted">Bu məhsul üçün təsdiqlənmiş rəy yoxdur.</span>';
 }
+
 
 document.addEventListener('submit', async (event) => {
   if (event.target?.id !== 'reviewForm') return;
