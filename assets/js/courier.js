@@ -18,6 +18,8 @@ import { initLayout } from './layout.js';
 
 let activeCourier = null;
 let heartbeatTimer = null;
+let wakeLock = null;
+let navigationModeTimer = null;
 let watchId = null;
 let courierPosition = null;
 const courierMaps = new Map();
@@ -148,6 +150,12 @@ function bindCourierButtons() {
       followCourier = !followCourier;
       button.classList.toggle('active-status', followCourier);
       button.textContent = followCourier ? '📍 İzləmə aktivdir' : '📍 Kuryeri izlə';
+    });
+  });
+
+    $$('.map-nav-btn').forEach((link) => {
+    link.addEventListener('click', () => {
+      setCourierNavigationMode();
     });
   });
 }
@@ -685,6 +693,7 @@ function subscribeCourierLive() {
 async function startCourierHeartbeat() {
   if (heartbeatTimer) clearInterval(heartbeatTimer);
 
+  await requestCourierWakeLock();
   await sendCourierHeartbeat();
 
   heartbeatTimer = setInterval(() => {
@@ -693,11 +702,23 @@ async function startCourierHeartbeat() {
 
   window.addEventListener('online', sendCourierHeartbeat);
   window.addEventListener('offline', sendCourierHeartbeat);
+
+  document.addEventListener('visibilitychange', async () => {
+    if (!document.hidden) {
+      await requestCourierWakeLock();
+      await sendCourierHeartbeat();
+    }
+  });
 }
 
 function stopCourierHeartbeat() {
   if (heartbeatTimer) clearInterval(heartbeatTimer);
   heartbeatTimer = null;
+
+  if (navigationModeTimer) clearInterval(navigationModeTimer);
+  navigationModeTimer = null;
+
+  releaseCourierWakeLock();
 }
 
 async function sendCourierHeartbeat() {
@@ -738,3 +759,51 @@ async function sendCourierHeartbeat() {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id' });
 }
+
+
+
+async function requestCourierWakeLock() {
+  try {
+    if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (error) {
+    console.warn('Ekran açıq saxlama aktiv olmadı:', error.message);
+  }
+}
+
+async function releaseCourierWakeLock() {
+  try {
+    if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  } catch {}
+}
+
+async function setCourierNavigationMode() {
+  if (!activeCourier?.id) return;
+
+  await sendCourierHeartbeat();
+
+  await supabase
+    .from('courier_device_status')
+    .upsert({
+      courier_id: activeCourier.id,
+      is_online: true,
+      network_status: navigator.onLine ? 'navigation_app_opened' : 'offline',
+      last_heartbeat: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      user_agent: navigator.userAgent,
+    }, { onConflict: 'courier_id' });
+
+  toast('Xəritə açıldı. Admin paneldə kuryer aktiv hesablanacaq.');
+
+  if (navigationModeTimer) clearInterval(navigationModeTimer);
+
+  navigationModeTimer = setInterval(() => {
+    if (!document.hidden) sendCourierHeartbeat();
+  }, 30000);
+}
+
+
