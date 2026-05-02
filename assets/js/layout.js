@@ -4,7 +4,7 @@
 // Header-də bildiriş və mesaj butonları var, kliklənəndə GitHub 404 yox, sayt içi modal açılır.
 // ============================================================
 
-import { $, profile, logout, supabase, playNotifySound, notificationBodyAz } from './core.js';
+import { $, profile, logout, supabase, playNotifySound, notificationBodyAz, updateMyPresence } from './core.js';
 
 let notificationPollTimer = null;
 let lastNotificationTime = new Date().toISOString();
@@ -29,6 +29,7 @@ export async function initLayout() {
   renderTopbar();
   renderBottomNav();
   await hydrateUserArea();
+  startGlobalPresence();
   await refreshBadges();
   await subscribeNotifications();
   startNotificationPolling();
@@ -451,4 +452,28 @@ function setupResponsiveLogout() {
   }
 }
 
+/*==========================================================================================================*/
+
+let globalPresenceTimer = null;
+
+async function startGlobalPresence() {
+  const activeProfile = await profile();
+  if (!activeProfile) return;
+
+  await updateMyPresence(true);
+
+  if (globalPresenceTimer) clearInterval(globalPresenceTimer);
+
+  globalPresenceTimer = setInterval(() => {
+    updateMyPresence(!document.hidden);
+  }, 30000);
+
+  document.addEventListener('visibilitychange', () => {
+    updateMyPresence(!document.hidden);
+  });
+
+  window.addEventListener('beforeunload', () => {
+    updateMyPresence(false);
+  });
+}
 /*==========================================================================================================*/
