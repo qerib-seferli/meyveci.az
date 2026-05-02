@@ -13,6 +13,28 @@
 <body data-page="product">
   <main class="app-shell">
     <section id="productDetail"></section>
+
+<section class="card" style="margin-top:16px;">
+  <div class="section-head">
+    <h2>Müştəri rəyləri</h2>
+  </div>
+
+  <form id="reviewForm" class="form-grid">
+    <select name="rating" required>
+      <option value="">Reytinq seç</option>
+      <option value="5">⭐⭐⭐⭐⭐ - Əla</option>
+      <option value="4">⭐⭐⭐⭐ - Yaxşı</option>
+      <option value="3">⭐⭐⭐ - Normal</option>
+      <option value="2">⭐⭐ - Zəif</option>
+      <option value="1">⭐ - Pis</option>
+    </select>
+    <textarea class="full" name="review_text" placeholder="Məhsul haqqında rəy yaz..." required></textarea>
+    <button class="btn btn-primary full">Rəy göndər</button>
+  </form>
+
+  <div id="productReviews" class="compact-list" style="margin-top:14px;"></div>
+</section>
+    
   </main>
 
   <script type="module" src="./assets/js/shop.js"></script>
