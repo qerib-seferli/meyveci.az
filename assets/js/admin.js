@@ -113,6 +113,34 @@ function formatDate(value) {
   return value ? new Date(value).toLocaleString('az-AZ') : '—';
 }
 
+
+function methodAz(method) {
+  const map = {
+    cash: 'Nağd',
+    card_transfer: 'Kart köçürməsi',
+    pos: 'POS terminal',
+    online_payment: 'Online payment',
+    online: 'Online payment',
+  };
+
+  return map[method] || method || '—';
+}
+
+function fullName(profile = {}) {
+  return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Adsız istifadəçi';
+}
+
+function isReallyOnline(profile = {}, device = null) {
+  const lastSeen = profile.last_seen ? new Date(profile.last_seen).getTime() : 0;
+  const profileOnline = profile.is_online === true && Date.now() - lastSeen <= 90000;
+
+  const heartbeat = device?.last_heartbeat ? new Date(device.last_heartbeat).getTime() : 0;
+  const deviceOnline = heartbeat && Date.now() - heartbeat <= 130000;
+
+  return Boolean(profileOnline || deviceOnline);
+}
+
+
 function statusClass(status) {
   return `status-${String(status || '').replaceAll('_', '-')}`;
 }
@@ -229,11 +257,12 @@ async function loadRecentOrders() {
       <div class="action-row">
         ${statusBadge(order.status)}
         ${payBadge(order.payment_status)}
-        <a class="btn btn-soft btn-mini" href="orders.html">Aç</a>
+        <a class="btn btn-soft btn-mini" href="orders.html?code=${encodeURIComponent(order.order_code || '')}">Aç</a>
       </div>
     </div>
   `).join('') || '<span class="muted">Sifariş yoxdur.</span>';
 }
+
 
 async function loadCourierMonitor() {
   if (!$('#courierMap')) return;
@@ -259,23 +288,25 @@ async function loadCourierMonitor() {
     const profile = profileMap.get(courier.user_id) || {};
     const device = deviceMap.get(courier.user_id) || {};
     const loc = locationMap.get(courier.user_id) || {};
+    const online = isReallyOnline(profile, device);
+
     updateCourierMarker(courier, profile, device, loc);
 
-    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Kuryer';
+    const name = fullName(profile);
     const heartbeatAge = device.last_heartbeat ? Math.round((Date.now() - new Date(device.last_heartbeat).getTime()) / 1000) : null;
-    const online = heartbeatAge !== null && heartbeatAge <= 130;
 
     return `
-      <div class="admin-live-card">
-        <img class="admin-avatar" src="${profile.avatar_url || PLACEHOLDER}" alt="${esc(fullName)}">
+      <div class="admin-live-card focus-courier" data-courier-id="${courier.user_id}">
+        <img class="admin-avatar" src="${profile.avatar_url || PLACEHOLDER}" alt="${esc(name)}">
         <span>
-          <b>${esc(fullName)}</b>
+          <b><span class="admin-online-dot ${online ? 'online' : 'offline'}"></span>${esc(name)}</b>
           <small>${esc(profile.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatAge === null ? 'yoxdur' : `${heartbeatAge} san əvvəl`}</small>
         </span>
         <div class="admin-device-mini">
           <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
           <span class="mini-badge ${Number(device.battery_level || 0) <= 15 ? 'mini-red' : 'mini-green'}">🔋 ${safe(device.battery_level, '?')}%</span>
           <span class="mini-badge ${device.network_status === 'offline' ? 'mini-red' : 'mini-blue'}">🌐 ${safe(device.network_status, 'bilinmir')}</span>
+          <span class="mini-badge ${loc.lat && loc.lng ? 'mini-green' : 'mini-yellow'}">📍 ${loc.lat && loc.lng ? 'GPS var' : 'GPS yoxdur'}</span>
         </div>
       </div>
     `;
@@ -283,8 +314,28 @@ async function loadCourierMonitor() {
 
   $('#courierLiveList').innerHTML = rows.join('') || '<span class="muted">Aktiv kuryer yoxdur.</span>';
 
+  $$('.focus-courier').forEach((card) => {
+    card.addEventListener('click', () => {
+      const marker = courierMarkers.get(card.dataset.courierId);
+      if (!marker || !courierMap) {
+        toast('Bu kuryerin GPS məlumatı hələ yoxdur');
+        return;
+      }
+
+      courierMap.setView(marker.getLatLng(), 15, { animate: true });
+      marker.openPopup();
+      setTimeout(() => courierMap.invalidateSize(), 120);
+    });
+  });
+
+  setTimeout(() => {
+    courierMap?.invalidateSize();
+  }, 250);
+
   await generateCourierAlerts(couriers || [], profileMap, deviceMap, locationMap);
 }
+
+
 
 function initCourierAdminMap() {
   if (!window.L || courierMap) return;
@@ -634,13 +685,21 @@ async function saveProduct(event) {
   }
 }
 
+
 async function ordersPayments() {
+  const code = new URLSearchParams(location.search).get('code');
+
+  if (code && $('#orderSearch')) {
+    $('#orderSearch').value = code;
+  }
+
   await loadOrders();
   await loadPayments();
 
   $('#orderSearch')?.addEventListener('input', loadOrders);
   $('#paymentSearch')?.addEventListener('input', loadPayments);
 }
+
 
 async function loadOrders() {
   const [ordersRes, profilesRes, couriersRes, paymentsRes, itemsRes] = await Promise.all([
@@ -676,7 +735,8 @@ async function loadOrders() {
   const makeCourierOptions = (selectedId = '') => activeCouriers.map((courier) => {
     const p = courier.profile || {};
     const name = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email || 'Kuryer';
-    return `<option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${esc(name)}${courier.vehicle_plate ? ` • ${esc(courier.vehicle_plate)}` : ''}</option>`;
+    const phone = p.phone ? ` • ${p.phone}` : '';
+    return `<option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${esc(name)}${phone}${courier.vehicle_plate ? ` • ${esc(courier.vehicle_plate)}` : ''}</option>`;
   }).join('');
 
   let rows = ordersRes.data || [];
@@ -713,13 +773,16 @@ async function loadOrders() {
         </td>
         <td>${statusBadge(order.status)}</td>
         <td>${payBadge(order.payment_status)}</td>
-        <td><b>${money(order.total_amount)}</b><small class="muted">${itemsMap.get(order.id)?.length || 0} məhsul</small></td>
+        <td class="admin-money-cell">
+          <b>${money(order.total_amount)}</b>
+          <small>${itemsMap.get(order.id)?.length || 0} məhsul</small>
+        </td>
         <td>
           <select class="assign" data-id="${order.id}">
             <option value="">Kuryer seç</option>
             ${makeCourierOptions(order.courier_id)}
           </select>
-          <small class="muted">${courier.first_name || courier.email || ''}</small>
+          <small class="muted">${esc(fullName(courier))}</small>
         </td>
         <td>
           <div class="action-row">
@@ -822,8 +885,14 @@ async function loadPayments() {
 
   $('#paymentsTable').innerHTML = rows.map((payment) => `
     <tr>
-      <td><b>${esc(payment.orders?.order_code || '—')}</b><small class="muted">${formatDate(payment.created_at)}</small></td>
-      <td>${esc(payment.provider || payment.orders?.payment_method || '—')}<small class="muted">${esc(payment.transaction_ref || '')}</small></td>
+      <td>
+        <b>${esc(payment.orders?.order_code || '—')}</b>
+        <small class="muted">${formatDate(payment.created_at)}</small>
+      </td>
+      <td>
+        <b>${esc(methodAz(payment.provider || payment.orders?.payment_method))}</b>
+        <small class="muted">${esc(payment.transaction_ref || '')}</small>
+      </td>
       <td><b>${money(payment.amount)}</b></td>
       <td>${payBadge(payment.status)}</td>
       <td>${payment.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
@@ -861,6 +930,14 @@ async function usersReviews() {
 async function loadUsers() {
   const search = ($('#userSearch')?.value || '').toLowerCase();
 
+  const { data: setting } = await supabase
+  .from('site_settings')
+  .select('setting_value')
+  .eq('setting_key', 'master_admin_email')
+  .maybeSingle();
+
+  const masterEmail = setting?.setting_value || 'meyveci@proton.me';
+
   const [{ data: users }, { data: orders }] = await Promise.all([
     supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500),
     supabase.from('orders').select('id,user_id,total_amount,status'),
@@ -884,14 +961,19 @@ async function loadUsers() {
         </td>
         <td><small>${esc([user.city_region, user.address_line, user.apartment, user.door_code].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</small></td>
         <td>
-          <select class="role" data-id="${user.id}">
+          <select class="role" data-id="${user.id}" ${user.email === masterEmail && adminProfile?.email !== masterEmail ? 'disabled' : ''}>
             <option value="user" ${user.role === 'user' ? 'selected' : ''}>Müştəri</option>
             <option value="courier" ${user.role === 'courier' ? 'selected' : ''}>Kuryer</option>
             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
         </td>
         <td>${activeSwitch(user.id, user.is_active !== false, 'toggle-user-active', 'profiles')}</td>
-        <td>${user.is_online ? '<span class="mini-badge mini-green">Online</span>' : '<span class="mini-badge mini-red">Offline</span>'}</td>
+        <td>
+          ${isReallyOnline(user)
+            ? '<span class="mini-badge mini-green"><span class="admin-online-dot online"></span>Online</span>'
+            : '<span class="mini-badge mini-red"><span class="admin-online-dot offline"></span>Offline</span>'
+          }
+        </td>
         <td>${orderCount.get(user.id) || 0}</td>
         <td>${formatDate(user.created_at)}</td>
         <td>
@@ -931,18 +1013,29 @@ function bindUserEvents() {
   $$('.view-user').forEach((btn) => {
     btn.addEventListener('click', () => {
       const u = JSON.parse(btn.dataset.row);
-      openAdminModal('İstifadəçi detalları', `
-        <div class="admin-detail-grid">
-          <div class="admin-detail-box"><b>Ad Soyad</b><span>${esc(`${u.first_name || ''} ${u.last_name || ''}`.trim())}</span></div>
-          <div class="admin-detail-box"><b>Email</b><span>${esc(u.email)}</span></div>
-          <div class="admin-detail-box"><b>Telefon</b><span>${esc(u.phone)}</span></div>
-          <div class="admin-detail-box"><b>Rol</b><span>${esc(u.role)}</span></div>
-          <div class="admin-detail-box"><b>Status</b><span>${u.is_active !== false ? 'Aktiv' : 'Passiv'}</span></div>
-          <div class="admin-detail-box"><b>Son giriş</b><span>${formatDate(u.last_seen)}</span></div>
-          <div class="admin-detail-box admin-detail-full"><b>Ünvan</b><span>${esc([u.city_region, u.address_line, u.apartment, u.door_code].filter(Boolean).join(', '))}</span></div>
-          <div class="admin-detail-box admin-detail-full"><b>Bio</b><span>${esc(u.bio || 'Qeyd yoxdur')}</span></div>
+    openAdminModal('İstifadəçi detalları', `
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+        <img class="admin-detail-profile-img" src="${u.avatar_url || PLACEHOLDER}" alt="${esc(fullName(u))}">
+        <div>
+          <h2 style="margin:0;">${esc(fullName(u))}</h2>
+          <p class="muted" style="margin:4px 0 0;">${esc(u.email || '')}</p>
         </div>
-      `);
+      </div>
+    
+      <div class="admin-detail-grid">
+        <div class="admin-detail-box"><b>Ad Soyad</b><span>${esc(`${u.first_name || ''} ${u.last_name || ''}`.trim())}</span></div>
+        <div class="admin-detail-box"><b>Email</b><span>${esc(u.email)}</span></div>
+        <div class="admin-detail-box"><b>Telefon</b><span>${esc(u.phone)}</span></div>
+        <div class="admin-detail-box"><b>Rol</b><span>${esc(u.role)}</span></div>
+        <div class="admin-detail-box"><b>Status</b><span>${u.is_active !== false ? 'Aktiv' : 'Passiv'}</span></div>
+        <div class="admin-detail-box"><b>Online</b><span>${isReallyOnline(u) ? 'Online' : 'Offline'}</span></div>
+        <div class="admin-detail-box"><b>Son giriş</b><span>${formatDate(u.last_seen)}</span></div>
+        <div class="admin-detail-box"><b>Qeydiyyat</b><span>${formatDate(u.created_at)}</span></div>
+        <div class="admin-detail-box admin-detail-full"><b>Ünvan</b><span>${esc([u.city_region, u.address_line, u.apartment, u.door_code].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</span></div>
+        <div class="admin-detail-box admin-detail-full"><b>Koordinat</b><span>${esc([u.lat, u.lng].filter(Boolean).join(', ') || 'GPS yoxdur')}</span></div>
+        <div class="admin-detail-box admin-detail-full"><b>Bio</b><span>${esc(u.bio || 'Qeyd yoxdur')}</span></div>
+      </div>
+    `);
     });
   });
 }
@@ -1043,6 +1136,7 @@ async function loadContent(table) {
       </div>
       <div class="action-row">
         ${activeSwitch(item.id, item.is_active, 'toggle-active', table)}
+        <button class="btn btn-soft btn-mini view-content" data-table="${table}" data-row="${rowAttr(item)}">Bax</button>
         <button class="btn btn-soft btn-mini edit-content" data-table="${table}" data-row="${rowAttr(item)}">Redaktə</button>
         <button class="btn btn-danger btn-mini del-content" data-table="${table}" data-id="${item.id}">Sil</button>
       </div>
@@ -1067,6 +1161,27 @@ async function loadContent(table) {
     });
   });
 
+
+  $$('.view-content').forEach((button) => {
+  button.addEventListener('click', () => {
+    const item = JSON.parse(button.dataset.row);
+    const title = item.title || item.name || 'Başlıqsız';
+
+    openAdminModal(title, `
+      <img class="admin-content-preview-img" src="${item.image_url || PLACEHOLDER}" alt="${esc(title)}">
+      <div class="admin-detail-grid">
+        <div class="admin-detail-box admin-detail-full"><b>Başlıq / Ad</b><span>${esc(title)}</span></div>
+        <div class="admin-detail-box"><b>Status</b><span>${item.is_active ? 'Aktiv' : 'Passiv'}</span></div>
+        <div class="admin-detail-box"><b>Sıra</b><span>${safe(item.sort_order, 0)}</span></div>
+        <div class="admin-detail-box admin-detail-full"><b>Link</b><span>${esc(item.link_url || 'Link yoxdur')}</span></div>
+        <div class="admin-detail-box admin-detail-full"><b>Qısa mətn</b><span>${esc(item.excerpt || 'Yoxdur')}</span></div>
+        <div class="admin-detail-box admin-detail-full"><b>Geniş mətn</b><span>${esc(item.body || 'Yoxdur')}</span></div>
+      </div>
+    `);
+  });
+});
+
+  
   $$('.toggle-active').forEach((input) => input.addEventListener('change', toggleActive));
 }
 
