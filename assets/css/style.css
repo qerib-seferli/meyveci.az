@@ -1640,8 +1640,8 @@ BANNER
 
 /* Çiyələk icon — böyüdü */
 .bottom-nav .home-logo {
-  width: 60px !important;
-  height: 60px !important;
+  width: 48px !important;
+  height: 48px !important;
   margin-top: 0 !important;
   position: relative;
   z-index: 5;
@@ -1712,8 +1712,8 @@ BANNER
   }
 
   .bottom-nav .home-logo {
-    width: 56px !important;
-    height: 56px !important;
+    width: 44px !important;
+    height: 44px !important;
   }
 }
 
