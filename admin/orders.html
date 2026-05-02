@@ -26,23 +26,57 @@
         </nav>
       </aside>
 
-      <section class="grid">
-        <h1>Sifarişlər və ödənişlər</h1>
-        <div class="tabs-wrap">
-          <div class="tabs">
-            <button class="tab active" data-tab="ordersPanel">Sifarişlər</button>
-            <button class="tab" data-tab="paymentsPanel">Ödənişlər</button>
+        <section class="admin-main">
+          <div class="admin-hero">
+            <div>
+              <span class="admin-eyebrow">Sifariş mərkəzi</span>
+              <h1>Sifarişlər və ödənişlər</h1>
+              <p>Müştəri, ünvan, ödəniş, kuryer təyinatı və status idarəsi.</p>
+            </div>
           </div>
-
-          <section id="ordersPanel" class="tab-panel active card">
-            <div class="table-wrap"><table><thead><tr><th>Kod</th><th>Müştəri</th><th>Telefon</th><th>Ünvan</th><th>Status</th><th>Ödəniş</th><th>Məbləğ</th><th>Kuryer</th><th>Əməliyyat</th></tr></thead><tbody id="ordersTable"></tbody></table></div>
-          </section>
-
-          <section id="paymentsPanel" class="tab-panel card">
-            <div class="table-wrap"><table><thead><tr><th>Sifariş</th><th>Tip</th><th>Məbləğ</th><th>Status</th><th>Çek</th><th>Əməliyyat</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
-          </section>
-        </div>
-      </section>
+        
+          <div class="tabs-wrap">
+            <div class="tabs">
+              <button class="tab active" data-tab="ordersPanel">Sifarişlər</button>
+              <button class="tab" data-tab="paymentsPanel">Ödənişlər</button>
+            </div>
+        
+            <section id="ordersPanel" class="tab-panel active card pro-card">
+              <div class="admin-table-toolbar">
+                <h2>Sifarişlər</h2>
+                <input id="orderSearch" class="admin-search" type="search" placeholder="Kod, müştəri, telefon axtar...">
+              </div>
+              <div class="table-wrap">
+                <table class="pro-table">
+                  <thead>
+                    <tr>
+                      <th>Kod</th><th>Müştəri</th><th>Ünvan</th><th>Status</th><th>Ödəniş</th><th>Məbləğ</th><th>Kuryer</th><th>Əməliyyat</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTable"></tbody>
+                </table>
+              </div>
+            </section>
+        
+            <section id="paymentsPanel" class="tab-panel card pro-card">
+              <div class="admin-table-toolbar">
+                <h2>Ödənişlər</h2>
+                <input id="paymentSearch" class="admin-search" type="search" placeholder="Sifariş, tip, status axtar...">
+              </div>
+              <div class="table-wrap">
+                <table class="pro-table">
+                  <thead>
+                    <tr>
+                      <th>Sifariş</th><th>Tip</th><th>Məbləğ</th><th>Status</th><th>Çek</th><th>Əməliyyat</th>
+                    </tr>
+                  </thead>
+                  <tbody id="paymentsTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+      
     </div>
   </main>
 
