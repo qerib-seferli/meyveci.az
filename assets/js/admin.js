@@ -351,6 +351,8 @@ async function loadCourierMonitor() {
     });
   });
 
+  fitAllCourierMarkers();
+  
   setTimeout(() => {
     courierMap?.invalidateSize();
   }, 250);
@@ -371,23 +373,31 @@ function initCourierAdminMap() {
   setTimeout(() => courierMap.invalidateSize(), 150);
 }
 
+
 function updateCourierMarker(courier, profile, device, location) {
   if (!courierMap || !location?.lat || !location?.lng) return;
 
   const lat = Number(location.lat);
   const lng = Number(location.lng);
+
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-  const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Kuryer';
+  const name = fullName(profile);
+  const online = isReallyOnline(profile, device);
+
   const popup = `
     <b>${esc(name)}</b><br>
-    🔋 ${safe(device.battery_level, '?')}%<br>
-    🌐 ${safe(device.network_status, 'bilinmir')}<br>
-    GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}
+    ${online ? '🟢 Online' : '🔴 Offline'}<br>
+    📞 ${esc(profile.phone || 'Telefon yoxdur')}<br>
+    🔋 ${device?.battery_level ?? 'dəstək yoxdur'}${device?.battery_level ? '%' : ''}<br>
+    🌐 ${online ? 'internet var' : 'bilinmir'}<br>
+    📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}
   `;
 
   if (courierMarkers.has(courier.user_id)) {
-    courierMarkers.get(courier.user_id).setLatLng([lat, lng]).setPopupContent(popup);
+    const marker = courierMarkers.get(courier.user_id);
+    animateMarkerTo(marker, [lat, lng]);
+    marker.setPopupContent(popup);
     return;
   }
 
@@ -400,6 +410,7 @@ function updateCourierMarker(courier, profile, device, location) {
   const marker = L.marker([lat, lng], { icon }).addTo(courierMap).bindPopup(popup);
   courierMarkers.set(courier.user_id, marker);
 }
+
 
 async function generateCourierAlerts(couriers, profileMap, deviceMap, locationMap) {
   for (const courier of couriers) {
@@ -1315,8 +1326,8 @@ function subscribeAdminRealtime() {
       if (document.body.dataset.page === 'admin-orders') loadPayments();
       if (document.body.dataset.page === 'admin-dashboard') loadDashboardKpis();
     })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, () => {
-      if (document.body.dataset.page === 'admin-dashboard') loadCourierMonitor();
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, (payload) => {
+      if (document.body.dataset.page === 'admin-dashboard') handleCourierLocationRealtime(payload.new);
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_device_status' }, () => {
       if (document.body.dataset.page === 'admin-dashboard') loadCourierMonitor();
@@ -1350,3 +1361,87 @@ function initAdminSoundUnlock() {
   document.addEventListener('pointerdown', unlock, { once: true });
   document.addEventListener('keydown', unlock, { once: true });
 }
+
+
+function animateMarkerTo(marker, targetLatLng) {
+  const start = marker.getLatLng();
+  const end = L.latLng(targetLatLng[0], targetLatLng[1]);
+
+  const duration = 900;
+  const startTime = performance.now();
+
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+
+    const lat = start.lat + (end.lat - start.lat) * progress;
+    const lng = start.lng + (end.lng - start.lng) * progress;
+
+    marker.setLatLng([lat, lng]);
+
+    if (progress < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+}
+
+function fitAllCourierMarkers() {
+  if (!courierMap || courierMarkers.size === 0) return;
+
+  const points = [...courierMarkers.values()].map((marker) => marker.getLatLng());
+
+  if (points.length === 1) {
+    courierMap.setView(points[0], 13);
+    return;
+  }
+
+  courierMap.fitBounds(L.latLngBounds(points), {
+    padding: [45, 45],
+    maxZoom: 12,
+  });
+}
+
+
+async function handleCourierLocationRealtime(location) {
+  if (!location?.courier_id || !location.lat || !location.lng) return;
+
+  const [{ data: profile }, { data: device }, { data: courier }] = await Promise.all([
+    supabase.from('profiles').select('id,first_name,last_name,email,phone,avatar_url,is_online,last_seen,role').eq('id', location.courier_id).maybeSingle(),
+    supabase.from('courier_device_status').select('*').eq('courier_id', location.courier_id).maybeSingle(),
+    supabase.from('couriers').select('*').eq('user_id', location.courier_id).maybeSingle(),
+  ]);
+
+  if (!courier?.is_active || profile?.role !== 'courier') return;
+
+  updateCourierMarker(courier, profile || {}, device || {}, location);
+
+  const card = document.querySelector(`.focus-courier[data-courier-id="${location.courier_id}"]`);
+  if (card) {
+    const online = isReallyOnline(profile || {}, device || {});
+    const heartbeatAge = device?.last_heartbeat
+      ? Math.round((Date.now() - new Date(device.last_heartbeat).getTime()) / 1000)
+      : null;
+
+    card.innerHTML = `
+      <img class="admin-avatar" src="${profile?.avatar_url || PLACEHOLDER}" alt="${esc(fullName(profile || {}))}">
+      <span>
+        <b><span class="admin-online-dot ${online ? 'online' : 'offline'}"></span>${esc(fullName(profile || {}))}</b>
+        <small>${esc(profile?.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatAge === null ? 'yoxdur' : `${heartbeatAge} san əvvəl`}</small>
+      </span>
+      <div class="admin-device-mini">
+        <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
+        <span class="mini-badge ${
+          device?.battery_level === null || device?.battery_level === undefined
+            ? 'mini-blue'
+            : Number(device.battery_level) <= 15
+              ? 'mini-red'
+              : 'mini-green'
+        }">
+          🔋 ${device?.battery_level === null || device?.battery_level === undefined ? 'dəstək yoxdur' : `${device.battery_level}%`}
+        </span>
+        <span class="mini-badge ${online ? 'mini-green' : 'mini-blue'}">🌐 ${online ? 'internet var' : 'bilinmir'}</span>
+        <span class="mini-badge mini-green">📍 GPS var</span>
+      </div>
+    `;
+  }
+}
+
