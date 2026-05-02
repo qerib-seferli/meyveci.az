@@ -23,6 +23,7 @@ import { initLayout } from './layout.js';
 let adminProfile = null;
 let courierMap = null;
 let courierMarkers = new Map();
+let adminSoundReady = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initTabs();
   initAdminModal();
+  initAdminSoundUnlock();
 
   const page = document.body.dataset.page;
 
@@ -517,9 +519,9 @@ function playAdminSound() {
     audio.currentTime = 0;
     audio.volume = 0.85;
 
-    audio.play().catch(() => {
-      console.warn('Səs üçün əvvəlcə səhifəyə klik edilməlidir.');
-    });
+    if (adminSoundReady) {
+      audio.play().catch(() => {});
+    }
   } catch (error) {
     console.warn('Admin alarm səsi işləmədi:', error.message);
   }
@@ -1324,4 +1326,27 @@ function subscribeAdminRealtime() {
       playAdminSound();
     })
     .subscribe();
+}
+
+
+function initAdminSoundUnlock() {
+  const unlock = async () => {
+    const audio = $('#adminNotifyAudio');
+    if (!audio) return;
+
+    try {
+      audio.src = '../assets/sounds/courier-alarm.mp3';
+      audio.volume = 0;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 0.85;
+      adminSoundReady = true;
+    } catch {
+      adminSoundReady = false;
+    }
+  };
+
+  document.addEventListener('pointerdown', unlock, { once: true });
+  document.addEventListener('keydown', unlock, { once: true });
 }
