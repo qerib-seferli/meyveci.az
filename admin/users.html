@@ -14,10 +14,58 @@
 <body data-page="admin-users">
   <main class="app-shell"><div class="admin-layout">
     <aside class="sidebar card"><b>Admin panel</b><nav class="side-nav" style="margin-top: 12px;"><a class="side-link" href="index.html">📊 Dashboard</a><a class="side-link" href="catalog.html">🥝 Kataloq</a><a class="side-link" href="orders.html">📦 Sifarişlər</a><a class="side-link" href="users.html">👥 İstifadəçilər</a><a class="side-link" href="content.html">📰 Kontent</a><a class="side-link" href="../index.html">🏠 Sayta qayıt</a></nav></aside>
-    <section class="grid"><h1>İstifadəçilər və rəylər</h1><div class="tabs-wrap"><div class="tabs"><button class="tab active" data-tab="usersPanel">İstifadəçilər</button><button class="tab" data-tab="reviewsPanel">Rəylər</button></div>
-      <section id="usersPanel" class="tab-panel active card"><div class="table-wrap"><table><thead><tr><th>İstifadəçi</th><th>Ünvan</th><th>Rol</th><th>Status</th><th>Əməliyyat</th></tr></thead><tbody id="usersTable"></tbody></table></div></section>
-      <section id="reviewsPanel" class="tab-panel card"><div class="table-wrap"><table><thead><tr><th>Məhsul</th><th>Reytinq</th><th>Rəy</th><th>Status</th><th>Əməliyyat</th></tr></thead><tbody id="reviewsTable"></tbody></table></div></section>
-    </div></section>
+
+<section class="admin-main">
+  <div class="admin-hero">
+    <div>
+      <span class="admin-eyebrow">İstifadəçi idarəsi</span>
+      <h1>İstifadəçilər və rəylər</h1>
+      <p>Rol, status, müştəri məlumatı, kuryer aktivliyi və rəy moderasiyası.</p>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab active" data-tab="usersPanel">İstifadəçilər</button>
+      <button class="tab" data-tab="reviewsPanel">Rəylər</button>
+    </div>
+
+    <section id="usersPanel" class="tab-panel active card pro-card">
+      <div class="admin-table-toolbar">
+        <h2>İstifadəçilər</h2>
+        <input id="userSearch" class="admin-search" type="search" placeholder="Ad, email, telefon, rol axtar...">
+      </div>
+      <div class="table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>İstifadəçi</th><th>Ünvan</th><th>Rol</th><th>Status</th><th>Online</th><th>Sifariş sayı</th><th>Tarix</th><th>Əməliyyat</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reviewsPanel" class="tab-panel card pro-card">
+      <div class="admin-table-toolbar">
+        <h2>Rəylər</h2>
+        <input id="reviewSearch" class="admin-search" type="search" placeholder="Məhsul, müştəri, rəy axtar...">
+      </div>
+      <div class="table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Məhsul</th><th>Reytinq</th><th>Rəy</th><th>Status</th><th>Tarix</th><th>Əməliyyat</th>
+            </tr>
+          </thead>
+          <tbody id="reviewsTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>
+    
   </div></main><script type="module" src="../assets/js/admin.js"></script>
 </body>
 </html>
