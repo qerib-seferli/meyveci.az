@@ -132,10 +132,10 @@ function fullName(profile = {}) {
 
 function isReallyOnline(profile = {}, device = null) {
   const lastSeen = profile.last_seen ? new Date(profile.last_seen).getTime() : 0;
-  const profileOnline = profile.is_online === true && Date.now() - lastSeen <= 90000;
-
   const heartbeat = device?.last_heartbeat ? new Date(device.last_heartbeat).getTime() : 0;
-  const deviceOnline = heartbeat && Date.now() - heartbeat <= 130000;
+
+  const profileOnline = profile.is_online === true && Date.now() - lastSeen <= 10 * 60 * 1000;
+  const deviceOnline = heartbeat && Date.now() - heartbeat <= 15 * 60 * 1000;
 
   return Boolean(profileOnline || deviceOnline);
 }
@@ -408,7 +408,7 @@ async function generateCourierAlerts(couriers, profileMap, deviceMap, locationMa
 
     if (device.last_heartbeat) {
       const diff = Date.now() - new Date(device.last_heartbeat).getTime();
-      if (diff > 120000) {
+      if (diff > 15 * 60 * 1000) {
         await createAlertOnce('courier_offline', courier.user_id, null, 'critical', 'Kuryer ilə əlaqə kəsildi', `${name} son 2 dəqiqə ərzində heartbeat göndərməyib.`);
       }
     }
@@ -423,7 +423,7 @@ async function generateCourierAlerts(couriers, profileMap, deviceMap, locationMa
 
     if (loc.updated_at) {
       const diff = Date.now() - new Date(loc.updated_at).getTime();
-      if (diff > 300000) {
+      if (diff > 20 * 60 * 1000) {
         await createAlertOnce('idle_location', courier.user_id, loc.order_id, 'medium', 'Kuryer lokasiyası yenilənmir', `${name} son 5 dəqiqə ərzində GPS yeniləməyib.`);
       }
     }
@@ -469,14 +469,21 @@ async function loadAdminAlerts() {
 
   const critical = (data || []).filter((a) => a.severity === 'critical');
 
-  if (critical.length) {
-    $('#adminAlertBar')?.classList.remove('hide');
-    $('#adminAlertBar').textContent = `🚨 ${critical.length} kritik xəbərdarlıq var. Alert mərkəzinə baxın.`;
-    playAdminSound();
-  } else {
-    $('#adminAlertBar')?.classList.add('hide');
-  }
-
+  
+    if (critical.length) {
+      $('#adminAlertBar')?.classList.remove('hide');
+      $('#adminAlertBar').textContent = `${critical.length} kritik xəbərdarlıq var. Alert mərkəzinə baxın.`;
+    
+      if (!window.__adminCriticalAlarmPlayed) {
+        window.__adminCriticalAlarmPlayed = true;
+        playAdminSound();
+      }
+    } else {
+      window.__adminCriticalAlarmPlayed = false;
+      $('#adminAlertBar')?.classList.add('hide');
+    }
+  
+  
   $('#adminAlertsList').innerHTML = (data || []).map((alert) => `
     <div class="admin-alert-card ${alert.severity === 'critical' ? 'critical' : ''}">
       <b>${esc(alert.title)}</b>
@@ -503,9 +510,18 @@ async function loadAdminAlerts() {
 
 function playAdminSound() {
   try {
-    $('#adminNotifyAudio')?.play?.().catch(() => playNotifySound());
-  } catch {
-    playNotifySound();
+    const audio = $('#adminNotifyAudio');
+    if (!audio) return;
+
+    audio.src = '../assets/sounds/courier-alarm.mp3';
+    audio.currentTime = 0;
+    audio.volume = 0.85;
+
+    audio.play().catch(() => {
+      console.warn('Səs üçün əvvəlcə səhifəyə klik edilməlidir.');
+    });
+  } catch (error) {
+    console.warn('Admin alarm səsi işləmədi:', error.message);
   }
 }
 
@@ -997,7 +1013,13 @@ async function loadUsers() {
             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
         </td>
-        <td>${activeSwitch(user.id, user.is_active !== false, 'toggle-user-active', 'profiles')}</td>
+        <td>
+          ${
+            user.email === masterEmail && adminProfile?.email !== masterEmail
+              ? '<span class="mini-badge mini-yellow">Əsas admin qorunur</span>'
+              : activeSwitch(user.id, user.is_active !== false, 'toggle-user-active', 'profiles')
+          }
+        </td>
         <td>
           ${isReallyOnline(user)
             ? '<span class="mini-badge mini-green"><span class="admin-online-dot online"></span>Online</span>'
@@ -1029,9 +1051,12 @@ function bindUserEvents() {
       }
 
       if (!error && select.value !== 'courier') {
-        await supabase.from('couriers').update({ is_active: false, is_online: false }).eq('user_id', userId);
+        await supabase
+          .from('couriers')
+          .update({ is_active: false, is_online: false, updated_at: new Date().toISOString() })
+          .eq('user_id', userId);
       }
-
+      
       toast(error ? error.message : 'Rol dəyişdi');
       select.disabled = false;
       loadUsers();
