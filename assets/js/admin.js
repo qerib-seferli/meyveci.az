@@ -388,8 +388,7 @@ function updateCourierMarker(courier, profile, device, location) {
   const popup = `
     <b>${esc(name)}</b><br>
     ${online ? '🟢 Online' : '🔴 Offline'}<br>
-    📞 ${esc(profile.phone || 'Telefon yoxdur')}<br>
-    🔋 ${device?.battery_level ?? 'dəstək yoxdur'}${device?.battery_level ? '%' : ''}<br>
+    🔋 ${device?.battery_level ?? 'dəstək yoxdur'}${device?.battery_level ? '%' : ''}
     🌐 ${online ? 'internet var' : 'bilinmir'}<br>
     📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}
   `;
