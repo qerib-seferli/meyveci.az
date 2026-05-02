@@ -14,10 +14,96 @@
 <body data-page="admin-catalog">
   <main class="app-shell"><div class="admin-layout">
     <aside class="sidebar card"><b>Admin panel</b><nav class="side-nav" style="margin-top: 12px;"><a class="side-link" href="index.html">📊 Dashboard</a><a class="side-link" href="catalog.html">🥝 Kataloq</a><a class="side-link" href="orders.html">📦 Sifarişlər</a><a class="side-link" href="users.html">👥 İstifadəçilər</a><a class="side-link" href="content.html">📰 Kontent</a><a class="side-link" href="../index.html">🏠 Sayta qayıt</a></nav></aside>
-    <section class="grid"><div class="section-head"><h1>Məhsullar və kateqoriyalar</h1></div><div class="tabs-wrap"><div class="tabs"><button class="tab active" data-tab="productsPanel">Məhsullar</button><button class="tab" data-tab="catsPanel">Kateqoriyalar</button></div>
-      <section id="productsPanel" class="tab-panel active card"><h2>Məhsul əlavə/redaktə</h2><form id="productForm" class="form-grid"><input type="hidden" name="id"><input name="name" placeholder="Ad" required><input name="slug" placeholder="Slug"><select id="productCategory" name="category_id"></select><input name="price" type="number" step="0.01" placeholder="Qiymət"><input name="old_price" type="number" step="0.01" placeholder="Köhnə qiymət"><input name="stock_quantity" type="number" placeholder="Stok"><input name="unit" placeholder="Ölçü vahidi"><input name="image_url" placeholder="Şəkil linki"><input id="productImage" type="file" accept="image/*"><select name="status"><option value="active">Aktiv</option><option value="inactive">Passiv</option></select><label><input type="checkbox" name="is_featured"> Seçilmiş</label><textarea class="full" name="short_description" placeholder="Qısa açıqlama"></textarea><textarea class="full" name="description" placeholder="Ətraflı açıqlama"></textarea><button class="btn btn-primary">Saxla</button><button id="newProduct" type="button" class="btn btn-soft">Yeni</button></form><div class="table-wrap"><table><thead><tr><th>Şəkil</th><th>Məhsul</th><th>Qiymət</th><th>Stok</th><th>Status</th><th>Əməliyyat</th></tr></thead><tbody id="productTable"></tbody></table></div></section>
-      <section id="catsPanel" class="tab-panel card"><h2>Kateqoriya əlavə/redaktə</h2><form id="catForm" class="form-grid"><input type="hidden" name="id"><input name="name" placeholder="Ad" required><input name="slug" placeholder="Slug"><input name="sort_order" type="number" placeholder="Sıra"><label><input type="checkbox" name="is_active" checked> Aktiv</label><textarea class="full" name="description" placeholder="Açıqlama"></textarea><button class="btn btn-primary">Saxla</button><button id="newCat" type="button" class="btn btn-soft">Yeni</button></form><div class="table-wrap"><table><thead><tr><th>Ad</th><th>Slug</th><th>Sıra</th><th>Status</th><th>Əməliyyat</th></tr></thead><tbody id="catTable"></tbody></table></div></section>
-    </div></section>
+
+  <section class="admin-main">
+  <div class="admin-hero">
+    <div>
+      <span class="admin-eyebrow">Kataloq idarəsi</span>
+      <h1>Məhsullar və kateqoriyalar</h1>
+      <p>Məhsul, kateqoriya, şəkil, stok, qiymət və aktiv/passiv idarəsi.</p>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab active" data-tab="productsPanel">Məhsullar</button>
+      <button class="tab" data-tab="catsPanel">Kateqoriyalar</button>
+    </div>
+
+    <section id="productsPanel" class="tab-panel active card pro-card">
+      <div class="section-head"><h2>Məhsul əlavə/redaktə</h2></div>
+
+      <form id="productForm" class="form-grid">
+        <input type="hidden" name="id">
+        <input name="name" placeholder="Məhsul adı" required>
+        <input name="slug" placeholder="Slug">
+        <select id="productCategory" name="category_id"></select>
+        <input name="price" type="number" step="0.01" placeholder="Qiymət">
+        <input name="old_price" type="number" step="0.01" placeholder="Köhnə qiymət">
+        <input name="stock_quantity" type="number" placeholder="Stok">
+        <input name="unit" placeholder="Ölçü vahidi">
+        <input name="image_url" placeholder="Şəkil linki">
+        <label class="gallery-field">🖼️ Qalereyadan məhsul şəkli seç <input id="productImage" type="file" accept="image/*"></label>
+        <select name="status"><option value="active">Aktiv</option><option value="inactive">Passiv</option></select>
+        <label class="gallery-field"><input type="checkbox" name="is_featured"> ⭐ Seçilmiş məhsul</label>
+        <textarea class="full" name="short_description" placeholder="Qısa açıqlama"></textarea>
+        <textarea class="full" name="description" placeholder="Ətraflı açıqlama"></textarea>
+        <button class="btn btn-primary">Saxla</button>
+        <button id="newProduct" type="button" class="btn btn-soft">Yeni məhsul</button>
+      </form>
+
+      <div class="admin-table-toolbar">
+        <h2>Məhsul siyahısı</h2>
+        <input id="productSearch" class="admin-search" type="search" placeholder="Məhsul axtar...">
+      </div>
+
+      <div class="table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Şəkil</th><th>Məhsul</th><th>Kateqoriya</th><th>Qiymət</th><th>Stok</th><th>Tip</th><th>Status</th><th>Tarix</th><th>Əməliyyat</th>
+            </tr>
+          </thead>
+          <tbody id="productTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="catsPanel" class="tab-panel card pro-card">
+      <div class="section-head"><h2>Kateqoriya əlavə/redaktə</h2></div>
+
+      <form id="catForm" class="form-grid">
+        <input type="hidden" name="id">
+        <input name="name" placeholder="Kateqoriya adı" required>
+        <input name="slug" placeholder="Slug">
+        <input name="sort_order" type="number" placeholder="Sıra">
+        <input name="image_url" placeholder="Şəkil linki">
+        <label class="gallery-field">🖼️ Kateqoriya şəkli seç <input id="catImage" type="file" accept="image/*"></label>
+        <label class="gallery-field"><input type="checkbox" name="is_active" checked> Aktiv</label>
+        <textarea class="full" name="description" placeholder="Açıqlama"></textarea>
+        <button class="btn btn-primary">Saxla</button>
+        <button id="newCat" type="button" class="btn btn-soft">Yeni kateqoriya</button>
+      </form>
+
+      <div class="admin-table-toolbar">
+        <h2>Kateqoriya siyahısı</h2>
+        <input id="categorySearch" class="admin-search" type="search" placeholder="Kateqoriya axtar...">
+      </div>
+
+      <div class="table-wrap">
+        <table class="pro-table">
+          <thead>
+            <tr>
+              <th>Kateqoriya</th><th>Slug</th><th>Sıra</th><th>Məhsul sayı</th><th>Status</th><th>Tarix</th><th>Əməliyyat</th>
+            </tr>
+          </thead>
+          <tbody id="catTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>
+    
   </div></main><script type="module" src="../assets/js/admin.js"></script>
 </body>
 </html>
