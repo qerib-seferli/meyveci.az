@@ -12,6 +12,7 @@ import {
   PLACEHOLDER,
   requireAuth,
   byId,
+  formData,
 } from './core.js';
 
 import { initLayout } from './layout.js';
@@ -523,3 +524,85 @@ function startCampaignRotation() {
     }, 80);
   }, 4000);  // Bannerlərin dəyişmə saniyəsin 4 saniyə etdim
 }
+
+
+//=========================================================
+// ==================== MƏHSUL RƏYLƏRİ ====================
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const form = document.querySelector('#reviewForm');
+    const productId = new URLSearchParams(location.search).get('id');
+    if (!form || !productId) return;
+
+    loadProductReviews(productId);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const { requireAuth, toast, supabase } = window.__dummy || {};
+    });
+  }, 800);
+});
+
+//=========================================================
+
+async function loadProductReviews(productId) {
+  const box = $('#productReviews');
+  if (!box) return;
+
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*,profiles(first_name,last_name,email,avatar_url)')
+    .eq('product_id', productId)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  if (error) {
+    box.innerHTML = `<span class="muted">${error.message}</span>`;
+    return;
+  }
+
+  box.innerHTML = (data || []).map((review) => {
+    const name = `${review.profiles?.first_name || ''} ${review.profiles?.last_name || ''}`.trim() || review.profiles?.email || 'Müştəri';
+    return `
+      <div class="compact-row">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <img class="preview-img customer-avatar" src="${review.profiles?.avatar_url || PLACEHOLDER}" alt="${name}">
+          <span>
+            <b>${name}</b><br>
+            <small>${'⭐'.repeat(Number(review.rating || 0))}</small><br>
+            <small class="muted">${review.review_text || ''}</small>
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('') || '<span class="muted">Bu məhsul üçün təsdiqlənmiş rəy yoxdur.</span>';
+}
+
+document.addEventListener('submit', async (event) => {
+  if (event.target?.id !== 'reviewForm') return;
+
+  event.preventDefault();
+
+  const productId = byId();
+  const activeUser = await requireAuth();
+  if (!activeUser || !productId) return;
+
+  const data = formData(event.target);
+
+  const { error } = await supabase.from('reviews').insert({
+    product_id: productId,
+    user_id: activeUser.id,
+    rating: Number(data.rating),
+    review_text: data.review_text,
+    status: 'pending',
+  });
+
+  toast(error ? error.message : 'Rəy göndərildi. Admin təsdiq etdikdən sonra görünəcək.');
+  event.target.reset();
+});
+
+//=========================================================
+
