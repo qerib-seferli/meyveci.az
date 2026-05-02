@@ -395,11 +395,18 @@ async function checkout(event) {
     if (error) throw error;
     
     await supabase
-      .from('orders')
-      .update({
-        city_region: data.city_region || null,
-      })
-      .eq('id', orderId);
+    .from('orders')
+    .update({
+      full_name: data.full_name || null,
+      phone: data.phone || null,
+      city_region: data.city_region || null,
+      address_text: data.address || null,
+      apartment: data.apartment || null,
+      door_code: data.door_code || null,
+      lat: data.lat ? Number(data.lat) : null,
+      lng: data.lng ? Number(data.lng) : null,
+    })
+    .eq('id', orderId);
     
     toast('Sifariş adminə göndərildi');
     
@@ -504,7 +511,6 @@ function orderCard(order, courier = null, courierLocation = null) {
             <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
               📍 Kuryeri izlə
             </button>
-            ${mapNavigationLinks(order.lat, order.lng)}
           </div>
         <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
         <p class="muted map-note" id="userMapNote-${order.id}">
@@ -687,7 +693,7 @@ async function drawRouteForOrder(orderId, from, to) {
   }
 
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson&steps=true`;
     const res = await fetch(url);
     const data = await res.json();
 
