@@ -502,7 +502,16 @@ function orderCard(order, courier = null, courierLocation = null) {
       </div>
 
       <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
-      <p><b>Ünvan:</b> ${[order.city_region, order.address_text, order.apartment, order.door_code].filter(Boolean).join(', ') || 'Ünvan qeyd edilməyib'}</p>
+
+      <p>
+        <b>Ünvan:</b>
+        ${[
+          order.city_region,
+          order.address_text,
+          order.apartment ? `Mənzil/blok: ${order.apartment}` : '',
+          order.door_code ? `Qapı kodu: ${order.door_code}` : '',
+        ].filter(Boolean).join(', ') || 'Ünvan qeyd edilməyib'}
+      </p>
 
       ${['delivered','cancelled'].includes(order.status) ? `
         <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
