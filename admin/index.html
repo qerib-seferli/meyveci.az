@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#16a34a">
   <link rel="icon" href="../assets/img/logo/Cilek-logo.png">
   <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,10 +15,10 @@
 <body data-page="admin-dashboard">
   <main class="app-shell">
     <div class="admin-layout">
-      <aside class="sidebar card">
-        <b>Admin panel</b>
-        <nav class="side-nav" style="margin-top: 12px;">
-          <a class="side-link" href="index.html">📊 Dashboard</a>
+      <aside class="sidebar card admin-sidebar">
+        <b>🍓 Meyvəçi.az Admin</b>
+        <nav class="side-nav">
+          <a class="side-link active" href="index.html">📊 Dashboard</a>
           <a class="side-link" href="catalog.html">🥝 Kataloq</a>
           <a class="side-link" href="orders.html">📦 Sifarişlər</a>
           <a class="side-link" href="users.html">👥 İstifadəçilər</a>
@@ -26,17 +27,51 @@
         </nav>
       </aside>
 
-      <section class="grid">
-        <div class="section-head"><h1>Dashboard</h1></div>
-        <div id="kpis" class="kpi-grid"></div>
-        <section class="card">
-          <h2>Son sifarişlər</h2>
-          <div id="recentOrders" class="compact-list"></div>
+      <section class="admin-main">
+        <div class="admin-hero">
+          <div>
+            <span class="admin-eyebrow">Canlı idarəetmə paneli</span>
+            <h1>Dashboard</h1>
+            <p>Satış, sifariş, ödəniş, kuryer və kritik xəbərdarlıqlar bir ekranda.</p>
+          </div>
+          <button id="adminRefreshBtn" class="btn btn-primary">🔄 Yenilə</button>
+        </div>
+
+        <div id="adminAlertBar" class="admin-alert-bar hide"></div>
+        <div id="kpis" class="pro-kpi-grid"></div>
+
+        <div class="admin-dashboard-grid">
+          <section class="card pro-card">
+            <div class="section-head">
+              <h2>🚚 Kuryer Live Monitor</h2>
+              <span class="muted">GPS / batareya / internet</span>
+            </div>
+            <div id="courierMap" class="admin-map"></div>
+            <div id="courierLiveList" class="admin-live-list"></div>
+          </section>
+
+          <section class="card pro-card">
+            <div class="section-head">
+              <h2>🚨 Alert Mərkəzi</h2>
+              <button id="resolveAlertsBtn" class="btn btn-soft">Hamısını oxundu et</button>
+            </div>
+            <div id="adminAlertsList" class="admin-alert-list"></div>
+          </section>
+        </div>
+
+        <section class="card pro-card">
+          <div class="section-head">
+            <h2>Son sifarişlər</h2>
+            <a href="orders.html" class="btn btn-soft">Hamısına bax</a>
+          </div>
+          <div id="recentOrders" class="pro-order-list"></div>
         </section>
       </section>
     </div>
   </main>
 
+  <audio id="adminNotifyAudio" src="../assets/sounds/notify.mp3" preload="auto"></audio>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="../assets/js/admin.js"></script>
 </body>
 </html>
