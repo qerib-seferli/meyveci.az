@@ -17,6 +17,7 @@ import {
 import { initLayout } from './layout.js';
 
 let activeCourier = null;
+let heartbeatTimer = null;
 let watchId = null;
 let courierPosition = null;
 const courierMaps = new Map();
@@ -51,9 +52,11 @@ async function toggleOnline(event) {
 
   if (isOnline) {
     startLocationSharing();
+    startCourierHeartbeat();
     toast('Kuryer online oldu');
   } else {
     stopLocationSharing();
+    stopCourierHeartbeat();
     toast('Kuryer offline oldu');
   }
 }
@@ -673,4 +676,65 @@ function subscribeCourierLive() {
       }
     })
     .subscribe();
+}
+
+
+
+//================================================================
+
+async function startCourierHeartbeat() {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+
+  await sendCourierHeartbeat();
+
+  heartbeatTimer = setInterval(() => {
+    sendCourierHeartbeat();
+  }, 30000);
+
+  window.addEventListener('online', sendCourierHeartbeat);
+  window.addEventListener('offline', sendCourierHeartbeat);
+}
+
+function stopCourierHeartbeat() {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  heartbeatTimer = null;
+}
+
+async function sendCourierHeartbeat() {
+  if (!activeCourier?.id) return;
+
+  let batteryLevel = null;
+  let isCharging = false;
+
+  try {
+    if (navigator.getBattery) {
+      const battery = await navigator.getBattery();
+      batteryLevel = Math.round(battery.level * 100);
+      isCharging = Boolean(battery.charging);
+    }
+  } catch {}
+
+  const networkStatus = navigator.onLine ? 'online' : 'offline';
+
+  await supabase
+    .from('courier_device_status')
+    .upsert({
+      courier_id: activeCourier.id,
+      battery_level: batteryLevel,
+      is_charging: isCharging,
+      is_online: navigator.onLine,
+      network_status: networkStatus,
+      last_heartbeat: new Date().toISOString(),
+      user_agent: navigator.userAgent,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'courier_id' });
+
+  await supabase
+    .from('couriers')
+    .upsert({
+      user_id: activeCourier.id,
+      is_online: navigator.onLine,
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
 }
