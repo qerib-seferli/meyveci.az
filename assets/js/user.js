@@ -347,7 +347,7 @@ async function checkout(event) {
   const receiptFile = $('#receiptFile')?.files?.[0];
 
   // Sifariş tamamlananda telefondan/browserdən lokasiya icazəsi istəyirik.
-  if (!data.lat || !data.lng) {
+  if (!data.lat || !data.lng || data.lat == 0 || data.lng == 0) {
     toast('Çatdırılma üçün lokasiya icazəsi istənir...');
     const locationPoint = await askLocation();
 
@@ -357,7 +357,18 @@ async function checkout(event) {
       if ($('#checkoutForm')?.lat) $('#checkoutForm').lat.value = locationPoint.lat;
       if ($('#checkoutForm')?.lng) $('#checkoutForm').lng.value = locationPoint.lng;
     }
-  }
+
+        if (!data.lat || !data.lng) {
+          const locationPoint = await askLocation();
+        
+          if (locationPoint) {
+            data.lat = Number(locationPoint.lat);
+            data.lng = Number(locationPoint.lng);
+          } else {
+            toast('Lokasiya alınmadı, xəritə düzgün işləməyə bilər');
+          }
+        }
+    }
 
   try {
     let receiptUrl = null;
@@ -572,11 +583,10 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
 
     if (!mapEl) return;
 
-    const center = validMapPoint(courierLat, courierLng)
-      ? [courierLat, courierLng]
-      : validMapPoint(customerLat, customerLng)
-        ? [customerLat, customerLng]
-        : [40.4093, 49.8671];
+  const center =
+  validMapPoint(courierLat, courierLng) ? [courierLat, courierLng] :
+  validMapPoint(customerLat, customerLng) ? [customerLat, customerLng] :
+  [40.4093, 49.8671];
 
     const map = L.map(mapEl, { zoomControl: false }).setView(center, 13);
 
@@ -693,16 +703,29 @@ function mapNavigationLinks(lat, lng) {
   `;
 }
 
+
 async function drawRouteForOrder(orderId, from, to) {
   const mapData = userOrderMaps.get(orderId);
   if (!mapData) return;
+
+  const fromLat = Number(from?.lat);
+  const fromLng = Number(from?.lng);
+  const toLat = Number(to?.lat);
+  const toLng = Number(to?.lng);
+
+  // ❗ ƏN VACİB FİX
+  if (!validMapPoint(fromLat, fromLng) || !validMapPoint(toLat, toLng)) {
+    console.warn('Route üçün koordinatlar səhvdir:', from, to);
+    return;
+  }
 
   if (mapData.routeLayer) {
     mapData.map.removeLayer(mapData.routeLayer);
   }
 
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson&steps=true`;
+    const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+
     const res = await fetch(url);
     const data = await res.json();
 
@@ -711,24 +734,12 @@ async function drawRouteForOrder(orderId, from, to) {
         style: { color: '#16a34a', weight: 5, opacity: 0.9 },
       }).addTo(mapData.map);
     } else {
-      mapData.routeLayer = L.polyline(
-        [[from.lat, from.lng], [to.lat, to.lng]],
-        { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
-      ).addTo(mapData.map);
+      fallbackLine(mapData, fromLat, fromLng, toLat, toLng);
     }
-
-    userOrderMaps.set(orderId, mapData);
   } catch (e) {
-    mapData.routeLayer = L.polyline(
-      [[from.lat, from.lng], [to.lat, to.lng]],
-      { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
-    ).addTo(mapData.map);
-
-    userOrderMaps.set(orderId, mapData);
+    fallbackLine(mapData, fromLat, fromLng, toLat, toLng);
   }
 }
-
-
 
 
 async function refreshUserCourierLocations() {
@@ -765,7 +776,7 @@ function updateUserCourierMarker(location) {
   const courierPoint = [courierLat, courierLng];
 
   if (mapData.courierMarker) {
-    mapData.courierMarker.setLatLng(courierPoint);
+    animateUserMarker(mapData.courierMarker, courierPoint);
   } else {
     mapData.courierMarker = L.marker(courierPoint, { icon: mapData.courierIcon })
       .addTo(mapData.map)
@@ -1720,3 +1731,36 @@ function closeImageZoom() {
 }
 
 /*===================================================================*/
+
+function fallbackLine(mapData, lat1, lng1, lat2, lng2) {
+  mapData.routeLayer = L.polyline(
+    [[lat1, lng1], [lat2, lng2]],
+    { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+  ).addTo(mapData.map);
+}
+
+/*===================================================================*/
+
+function animateUserMarker(marker, target) {
+  const start = marker.getLatLng();
+  const end = L.latLng(target[0], target[1]);
+
+  const duration = 800;
+  const startTime = performance.now();
+
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+
+    const lat = start.lat + (end.lat - start.lat) * progress;
+    const lng = start.lng + (end.lng - start.lng) * progress;
+
+    marker.setLatLng([lat, lng]);
+
+    if (progress < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+}
+
+/*===================================================================*/
+
