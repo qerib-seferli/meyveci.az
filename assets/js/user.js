@@ -432,8 +432,6 @@ async function checkout(event) {
 async function initOrders() {
   const activeUser = await requireAuth();
 
-  // Sifarişləri ayrıca, kuryer profilini ayrıca oxuyuruq.
-  // Bu üsul Supabase foreign key adı dəyişəndə də ekranın boş qalmasının qarşısını alır.
   const { data, error } = await supabase
     .from('orders')
     .select('*')
@@ -443,65 +441,89 @@ async function initOrders() {
 
   const courierIds = [...new Set((data || []).map((order) => order.courier_id).filter(Boolean))];
   const orderIds = [...new Set((data || []).map((order) => order.id).filter(Boolean))];
+  const addressIds = [...new Set((data || []).map((order) => order.address_id).filter(Boolean))];
 
-  const [{ data: couriers }, { data: locations }] = await Promise.all([
+  const [{ data: couriers }, { data: locations }, { data: addresses }] = await Promise.all([
     courierIds.length
       ? supabase.from('profiles').select('id,email,first_name,last_name,phone,avatar_url').in('id', courierIds)
       : Promise.resolve({ data: [] }),
+
     orderIds.length
       ? supabase.from('courier_locations').select('*').in('order_id', orderIds)
+      : Promise.resolve({ data: [] }),
+
+    addressIds.length
+      ? supabase.from('addresses').select('*').in('id', addressIds)
       : Promise.resolve({ data: [] }),
   ]);
 
   const couriersMap = new Map((couriers || []).map((courier) => [courier.id, courier]));
   const locationsMap = new Map((locations || []).map((location) => [location.order_id, location]));
+  const addressesMap = new Map((addresses || []).map((address) => [address.id, address]));
 
   $('#ordersList').innerHTML = error
     ? `<div class="card">${error.message}</div>`
-    : (data || []).map((order) => orderCard(order, couriersMap.get(order.courier_id), locationsMap.get(order.id))).join('') || '<div class="card">Sifariş yoxdur.</div>';
+    : (data || []).map((order) =>
+        orderCard(
+          order,
+          couriersMap.get(order.courier_id),
+          locationsMap.get(order.id),
+          addressesMap.get(order.address_id)
+        )
+      ).join('') || '<div class="card">Sifariş yoxdur.</div>';
 
   $$('.open-chat').forEach((button) => {
     button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
   });
 
-  // İstifadəçi yalnız admin təsdiq etməmiş sifarişi ləğv edə bilir.
   $$('.cancel-order').forEach((button) => {
     button.addEventListener('click', () => cancelOrder(button.dataset.id));
   });
-  // İstifadəçi də kuryeri izləmə butonu olsun.
+
   $$('.follow-user-courier').forEach((button) => {
-  button.addEventListener('click', () => {
-    const orderId = button.dataset.id;
-    const mapData = userOrderMaps.get(orderId);
+    button.addEventListener('click', () => {
+      const orderId = button.dataset.id;
+      const mapData = userOrderMaps.get(orderId);
 
-    if (!mapData || !mapData.courierMarker) {
-      toast('Kuryerin konumu hələ görünmür');
-      return;
-    }
+      if (!mapData || !mapData.courierMarker) {
+        toast('Kuryerin konumu hələ görünmür');
+        return;
+      }
 
-    mapData.followCourier = !mapData.followCourier;
-    button.classList.toggle('active-status', mapData.followCourier);
-    button.textContent = mapData.followCourier ? '📍 İzləmə aktivdir' : '📍 Kuryeri izlə';
+      mapData.followCourier = !mapData.followCourier;
+      button.classList.toggle('active-status', mapData.followCourier);
+      button.textContent = mapData.followCourier ? '📍 İzləmə aktivdir' : '📍 Kuryeri izlə';
 
-    if (mapData.followCourier) {
-      mapData.map.panTo(mapData.courierMarker.getLatLng(), {
-        animate: true,
-        duration: 0.8,
-      });
-    }
+      if (mapData.followCourier) {
+        mapData.map.panTo(mapData.courierMarker.getLatLng(), {
+          animate: true,
+          duration: 0.8,
+        });
+      }
 
-    userOrderMaps.set(orderId, mapData);
+      userOrderMaps.set(orderId, mapData);
+    });
   });
-});
-  
-  initUserOrderMaps(data || [], couriersMap, locationsMap);
+
+  initUserOrderMaps(data || [], couriersMap, locationsMap, addressesMap);
   subscribeOrderTracking(activeUser.id);
 }
 
-function orderCard(order, courier = null, courierLocation = null) {
-  const eta = estimateEta(order, courierLocation);
 
-  // Sifariş status ikonları xəritənin içində yox, status sözünün yanında göstərilir.
+function orderCard(order, courier = null, courierLocation = null, address = {}) {
+  const eta = estimateEta(
+    { lat: address?.lat, lng: address?.lng, status: order.status },
+    courierLocation
+  );
+
+  const fullAddress = [
+    address?.city_region || order.city_region,
+    address?.address_line,
+    address?.apartment ? `Mənzil/blok: ${address.apartment}` : '',
+    address?.door_code ? `Qapı kodu: ${address.door_code}` : '',
+    address?.note ? `Qeyd: ${address.note}` : '',
+  ].filter(Boolean).join(', ');
+
   return `
     <div class="card" data-order-id="${order.id}">
       <div class="section-head">
@@ -513,26 +535,19 @@ function orderCard(order, courier = null, courierLocation = null) {
       </div>
 
       <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
-
-      <p>
-        <b>Ünvan:</b>
-        ${[
-          order.city_region,
-          order.address_text,
-          order.apartment ? `Mənzil/blok: ${order.apartment}` : '',
-          order.door_code ? `Qapı kodu: ${order.door_code}` : '',
-        ].filter(Boolean).join(', ') || 'Ünvan qeyd edilməyib'}
-      </p>
+      <p><b>Ünvan:</b> ${fullAddress || 'Ünvan qeyd edilməyib'}</p>
 
       ${['delivered','cancelled'].includes(order.status) ? `
         <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
       ` : `
-          <div class="map-toolbar">
-            <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
-              📍 Kuryeri izlə
-            </button>
-          </div>
+        <div class="map-toolbar">
+          <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
+            📍 Kuryeri izlə
+          </button>
+        </div>
+
         <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
+
         <p class="muted map-note" id="userMapNote-${order.id}">
           ${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}
         </p>
@@ -561,11 +576,9 @@ function orderCard(order, courier = null, courierLocation = null) {
 }
 
 
-// Leaflet/OpenStreetMap canlı xəritəsini göstərir.
-function initUserOrderMaps(orders, couriersMap, locationsMap) {
+function initUserOrderMaps(orders, couriersMap, locationsMap, addressesMap = new Map()) {
   if (!window.L) return;
 
-  // Köhnə xəritələri təmizləyirik ki, təkrar render zamanı xəritə daşmasın.
   userOrderMaps.forEach((mapData) => {
     mapData.map.remove();
   });
@@ -574,19 +587,22 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
   orders.forEach((order) => {
     if (['delivered', 'cancelled'].includes(order.status)) return;
 
+    const address = addressesMap.get(order.address_id) || {};
     const location = locationsMap.get(order.id) || {};
-    const customerLat = Number(order.lat);
-    const customerLng = Number(order.lng);
+
+    const customerLat = Number(address.lat);
+    const customerLng = Number(address.lng);
     const courierLat = Number(location.lat);
     const courierLng = Number(location.lng);
-    const mapEl = $(`#userOrderMap-${order.id}`);
 
+    const mapEl = $(`#userOrderMap-${order.id}`);
     if (!mapEl) return;
 
-  const center =
-  validMapPoint(courierLat, courierLng) ? [courierLat, courierLng] :
-  validMapPoint(customerLat, customerLng) ? [customerLat, customerLng] :
-  [40.4093, 49.8671];
+    const center = validMapPoint(courierLat, courierLng)
+      ? [courierLat, courierLng]
+      : validMapPoint(customerLat, customerLng)
+        ? [customerLat, customerLng]
+        : [40.4093, 49.8671];
 
     const map = L.map(mapEl, { zoomControl: false }).setView(center, 13);
 
@@ -599,7 +615,6 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
 
     let courierMarker = null;
     let homeMarker = null;
-    let routeLayer = null;
 
     const points = [];
 
@@ -607,7 +622,6 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
       homeMarker = L.marker([customerLat, customerLng], { icon: homeIcon })
         .addTo(map)
         .bindPopup('Sizin ünvanınız');
-
       points.push(homeMarker.getLatLng());
     }
 
@@ -615,7 +629,6 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
       courierMarker = L.marker([courierLat, courierLng], { icon: courierIcon })
         .addTo(map)
         .bindPopup('Kuryer');
-
       points.push(courierMarker.getLatLng());
     }
 
@@ -629,18 +642,21 @@ function initUserOrderMaps(orders, couriersMap, locationsMap) {
       homeMarker,
       courierIcon,
       homeIcon,
-      routeLayer,
+      routeLayer: null,
       customerLat,
       customerLng,
       followCourier: false,
     });
 
     if (validMapPoint(courierLat, courierLng) && validMapPoint(customerLat, customerLng)) {
-      drawRouteForOrder(order.id, { lat: courierLat, lng: courierLng }, { lat: customerLat, lng: customerLng });
+      drawRouteForOrder(
+        order.id,
+        { lat: courierLat, lng: courierLng },
+        { lat: customerLat, lng: customerLng }
+      );
     }
 
     setTimeout(() => map.invalidateSize(), 200);
-    setTimeout(() => refreshUserCourierLocations(), 500);
   });
 }
 
@@ -654,9 +670,25 @@ function makeUserMapIcon(url) {
   });
 }
 
+
+
 function validMapPoint(lat, lng) {
-  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const nLat = Number(lat);
+  const nLng = Number(lng);
+
+  if (!Number.isFinite(nLat) || !Number.isFinite(nLng)) return false;
+
+  // 0,0 problemi — xəritəni Afrikaya aparırdı
+  if (nLat === 0 && nLng === 0) return false;
+
+  // Azərbaycan üçün normal GPS sərhədi
+  if (nLat < 38 || nLat > 42.5) return false;
+  if (nLng < 44 || nLng > 51) return false;
+
+  return true;
 }
+
+
 
 function estimateEta(order, location = {}) {
   const aLat = Number(location?.lat);
@@ -704,20 +736,17 @@ function mapNavigationLinks(lat, lng) {
 }
 
 
+
 async function drawRouteForOrder(orderId, from, to) {
   const mapData = userOrderMaps.get(orderId);
   if (!mapData) return;
 
-  const fromLat = Number(from?.lat);
-  const fromLng = Number(from?.lng);
-  const toLat = Number(to?.lat);
-  const toLng = Number(to?.lng);
+  const fromLat = Number(from.lat);
+  const fromLng = Number(from.lng);
+  const toLat = Number(to.lat);
+  const toLng = Number(to.lng);
 
-  // ❗ ƏN VACİB FİX
-  if (!validMapPoint(fromLat, fromLng) || !validMapPoint(toLat, toLng)) {
-    console.warn('Route üçün koordinatlar səhvdir:', from, to);
-    return;
-  }
+  if (!validMapPoint(fromLat, fromLng) || !validMapPoint(toLat, toLng)) return;
 
   if (mapData.routeLayer) {
     mapData.map.removeLayer(mapData.routeLayer);
@@ -725,7 +754,6 @@ async function drawRouteForOrder(orderId, from, to) {
 
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
-
     const res = await fetch(url);
     const data = await res.json();
 
@@ -734,12 +762,23 @@ async function drawRouteForOrder(orderId, from, to) {
         style: { color: '#16a34a', weight: 5, opacity: 0.9 },
       }).addTo(mapData.map);
     } else {
-      fallbackLine(mapData, fromLat, fromLng, toLat, toLng);
+      mapData.routeLayer = L.polyline(
+        [[fromLat, fromLng], [toLat, toLng]],
+        { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+      ).addTo(mapData.map);
     }
+
+    userOrderMaps.set(orderId, mapData);
   } catch (e) {
-    fallbackLine(mapData, fromLat, fromLng, toLat, toLng);
+    mapData.routeLayer = L.polyline(
+      [[fromLat, fromLng], [toLat, toLng]],
+      { color: '#16a34a', weight: 5, opacity: 0.9, dashArray: '8,8' }
+    ).addTo(mapData.map);
+
+    userOrderMaps.set(orderId, mapData);
   }
 }
+
 
 
 async function refreshUserCourierLocations() {
