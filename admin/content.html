@@ -14,11 +14,72 @@
 <body data-page="admin-content">
   <main class="app-shell"><div class="admin-layout">
     <aside class="sidebar card"><b>Admin panel</b><nav class="side-nav" style="margin-top: 12px;"><a class="side-link" href="index.html">📊 Dashboard</a><a class="side-link" href="catalog.html">🥝 Kataloq</a><a class="side-link" href="orders.html">📦 Sifarişlər</a><a class="side-link" href="users.html">👥 İstifadəçilər</a><a class="side-link" href="content.html">📰 Kontent</a><a class="side-link" href="../index.html">🏠 Sayta qayıt</a></nav></aside>
-    <section class="grid"><h1>Banner, xəbər və partnyor</h1><div class="tabs-wrap"><div class="tabs"><button class="tab active" data-tab="banPanel">Banner</button><button class="tab" data-tab="newsPanel">Xəbər</button><button class="tab" data-tab="parPanel">Partnyor</button></div>
-      <section id="banPanel" class="tab-panel active card"><form id="bannerForm" class="form-grid"><input name="title" placeholder="Başlıq"><input name="link_url" placeholder="Link"><input name="image_url" placeholder="Şəkil linki"><input type="file" accept="image/*"><label><input type="checkbox" name="is_active" checked> Aktiv</label><button class="btn btn-primary">Əlavə et</button></form><div id="bannersList" class="compact-list" style="margin-top: 14px;"></div></section>
-      <section id="newsPanel" class="tab-panel card"><form id="newsForm" class="form-grid"><input name="title" placeholder="Başlıq"><input name="slug" placeholder="Slug"><input name="image_url" placeholder="Şəkil linki"><input type="file" accept="image/*"><textarea class="full" name="excerpt" placeholder="Qısa mətn"></textarea><textarea class="full" name="body" placeholder="Geniş mətn"></textarea><label><input type="checkbox" name="is_active" checked> Aktiv</label><button class="btn btn-primary">Əlavə et</button></form><div id="newsList" class="compact-list" style="margin-top: 14px;"></div></section>
-      <section id="parPanel" class="tab-panel card"><form id="partnerForm" class="form-grid"><input name="name" placeholder="Partnyor adı"><input name="link_url" placeholder="Link"><input name="image_url" placeholder="Şəkil linki"><input type="file" accept="image/*"><label><input type="checkbox" name="is_active" checked> Aktiv</label><button class="btn btn-primary">Əlavə et</button></form><div id="partnersList" class="compact-list" style="margin-top: 14px;"></div></section>
-    </div></section>
+
+  <section class="admin-main">
+  <div class="admin-hero">
+    <div>
+      <span class="admin-eyebrow">Kontent idarəsi</span>
+      <h1>Banner, xəbər və partnyor</h1>
+      <p>Əlavə et, redaktə et, sil, aktiv/passiv et və şəkil yüklə.</p>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab active" data-tab="banPanel">Banner</button>
+      <button class="tab" data-tab="newsPanel">Xəbər</button>
+      <button class="tab" data-tab="parPanel">Partnyor</button>
+    </div>
+
+    <section id="banPanel" class="tab-panel active card pro-card">
+      <form id="bannerForm" class="form-grid">
+        <input type="hidden" name="id">
+        <input name="title" placeholder="Başlıq">
+        <input name="link_url" placeholder="Link">
+        <input name="sort_order" type="number" placeholder="Sıra">
+        <input name="image_url" placeholder="Şəkil linki">
+        <label class="gallery-field">🖼️ Banner şəkli seç <input type="file" accept="image/*"></label>
+        <label class="gallery-field"><input type="checkbox" name="is_active" checked> Aktiv</label>
+        <button class="btn btn-primary">Saxla</button>
+        <button id="newBanner" type="button" class="btn btn-soft">Yeni</button>
+      </form>
+      <div id="bannersList" class="compact-list" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="newsPanel" class="tab-panel card pro-card">
+      <form id="newsForm" class="form-grid">
+        <input type="hidden" name="id">
+        <input name="title" placeholder="Başlıq">
+        <input name="slug" placeholder="Slug">
+        <input name="sort_order" type="number" placeholder="Sıra">
+        <input name="image_url" placeholder="Şəkil linki">
+        <label class="gallery-field">🖼️ Xəbər şəkli seç <input type="file" accept="image/*"></label>
+        <textarea class="full" name="excerpt" placeholder="Qısa mətn"></textarea>
+        <textarea class="full" name="body" placeholder="Geniş mətn"></textarea>
+        <label class="gallery-field"><input type="checkbox" name="is_active" checked> Aktiv</label>
+        <button class="btn btn-primary">Saxla</button>
+        <button id="newNews" type="button" class="btn btn-soft">Yeni</button>
+      </form>
+      <div id="newsList" class="compact-list" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="parPanel" class="tab-panel card pro-card">
+      <form id="partnerForm" class="form-grid">
+        <input type="hidden" name="id">
+        <input name="name" placeholder="Partnyor adı">
+        <input name="link_url" placeholder="Link">
+        <input name="sort_order" type="number" placeholder="Sıra">
+        <input name="image_url" placeholder="Şəkil linki">
+        <label class="gallery-field">🖼️ Partnyor loqosu seç <input type="file" accept="image/*"></label>
+        <label class="gallery-field"><input type="checkbox" name="is_active" checked> Aktiv</label>
+        <button class="btn btn-primary">Saxla</button>
+        <button id="newPartner" type="button" class="btn btn-soft">Yeni</button>
+      </form>
+      <div id="partnersList" class="compact-list" style="margin-top:14px;"></div>
+    </section>
+  </div>
+</section>
+    
   </div></main><script type="module" src="../assets/js/admin.js"></script>
 </body>
 </html>
