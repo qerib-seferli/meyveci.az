@@ -24,6 +24,7 @@ let adminProfile = null;
 let courierMap = null;
 let courierMarkers = new Map();
 let adminSoundReady = false;
+let adminAlarmLoop = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -115,6 +116,72 @@ function formatDate(value) {
   return value ? new Date(value).toLocaleString('az-AZ') : '—';
 }
 
+function formatDuration(ms) {
+  if (!ms || ms < 0) return 'yoxdur';
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) return `${hours} saat ${minutes} dəq ${seconds} san`;
+  if (minutes > 0) return `${minutes} dəq ${seconds} san`;
+  return `${seconds} san`;
+}
+
+function heartbeatText(value) {
+  if (!value) return 'yoxdur';
+  return formatDuration(Date.now() - new Date(value).getTime());
+}
+
+function courierFlowHtml(order = null) {
+  if (!order) {
+    return `
+      <div class="courier-status-flow">
+        <span class="flow-step idle active">⚪ Boşdur</span>
+      </div>
+    `;
+  }
+
+  const status = order.status;
+
+  if (status === 'cancelled') {
+    return `
+      <div class="courier-status-flow">
+        <span class="flow-step cancel active">❌ Ləğv edildi</span>
+      </div>
+    `;
+  }
+
+  const steps = [
+    { key: 'confirmed', cls: 'accepted', label: '✅ Sifariş qəbul edildi' },
+    { key: 'preparing', cls: 'preparing', label: '🥝 Hazırlanır' },
+    { key: 'on_the_way', cls: 'way', label: '🚚 Yoldadır' },
+    { key: 'courier_near', cls: 'near', label: '📍 Ünvana yaxın' },
+    { key: 'delivered', cls: 'done', label: '🎉 Təslim edildi' },
+  ];
+
+  return `
+    <div class="courier-status-flow">
+      ${steps.map((step) => `
+        <span class="flow-step ${step.cls} ${step.key === status ? 'active' : ''}">
+          ${step.label}
+        </span>
+      `).join('')}
+    </div>
+  `;
+}
+
+function courierWorkStatus(order = null) {
+  if (!order) return 'Boşdur';
+  if (order.status === 'confirmed') return 'Sifariş qəbul edildi';
+  if (order.status === 'preparing') return 'Hazırlanır';
+  if (order.status === 'on_the_way') return 'Yoldadır';
+  if (order.status === 'courier_near') return 'Təslim edir';
+  if (order.status === 'delivered') return 'Təslim edildi';
+  if (order.status === 'cancelled') return 'Ləğv edildi';
+  return statusAz(order.status);
+}
 
 function methodAz(method) {
   const map = {
@@ -269,71 +336,107 @@ async function loadRecentOrders() {
 async function loadCourierMonitor() {
   if (!$('#courierMap')) return;
 
-  const [{ data: couriers }, { data: profiles }, { data: devices }, { data: locations }] = await Promise.all([
+  const [
+    { data: couriers },
+    { data: profiles },
+    { data: devices },
+    { data: locations },
+    { data: activeOrders },
+  ] = await Promise.all([
     supabase.from('couriers').select('*').eq('is_active', true),
     supabase.from('profiles').select('id,first_name,last_name,email,phone,avatar_url,is_online,last_seen,role'),
     supabase.from('courier_device_status').select('*'),
     supabase.from('courier_locations').select('*').order('updated_at', { ascending: false }).limit(200),
+    supabase
+      .from('orders')
+      .select('id,order_code,courier_id,status,total_amount,created_at')
+      .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near'])
+      .order('created_at', { ascending: false }),
   ]);
 
   const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
   const deviceMap = new Map((devices || []).map((d) => [d.courier_id, d]));
   const locationMap = new Map();
+  const courierActiveOrderMap = new Map();
 
   (locations || []).forEach((loc) => {
     if (!locationMap.has(loc.courier_id)) locationMap.set(loc.courier_id, loc);
   });
 
+  (activeOrders || []).forEach((order) => {
+    if (!courierActiveOrderMap.has(order.courier_id)) {
+      courierActiveOrderMap.set(order.courier_id, order);
+    }
+  });
+
   initCourierAdminMap();
 
-  const rows = (couriers || []).map((courier) => {
-    const profile = profileMap.get(courier.user_id) || {};
-    const device = deviceMap.get(courier.user_id) || {};
-    const loc = locationMap.get(courier.user_id) || {};
-    const online = isReallyOnline(profile, device);
+  const rows = (couriers || [])
+    .filter((courier) => {
+      const profile = profileMap.get(courier.user_id) || {};
+      return profile.role === 'courier';
+    })
+    .map((courier) => {
+      const profile = profileMap.get(courier.user_id) || {};
+      const device = deviceMap.get(courier.user_id) || {};
+      const loc = locationMap.get(courier.user_id) || {};
+      const activeOrder = courierActiveOrderMap.get(courier.user_id) || null;
+      const online = isReallyOnline(profile, device);
+      const name = fullName(profile);
 
-    updateCourierMarker(courier, profile, device, loc);
+      updateCourierMarker(courier, profile, device, loc);
 
-    const name = fullName(profile);
-    const heartbeatAge = device.last_heartbeat ? Math.round((Date.now() - new Date(device.last_heartbeat).getTime()) / 1000) : null;
+      return `
+        <div class="admin-live-card focus-courier" data-courier-id="${courier.user_id}">
+          <img class="admin-avatar" src="${profile.avatar_url || PLACEHOLDER}" alt="${esc(name)}">
 
-    return `
-      <div class="admin-live-card focus-courier" data-courier-id="${courier.user_id}">
-        <img class="admin-avatar" src="${profile.avatar_url || PLACEHOLDER}" alt="${esc(name)}">
-        <span>
-          <b><span class="admin-online-dot ${online ? 'online' : 'offline'}"></span>${esc(name)}</b>
-          <small>${esc(profile.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatAge === null ? 'yoxdur' : `${heartbeatAge} san əvvəl`}</small>
-        </span>
-        <div class="admin-device-mini">
-          <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
-          
-          <span class="mini-badge ${
-            device.battery_level === null || device.battery_level === undefined
-              ? 'mini-blue'
-              : Number(device.battery_level) <= 15
-                ? 'mini-red'
-                : 'mini-green'
-          }">
-            🔋 ${device.battery_level === null || device.battery_level === undefined ? 'dəstək yoxdur' : `${device.battery_level}%`}
-          </span>
-          
-          <span class="mini-badge ${
-            online
-              ? 'mini-green'
-              : device.network_status === 'offline'
-                ? 'mini-red'
-                : 'mini-blue'
-          }">
-            🌐 ${online ? 'internet var' : device.network_status === 'offline' ? 'internet yoxdur' : 'bilinmir'}
-          </span>
-          
-          <span class="mini-badge ${loc.lat && loc.lng ? 'mini-green' : 'mini-yellow'}">
-            📍 ${loc.lat && loc.lng ? 'GPS var' : 'GPS yoxdur'}
-          </span>
+          <div class="admin-courier-main">
+            <div class="admin-courier-topline">
+              <b>
+                <span class="admin-online-dot ${online ? 'online' : 'offline'}"></span>
+                ${esc(name)}
+              </b>
+              <small>${esc(profile.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatText(device.last_heartbeat)}</small>
+            </div>
+
+            <small class="muted">
+              Cari vəziyyət: <b>${esc(courierWorkStatus(activeOrder))}</b>
+              ${activeOrder ? ` • ${esc(activeOrder.order_code || '')} • ${money(activeOrder.total_amount || 0)}` : ''}
+            </small>
+
+            ${courierFlowHtml(activeOrder)}
+          </div>
+
+          <div class="admin-device-mini">
+            <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
+
+            <span class="mini-badge ${
+              device.battery_level === null || device.battery_level === undefined
+                ? 'mini-blue'
+                : Number(device.battery_level) <= 15
+                  ? 'mini-red'
+                  : 'mini-green'
+            }">
+              🔋 ${device.battery_level === null || device.battery_level === undefined ? 'dəstək yoxdur' : `${device.battery_level}%`}
+            </span>
+
+            <span class="mini-badge ${
+              online
+                ? 'mini-green'
+                : device.network_status === 'offline'
+                  ? 'mini-red'
+                  : 'mini-blue'
+            }">
+              🌐 ${online ? 'internet var' : device.network_status === 'offline' ? 'internet yoxdur' : 'bilinmir'}
+            </span>
+
+            <span class="mini-badge ${loc.lat && loc.lng ? 'mini-green' : 'mini-yellow'}">
+              📍 ${loc.lat && loc.lng ? 'GPS var' : 'GPS yoxdur'}
+            </span>
+          </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
 
   $('#courierLiveList').innerHTML = rows.join('') || '<span class="muted">Aktiv kuryer yoxdur.</span>';
 
@@ -352,7 +455,7 @@ async function loadCourierMonitor() {
   });
 
   fitAllCourierMarkers();
-  
+
   setTimeout(() => {
     courierMap?.invalidateSize();
   }, 250);
@@ -486,12 +589,11 @@ async function loadAdminAlerts() {
       $('#adminAlertBar')?.classList.remove('hide');
       $('#adminAlertBar').textContent = `${critical.length} kritik xəbərdarlıq var. Alert mərkəzinə baxın.`;
     
-      if (!window.__adminCriticalAlarmPlayed) {
-        window.__adminCriticalAlarmPlayed = true;
-        playAdminSound();
-      }
+    playAdminSound(true);
+      
     } else {
       window.__adminCriticalAlarmPlayed = false;
+      stopAdminAlarm();
       $('#adminAlertBar')?.classList.add('hide');
     }
   
@@ -520,20 +622,50 @@ async function loadAdminAlerts() {
   });
 }
 
-function playAdminSound() {
+function playAdminSound(force = false) {
   try {
     const audio = $('#adminNotifyAudio');
     if (!audio) return;
 
     audio.src = '../assets/sounds/courier-alarm.mp3';
-    audio.currentTime = 0;
-    audio.volume = 0.85;
+    audio.volume = 0.9;
+    audio.loop = false;
 
-    if (adminSoundReady) {
+    const run = () => {
+      audio.currentTime = 0;
       audio.play().catch(() => {});
+    };
+
+    if (adminSoundReady || force) run();
+
+    if (force) {
+      clearInterval(adminAlarmLoop);
+
+      adminAlarmLoop = setInterval(() => {
+        const hasCritical = document.querySelector('.admin-alert-card.critical');
+
+        if (!hasCritical) {
+          stopAdminAlarm();
+          return;
+        }
+
+        run();
+      }, 4500);
     }
   } catch (error) {
     console.warn('Admin alarm səsi işləmədi:', error.message);
+  }
+}
+
+function stopAdminAlarm() {
+  const audio = $('#adminNotifyAudio');
+
+  clearInterval(adminAlarmLoop);
+  adminAlarmLoop = null;
+
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
   }
 }
 
@@ -1318,9 +1450,16 @@ function subscribeAdminRealtime() {
       if (document.body.dataset.page === 'admin-dashboard') {
         loadDashboardKpis();
         loadRecentOrders();
+        loadCourierMonitor();
+        loadAdminAlerts();
       }
-      if (document.body.dataset.page === 'admin-orders') loadOrders();
+    
+      if (document.body.dataset.page === 'admin-orders') {
+        loadOrders();
+        loadPayments();
+      }
     })
+    
     .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
       if (document.body.dataset.page === 'admin-orders') loadPayments();
       if (document.body.dataset.page === 'admin-dashboard') loadDashboardKpis();
@@ -1400,47 +1539,90 @@ function fitAllCourierMarkers() {
 }
 
 
-async function handleCourierLocationRealtime(location) {
-  if (!location?.courier_id || !location.lat || !location.lng) return;
-
-  const [{ data: profile }, { data: device }, { data: courier }] = await Promise.all([
-    supabase.from('profiles').select('id,first_name,last_name,email,phone,avatar_url,is_online,last_seen,role').eq('id', location.courier_id).maybeSingle(),
-    supabase.from('courier_device_status').select('*').eq('courier_id', location.courier_id).maybeSingle(),
-    supabase.from('couriers').select('*').eq('user_id', location.courier_id).maybeSingle(),
-  ]);
-
-  if (!courier?.is_active || profile?.role !== 'courier') return;
-
-  updateCourierMarker(courier, profile || {}, device || {}, location);
-
-  const card = document.querySelector(`.focus-courier[data-courier-id="${location.courier_id}"]`);
-  if (card) {
-    const online = isReallyOnline(profile || {}, device || {});
-    const heartbeatAge = device?.last_heartbeat
-      ? Math.round((Date.now() - new Date(device.last_heartbeat).getTime()) / 1000)
-      : null;
-
-    card.innerHTML = `
-      <img class="admin-avatar" src="${profile?.avatar_url || PLACEHOLDER}" alt="${esc(fullName(profile || {}))}">
-      <span>
-        <b><span class="admin-online-dot ${online ? 'online' : 'offline'}"></span>${esc(fullName(profile || {}))}</b>
-        <small>${esc(profile?.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatAge === null ? 'yoxdur' : `${heartbeatAge} san əvvəl`}</small>
-      </span>
-      <div class="admin-device-mini">
-        <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
-        <span class="mini-badge ${
-          device?.battery_level === null || device?.battery_level === undefined
-            ? 'mini-blue'
-            : Number(device.battery_level) <= 15
-              ? 'mini-red'
-              : 'mini-green'
-        }">
-          🔋 ${device?.battery_level === null || device?.battery_level === undefined ? 'dəstək yoxdur' : `${device.battery_level}%`}
-        </span>
-        <span class="mini-badge ${online ? 'mini-green' : 'mini-blue'}">🌐 ${online ? 'internet var' : 'bilinmir'}</span>
-        <span class="mini-badge mini-green">📍 GPS var</span>
-      </div>
-    `;
-  }
+    async function handleCourierLocationRealtime(location) {
+      if (!location?.courier_id || !location.lat || !location.lng) return;
+    
+      const [
+        { data: profile },
+        { data: device },
+        { data: courier },
+        { data: activeOrder },
+      ] = await Promise.all([
+        supabase.from('profiles').select('id,first_name,last_name,email,phone,avatar_url,is_online,last_seen,role').eq('id', location.courier_id).maybeSingle(),
+        supabase.from('courier_device_status').select('*').eq('courier_id', location.courier_id).maybeSingle(),
+        supabase.from('couriers').select('*').eq('user_id', location.courier_id).maybeSingle(),
+        supabase
+          .from('orders')
+          .select('id,order_code,courier_id,status,total_amount,created_at')
+          .eq('courier_id', location.courier_id)
+          .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+    
+      if (!courier?.is_active || profile?.role !== 'courier') return;
+    
+      updateCourierMarker(courier, profile || {}, device || {}, location);
+    
+      const card = document.querySelector(`.focus-courier[data-courier-id="${location.courier_id}"]`);
+      if (!card) return;
+    
+      const online = isReallyOnline(profile || {}, device || {});
+      const name = fullName(profile || {});
+    
+      card.innerHTML = `
+        <img class="admin-avatar" src="${profile?.avatar_url || PLACEHOLDER}" alt="${esc(name)}">
+    
+        <div class="admin-courier-main">
+          <div class="admin-courier-topline">
+            <b>
+              <span class="admin-online-dot ${online ? 'online' : 'offline'}"></span>
+              ${esc(name)}
+            </b>
+            <small>${esc(profile?.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatText(device?.last_heartbeat)}</small>
+          </div>
+    
+          <small class="muted">
+            Cari vəziyyət: <b>${esc(courierWorkStatus(activeOrder))}</b>
+            ${activeOrder ? ` • ${esc(activeOrder.order_code || '')} • ${money(activeOrder.total_amount || 0)}` : ''}
+          </small>
+    
+          ${courierFlowHtml(activeOrder)}
+        </div>
+    
+        <div class="admin-device-mini">
+          <span class="mini-badge ${online ? 'mini-green' : 'mini-red'}">${online ? 'Online' : 'Offline'}</span>
+    
+          <span class="mini-badge ${
+            device?.battery_level === null || device?.battery_level === undefined
+              ? 'mini-blue'
+              : Number(device.battery_level) <= 15
+                ? 'mini-red'
+                : 'mini-green'
+          }">
+            🔋 ${device?.battery_level === null || device?.battery_level === undefined ? 'dəstək yoxdur' : `${device.battery_level}%`}
+          </span>
+    
+          <span class="mini-badge ${online ? 'mini-green' : 'mini-blue'}">
+            🌐 ${online ? 'internet var' : 'bilinmir'}
+          </span>
+    
+          <span class="mini-badge mini-green">📍 GPS var</span>
+        </div>
+      `;
+    
+      card.addEventListener('click', () => {
+        const marker = courierMarkers.get(location.courier_id);
+        if (!marker || !courierMap) {
+          toast('Bu kuryerin GPS məlumatı hələ yoxdur');
+          return;
+        }
+    
+        courierMap.setView(marker.getLatLng(), 15, { animate: true });
+        marker.openPopup();
+        setTimeout(() => courierMap.invalidateSize(), 120);
+      });
+    }
 }
 
