@@ -1624,5 +1624,5 @@ function fitAllCourierMarkers() {
         setTimeout(() => courierMap.invalidateSize(), 120);
       });
     }
-}
+
 
