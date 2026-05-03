@@ -972,35 +972,36 @@ th {
   75% { transform: rotate(-8deg) scale(1.08); }
 }
 
-/* ================= KURYER STATUS ZƏNCİRİ ================= */
+/* ================= KURYER FLOW FINAL SƏLİQƏLİ VERSİYA ================= */
 
-.focus-courier {
-  align-items: flex-start !important;
-}
-
-.admin-courier-main {
-  display: grid;
-  gap: 7px;
-  min-width: 0;
-  flex: 1;
-}
-
-.admin-courier-topline {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.admin-courier-topline b {
+.admin-order-mini {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  line-height: 1.2;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 800;
 }
 
-.admin-courier-topline small {
-  color: var(--muted);
+.order-code-green {
+  color: #047857;
+  font-weight: 950;
+}
+
+.order-price-gold {
+  color: #d97706;
+  font-weight: 950;
+}
+
+.courier-flow-line {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.courier-flow-line > b {
+  color: #064e3b;
   font-size: 12px;
 }
 
@@ -1009,90 +1010,45 @@ th {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  margin-top: 2px;
 }
 
 .flow-step {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   min-height: 25px;
   padding: 5px 8px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 900;
-  border: 1px solid transparent;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(241, 245, 249, 0.76) !important;
+  color: rgba(51, 65, 85, 0.45) !important;
+  box-shadow: none !important;
+  animation: none !important;
   white-space: nowrap;
 }
 
-.flow-step.idle {
-  color: #64748b;
-  background: rgba(226, 232, 240, 0.75);
-  border-color: rgba(148, 163, 184, 0.3);
-}
-
-.flow-step.accepted {
-  color: #075985;
-  background: rgba(186, 230, 253, 0.8);
-  border-color: rgba(14, 165, 233, 0.28);
-}
-
-.flow-step.preparing {
-  color: #6d28d9;
-  background: rgba(237, 233, 254, 0.9);
-  border-color: rgba(124, 58, 237, 0.24);
-}
-
-.flow-step.way {
-  color: #047857;
-  background: rgba(209, 250, 229, 0.9);
-  border-color: rgba(16, 185, 129, 0.28);
-}
-
-.flow-step.near {
-  color: #b45309;
-  background: rgba(254, 243, 199, 0.9);
-  border-color: rgba(245, 158, 11, 0.28);
-}
-
-.flow-step.done {
-  color: #166534;
-  background: rgba(220, 252, 231, 0.95);
-  border-color: rgba(34, 197, 94, 0.35);
-}
-
-.flow-step.cancel {
-  color: #991b1b;
-  background: rgba(254, 226, 226, 0.92);
-  border-color: rgba(239, 68, 68, 0.28);
+.flow-step.passive {
+  opacity: 0.48;
+  filter: grayscale(0.75);
 }
 
 .flow-step.active {
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12), 0 8px 22px rgba(34, 197, 94, 0.16);
-  animation: courierFlowPulse 1.4s infinite;
+  opacity: 1;
+  filter: none;
+  color: #064e3b !important;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12), 0 8px 22px rgba(34, 197, 94, 0.16) !important;
+  animation: activeCourierStepPulse 1.25s infinite !important;
 }
 
-@keyframes courierFlowPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-}
-
-.admin-device-mini {
-  margin-left: auto;
-}
-
-@media (max-width: 700px) {
-  .focus-courier {
-    display: grid !important;
-    grid-template-columns: 54px 1fr;
+@keyframes activeCourierStepPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.10), 0 8px 22px rgba(34, 197, 94, 0.13);
   }
 
-  .admin-device-mini {
-    grid-column: 1 / -1;
-    margin-left: 0;
-  }
-
-  .courier-status-flow {
-    grid-column: 1 / -1;
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18), 0 12px 28px rgba(34, 197, 94, 0.20);
   }
 }
