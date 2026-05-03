@@ -1156,3 +1156,95 @@ th {
     grid-column: 1 / -1 !important;
   }
 }
+
+/* ================= KURYER LIVE CARD ULTRA CLEAN FIX ================= */
+
+.admin-live-card {
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  grid-template-areas:
+    "avatar info"
+    "avatar devices"
+    "avatar order"
+    "avatar flow" !important;
+  align-items: start !important;
+  gap: 8px 12px !important;
+  padding: 14px !important;
+}
+
+.admin-live-card > .admin-avatar {
+  grid-area: avatar !important;
+  margin-top: 8px !important;
+}
+
+.admin-live-card > span {
+  grid-area: info !important;
+  display: block !important;
+  min-width: 0 !important;
+}
+
+.admin-live-card > span b {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin-bottom: 3px !important;
+}
+
+.admin-live-card > span small {
+  display: block !important;
+  line-height: 1.35 !important;
+}
+
+.admin-device-mini {
+  grid-area: devices !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin-top: 2px !important;
+}
+
+.admin-order-mini {
+  grid-area: order !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex-wrap: wrap !important;
+  margin: 0 !important;
+}
+
+.courier-flow-line {
+  grid-area: flow !important;
+  display: grid !important;
+  gap: 7px !important;
+  margin: 0 !important;
+}
+
+.courier-flow-line > b {
+  margin: 0 !important;
+}
+
+.courier-status-flow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.flow-step {
+  min-height: 30px !important;
+  padding: 6px 10px !important;
+  line-height: 1 !important;
+}
+
+@media (min-width: 900px) {
+  .admin-live-card {
+    grid-template-columns: 58px minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "avatar info devices"
+      "avatar order order"
+      "avatar flow flow" !important;
+  }
+
+  .admin-device-mini {
+    justify-content: flex-end !important;
+  }
+}
