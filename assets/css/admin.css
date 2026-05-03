@@ -1248,3 +1248,31 @@ th {
     justify-content: flex-end !important;
   }
 }
+
+/* ========== KURYER STATUS FLOW - TƏK SƏTİR FIX ========== */
+
+.courier-status-flow {
+  display: grid !important;
+  grid-template-columns: repeat(5, max-content) !important;
+  justify-content: start !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.flow-step {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .courier-status-flow {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+}
