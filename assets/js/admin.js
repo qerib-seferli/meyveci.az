@@ -135,23 +135,7 @@ function heartbeatText(value) {
 }
 
 function courierFlowHtml(order = null) {
-  if (!order) {
-    return `
-      <div class="courier-status-flow">
-        <span class="flow-step idle active">⚪ Boşdur</span>
-      </div>
-    `;
-  }
-
-  const status = order.status;
-
-  if (status === 'cancelled') {
-    return `
-      <div class="courier-status-flow">
-        <span class="flow-step cancel active">❌ Ləğv edildi</span>
-      </div>
-    `;
-  }
+  const activeStatus = order?.status || 'idle';
 
   const steps = [
     { key: 'confirmed', cls: 'accepted', label: '✅ Sifariş qəbul edildi' },
@@ -162,12 +146,15 @@ function courierFlowHtml(order = null) {
   ];
 
   return `
-    <div class="courier-status-flow">
-      ${steps.map((step) => `
-        <span class="flow-step ${step.cls} ${step.key === status ? 'active' : ''}">
-          ${step.label}
-        </span>
-      `).join('')}
+    <div class="courier-flow-line">
+      <b>Cari vəziyyət:</b>
+      <div class="courier-status-flow">
+        ${steps.map((step) => `
+          <span class="flow-step ${step.cls} ${step.key === activeStatus ? 'active' : 'passive'}">
+            ${step.label}
+          </span>
+        `).join('')}
+      </div>
     </div>
   `;
 }
@@ -399,10 +386,15 @@ async function loadCourierMonitor() {
               <small>${esc(profile.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatText(device.last_heartbeat)}</small>
             </div>
 
-            <small class="muted">
-              Cari vəziyyət: <b>${esc(courierWorkStatus(activeOrder))}</b>
-              ${activeOrder ? ` • ${esc(activeOrder.order_code || '')} • ${money(activeOrder.total_amount || 0)}` : ''}
-            </small>
+            ${activeOrder ? `
+              <small class="admin-order-mini">
+                Sifariş: <b class="order-code-green">${esc(activeOrder.order_code || '')}</b>
+                <span>•</span>
+                <b class="order-price-gold">${money(activeOrder.total_amount || 0)}</b>
+              </small>
+            ` : `
+              <small class="admin-order-mini muted">Sifariş yoxdur</small>
+            `}
 
             ${courierFlowHtml(activeOrder)}
           </div>
@@ -1583,10 +1575,15 @@ function fitAllCourierMarkers() {
             <small>${esc(profile?.phone || 'Telefon yoxdur')} • Son siqnal: ${heartbeatText(device?.last_heartbeat)}</small>
           </div>
     
-          <small class="muted">
-            Cari vəziyyət: <b>${esc(courierWorkStatus(activeOrder))}</b>
-            ${activeOrder ? ` • ${esc(activeOrder.order_code || '')} • ${money(activeOrder.total_amount || 0)}` : ''}
-          </small>
+          ${activeOrder ? `
+            <small class="admin-order-mini">
+              Sifariş: <b class="order-code-green">${esc(activeOrder.order_code || '')}</b>
+              <span>•</span>
+              <b class="order-price-gold">${money(activeOrder.total_amount || 0)}</b>
+            </small>
+          ` : `
+            <small class="admin-order-mini muted">Sifariş yoxdur</small>
+          `}
     
           ${courierFlowHtml(activeOrder)}
         </div>
