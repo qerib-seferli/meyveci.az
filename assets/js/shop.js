@@ -72,7 +72,40 @@ function setupHomeEvents() {
     state.visible += 10;
     renderProducts();
   });
-}
+
+    const categoryRow = $('#homeCategoryChips');
+
+  if (categoryRow) {
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    categoryRow.addEventListener('mousedown', (event) => {
+      isDown = true;
+      categoryRow.classList.add('dragging');
+      startX = event.pageX - categoryRow.offsetLeft;
+      scrollLeft = categoryRow.scrollLeft;
+    });
+
+    categoryRow.addEventListener('mouseleave', () => {
+      isDown = false;
+      categoryRow.classList.remove('dragging');
+    });
+
+    categoryRow.addEventListener('mouseup', () => {
+      isDown = false;
+      categoryRow.classList.remove('dragging');
+    });
+
+    categoryRow.addEventListener('mousemove', (event) => {
+      if (!isDown) return;
+      event.preventDefault();
+
+      const x = event.pageX - categoryRow.offsetLeft;
+      const walk = (x - startX) * 1.4;
+      categoryRow.scrollLeft = scrollLeft - walk;
+    });
+  }
 
 async function loadHomeData() {
   const [categories, products, banners, news, partners, favorites] = await Promise.all([
