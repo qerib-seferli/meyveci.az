@@ -4175,4 +4175,17 @@ select option {
   }
 }
 
+/* Kompüterdə kateqoriya lentini mouse ilə sağ-sola sürüşdürmək üçün */
+@media (min-width: 769px) {
+  .search-card .chip-row {
+    cursor: grab !important;
+    user-select: none !important;
+    scroll-behavior: smooth !important;
+  }
+
+  .search-card .chip-row:active {
+    cursor: grabbing !important;
+  }
+}
+
 /*==============================================================================*/
