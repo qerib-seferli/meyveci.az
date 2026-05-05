@@ -4,7 +4,7 @@
 // Header-də bildiriş və mesaj butonları var, kliklənəndə GitHub 404 yox, sayt içi modal açılır.
 // ============================================================
 
-import { $, profile, logout, supabase, playNotifySound, notificationBodyAz, updateMyPresence } from './core.js';
+import { $, $$, profile, logout, supabase, playNotifySound, notificationBodyAz, updateMyPresence } from './core.js';
 
 let notificationPollTimer = null;
 let lastNotificationTime = new Date().toISOString();
@@ -48,6 +48,7 @@ function renderTopbar() {
   topbar.className = 'topbar';
   topbar.innerHTML = `
     <div class="topbar-inner">
+    <div class="topbar-left">
       <button id="catalogMenuBtn" class="catalog-menu-btn" type="button" aria-label="Kateqoriya menyusu">
         <span></span><span></span><span></span>
       </button>
@@ -55,7 +56,7 @@ function renderTopbar() {
       <a class="brand" href="${root}index.html" aria-label="Meyvəçi.az ana səhifə">
         <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az" onerror="this.src='${root}assets/img/logo/Cilek-logo.png'">
       </a>
-
+    </div>
       <div class="top-actions">
         <button id="notifyBtn" class="icon-btn" title="Bildirişlər">
           🔔 <span id="notifyCount" class="badge-count hide">0</span>
