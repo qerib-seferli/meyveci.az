@@ -48,6 +48,10 @@ function renderTopbar() {
   topbar.className = 'topbar';
   topbar.innerHTML = `
     <div class="topbar-inner">
+      <button id="catalogMenuBtn" class="catalog-menu-btn" type="button" aria-label="Kateqoriya menyusu">
+        <span></span><span></span><span></span>
+      </button>
+    
       <a class="brand" href="${root}index.html" aria-label="Meyvəçi.az ana səhifə">
         <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az" onerror="this.src='${root}assets/img/logo/Cilek-logo.png'">
       </a>
@@ -82,6 +86,7 @@ function renderTopbar() {
   $('#notifyBtn')?.addEventListener('click', loadNotifications);
   $('#notifyClose')?.addEventListener('click', () => $('#notifyDrop')?.classList.remove('show'));
   $('#logoutBtn')?.addEventListener('click', logout);
+    initCatalogMegaMenu();
 
               $('#messageBtn')?.addEventListener('click', async (event) => {
                 event.preventDefault();
@@ -475,5 +480,175 @@ async function startGlobalPresence() {
   window.addEventListener('beforeunload', () => {
     updateMyPresence(false);
   });
+}
+/*==========================================================================================================*/
+
+/* ==================== TRENDYOL STYLE KATALOQ MENYU ==================== */
+
+async function initCatalogMegaMenu() {
+  const root = getRootPath();
+  const btn = $('#catalogMenuBtn');
+  if (!btn) return;
+
+  let menu = $('#catalogMegaMenu');
+
+  if (!menu) {
+    menu = document.createElement('div');
+    menu.id = 'catalogMegaMenu';
+    menu.className = 'catalog-mega-menu';
+    menu.innerHTML = `
+      <div class="catalog-menu-panel">
+        <div class="catalog-left" id="catalogLeft"></div>
+        <div class="catalog-right" id="catalogRight"></div>
+      </div>
+    `;
+    document.body.appendChild(menu);
+  }
+
+  const [{ data: categories }, { data: products }] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('id,name,image_url,slug,sort_order')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(60),
+
+    supabase
+      .from('products')
+      .select('id,name,category_id,image_url,status')
+      .eq('status', 'active')
+      .order('name')
+      .limit(300),
+  ]);
+
+  const cats = categories || [];
+  const prods = products || [];
+
+  const left = $('#catalogLeft');
+  const right = $('#catalogRight');
+
+  function productKeywords(categoryId) {
+    const names = prods
+      .filter((p) => p.category_id === categoryId)
+      .map((p) => String(p.name || '').trim())
+      .filter(Boolean);
+
+    const words = [];
+
+    names.forEach((name) => {
+      const firstWord = name.split(' ')[0];
+      if (firstWord && firstWord.length > 2) words.push(firstWord);
+      words.push(name);
+    });
+
+    return [...new Set(words)].slice(0, 18);
+  }
+
+  function openCategory(category) {
+    const keywords = productKeywords(category.id);
+
+    right.innerHTML = `
+      <div class="catalog-mobile-head">
+        <button id="catalogBackBtn" type="button">←</button>
+        <b>${category.name}</b>
+      </div>
+
+      <div class="catalog-right-title">
+        <img src="${category.image_url || `${root}assets/img/logo/Cilek-logo.png`}" alt="${category.name}">
+        <div>
+          <b>${category.name}</b>
+          <span>Məhsul adına görə sürətli filter</span>
+        </div>
+      </div>
+
+      <div class="catalog-keyword-grid">
+        ${keywords.map((word) => `
+          <button class="catalog-keyword" type="button" data-cat="${category.id}" data-word="${escapeAttr(word)}">
+            ${word}
+          </button>
+        `).join('') || '<span class="muted">Bu kateqoriyada məhsul yoxdur.</span>'}
+      </div>
+    `;
+
+    $$('.catalog-keyword').forEach((item) => {
+      item.addEventListener('click', () => {
+        applyCatalogFilter(item.dataset.cat, item.dataset.word);
+      });
+    });
+
+    $('#catalogBackBtn')?.addEventListener('click', () => {
+      menu.classList.remove('show-products');
+    });
+
+    menu.classList.add('show-products');
+  }
+
+  left.innerHTML = cats.map((cat, index) => `
+    <button class="catalog-left-item ${index === 0 ? 'active' : ''}" type="button" data-id="${cat.id}">
+      <img src="${cat.image_url || `${root}assets/img/logo/Cilek-logo.png`}" alt="${cat.name}">
+      <span>${cat.name}</span>
+    </button>
+  `).join('');
+
+  $$('.catalog-left-item').forEach((item) => {
+    item.addEventListener('mouseenter', () => {
+      if (window.innerWidth <= 768) return;
+      $$('.catalog-left-item').forEach((x) => x.classList.remove('active'));
+      item.classList.add('active');
+      const cat = cats.find((c) => c.id === item.dataset.id);
+      if (cat) openCategory(cat);
+    });
+
+    item.addEventListener('click', () => {
+      const cat = cats.find((c) => c.id === item.dataset.id);
+      if (cat) {
+        if (window.innerWidth <= 768) {
+          applyCatalogFilter(cat.id, '');
+        } else {
+          openCategory(cat);
+        }
+      }
+    });
+  });
+
+  if (cats[0]) openCategory(cats[0]);
+
+  btn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    menu.classList.toggle('show');
+    menu.classList.remove('show-products');
+  });
+
+  menu.addEventListener('click', (event) => {
+    if (event.target === menu) {
+      menu.classList.remove('show');
+      menu.classList.remove('show-products');
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('#catalogMegaMenu') && !event.target.closest('#catalogMenuBtn')) {
+      menu.classList.remove('show');
+      menu.classList.remove('show-products');
+    }
+  });
+
+  function applyCatalogFilter(categoryId, keyword = '') {
+    localStorage.setItem('meyveciCatalogFilter', JSON.stringify({
+      category: categoryId || 'all',
+      query: keyword || '',
+    }));
+
+    menu.classList.remove('show');
+    menu.classList.remove('show-products');
+
+    if (document.body.dataset.page === 'home') {
+      window.dispatchEvent(new CustomEvent('meyveciCatalogFilter', {
+        detail: { category: categoryId || 'all', query: keyword || '' },
+      }));
+    } else {
+      location.href = `${root}index.html`;
+    }
+  }
 }
 /*==========================================================================================================*/
