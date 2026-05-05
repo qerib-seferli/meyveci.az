@@ -76,7 +76,7 @@ function setupHomeEvents() {
 
 async function loadHomeData() {
   const [categories, products, banners, news, partners, favorites] = await Promise.all([
-    supabase.from('categories').select('id,name,slug,description').eq('is_active', true).order('sort_order').limit(50),
+    supabase.from('categories').select('id,name,slug,description,image_url,sort_order').eq('is_active', true).order('sort_order').limit(50),
     supabase.from('products').select('*').eq('status', 'active').order('is_featured', { ascending: false }).order('created_at', { ascending: false }).limit(120),
     supabase.from('banners').select('*').eq('is_active', true).order('sort_order').limit(5),
     supabase.from('news').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(8),
@@ -232,13 +232,28 @@ function renderCategoryChips() {
   if (!container) return;
 
   container.innerHTML = `
-    <button class="chip ${state.category === 'all' ? 'active' : ''}" data-id="all">Hamısı</button>
+    <button class="category-card ${state.category === 'all' ? 'active' : ''}" data-id="all">
+      <span class="category-img-wrap">
+        <img src="./assets/img/logo/Cilek-logo.png" alt="Hamısı" loading="lazy">
+      </span>
+      <span class="category-name">Hamısı</span>
+    </button>
+
     ${state.categories.map((category) => `
-      <button class="chip ${state.category === category.id ? 'active' : ''}" data-id="${category.id}">${category.name}</button>
+      <button class="category-card ${state.category === category.id ? 'active' : ''}" data-id="${category.id}">
+        <span class="category-img-wrap">
+          <img 
+            src="${category.image_url || './assets/img/logo/Cilek-logo.png'}" 
+            alt="${category.name || 'Kateqoriya'}"
+            loading="lazy"
+          >
+        </span>
+        <span class="category-name">${category.name}</span>
+      </button>
     `).join('')}
   `;
 
-  $$('#homeCategoryChips .chip').forEach((button) => {
+  $$('#homeCategoryChips .category-card').forEach((button) => {
     button.addEventListener('click', () => {
       state.category = button.dataset.id;
       state.visible = 12;
