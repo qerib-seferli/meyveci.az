@@ -105,8 +105,24 @@ function setupHomeEvents() {
       const walk = (x - startX) * 1.4;
       categoryRow.scrollLeft = scrollLeft - walk;
     });
+
+      window.addEventListener('meyveciCatalogFilter', (event) => {
+        state.category = event.detail.category || 'all';
+        state.query = String(event.detail.query || '').toLowerCase();
+        state.visible = 12;
+    
+        if ($('#homeSearchInput')) $('#homeSearchInput').value = state.query;
+    
+        renderCategoryChips();
+        renderProducts();
+    
+        document.querySelector('#products')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      });  
+    }
   }
-}
 
 async function loadHomeData() {
   const [categories, products, banners, news, partners, favorites] = await Promise.all([
@@ -125,6 +141,23 @@ async function loadHomeData() {
   renderBanners(banners.data || []);
   renderNews(news.data || []);
   renderCategoryChips();
+
+      const savedFilter = localStorage.getItem('meyveciCatalogFilter');
+
+      if (savedFilter) {
+        try {
+          const filter = JSON.parse(savedFilter);
+          state.category = filter.category || 'all';
+          state.query = String(filter.query || '').toLowerCase();
+    
+          if ($('#homeSearchInput')) $('#homeSearchInput').value = state.query;
+    
+          localStorage.removeItem('meyveciCatalogFilter');
+        } catch (e) {
+          localStorage.removeItem('meyveciCatalogFilter');
+        }
+      }
+      
   renderProducts();
   renderPartners(partners.data || []);
 }
