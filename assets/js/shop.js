@@ -106,6 +106,7 @@ function setupHomeEvents() {
       categoryRow.scrollLeft = scrollLeft - walk;
     });
   }
+}
 
 async function loadHomeData() {
   const [categories, products, banners, news, partners, favorites] = await Promise.all([
