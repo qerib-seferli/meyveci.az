@@ -499,6 +499,10 @@ async function initCatalogMegaMenu() {
     menu.className = 'catalog-mega-menu';
     menu.innerHTML = `
       <div class="catalog-menu-panel">
+        <div class="catalog-mobile-title">
+          <button id="catalogCloseBtn" type="button">←</button>
+          <b>Bütün kateqoriyalar</b>
+        </div>
         <div class="catalog-left" id="catalogLeft"></div>
         <div class="catalog-right" id="catalogRight"></div>
       </div>
@@ -581,6 +585,11 @@ async function initCatalogMegaMenu() {
       menu.classList.remove('show-products');
     });
 
+    $('#catalogCloseBtn')?.addEventListener('click', () => {
+      menu.classList.remove('show');
+      menu.classList.remove('show-products');
+    });
+    
     menu.classList.add('show-products');
   }
 
