@@ -4437,3 +4437,62 @@ select option {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Header sol hissə: 3 xətt + logo yanaşı */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 3 xətt sadə görünüş */
+.catalog-menu-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 5px !important;
+  display: grid !important;
+  place-items: center !important;
+  gap: 4px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.catalog-menu-btn span {
+  width: 20px !important;
+  height: 2px !important;
+  border-radius: 999px !important;
+  background: #047857 !important;
+}
+
+.catalog-menu-btn:hover {
+  transform: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Logo artıq ortaya qaçmasın */
+.topbar-inner {
+  justify-content: space-between !important;
+}
+
+.topbar-left .brand {
+  min-width: auto !important;
+}
+
+@media (max-width: 640px) {
+  .topbar-left {
+    gap: 6px;
+  }
+
+  .catalog-menu-btn {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .catalog-menu-btn span {
+    width: 18px !important;
+  }
+}
