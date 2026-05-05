@@ -4496,3 +4496,139 @@ select option {
     width: 18px !important;
   }
 }
+
+/* ============================================================
+   KATALOQ MENYU - FINAL DİZAYN BALANSI
+   ============================================================ */
+
+/* Desktopda menyu daha enli və uzun */
+@media (min-width: 769px) {
+  .catalog-menu-panel {
+    width: min(980px, calc(100vw - 40px)) !important;
+    grid-template-columns: 260px 1fr !important;
+    max-height: 620px !important;
+  }
+
+  .catalog-left {
+    max-height: 620px !important;
+    padding: 12px !important;
+  }
+
+  .catalog-left-item {
+    padding: 8px 10px !important;
+    font-weight: 500 !important;
+    border-radius: 13px !important;
+  }
+
+  .catalog-left-item span {
+    font-weight: 500 !important;
+  }
+
+  .catalog-left-item.active span,
+  .catalog-left-item:hover span {
+    font-weight: 650 !important;
+  }
+
+  .catalog-right {
+    min-height: 500px !important;
+    padding: 20px 24px !important;
+  }
+
+  .catalog-keyword-grid {
+    display: block !important;
+    column-count: 4;
+    column-gap: 22px;
+  }
+
+  .catalog-keyword {
+    width: 100% !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 4px 0 !important;
+    margin: 0 0 7px !important;
+    display: block !important;
+    background: transparent !important;
+    color: #334155 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .catalog-keyword:hover {
+    color: #047857 !important;
+    background: transparent !important;
+    transform: none !important;
+    text-decoration: underline;
+  }
+
+  .catalog-mobile-title {
+    display: none !important;
+  }
+}
+
+/* Telefonda başlıq + bağlama oxu */
+.catalog-mobile-title {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .catalog-mobile-title {
+    display: flex !important;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px 8px;
+    background: #ffffff;
+  }
+
+  .catalog-mobile-title button {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(220, 252, 231, 0.9);
+    color: #047857;
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  .catalog-mobile-title b {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1f2937;
+  }
+
+  .catalog-left {
+    padding-top: 4px !important;
+  }
+
+  .catalog-left::before {
+    display: none !important;
+  }
+
+  .catalog-left-item {
+    min-height: 78px !important;
+    padding: 10px !important;
+    font-weight: 500 !important;
+  }
+
+  .catalog-left-item span {
+    max-width: 68% !important;
+    font-size: 12px !important;
+    line-height: 1.18 !important;
+    font-weight: 500 !important;
+  }
+
+  .catalog-left-item img {
+    width: 58px !important;
+    height: 58px !important;
+    right: 4px !important;
+  }
+
+  .catalog-keyword {
+    font-weight: 500 !important;
+    font-size: 12px !important;
+  }
+}
