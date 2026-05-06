@@ -1123,7 +1123,7 @@ async function loadPreparationCenter() {
     ordersQuery,
     supabase.from('order_items').select('*').limit(3000),
     supabase.from('products').select('id,name,stock_quantity,unit,status').limit(1000),
-    supabase.from('profiles').select('id,first_name,last_name,email,phone').limit(1000),
+    supabase.from('profiles').select('id,first_name,last_name,email,phone,city_region,address_line,apartment,door_code').limit(1000),
   ]);
 
   if (ordersRes.error) {
@@ -1409,13 +1409,14 @@ function safeSheetName(name) {
 }
   
 
-  function addLogo(ws) {
-    if (!logoId) return;
-    ws.addImage(logoId, {
-      tl: { col: 0.2, row: 0.2 },
-      ext: { width: 120, height: 45 },
-    });
-  }
+function addLogo(ws) {
+  if (!logoId) return;
+
+  ws.addImage(logoId, {
+    tl: { col: 0.1, row: 0.25 },
+    ext: { width: 170, height: 70 },
+  });
+}
 
   const summarySheet = workbook.addWorksheet('Hazırlanma Mərkəzi');
 
@@ -1502,10 +1503,10 @@ preparationOrdersCache.forEach((data, index) => {
 
   ws.columns = [
     { key: 'a', width: 22 },
-    { key: 'b', width: 32 },
-    { key: 'c', width: 16 },
-    { key: 'd', width: 18 },
-    { key: 'e', width: 22 },
+    { key: 'b', width: 36 },
+    { key: 'c', width: 20 },
+    { key: 'd', width: 20 },
+    { key: 'e', width: 18 },
   ];
 
   ws.pageSetup = {
@@ -1530,7 +1531,7 @@ preparationOrdersCache.forEach((data, index) => {
 
   addLogo(ws);
 
-  ws.mergeCells('B1:E3');
+  ws.mergeCells('B1:E4');
   const title = ws.getCell('B1');
   title.value = 'MÜŞTƏRİ SİFARİŞ ÇEKİ ✅';
   title.font = { bold: true, size: 20, color: { argb: 'FFFFFFFF' } };
@@ -1584,6 +1585,8 @@ preparationOrdersCache.forEach((data, index) => {
     : redFill;
 
   const productHeader = ws.addRow(['Məhsul', 'Miqdar', 'Vahid qiymət', 'Cəmi', 'Qeyd']);
+  productHeader.height = 24;
+  productHeader.getCell(5).alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
   styleHeader(productHeader);
 
   items.forEach((item) => {
@@ -1603,13 +1606,13 @@ preparationOrdersCache.forEach((data, index) => {
     styleBody(emptyRow);
   }
 
-  const totalRow = ws.addRow(['', '', 'Ümumi məbləğ:', money(order.total_amount), '']);
-  ws.mergeCells(`A${totalRow.number}:B${totalRow.number}`);
+const totalRow = ws.addRow(['', '', '', 'Ümumi məbləğ:', money(order.total_amount)]);
+ws.mergeCells(`A${totalRow.number}:C${totalRow.number}`);
   totalRow.height = 34;
-  totalRow.getCell(3).font = { bold: true, size: 14 };
-  totalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
-  totalRow.getCell(4).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
-  totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
+totalRow.getCell(4).font = { bold: true, size: 14 };
+totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
+totalRow.getCell(5).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
   styleBody(totalRow);
 
   ws.addRow([]);
