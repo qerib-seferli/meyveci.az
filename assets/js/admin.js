@@ -868,6 +868,7 @@ async function saveProduct(event) {
 }
 
 
+
 async function ordersPayments() {
   const code = new URLSearchParams(location.search).get('code');
 
@@ -875,12 +876,25 @@ async function ordersPayments() {
     $('#orderSearch').value = code;
   }
 
+  initPreparationDates();
+
   await loadOrders();
   await loadPayments();
+  await loadPreparationCenter();
 
   $('#orderSearch')?.addEventListener('input', loadOrders);
   $('#paymentSearch')?.addEventListener('input', loadPayments);
+
+  $('#prepFilterBtn')?.addEventListener('click', loadPreparationCenter);
+  $('#prepSearch')?.addEventListener('input', loadPreparationCenter);
+  $('#prepStatus')?.addEventListener('change', loadPreparationCenter);
+  $('#prepStartDate')?.addEventListener('change', loadPreparationCenter);
+  $('#prepEndDate')?.addEventListener('change', loadPreparationCenter);
+
+  $('#prepExportBtn')?.addEventListener('click', exportPreparationExcel);
+  $('#prepPrintBtn')?.addEventListener('click', printPreparationCenter);
 }
+
 
 
 async function loadOrders() {
@@ -1052,6 +1066,341 @@ async function assignCourierSafe(orderId, courierId) {
 
   return { error: null };
 }
+
+
+
+let preparationRowsCache = [];
+let preparationPurchaseCache = [];
+
+function initPreparationDates() {
+  const start = $('#prepStartDate');
+  const end = $('#prepEndDate');
+  if (!start || !end) return;
+
+  const today = new Date();
+  const value = today.toISOString().slice(0, 10);
+
+  if (!start.value) start.value = value;
+  if (!end.value) end.value = value;
+}
+
+function getPreparationRange() {
+  const startValue = $('#prepStartDate')?.value;
+  const endValue = $('#prepEndDate')?.value;
+
+  const start = startValue ? new Date(`${startValue}T00:00:00`) : new Date();
+  const end = endValue ? new Date(`${endValue}T23:59:59`) : new Date();
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString(),
+  };
+}
+
+async function loadPreparationCenter() {
+  if (!$('#prepSummaryTable')) return;
+
+  const range = getPreparationRange();
+  const status = $('#prepStatus')?.value || 'active';
+  const search = ($('#prepSearch')?.value || '').trim().toLowerCase();
+
+  let ordersQuery = supabase
+    .from('orders')
+    .select('*')
+    .gte('created_at', range.start)
+    .lte('created_at', range.end)
+    .order('created_at', { ascending: true })
+    .limit(500);
+
+  if (status === 'active') {
+    ordersQuery = ordersQuery.in('status', ['confirmed', 'preparing']);
+  } else if (status !== 'all') {
+    ordersQuery = ordersQuery.eq('status', status);
+  }
+
+  const [ordersRes, itemsRes, productsRes, profilesRes] = await Promise.all([
+    ordersQuery,
+    supabase.from('order_items').select('*').limit(3000),
+    supabase.from('products').select('id,name,stock_quantity,unit,status').limit(1000),
+    supabase.from('profiles').select('id,first_name,last_name,email,phone').limit(1000),
+  ]);
+
+  if (ordersRes.error) {
+    $('#prepSummaryTable').innerHTML = `<tr><td colspan="5">${esc(ordersRes.error.message)}</td></tr>`;
+    return;
+  }
+
+  const orders = ordersRes.data || [];
+  const orderIds = new Set(orders.map((o) => o.id));
+  const productsMap = new Map((productsRes.data || []).map((p) => [p.id, p]));
+  const profilesMap = new Map((profilesRes.data || []).map((p) => [p.id, p]));
+  const ordersMap = new Map(orders.map((o) => [o.id, o]));
+
+  const items = (itemsRes.data || []).filter((item) => orderIds.has(item.order_id));
+
+  const productAgg = new Map();
+
+  items.forEach((item) => {
+    const order = ordersMap.get(item.order_id);
+    if (!order) return;
+
+    const product = productsMap.get(item.product_id) || {};
+    const productName = item.product_name || product.name || 'Adsız məhsul';
+
+    if (search && !productName.toLowerCase().includes(search)) return;
+
+    const key = item.product_id || productName;
+    const quantity = Number(item.quantity || 0);
+    const stock = Number(product.stock_quantity || 0);
+    const unit = product.unit || 'ədəd';
+    const profile = profilesMap.get(order.user_id) || {};
+
+    const customerName =
+      order.full_name ||
+      `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
+      profile.email ||
+      'Müştəri';
+
+    if (!productAgg.has(key)) {
+      productAgg.set(key, {
+        product_id: item.product_id,
+        product_name: productName,
+        unit,
+        stock,
+        total_quantity: 0,
+        customers: [],
+        first_order_date: order.created_at,
+      });
+    }
+
+    const row = productAgg.get(key);
+    row.total_quantity += quantity;
+
+    if (new Date(order.created_at) < new Date(row.first_order_date)) {
+      row.first_order_date = order.created_at;
+    }
+
+    row.customers.push({
+      order_code: order.order_code || order.id,
+      customer_name: customerName,
+      phone: order.phone || profile.phone || '',
+      quantity,
+      unit,
+      created_at: order.created_at,
+      status: order.status,
+    });
+  });
+
+  const rows = [...productAgg.values()]
+    .map((row) => ({
+      ...row,
+      need_quantity: Math.max(Number(row.total_quantity || 0) - Number(row.stock || 0), 0),
+      remain_quantity: Math.max(Number(row.stock || 0) - Number(row.total_quantity || 0), 0),
+      customers: row.customers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
+    }))
+    .sort((a, b) => new Date(a.first_order_date) - new Date(b.first_order_date));
+
+  preparationRowsCache = rows;
+  preparationPurchaseCache = rows.filter((row) => row.need_quantity > 0);
+
+  renderPreparationKpis(rows, orders);
+  renderPreparationSummary(rows);
+  renderPreparationDetails(rows);
+  renderPreparationPurchase(preparationPurchaseCache);
+}
+
+function renderPreparationKpis(rows, orders) {
+  const totalProducts = rows.length;
+  const totalOrders = orders.length;
+  const needCount = rows.filter((row) => row.need_quantity > 0).length;
+  const readyCount = rows.filter((row) => row.need_quantity <= 0).length;
+
+  $('#prepKpis').innerHTML = `
+    <div class="prep-kpi"><span>Sifariş</span><b>${totalOrders}</b><small>Seçilən tarix aralığı</small></div>
+    <div class="prep-kpi"><span>Məhsul çeşidi</span><b>${totalProducts}</b><small>Cəmlənmiş məhsul sayı</small></div>
+    <div class="prep-kpi"><span>Anbarda var</span><b>${readyCount}</b><small>Tam hazırlana bilər</small></div>
+    <div class="prep-kpi danger"><span>Satınalma lazımdır</span><b>${needCount}</b><small>Çatışmayan məhsul</small></div>
+  `;
+}
+
+function renderPreparationSummary(rows) {
+  $('#prepSummaryTable').innerHTML = rows.map((row) => `
+    <tr>
+      <td>
+        <b>${esc(row.product_name)}</b>
+        <small class="muted">${formatDate(row.first_order_date)} tarixindən başlayır</small>
+      </td>
+      <td><b>${row.total_quantity} ${esc(row.unit)}</b></td>
+      <td>${row.stock} ${esc(row.unit)}</td>
+      <td>
+        ${
+          row.need_quantity > 0
+            ? `<span class="prep-badge danger">Alınmalıdır: ${row.need_quantity} ${esc(row.unit)}</span>`
+            : `<span class="prep-badge success">Yetərlidir</span>`
+        }
+      </td>
+      <td>${row.remain_quantity} ${esc(row.unit)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5">Bu tarix aralığında hazırlanacaq məhsul yoxdur.</td></tr>';
+}
+
+function renderPreparationDetails(rows) {
+  $('#prepDetailsList').innerHTML = rows.map((row) => `
+    <details class="prep-detail-card">
+      <summary>
+        <span>
+          <b>${esc(row.product_name)}</b>
+          <small>${row.total_quantity} ${esc(row.unit)} ümumi sifariş</small>
+        </span>
+        ${
+          row.need_quantity > 0
+            ? `<em class="prep-badge danger">Çatışmır: ${row.need_quantity} ${esc(row.unit)}</em>`
+            : `<em class="prep-badge success">Anbarda var</em>`
+        }
+      </summary>
+
+      <div class="prep-customer-list">
+        ${row.customers.map((customer, index) => `
+          <div class="prep-customer-row">
+            <div>
+              <b>${index + 1}. ${esc(customer.customer_name)}</b>
+              <small>${esc(customer.order_code)} • ${formatDate(customer.created_at)} • ${statusAz(customer.status)}</small>
+              ${customer.phone ? `<small>📞 ${esc(customer.phone)}</small>` : ''}
+            </div>
+            <strong>${customer.quantity} ${esc(customer.unit)}</strong>
+          </div>
+        `).join('')}
+      </div>
+    </details>
+  `).join('') || '<span class="muted">Müştəri detalları yoxdur.</span>';
+}
+
+function renderPreparationPurchase(rows) {
+  $('#prepPurchaseTable').innerHTML = rows.map((row) => `
+    <tr>
+      <td><b>${esc(row.product_name)}</b></td>
+      <td>${row.total_quantity} ${esc(row.unit)}</td>
+      <td>${row.stock} ${esc(row.unit)}</td>
+      <td><span class="prep-badge danger">${row.need_quantity} ${esc(row.unit)}</span></td>
+    </tr>
+  `).join('') || '<tr><td colspan="4">Satınalma ehtiyacı yoxdur.</td></tr>';
+}
+
+function exportPreparationExcel() {
+  if (!preparationRowsCache.length) {
+    toast('Export üçün məlumat yoxdur');
+    return;
+  }
+
+  const rows = [
+    ['Məhsul', 'Cəm miqdar', 'Anbar qalığı', 'Satınalma ehtiyacı', 'Anbarda qalacaq'],
+    ...preparationRowsCache.map((row) => [
+      row.product_name,
+      `${row.total_quantity} ${row.unit}`,
+      `${row.stock} ${row.unit}`,
+      `${row.need_quantity} ${row.unit}`,
+      `${row.remain_quantity} ${row.unit}`,
+    ]),
+    [],
+    ['SATINALMA SİYAHISI'],
+    ['Məhsul', 'Lazım olan', 'Anbar', 'Alınacaq'],
+    ...preparationPurchaseCache.map((row) => [
+      row.product_name,
+      `${row.total_quantity} ${row.unit}`,
+      `${row.stock} ${row.unit}`,
+      `${row.need_quantity} ${row.unit}`,
+    ]),
+  ];
+
+  const csv = rows
+    .map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(';'))
+    .join('\n');
+
+  const blob = new Blob(['\ufeff' + csv], {
+    type: 'text/csv;charset=utf-8;',
+  });
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `hazirlanma-merkezi-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function printPreparationCenter() {
+  const summary = $('#prepSummaryTable')?.innerHTML || '';
+  const purchase = $('#prepPurchaseTable')?.innerHTML || '';
+  const details = $('#prepDetailsList')?.innerHTML || '';
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    toast('Print pəncərəsi bloklandı');
+    return;
+  }
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="az">
+    <head>
+      <meta charset="UTF-8">
+      <title>Hazırlanma Mərkəzi</title>
+      <style>
+        body { font-family: Arial, sans-serif; color:#111827; padding:24px; }
+        h1,h2 { margin:0 0 12px; color:#064e3b; }
+        table { width:100%; border-collapse:collapse; margin:12px 0 24px; }
+        th,td { border:1px solid #d1d5db; padding:8px; text-align:left; font-size:13px; }
+        th { background:#dcfce7; color:#064e3b; }
+        small { display:block; color:#64748b; }
+        details { border:1px solid #d1d5db; border-radius:10px; padding:10px; margin-bottom:10px; }
+        summary { font-weight:bold; }
+        .prep-customer-row { display:flex; justify-content:space-between; border-top:1px solid #e5e7eb; padding:8px 0; }
+        .prep-badge { font-weight:bold; }
+        @media print { button { display:none; } }
+      </style>
+    </head>
+    <body>
+      <h1>Hazırlanma Mərkəzi</h1>
+      <p>Çap tarixi: ${new Date().toLocaleString('az-AZ')}</p>
+
+      <h2>Ümumi sifariş miqdarı</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Məhsul</th>
+            <th>Cəm miqdar</th>
+            <th>Anbar qalığı</th>
+            <th>Satınalma ehtiyacı</th>
+            <th>Anbarda qalacaq</th>
+          </tr>
+        </thead>
+        <tbody>${summary}</tbody>
+      </table>
+
+      <h2>Satınalma siyahısı</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Məhsul</th>
+            <th>Lazım olan miqdar</th>
+            <th>Anbar qalığı</th>
+            <th>Satın alınacaq</th>
+          </tr>
+        </thead>
+        <tbody>${purchase}</tbody>
+      </table>
+
+      <h2>Müştəri detalları</h2>
+      ${details}
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 400);
+}
+
+
 
 async function loadPayments() {
   const search = ($('#paymentSearch')?.value || '').toLowerCase();
@@ -1449,6 +1798,7 @@ function subscribeAdminRealtime() {
       if (document.body.dataset.page === 'admin-orders') {
         loadOrders();
         loadPayments();
+        loadPreparationCenter();
       }
     })
     
