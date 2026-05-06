@@ -1329,27 +1329,34 @@ async function exportPreparationExcel() {
   workbook.created = new Date();
 
   
-  let logoId = null;
+ let logoId = null;
 
-  try {
-    const basePath = location.pathname.includes('/admin/')
-      ? location.pathname.split('/admin/')[0]
-      : '';
+try {
+  const basePath = location.pathname.includes('/admin/')
+    ? location.pathname.split('/admin/')[0]
+    : '';
 
-    const logoRes = await fetch(`${location.origin}${basePath}/assets/img/logo/Meyveci-logo.png`);
-    if (!logoRes.ok) throw new Error('Logo tapılmadı');
+  const logoUrl = `${location.origin}${basePath}/assets/img/logo/Meyveci-logo.png`;
+  const logoRes = await fetch(logoUrl);
+  if (!logoRes.ok) throw new Error('Logo tapılmadı');
 
-    const logoBlob = await logoRes.blob();
-    const logoBuffer = await logoBlob.arrayBuffer();
+  const logoBlob = await logoRes.blob();
 
-    logoId = workbook.addImage({
-      buffer: logoBuffer,
-      extension: 'png',
-    });
-  } catch (error) {
-    console.warn('Excel logo yüklənmədi:', error.message);
-    logoId = null;
-  }
+  const logoBase64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(logoBlob);
+  });
+
+  logoId = workbook.addImage({
+    base64: logoBase64,
+    extension: 'png',
+  });
+} catch (error) {
+  console.warn('Excel logo yüklənmədi:', error.message);
+  logoId = null;
+}
   
 
   const border = {
@@ -1413,13 +1420,32 @@ function safeSheetName(name) {
   
 
 function addLogo(ws) {
-  if (!logoId) return;
+  ws.getCell('A2').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFFFFFF' },
+  };
+
+  ws.getCell('A3').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFFFFFF' },
+  };
+
+  if (!logoId) {
+    ws.getCell('A2').value = 'Meyvəçi.az';
+    ws.getCell('A2').font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+    ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
+    return;
+  }
 
   ws.addImage(logoId, {
-    tl: { col: 0.15, row: 1.15 },
-    ext: { width: 170, height: 65 },
+    tl: { col: 0.1, row: 1.15 },
+    ext: { width: 160, height: 60 },
   });
 }
+
+  
 
   const summarySheet = workbook.addWorksheet('Hazırlanma Mərkəzi');
 
@@ -1516,7 +1542,7 @@ function addLogo(ws) {
 
   ws.pageSetup = {
     paperSize: 9,
-    orientation: 'landscape',
+    orientation: 'portrait',
     fitToPage: true,
     fitToWidth: 1,
     fitToHeight: 0,
@@ -1587,14 +1613,25 @@ function addLogo(ws) {
     styleBody(ws.addRow(['', '', '', '', '']));
   }
 
-  const totalRow = ws.addRow(['', '', '', 'Ümumi məbləğ:', money(order.total_amount)]);
-  ws.mergeCells(`A${totalRow.number}:C${totalRow.number}`);
-  totalRow.height = 34;
-  totalRow.getCell(4).font = { bold: true, size: 14 };
-  totalRow.getCell(5).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
-  totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
-  totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
-  styleBody(totalRow);
+const totalRow = ws.addRow(['', '', 'Ümumi məbləğ:', money(order.total_amount), '']);
+ws.mergeCells(`A${totalRow.number}:B${totalRow.number}`);
+totalRow.height = 34;
+
+styleBody(totalRow);
+
+[1, 2, 3, 4, 5].forEach((cellNo) => {
+  totalRow.getCell(cellNo).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFFFFFF' },
+  };
+});
+
+totalRow.getCell(3).font = { bold: true, size: 14 };
+totalRow.getCell(4).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+
+totalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
+totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
 
   ws.addRow([]);
 
