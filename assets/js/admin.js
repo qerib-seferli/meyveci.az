@@ -1071,6 +1071,7 @@ async function assignCourierSafe(orderId, courierId) {
 
 let preparationRowsCache = [];
 let preparationPurchaseCache = [];
+let preparationOrdersCache = [];
 
 function initPreparationDates() {
   const start = $('#prepStartDate');
@@ -1200,8 +1201,32 @@ async function loadPreparationCenter() {
     }))
     .sort((a, b) => new Date(a.first_order_date) - new Date(b.first_order_date));
 
-  preparationRowsCache = rows;
-  preparationPurchaseCache = rows.filter((row) => row.need_quantity > 0);
+  
+preparationRowsCache = rows;
+preparationPurchaseCache = rows.filter((row) => row.need_quantity > 0);
+
+preparationOrdersCache = orders.map((order) => {
+  const profile = profilesMap.get(order.user_id) || {};
+  const orderItems = items
+    .filter((item) => item.order_id === order.id)
+    .map((item) => {
+      const product = productsMap.get(item.product_id) || {};
+      return {
+        product_name: item.product_name || product.name || 'Məhsul',
+        quantity: Number(item.quantity || 0),
+        unit: product.unit || 'ədəd',
+        unit_price: Number(item.unit_price || 0),
+        line_total: Number(item.line_total || 0),
+      };
+    });
+
+  return {
+    order,
+    profile,
+    items: orderItems,
+  };
+});
+  
 
   renderPreparationKpis(rows, orders);
   renderPreparationSummary(rows);
@@ -1286,46 +1311,243 @@ function renderPreparationPurchase(rows) {
   `).join('') || '<tr><td colspan="4">Satınalma ehtiyacı yoxdur.</td></tr>';
 }
 
-function exportPreparationExcel() {
-  if (!preparationRowsCache.length) {
+
+
+async function exportPreparationExcel() {
+  if (!window.ExcelJS) {
+    toast('ExcelJS kitabxanası yüklənməyib');
+    return;
+  }
+
+  if (!preparationRowsCache.length && !preparationOrdersCache.length) {
     toast('Export üçün məlumat yoxdur');
     return;
   }
 
-  const rows = [
-    ['Məhsul', 'Cəm miqdar', 'Anbar qalığı', 'Satınalma ehtiyacı', 'Anbarda qalacaq'],
-    ...preparationRowsCache.map((row) => [
-      row.product_name,
-      `${row.total_quantity} ${row.unit}`,
-      `${row.stock} ${row.unit}`,
-      `${row.need_quantity} ${row.unit}`,
-      `${row.remain_quantity} ${row.unit}`,
-    ]),
-    [],
-    ['SATINALMA SİYAHISI'],
-    ['Məhsul', 'Lazım olan', 'Anbar', 'Alınacaq'],
-    ...preparationPurchaseCache.map((row) => [
-      row.product_name,
-      `${row.total_quantity} ${row.unit}`,
-      `${row.stock} ${row.unit}`,
-      `${row.need_quantity} ${row.unit}`,
-    ]),
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Meyvəçi.az';
+  workbook.created = new Date();
+
+  let logoId = null;
+
+  try {
+    const logoRes = await fetch('../assets/img/logo/Meyveci-logo.png');
+    const logoBlob = await logoRes.blob();
+    const logoBuffer = await logoBlob.arrayBuffer();
+
+    logoId = workbook.addImage({
+      buffer: logoBuffer,
+      extension: 'png',
+    });
+  } catch {
+    logoId = null;
+  }
+
+  const border = {
+    top: { style: 'thin', color: { argb: 'FFB7E4C7' } },
+    left: { style: 'thin', color: { argb: 'FFB7E4C7' } },
+    bottom: { style: 'thin', color: { argb: 'FFB7E4C7' } },
+    right: { style: 'thin', color: { argb: 'FFB7E4C7' } },
+  };
+
+  const headerFill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFDCFCE7' },
+  };
+
+  const titleFill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF16A34A' },
+  };
+
+  function styleHeader(row) {
+    row.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: 'FF064E3B' } };
+      cell.fill = headerFill;
+      cell.border = border;
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    });
+  }
+
+  function styleBody(row) {
+    row.eachCell((cell) => {
+      cell.border = border;
+      cell.alignment = { vertical: 'middle', wrapText: true };
+    });
+  }
+
+  function safeSheetName(name) {
+    return String(name || 'List')
+      .replace(/[\\/*?:[\]]/g, '')
+      .slice(0, 31);
+  }
+
+  function addLogo(ws) {
+    if (!logoId) return;
+    ws.addImage(logoId, {
+      tl: { col: 0.2, row: 0.2 },
+      ext: { width: 120, height: 45 },
+    });
+  }
+
+  const summarySheet = workbook.addWorksheet('Hazırlanma Mərkəzi');
+
+  summarySheet.columns = [
+    { key: 'a', width: 28 },
+    { key: 'b', width: 18 },
+    { key: 'c', width: 18 },
+    { key: 'd', width: 22 },
+    { key: 'e', width: 20 },
   ];
 
-  const csv = rows
-    .map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(';'))
-    .join('\n');
+  addLogo(summarySheet);
 
-  const blob = new Blob(['\ufeff' + csv], {
-    type: 'text/csv;charset=utf-8;',
+  summarySheet.mergeCells('A1:E3');
+  const titleCell = summarySheet.getCell('A1');
+  titleCell.value = 'Hazırlanma Mərkəzi';
+  titleCell.font = { bold: true, size: 20, color: { argb: 'FF064E3B' } };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  summarySheet.getCell('A4').value = `Tarix: ${new Date().toLocaleString('az-AZ')}`;
+  summarySheet.mergeCells('A4:E4');
+
+  summarySheet.addRow([]);
+  const h1 = summarySheet.addRow(['Məhsul', 'Cəm miqdar', 'Anbar qalığı', 'Satınalma ehtiyacı', 'Anbarda qalacaq']);
+  styleHeader(h1);
+
+  preparationRowsCache.forEach((row) => {
+    const r = summarySheet.addRow([
+      row.product_name,
+      `${row.total_quantity} ${row.unit}`,
+      `${row.stock} ${row.unit}`,
+      row.need_quantity > 0 ? `${row.need_quantity} ${row.unit}` : 'Yetərlidir',
+      `${row.remain_quantity} ${row.unit}`,
+    ]);
+    styleBody(r);
+  });
+
+  summarySheet.addRow([]);
+  const purchaseTitle = summarySheet.addRow(['SATINALMA SİYAHISI']);
+  summarySheet.mergeCells(`A${purchaseTitle.number}:E${purchaseTitle.number}`);
+  purchaseTitle.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  purchaseTitle.getCell(1).fill = titleFill;
+  purchaseTitle.getCell(1).alignment = { horizontal: 'center' };
+
+  const h2 = summarySheet.addRow(['Məhsul', 'Lazım olan', 'Anbar', 'Alınacaq', 'Qeyd']);
+  styleHeader(h2);
+
+  preparationPurchaseCache.forEach((row) => {
+    const r = summarySheet.addRow([
+      row.product_name,
+      `${row.total_quantity} ${row.unit}`,
+      `${row.stock} ${row.unit}`,
+      `${row.need_quantity} ${row.unit}`,
+      'Satınalma lazımdır',
+    ]);
+    styleBody(r);
+  });
+
+  summarySheet.views = [{ state: 'frozen', ySplit: 6 }];
+
+  preparationOrdersCache.forEach((data, index) => {
+    const order = data.order || {};
+    const profile = data.profile || {};
+    const items = data.items || [];
+
+    const customerName =
+      order.full_name ||
+      `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
+      profile.email ||
+      `Müştəri ${index + 1}`;
+
+    const ws = workbook.addWorksheet(safeSheetName(`Müştəri sifariş-${customerName}`));
+
+    ws.columns = [
+      { key: 'a', width: 26 },
+      { key: 'b', width: 14 },
+      { key: 'c', width: 16 },
+      { key: 'd', width: 16 },
+      { key: 'e', width: 22 },
+    ];
+
+    addLogo(ws);
+
+    ws.mergeCells('A1:E3');
+    const receiptTitle = ws.getCell('A1');
+    receiptTitle.value = 'Meyvəçi.az — Müştəri Sifariş Çeki';
+    receiptTitle.font = { bold: true, size: 18, color: { argb: 'FF064E3B' } };
+    receiptTitle.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    ws.addRow([]);
+    ws.addRow(['Sifariş kodu', order.order_code || order.id, '', 'Tarix', formatDate(order.created_at)]);
+    ws.addRow(['Müştəri', customerName, '', 'Telefon', order.phone || profile.phone || '—']);
+    ws.addRow(['Ünvan', [order.city_region, order.address_text || profile.address_line, order.apartment, order.door_code].filter(Boolean).join(', '), '', 'Status', statusAz(order.status)]);
+    ws.addRow(['Ödəniş üsulu', methodAz(order.payment_method), '', 'Ödəniş statusu', statusAz(order.payment_status)]);
+    ws.addRow([]);
+
+    for (let i = 5; i <= 9; i++) {
+      ws.getRow(i).eachCell((cell) => {
+        cell.border = border;
+        cell.alignment = { vertical: 'middle', wrapText: true };
+      });
+    }
+
+    const productHeader = ws.addRow(['Məhsul', 'Miqdar', 'Vahid qiymət', 'Cəmi', 'Qeyd']);
+    styleHeader(productHeader);
+
+    items.forEach((item) => {
+      const r = ws.addRow([
+        item.product_name,
+        `${item.quantity} ${item.unit}`,
+        money(item.unit_price),
+        money(item.line_total),
+        '',
+      ]);
+      styleBody(r);
+    });
+
+    ws.addRow([]);
+    const totalRow = ws.addRow(['', '', 'Ümumi məbləğ', money(order.total_amount), '']);
+    totalRow.getCell(3).font = { bold: true, size: 13 };
+    totalRow.getCell(4).font = { bold: true, size: 13, color: { argb: 'FF047857' } };
+    styleBody(totalRow);
+
+    ws.addRow([]);
+    const noteRow = ws.addRow(['Qeyd', order.customer_note || order.note || 'Qeyd yoxdur']);
+    ws.mergeCells(`B${noteRow.number}:E${noteRow.number}`);
+    styleBody(noteRow);
+
+    ws.addRow([]);
+    const footer = ws.addRow(['Bu çek məhsulların paketinə əlavə edilmək üçün hazırlanıb.']);
+    ws.mergeCells(`A${footer.number}:E${footer.number}`);
+    footer.getCell(1).font = { italic: true, color: { argb: 'FF64748B' } };
+    footer.getCell(1).alignment = { horizontal: 'center' };
+
+    ws.pageSetup = {
+      paperSize: 9,
+      orientation: 'portrait',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+    };
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
 
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `hazirlanma-merkezi-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `hazirlanma-merkezi-${new Date().toISOString().slice(0, 10)}.xlsx`;
   link.click();
   URL.revokeObjectURL(link.href);
 }
+
+
+
 
 function printPreparationCenter() {
   const summary = $('#prepSummaryTable')?.innerHTML || '';
