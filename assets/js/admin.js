@@ -1472,91 +1472,146 @@ function safeSheetName(name) {
 
   summarySheet.views = [{ state: 'frozen', ySplit: 6 }];
 
-  preparationOrdersCache.forEach((data, index) => {
-    const order = data.order || {};
-    const profile = data.profile || {};
-    const items = data.items || [];
+preparationOrdersCache.forEach((data, index) => {
+  const order = data.order || {};
+  const profile = data.profile || {};
+  const items = data.items || [];
 
-    const customerName =
-      order.full_name ||
-      `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
-      profile.email ||
-      `Müştəri ${index + 1}`;
+  const customerName =
+    order.full_name ||
+    `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
+    profile.email ||
+    `Müştəri ${index + 1}`;
 
-    const shortCode = String(order.order_code || order.id || index + 1).slice(-6);
-    const ws = workbook.addWorksheet(
-      safeSheetName(`Müştəri-${customerName}-${shortCode}`)
-    );
+  const fullAddress = [
+    order.city_region,
+    order.address_text || profile.address_line,
+    order.apartment || profile.apartment,
+    order.door_code || profile.door_code,
+  ].filter(Boolean).join(', ');
 
-    ws.columns = [
-      { key: 'a', width: 26 },
-      { key: 'b', width: 14 },
-      { key: 'c', width: 16 },
-      { key: 'd', width: 16 },
-      { key: 'e', width: 22 },
-    ];
+  const shortCode = String(order.order_code || order.id || index + 1).slice(-6);
+  const ws = workbook.addWorksheet(
+    safeSheetName(`Müştəri-${customerName}-${shortCode}`)
+  );
 
-    addLogo(ws);
+  ws.columns = [
+    { key: 'a', width: 22 },
+    { key: 'b', width: 30 },
+    { key: 'c', width: 14 },
+    { key: 'd', width: 18 },
+    { key: 'e', width: 18 },
+  ];
 
-    ws.mergeCells('A1:E3');
-    const receiptTitle = ws.getCell('A1');
-    receiptTitle.value = 'Meyvəçi.az — Müştəri Sifariş Çeki';
-    receiptTitle.font = { bold: true, size: 18, color: { argb: 'FF064E3B' } };
-    receiptTitle.alignment = { horizontal: 'center', vertical: 'middle' };
+  ws.pageSetup = {
+    paperSize: 9,
+    orientation: 'landscape',
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    margins: {
+      left: 0.25,
+      right: 0.25,
+      top: 0.35,
+      bottom: 0.35,
+      header: 0.1,
+      footer: 0.1,
+    },
+  };
 
-    ws.addRow([]);
-    ws.addRow(['Sifariş kodu', order.order_code || order.id, '', 'Tarix', formatDate(order.created_at)]);
-    ws.addRow(['Müştəri', customerName, '', 'Telefon', order.phone || profile.phone || '—']);
-    ws.addRow(['Ünvan', [order.city_region, order.address_text || profile.address_line, order.apartment, order.door_code].filter(Boolean).join(', '), '', 'Status', statusAz(order.status)]);
-    ws.addRow(['Ödəniş üsulu', methodAz(order.payment_method), '', 'Ödəniş statusu', statusAz(order.payment_status)]);
-    ws.addRow([]);
+  addLogo(ws);
 
-    for (let i = 5; i <= 9; i++) {
-      ws.getRow(i).eachCell((cell) => {
-        cell.border = border;
-        cell.alignment = { vertical: 'middle', wrapText: true };
-      });
-    }
+  ws.mergeCells('B1:E3');
+  const title = ws.getCell('B1');
+  title.value = 'MÜŞTƏRİ SİFARİŞ ÇEKİ ✅';
+  title.font = { bold: true, size: 20, color: { argb: 'FFFFFFFF' } };
+  title.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF047857' },
+  };
+  title.alignment = { horizontal: 'center', vertical: 'middle' };
 
-    const productHeader = ws.addRow(['Məhsul', 'Miqdar', 'Vahid qiymət', 'Cəmi', 'Qeyd']);
-    styleHeader(productHeader);
+  ws.addRow([]);
+  ws.addRow(['Sifariş kodu:', order.order_code || order.id, '', 'Tarix:', formatDate(order.created_at)]);
+  ws.addRow(['Müştəri:', customerName, '', 'Telefon:', order.phone || profile.phone || '—']);
+  ws.addRow(['Ünvan:', fullAddress || 'Ünvan yoxdur', '', 'Ödəniş üsulu:', methodAz(order.payment_method)]);
+  ws.addRow(['Sifariş statusu:', statusAz(order.status), '', 'Ödəniş statusu:', statusAz(order.payment_status)]);
+  ws.addRow([]);
 
-    items.forEach((item) => {
-      const r = ws.addRow([
-        item.product_name,
-        `${item.quantity} ${item.unit}`,
-        money(item.unit_price),
-        money(item.line_total),
-        '',
-      ]);
-      styleBody(r);
+  for (let i = 5; i <= 8; i++) {
+    ws.getRow(i).height = 22;
+    ws.getRow(i).eachCell((cell) => {
+      cell.border = border;
+      cell.alignment = { vertical: 'middle', wrapText: true };
     });
 
-    ws.addRow([]);
-    const totalRow = ws.addRow(['', '', 'Ümumi məbləğ', money(order.total_amount), '']);
-    totalRow.getCell(3).font = { bold: true, size: 13 };
-    totalRow.getCell(4).font = { bold: true, size: 13, color: { argb: 'FF047857' } };
-    styleBody(totalRow);
+    ws.getRow(i).getCell(1).font = { bold: true };
+    ws.getRow(i).getCell(4).font = { bold: true };
+  }
 
-    ws.addRow([]);
-    const noteRow = ws.addRow(['Qeyd', order.customer_note || order.note || 'Qeyd yoxdur']);
-    ws.mergeCells(`B${noteRow.number}:E${noteRow.number}`);
-    styleBody(noteRow);
+  ws.getRow(8).getCell(2).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFEE2E2' },
+  };
 
-    ws.addRow([]);
-    const footer = ws.addRow(['Bu çek məhsulların paketinə əlavə edilmək üçün hazırlanıb.']);
-    ws.mergeCells(`A${footer.number}:E${footer.number}`);
-    footer.getCell(1).font = { italic: true, color: { argb: 'FF64748B' } };
-    footer.getCell(1).alignment = { horizontal: 'center' };
+  ws.getRow(8).getCell(5).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFEE2E2' },
+  };
 
-    ws.pageSetup = {
-      paperSize: 9,
-      orientation: 'portrait',
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0,
-    };
+  const productHeader = ws.addRow(['Məhsul', 'Miqdar', 'Vahid qiymət', 'Cəmi', 'Qeyd']);
+  styleHeader(productHeader);
+
+  items.forEach((item) => {
+    const r = ws.addRow([
+      item.product_name,
+      `${item.quantity} ${item.unit}`,
+      money(item.unit_price),
+      money(item.line_total),
+      '',
+    ]);
+
+    styleBody(r);
   });
+
+  for (let i = items.length; i < 4; i++) {
+    const emptyRow = ws.addRow(['', '', '', '', '']);
+    styleBody(emptyRow);
+  }
+
+  const totalRow = ws.addRow(['', '', 'Ümumi məbləğ:', money(order.total_amount), '']);
+  ws.mergeCells(`A${totalRow.number}:B${totalRow.number}`);
+  totalRow.getCell(3).font = { bold: true, size: 14 };
+  totalRow.getCell(4).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+  styleBody(totalRow);
+
+  ws.addRow([]);
+
+  const noteRow = ws.addRow([
+    'Qeyd:',
+    'Bu çek məhsulların paketinə əlavə edilmək üçün hazırlanıb.',
+    '',
+    '',
+    '',
+  ]);
+
+  ws.mergeCells(`B${noteRow.number}:E${noteRow.number}`);
+  noteRow.getCell(1).font = { bold: true };
+  styleBody(noteRow);
+
+  ws.eachRow((row) => {
+    row.eachCell((cell) => {
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: cell.col === 3 || cell.col === 4 ? 'right' : 'left',
+        wrapText: true,
+      };
+    });
+  });
+});
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
