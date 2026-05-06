@@ -1331,7 +1331,13 @@ async function exportPreparationExcel() {
   let logoId = null;
 
   try {
-    const logoRes = await fetch('../assets/img/logo/Meyveci-logo.png');
+      const logoPath = location.pathname.includes('/admin/')
+        ? '../assets/img/logo/Meyveci-logo.png'
+        : './assets/img/logo/Meyveci-logo.png';
+      
+      const logoRes = await fetch(logoPath);
+      if (!logoRes.ok) throw new Error('Logo tapılmadı');
+    
     const logoBlob = await logoRes.blob();
     const logoBuffer = await logoBlob.arrayBuffer();
 
@@ -1378,9 +1384,9 @@ async function exportPreparationExcel() {
     });
   }
 
+  
 const usedSheetNames = new Set();
 
-  
 function safeSheetName(name) {
   let clean = String(name || 'List')
     .replace(/[\\/*?:[\]]/g, '')
@@ -1389,9 +1395,7 @@ function safeSheetName(name) {
 
   if (!clean) clean = 'List';
 
-  clean = clean.slice(0, 25);
-
-  let finalName = clean;
+  let finalName = clean.slice(0, 31);
   let counter = 2;
 
   while (usedSheetNames.has(finalName)) {
@@ -1485,22 +1489,23 @@ preparationOrdersCache.forEach((data, index) => {
 
   const fullAddress = [
     order.city_region,
-    order.address_text || profile.address_line,
+    order.address_text,
+    profile.address_line && profile.address_line !== order.address_text ? profile.address_line : '',
     order.apartment || profile.apartment,
     order.door_code || profile.door_code,
   ].filter(Boolean).join(', ');
 
   const shortCode = String(order.order_code || order.id || index + 1).slice(-6);
   const ws = workbook.addWorksheet(
-    safeSheetName(`Müştəri-${customerName}-${shortCode}`)
+    safeSheetName(`${customerName}-${shortCode}`)
   );
 
   ws.columns = [
     { key: 'a', width: 22 },
-    { key: 'b', width: 30 },
-    { key: 'c', width: 14 },
+    { key: 'b', width: 32 },
+    { key: 'c', width: 16 },
     { key: 'd', width: 18 },
-    { key: 'e', width: 18 },
+    { key: 'e', width: 22 },
   ];
 
   ws.pageSetup = {
@@ -1518,6 +1523,10 @@ preparationOrdersCache.forEach((data, index) => {
       footer: 0.1,
     },
   };
+
+  ws.getRow(1).height = 28;
+  ws.getRow(2).height = 28;
+  ws.getRow(3).height = 28;
 
   addLogo(ws);
 
@@ -1540,7 +1549,8 @@ preparationOrdersCache.forEach((data, index) => {
   ws.addRow([]);
 
   for (let i = 5; i <= 8; i++) {
-    ws.getRow(i).height = 22;
+    ws.getRow(i).height = i === 7 ? 34 : 22;
+
     ws.getRow(i).eachCell((cell) => {
       cell.border = border;
       cell.alignment = { vertical: 'middle', wrapText: true };
@@ -1550,17 +1560,28 @@ preparationOrdersCache.forEach((data, index) => {
     ws.getRow(i).getCell(4).font = { bold: true };
   }
 
-  ws.getRow(8).getCell(2).fill = {
+  const greenFill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFDCFCE7' },
+  };
+
+  const redFill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFFEE2E2' },
   };
 
-  ws.getRow(8).getCell(5).fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFFEE2E2' },
-  };
+  const orderStatusCell = ws.getRow(8).getCell(2);
+  const paymentStatusCell = ws.getRow(8).getCell(5);
+
+  orderStatusCell.fill = ['confirmed', 'preparing', 'on_the_way', 'courier_near', 'delivered'].includes(order.status)
+    ? greenFill
+    : redFill;
+
+  paymentStatusCell.fill = ['paid', 'approved'].includes(order.payment_status)
+    ? greenFill
+    : redFill;
 
   const productHeader = ws.addRow(['Məhsul', 'Miqdar', 'Vahid qiymət', 'Cəmi', 'Qeyd']);
   styleHeader(productHeader);
@@ -1584,8 +1605,11 @@ preparationOrdersCache.forEach((data, index) => {
 
   const totalRow = ws.addRow(['', '', 'Ümumi məbləğ:', money(order.total_amount), '']);
   ws.mergeCells(`A${totalRow.number}:B${totalRow.number}`);
+  totalRow.height = 34;
   totalRow.getCell(3).font = { bold: true, size: 14 };
+  totalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
   totalRow.getCell(4).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+  totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
   styleBody(totalRow);
 
   ws.addRow([]);
@@ -1607,12 +1631,14 @@ preparationOrdersCache.forEach((data, index) => {
       cell.alignment = {
         vertical: 'middle',
         horizontal: cell.col === 3 || cell.col === 4 ? 'right' : 'left',
-        wrapText: true,
+        wrapText: cell.col !== 3 && cell.col !== 4,
       };
     });
   });
 });
 
+
+  
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
