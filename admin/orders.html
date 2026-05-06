@@ -40,6 +40,7 @@
             <div class="tabs">
               <button class="tab active" data-tab="ordersPanel">Sifarişlər</button>
               <button class="tab" data-tab="paymentsPanel">Ödənişlər</button>
+              <button class="tab" data-tab="preparationPanel">Hazırlanma Mərkəzi</button>
             </div>
         
             <section id="ordersPanel" class="tab-panel active card pro-card">
@@ -75,6 +76,106 @@
                 </table>
               </div>
             </section>
+          </div>
+        </section>
+
+        <section id="preparationPanel" class="tab-panel card pro-card">
+          <div class="prep-head">
+            <div>
+              <h2>Hazırlanma Mərkəzi</h2>
+              <p class="muted">Sifariş məhsullarını cəmləyir, müştəri bölgüsünü göstərir və çatışmayan məhsulları satınalma siyahısına çıxarır.</p>
+            </div>
+        
+            <div class="prep-actions">
+              <button id="prepExportBtn" class="btn btn-soft btn-mini" type="button">📊 Excel</button>
+              <button id="prepPrintBtn" class="btn btn-soft btn-mini" type="button">🖨 Çap et</button>
+            </div>
+          </div>
+        
+          <div class="prep-filter-grid">
+            <label>
+              <span>Başlanğıc tarix</span>
+              <input id="prepStartDate" type="date">
+            </label>
+        
+            <label>
+              <span>Son tarix</span>
+              <input id="prepEndDate" type="date">
+            </label>
+        
+            <label>
+              <span>Status</span>
+              <select id="prepStatus">
+                <option value="active">Aktiv hazırlanacaq sifarişlər</option>
+                <option value="all">Hamısı</option>
+                <option value="confirmed">Təsdiqlənmiş</option>
+                <option value="preparing">Hazırlanır</option>
+                <option value="pending">Gözləyən</option>
+              </select>
+            </label>
+        
+            <label>
+              <span>Məhsul axtar</span>
+              <input id="prepSearch" type="search" placeholder="Məs: kivi, alma...">
+            </label>
+        
+            <button id="prepFilterBtn" class="btn btn-primary" type="button">Filterlə</button>
+          </div>
+        
+          <div id="prepKpis" class="prep-kpi-grid"></div>
+        
+          <div class="prep-grid">
+            <div class="prep-box">
+              <div class="prep-box-head">
+                <h3>Ümumi sifariş miqdarı</h3>
+                <small>Məhsullar cəmlənmiş formada</small>
+              </div>
+        
+              <div class="table-wrap">
+                <table class="pro-table prep-table">
+                  <thead>
+                    <tr>
+                      <th>Məhsul</th>
+                      <th>Cəm miqdar</th>
+                      <th>Anbar qalığı</th>
+                      <th>Satınalma ehtiyacı</th>
+                      <th>Anbarda qalacaq</th>
+                    </tr>
+                  </thead>
+                  <tbody id="prepSummaryTable"></tbody>
+                </table>
+              </div>
+            </div>
+        
+            <div class="prep-box">
+              <div class="prep-box-head">
+                <h3>Müştəri detalları</h3>
+                <small>Birinci sifariş verən müştəri əvvəl göstərilir</small>
+              </div>
+        
+              <div id="prepDetailsList" class="prep-details-list"></div>
+            </div>
+          </div>
+        
+          <div class="prep-box prep-purchase-box">
+            <div class="prep-box-head">
+              <h3>Satınalma siyahısı</h3>
+              <small>Anbarda çatışmayan məhsullar avtomatik formalaşır</small>
+            </div>
+        
+            <div class="table-wrap">
+              <table class="pro-table prep-table">
+                <thead>
+                  <tr>
+                    <th>Məhsul</th>
+                    <th>Lazım olan miqdar</th>
+                    <th>Anbar qalığı</th>
+                    <th>Satın alınacaq</th>
+                  </tr>
+                </thead>
+                <tbody id="prepPurchaseTable"></tbody>
+              </table>
+            </div>
           </div>
         </section>
       
