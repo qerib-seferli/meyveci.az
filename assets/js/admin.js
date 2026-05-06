@@ -1378,11 +1378,32 @@ async function exportPreparationExcel() {
     });
   }
 
-  function safeSheetName(name) {
-    return String(name || 'List')
-      .replace(/[\\/*?:[\]]/g, '')
-      .slice(0, 31);
+const usedSheetNames = new Set();
+
+  
+function safeSheetName(name) {
+  let clean = String(name || 'List')
+    .replace(/[\\/*?:[\]]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!clean) clean = 'List';
+
+  clean = clean.slice(0, 25);
+
+  let finalName = clean;
+  let counter = 2;
+
+  while (usedSheetNames.has(finalName)) {
+    const suffix = `-${counter}`;
+    finalName = `${clean.slice(0, 31 - suffix.length)}${suffix}`;
+    counter++;
   }
+
+  usedSheetNames.add(finalName);
+  return finalName;
+}
+  
 
   function addLogo(ws) {
     if (!logoId) return;
@@ -1462,7 +1483,10 @@ async function exportPreparationExcel() {
       profile.email ||
       `Müştəri ${index + 1}`;
 
-    const ws = workbook.addWorksheet(safeSheetName(`Müştəri sifariş-${customerName}`));
+    const shortCode = String(order.order_code || order.id || index + 1).slice(-6);
+    const ws = workbook.addWorksheet(
+      safeSheetName(`Müştəri-${customerName}-${shortCode}`)
+    );
 
     ws.columns = [
       { key: 'a', width: 26 },
