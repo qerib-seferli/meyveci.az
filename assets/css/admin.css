@@ -1276,3 +1276,267 @@ th {
     flex-wrap: wrap !important;
   }
 }
+
+
+/* ============================================================
+   HAZIRLANMA MƏRKƏZİ
+   Sifariş məhsullarını cəmləyən, satınalma ehtiyacını göstərən bölmə.
+   ============================================================ */
+
+.prep-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.prep-head p {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.prep-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.prep-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.prep-filter-grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.prep-filter-grid label span {
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.prep-filter-grid input,
+.prep-filter-grid select {
+  min-height: 42px;
+  border-radius: 16px;
+  font-size: 13px;
+}
+
+.prep-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.prep-kpi {
+  border: 1px solid rgba(34, 197, 94, 0.16);
+  border-radius: 22px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 12px 28px rgba(15, 122, 55, 0.09);
+}
+
+.prep-kpi span {
+  display: block;
+  color: #64756b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.prep-kpi b {
+  display: block;
+  margin-top: 6px;
+  color: #064e3b;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.prep-kpi small {
+  display: block;
+  margin-top: 6px;
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.prep-kpi.danger b,
+.prep-kpi.danger small {
+  color: #b91c1c;
+}
+
+.prep-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+  gap: 16px;
+}
+
+.prep-box {
+  border: 1px solid rgba(34, 197, 94, 0.14);
+  border-radius: 24px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.prep-box-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.prep-box-head h3 {
+  margin: 0;
+  color: #052e1c;
+  font-size: 17px;
+}
+
+.prep-box-head small {
+  color: #64756b;
+  font-size: 12px;
+}
+
+.prep-table {
+  min-width: 720px;
+}
+
+.prep-table td b {
+  color: #102018;
+}
+
+.prep-badge {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.prep-badge.success {
+  color: #047857;
+  background: #dcfce7;
+}
+
+.prep-badge.danger {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.prep-details-list {
+  display: grid;
+  gap: 10px;
+}
+
+.prep-detail-card {
+  border: 1px solid rgba(34, 197, 94, 0.14);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  overflow: hidden;
+}
+
+.prep-detail-card summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px;
+}
+
+.prep-detail-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.prep-detail-card summary span {
+  display: grid;
+  gap: 3px;
+}
+
+.prep-detail-card summary b {
+  color: #064e3b;
+  font-size: 14px;
+}
+
+.prep-detail-card summary small {
+  color: #64756b;
+  font-size: 12px;
+}
+
+.prep-customer-list {
+  display: grid;
+  gap: 8px;
+  padding: 0 13px 13px;
+}
+
+.prep-customer-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgba(34, 197, 94, 0.12);
+  padding-top: 9px;
+}
+
+.prep-customer-row b {
+  color: #102018;
+  font-size: 13px;
+}
+
+.prep-customer-row small {
+  display: block;
+  margin-top: 3px;
+  color: #64756b;
+  font-size: 11px;
+}
+
+.prep-customer-row strong {
+  flex: 0 0 auto;
+  color: #047857;
+  font-size: 13px;
+}
+
+.prep-purchase-box {
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .prep-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prep-filter-grid .btn {
+    grid-column: 1 / -1;
+  }
+
+  .prep-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prep-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .prep-filter-grid,
+  .prep-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .prep-detail-card summary,
+  .prep-customer-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
