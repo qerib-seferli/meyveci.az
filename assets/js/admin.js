@@ -1331,10 +1331,16 @@ async function exportPreparationExcel() {
   let logoId = null;
 
   try {
-      const logoPath = location.pathname.includes('/admin/')
-        ? '../assets/img/logo/Meyveci-logo.png'
-        : './assets/img/logo/Meyveci-logo.png';
-      
+
+    
+    const basePath = location.pathname.includes('/admin/')
+      ? location.pathname.split('/admin/')[0]
+      : '';
+    
+    const logoRes = await fetch(`${location.origin}${basePath}/assets/img/logo/Meyveci-logo.png`);
+    if (!logoRes.ok) throw new Error('Logo tapılmadı');
+
+    
       const logoRes = await fetch(logoPath);
       if (!logoRes.ok) throw new Error('Logo tapılmadı');
     
@@ -1413,8 +1419,8 @@ function addLogo(ws) {
   if (!logoId) return;
 
   ws.addImage(logoId, {
-    tl: { col: 0.1, row: 0.25 },
-    ext: { width: 170, height: 70 },
+    tl: { col: 0.15, row: 1.15 },
+    ext: { width: 170, height: 65 },
   });
 }
 
@@ -1477,7 +1483,8 @@ function addLogo(ws) {
 
   summarySheet.views = [{ state: 'frozen', ySplit: 6 }];
 
-preparationOrdersCache.forEach((data, index) => {
+
+  preparationOrdersCache.forEach((data, index) => {
   const order = data.order || {};
   const profile = data.profile || {};
   const items = data.items || [];
@@ -1497,6 +1504,7 @@ preparationOrdersCache.forEach((data, index) => {
   ].filter(Boolean).join(', ');
 
   const shortCode = String(order.order_code || order.id || index + 1).slice(-6);
+
   const ws = workbook.addWorksheet(
     safeSheetName(`${customerName}-${shortCode}`)
   );
@@ -1505,8 +1513,8 @@ preparationOrdersCache.forEach((data, index) => {
     { key: 'a', width: 22 },
     { key: 'b', width: 36 },
     { key: 'c', width: 20 },
-    { key: 'd', width: 20 },
-    { key: 'e', width: 18 },
+    { key: 'd', width: 22 },
+    { key: 'e', width: 22 },
   ];
 
   ws.pageSetup = {
@@ -1515,78 +1523,56 @@ preparationOrdersCache.forEach((data, index) => {
     fitToPage: true,
     fitToWidth: 1,
     fitToHeight: 0,
-    margins: {
-      left: 0.25,
-      right: 0.25,
-      top: 0.35,
-      bottom: 0.35,
-      header: 0.1,
-      footer: 0.1,
-    },
+    margins: { left: 0.25, right: 0.25, top: 0.25, bottom: 0.25, header: 0.1, footer: 0.1 },
   };
 
-  ws.getRow(1).height = 28;
-  ws.getRow(2).height = 28;
-  ws.getRow(3).height = 28;
+  ws.getRow(1).height = 10;
+  ws.getRow(2).height = 32;
+  ws.getRow(3).height = 32;
+  ws.getRow(4).height = 10;
 
   addLogo(ws);
 
-  ws.mergeCells('B1:E4');
-  const title = ws.getCell('B1');
+  ws.mergeCells('B2:E3');
+  const title = ws.getCell('B2');
   title.value = 'MÜŞTƏRİ SİFARİŞ ÇEKİ ✅';
   title.font = { bold: true, size: 20, color: { argb: 'FFFFFFFF' } };
-  title.fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FF047857' },
-  };
+  title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF047857' } };
   title.alignment = { horizontal: 'center', vertical: 'middle' };
 
-  ws.addRow([]);
-  ws.addRow(['Sifariş kodu:', order.order_code || order.id, '', 'Tarix:', formatDate(order.created_at)]);
-  ws.addRow(['Müştəri:', customerName, '', 'Telefon:', order.phone || profile.phone || '—']);
-  ws.addRow(['Ünvan:', fullAddress || 'Ünvan yoxdur', '', 'Ödəniş üsulu:', methodAz(order.payment_method)]);
-  ws.addRow(['Sifariş statusu:', statusAz(order.status), '', 'Ödəniş statusu:', statusAz(order.payment_status)]);
-  ws.addRow([]);
+  ws.getRow(6).values = ['Sifariş kodu:', order.order_code || order.id, '', 'Tarix:', formatDate(order.created_at)];
+  ws.getRow(7).values = ['Müştəri:', customerName, '', 'Telefon:', order.phone || profile.phone || '—'];
+  ws.getRow(8).values = ['Ünvan:', fullAddress || 'Ünvan yoxdur', '', 'Ödəniş üsulu:', methodAz(order.payment_method)];
+  ws.getRow(9).values = ['Sifariş statusu:', statusAz(order.status), '', 'Ödəniş statusu:', statusAz(order.payment_status)];
 
-  for (let i = 5; i <= 8; i++) {
-    ws.getRow(i).height = i === 7 ? 34 : 22;
+  ws.mergeCells('B8:C8');
+  ws.getRow(8).height = 40;
 
-    ws.getRow(i).eachCell((cell) => {
+  [6, 7, 8, 9].forEach((rowNo) => {
+    ws.getRow(rowNo).eachCell((cell) => {
       cell.border = border;
       cell.alignment = { vertical: 'middle', wrapText: true };
     });
 
-    ws.getRow(i).getCell(1).font = { bold: true };
-    ws.getRow(i).getCell(4).font = { bold: true };
-  }
+    ws.getCell(`A${rowNo}`).font = { bold: true };
+    ws.getCell(`D${rowNo}`).font = { bold: true };
+  });
 
-  const greenFill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFDCFCE7' },
-  };
+  const greenFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
+  const redFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
 
-  const redFill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFFEE2E2' },
-  };
-
-  const orderStatusCell = ws.getRow(8).getCell(2);
-  const paymentStatusCell = ws.getRow(8).getCell(5);
-
-  orderStatusCell.fill = ['confirmed', 'preparing', 'on_the_way', 'courier_near', 'delivered'].includes(order.status)
+  ws.getCell('B9').fill = ['confirmed', 'preparing', 'on_the_way', 'courier_near', 'delivered'].includes(order.status)
     ? greenFill
     : redFill;
 
-  paymentStatusCell.fill = ['paid', 'approved'].includes(order.payment_status)
+  ws.getCell('E9').fill = ['paid', 'approved'].includes(order.payment_status)
     ? greenFill
     : redFill;
+
+  ws.addRow([]);
 
   const productHeader = ws.addRow(['Məhsul', 'Miqdar', 'Vahid qiymət', 'Cəmi', 'Qeyd']);
   productHeader.height = 24;
-  productHeader.getCell(5).alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
   styleHeader(productHeader);
 
   items.forEach((item) => {
@@ -1597,22 +1583,20 @@ preparationOrdersCache.forEach((data, index) => {
       money(item.line_total),
       '',
     ]);
-
     styleBody(r);
   });
 
   for (let i = items.length; i < 4; i++) {
-    const emptyRow = ws.addRow(['', '', '', '', '']);
-    styleBody(emptyRow);
+    styleBody(ws.addRow(['', '', '', '', '']));
   }
 
-const totalRow = ws.addRow(['', '', '', 'Ümumi məbləğ:', money(order.total_amount)]);
-ws.mergeCells(`A${totalRow.number}:C${totalRow.number}`);
+  const totalRow = ws.addRow(['', '', '', 'Ümumi məbləğ:', money(order.total_amount)]);
+  ws.mergeCells(`A${totalRow.number}:C${totalRow.number}`);
   totalRow.height = 34;
-totalRow.getCell(4).font = { bold: true, size: 14 };
-totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
-totalRow.getCell(5).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
-totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
+  totalRow.getCell(4).font = { bold: true, size: 14 };
+  totalRow.getCell(5).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+  totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
+  totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
   styleBody(totalRow);
 
   ws.addRow([]);
@@ -1628,18 +1612,8 @@ totalRow.getCell(5).alignment = { horizontal: 'right', vertical: 'middle', wrapT
   ws.mergeCells(`B${noteRow.number}:E${noteRow.number}`);
   noteRow.getCell(1).font = { bold: true };
   styleBody(noteRow);
-
-  ws.eachRow((row) => {
-    row.eachCell((cell) => {
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: cell.col === 3 || cell.col === 4 ? 'right' : 'left',
-        wrapText: cell.col !== 3 && cell.col !== 4,
-      };
-    });
-  });
 });
-
+  
 
   
   const buffer = await workbook.xlsx.writeBuffer();
