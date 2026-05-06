@@ -1328,22 +1328,17 @@ async function exportPreparationExcel() {
   workbook.creator = 'Meyvəçi.az';
   workbook.created = new Date();
 
+  
   let logoId = null;
 
   try {
-
-    
     const basePath = location.pathname.includes('/admin/')
       ? location.pathname.split('/admin/')[0]
       : '';
-    
+
     const logoRes = await fetch(`${location.origin}${basePath}/assets/img/logo/Meyveci-logo.png`);
     if (!logoRes.ok) throw new Error('Logo tapılmadı');
 
-    
-      const logoRes = await fetch(logoPath);
-      if (!logoRes.ok) throw new Error('Logo tapılmadı');
-    
     const logoBlob = await logoRes.blob();
     const logoBuffer = await logoBlob.arrayBuffer();
 
@@ -1351,9 +1346,11 @@ async function exportPreparationExcel() {
       buffer: logoBuffer,
       extension: 'png',
     });
-  } catch {
+  } catch (error) {
+    console.warn('Excel logo yüklənmədi:', error.message);
     logoId = null;
   }
+  
 
   const border = {
     top: { style: 'thin', color: { argb: 'FFB7E4C7' } },
