@@ -1542,7 +1542,7 @@ function addLogo(ws) {
 
   ws.columns = [
     { key: 'a', width: 22 },
-    { key: 'b', width: 24 },
+    { key: 'b', width: 36 },
     { key: 'c', width: 20 },
     { key: 'd', width: 22 },
     { key: 'e', width: 22 },
@@ -1558,8 +1558,8 @@ function addLogo(ws) {
   };
 
   ws.getRow(1).height = 10;
-  ws.getRow(2).height = 32;
-  ws.getRow(3).height = 32;
+  ws.getRow(2).height = 24;
+  ws.getRow(3).height = 24;
   ws.getRow(4).height = 10;
 
   addLogo(ws);
