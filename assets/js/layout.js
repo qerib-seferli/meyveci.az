@@ -518,12 +518,13 @@ async function initCatalogMegaMenu() {
       .order('sort_order')
       .limit(60),
 
-    supabase
-      .from('products')
-      .select('id,name,category_id,image_url,status')
-      .eq('status', 'active')
-      .order('name')
-      .limit(300),
+  supabase
+    .from('products')
+    .select('id,name,category_id,image_url,status,price,old_price')
+    .eq('status', 'active')
+    .order('name')
+    .limit(300),
+    
   ]);
 
   const cats = categories || [];
@@ -593,13 +594,54 @@ async function initCatalogMegaMenu() {
     menu.classList.add('show-products');
   }
 
-  left.innerHTML = cats.map((cat, index) => `
-    <button class="catalog-left-item ${index === 0 ? 'active' : ''}" type="button" data-id="${cat.id}">
-      <img src="${cat.image_url || `${root}assets/img/logo/Cilek-logo.png`}" alt="${cat.name}">
-      <span>${cat.name}</span>
-    </button>
-  `).join('');
 
+  const discountedProducts = prods.filter((product) =>
+    Number(product.old_price) > Number(product.price)
+  );
+  
+  const maxDiscount = discountedProducts.length
+    ? Math.max(...discountedProducts.map((product) =>
+        Math.round(((Number(product.old_price) - Number(product.price)) / Number(product.old_price)) * 100)
+      ))
+    : 0;
+
+  
+  left.innerHTML = `
+    <button class="catalog-discount-head" type="button" data-discount="true">
+      <span class="discount-head-left">
+        <b>Endirimli məhsullar</b>
+        <small>🔥 Ən sərfəli qiymətlər</small>
+      </span>
+      <span class="discount-head-percent">${maxDiscount || 0}%</span>
+    </button>
+
+    ${cats.map((cat, index) => `
+      <button class="catalog-left-item ${index === 0 ? 'active' : ''}" type="button" data-id="${cat.id}">
+        <img src="${cat.image_url || `${root}assets/img/logo/Cilek-logo.png`}" alt="${cat.name}">
+        <span>${cat.name}</span>
+      </button>
+    `).join('')}
+  `;
+  
+
+  $('.catalog-discount-head')?.addEventListener('click', () => {
+    localStorage.setItem('meyveciCatalogFilter', JSON.stringify({
+      category: 'discounts',
+      query: '',
+    }));
+  
+    menu.classList.remove('show');
+    menu.classList.remove('show-products');
+  
+    if (document.body.dataset.page === 'home') {
+      window.dispatchEvent(new CustomEvent('meyveciCatalogFilter', {
+        detail: { category: 'discounts', query: '' },
+      }));
+    } else {
+      location.href = `${root}index.html`;
+    }
+  });
+  
   $$('.catalog-left-item').forEach((item) => {
     item.addEventListener('mouseenter', () => {
       if (window.innerWidth <= 768) return;
