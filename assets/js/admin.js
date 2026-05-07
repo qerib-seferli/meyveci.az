@@ -1330,35 +1330,46 @@ async function exportPreparationExcel() {
 
 
   
-  let logoId = null;
+let logoId = null;
 
-  try {
-    const logoUrl = new URL('../img/logo/Meyveci-logo.png', import.meta.url).href;
-    console.log('Excel logo URL:', logoUrl);
-  
-    const logoRes = await fetch(logoUrl, { cache: 'no-store' });
-  
-    if (!logoRes.ok) {
-      throw new Error(`Logo tapılmadı: ${logoRes.status} - ${logoUrl}`);
-    }
-  
-    const logoBlob = await logoRes.blob();
-  
-    const logoBase64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(logoBlob);
-    });
-  
-    logoId = workbook.addImage({
-      base64: logoBase64,
-      extension: 'png',
-    });
-  } catch (error) {
-    console.warn('Excel logo yüklənmədi:', error.message);
-    logoId = null;
+try {
+  const logoUrl = new URL('../img/logo/Meyveci-logo.png', import.meta.url).href;
+
+  const logoRes = await fetch(logoUrl, {
+    cache: 'no-store',
+    mode: 'cors',
+  });
+
+  if (!logoRes.ok) {
+    throw new Error(`Logo tapılmadı: ${logoRes.status}`);
   }
+
+  const logoBlob = await logoRes.blob();
+
+  const logoBase64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Logo base64 çevrilmədi'));
+    };
+
+    reader.readAsDataURL(logoBlob);
+  });
+
+  logoId = workbook.addImage({
+    base64: logoBase64,
+    extension: 'png',
+  });
+
+  console.log('Excel logo əlavə edildi:', logoUrl);
+} catch (error) {
+  console.warn('Excel logo xətası:', error.message);
+  logoId = null;
+}
   
 
   
@@ -1423,19 +1434,19 @@ function safeSheetName(name) {
   
 
 function addLogo(ws) {
-  ws.getRow(2).height = 36;
-  ws.getRow(3).height = 36;
+  ws.getRow(2).height = 24;
+  ws.getRow(3).height = 24;
 
   if (!logoId) {
     ws.getCell('A2').value = 'Meyveci.az';
-    ws.getCell('A2').font = { bold: true, size: 16, color: { argb: 'FF047857' } };
+    ws.getCell('A2').font = { bold: true, size: 14, color: { argb: 'FF047857' } };
     ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
     return;
   }
 
   ws.addImage(logoId, {
-    tl: { col: 0.08, row: 1.15 },
-    ext: { width: 165, height: 62 },
+    tl: { col: 0.05, row: 1.15 },
+    ext: { width: 150, height: 48 },
   });
 }
 
