@@ -1444,10 +1444,7 @@ function addLogo(ws) {
     return;
   }
 
-  ws.addImage(logoId, {
-    tl: { col: 0.05, row: 1.15 },
-    ext: { width: 150, height: 48 },
-  });
+  ws.addImage(logoId, 'A2:A3');
 }
 
   
