@@ -391,34 +391,62 @@ function renderProducts() {
   if (loadMoreButton) loadMoreButton.style.display = rows.length > visibleRows.length ? 'inline-flex' : 'none';
 }
 
+
+
 function productCard(product) {
   const discount = getDiscount(product.price, product.old_price);
   const isFavorite = state.favorites.has(product.id);
+  const rating = Number(product.rating_avg || 0).toFixed(1);
+  const hasDiscount = discount > 0;
 
   return `
-    <article class="product-card">
-      ${discount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
-      <button class="fav-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}" title="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}" aria-label="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}">♥</button>
+    <article class="product-card ${hasDiscount ? 'discount-product-card' : 'fresh-product-card'}">
+      <div class="product-media">
+        <div class="rating-pill">
+          <span>⭐</span>
+          <b>${rating > 0 ? rating : '5.0'}</b>
+        </div>
 
-      <a href="product.html?id=${product.id}" class="pic">
-        <img loading="lazy" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
-      </a>
+        <button class="fav-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}" title="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}" aria-label="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}">♥</button>
+
+        <a href="product.html?id=${product.id}" class="pic">
+          <img loading="lazy" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+        </a>
+
+        <div class="fresh-badge">🌿 TƏZƏ MƏHSUL</div>
+        <div class="quality-badge">🛡️ KEYFİYYƏT<br>ZƏMANƏTİ</div>
+      </div>
 
       <div class="product-title-row">
         <h3><a href="product.html?id=${product.id}">${product.name}</a></h3>
         <span class="unit-badge">${product.unit || 'ədəd'}</span>
       </div>
 
-      <div class="price-row">
-        <span class="price">${money(product.price)}</span>
-        ${product.old_price ? `<span class="old-price">${money(product.old_price)}</span>` : ''}
+      <div class="price-panel">
+        <div>
+          <span class="price">${money(product.price)}</span>
+          <small>Meyvəçi qiyməti</small>
+        </div>
+
+        ${hasDiscount ? `
+          <div class="discount-flag">
+            <b>${discount}%</b>
+            <span>ENDİRİM</span>
+          </div>
+          <span class="old-price">${money(product.old_price)}</span>
+        ` : ''}
       </div>
 
-      <p class="short-desc">${product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
-      <button class="btn btn-primary cart-btn add-cart" data-id="${product.id}">Səbətə at</button>
+      <p class="short-desc">🌿 ${product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
+
+      <button class="btn btn-primary cart-btn add-cart" data-id="${product.id}">
+        🛒 Səbətə at
+      </button>
     </article>
   `;
 }
+
+
 
 function getDiscount(price, oldPrice) {
   if (!oldPrice || Number(oldPrice) <= Number(price)) return 0;
