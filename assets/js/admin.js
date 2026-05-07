@@ -1336,7 +1336,11 @@ try {
     ? location.pathname.split('/admin/')[0]
     : '';
 
-const logoUrl = new URL('./assets/img/logo/Meyveci-logo.png', window.location.href).href;
+  const logoUrl = new URL(
+    '../assets/img/logo/Meyveci-logo.png',
+    window.location.href
+  ).href;
+  
 const logoRes = await fetch(logoUrl, { cache: 'no-store' });
 
 if (!logoRes.ok) throw new Error(`Logo tapılmadı: ${logoUrl}`);
