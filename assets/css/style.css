@@ -5896,3 +5896,134 @@ select option {
     right: 8px !important;
   }
 }
+
+/* ============================================================
+   FINAL PRICE PANEL LIKE SAMPLE
+   Köhnə qiymət yuxarı sol, qiymət altında, bayraq ortada, unit sağda.
+   ============================================================ */
+
+.price-panel {
+  position: relative !important;
+  display: block !important;
+  height: 78px !important;
+  min-height: 78px !important;
+  padding: 10px 92px 8px 12px !important;
+  overflow: visible !important;
+}
+
+.price-panel > div:first-child {
+  display: block !important;
+  min-width: 0 !important;
+}
+
+.price {
+  display: block !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.05em !important;
+}
+
+.price-panel small {
+  display: block !important;
+  margin-top: 3px !important;
+  font-size: 9px !important;
+}
+
+/* Köhnə qiymət qiymətin üstündə, qırmızı xətt ilə */
+.price-panel .old-price {
+  position: absolute !important;
+  top: 7px !important;
+  left: 13px !important;
+  right: auto !important;
+  z-index: 6 !important;
+  display: inline-block !important;
+  max-width: 76px !important;
+  color: rgba(17, 24, 39, 0.52) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  text-decoration-line: line-through !important;
+  text-decoration-color: #ef4444 !important;
+  text-decoration-thickness: 2px !important;
+}
+
+/* Endirim bayrağı panelin yuxarı xəttindən asılı kimi */
+.discount-flag {
+  position: absolute !important;
+  top: -1px !important;
+  right: 58px !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  height: 62px !important;
+  z-index: 7 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  transform-origin: top center !important;
+}
+
+.discount-flag::before {
+  content: "";
+  position: absolute;
+  top: -4px !important;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: #0f7a37;
+  border-radius: 7px 7px 0 0;
+}
+
+.discount-flag b {
+  font-size: 14px !important;
+}
+
+.discount-flag span {
+  font-size: 6px !important;
+}
+
+/* Endirimli kartlarda qiymət köhnə qiymətə görə aşağı başlasın */
+.discount-product-card .price {
+  margin-top: 14px !important;
+}
+
+/* Unit badge qiymət panelinin sağında */
+.price-panel + .unit-badge,
+.product-title-row .unit-badge {
+  position: relative !important;
+}
+
+/* Mobil */
+@media (max-width: 640px) {
+  .price-panel {
+    height: 76px !important;
+    min-height: 76px !important;
+    padding: 10px 84px 8px 11px !important;
+  }
+
+  .price {
+    font-size: 22px !important;
+  }
+
+  .price-panel .old-price {
+    top: 7px !important;
+    left: 12px !important;
+    font-size: 9px !important;
+  }
+
+  .discount-flag {
+    right: 49px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 58px !important;
+  }
+
+  .discount-flag b {
+    font-size: 13px !important;
+  }
+
+  .discount-flag span {
+    font-size: 5.5px !important;
+  }
+
+  .discount-product-card .price {
+    margin-top: 13px !important;
+  }
+}
