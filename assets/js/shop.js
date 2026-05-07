@@ -333,13 +333,6 @@ function renderCategoryChips() {
       <span class="category-name">Hamısı</span>
     </button>
 
-    <button class="category-card discount-category-card ${state.category === 'discounts' ? 'active' : ''}" data-id="discounts">
-      <span class="discount-cat-bg">
-        <b>Endirimli məhsullar</b>
-        <small>🔥 Ən sərfəli qiymətlər</small>
-      </span>
-    </button>
-
     ${state.categories.map((category) => `
       <button class="category-card ${state.category === category.id ? 'active' : ''}" data-id="${category.id}">
         <span class="category-img-wrap">
@@ -367,10 +360,7 @@ function renderCategoryChips() {
 function filteredProducts() {
   return state.products.filter((product) => {
     
-    const categoryMatch =
-      state.category === 'all' ||
-      (state.category === 'discounts' && Number(product.old_price) > Number(product.price)) ||
-      product.category_id === state.category;
+    const categoryMatch = state.category === 'all' || product.category_id === state.category;
     
     const searchMatch = !state.query || product.name.toLowerCase().includes(state.query);
     return categoryMatch && searchMatch;
