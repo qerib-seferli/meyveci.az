@@ -1542,7 +1542,7 @@ function addLogo(ws) {
 
   ws.columns = [
     { key: 'a', width: 22 },
-    { key: 'b', width: 36 },
+    { key: 'b', width: 24 },
     { key: 'c', width: 20 },
     { key: 'd', width: 22 },
     { key: 'e', width: 22 },
