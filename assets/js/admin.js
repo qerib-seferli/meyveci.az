@@ -679,6 +679,7 @@ async function catalog() {
   
   $('#productExcelImport')?.addEventListener('change', importProductsFromExcel);
   $('#productTemplateBtn')?.addEventListener('click', downloadProductExcelTemplate);
+  $('#productExportBtn')?.addEventListener('click', exportProductsToExcel);
   
 }
 
@@ -2461,4 +2462,81 @@ function downloadProductExcelTemplate() {
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Mehsul Import');
 
   XLSX.writeFile(workbook, 'meyveci-mehsul-import-sablonu.xlsx');
+}
+
+
+// Bu sistemlə admin belə işləyəcək: =====================================================
+// Bazadan Excel Çıxart vurur
+// Faylda qiymət, stok, ad, kateqoriya düzəlişi edir
+// Sonra 1C Excel Import ilə geri yükləyir
+// Sistem SKU ilə məhsulu tapır və yeniləyir
+// SKU yoxdursa 1c də olan məhsul adı ilə yoxlayır
+// Heç biri tapılmasa yeni məhsul kimi əlavə edir.
+
+async function exportProductsToExcel() {
+  if (!window.XLSX) {
+    toast('Excel kitabxanası yüklənməyib');
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        sku,
+        name,
+        slug,
+        price,
+        old_price,
+        stock_quantity,
+        unit,
+        one_c_name,
+        categories(name)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(5000);
+
+    if (error) {
+      toast(error.message);
+      return;
+    }
+
+    const rows = (data || []).map((product) => ({
+      'SKU': product.sku || '',
+      'Məhsul adı': product.name || '',
+      'Slug': product.slug || '',
+      'Kateqoriya': product.categories?.name || '',
+      'Faktiki satış qiyməti': Number(product.price || 0),
+      'Köhnə qiymət': product.old_price ?? '',
+      'Stok (anbar)': Number(product.stock_quantity || 0),
+      'Ölçü vahidi': product.unit || 'ədəd',
+      '1c də olan məhsul adı': product.one_c_name || '',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    worksheet['!cols'] = [
+      { wch: 18 },
+      { wch: 38 },
+      { wch: 38 },
+      { wch: 28 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 14 },
+      { wch: 42 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Mehsullar');
+
+    XLSX.writeFile(
+      workbook,
+      `meyveci-baza-mehsullari-${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
+
+    toast('Məhsullar Excelə çıxarıldı');
+  } catch (error) {
+    toast(error.message);
+  }
 }
