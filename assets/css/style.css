@@ -4644,11 +4644,10 @@ select option {
 /*===========================================================*/
 
 /* ============================================================
-   MEYVƏÇİ.AZ - FINAL PRODUCT CARD + PRODUCT DETAIL FIX
-   Kart hündürlükləri bərabər, mətn daşmır, endirim və normal kart ayrıdır.
+   MEYVƏÇİ.AZ - FINAL COMPACT PRODUCT CARD FIX
+   Kartlar kompakt, eyni ölçülü, şəkillər standart, mətn daşmır.
    ============================================================ */
 
-/* Məhsul grid */
 .product-grid {
   display: grid !important;
   grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
@@ -4656,20 +4655,19 @@ select option {
   align-items: stretch !important;
 }
 
-/* Ümumi kart */
 .product-card {
   width: 100% !important;
   min-width: 0 !important;
-  height: 100% !important;
-  min-height: 585px !important;
-  padding: 12px !important;
-  border-radius: 28px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 10px !important;
+  border-radius: 26px !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
+  gap: 8px !important;
   border: 1px solid rgba(34, 197, 94, 0.18) !important;
-  box-shadow: 0 18px 42px rgba(15, 122, 55, 0.12) !important;
+  box-shadow: 0 16px 36px rgba(15, 122, 55, 0.11) !important;
 }
 
 .fresh-product-card {
@@ -4678,17 +4676,19 @@ select option {
 
 .discount-product-card {
   background:
-    radial-gradient(circle at 45% 14%, rgba(255, 255, 255, 0.45), transparent 34%),
+    radial-gradient(circle at 45% 14%, rgba(255, 255, 255, 0.42), transparent 34%),
     linear-gradient(180deg, #ffe928 0%, #ffd817 54%, #ffc400 100%) !important;
   border-color: rgba(250, 204, 21, 0.85) !important;
 }
 
-/* Şəkil sahəsi */
+/* Şəkil sahəsi standart */
 .product-media {
   position: relative !important;
+  width: 100% !important;
   height: 230px !important;
   min-height: 230px !important;
-  border-radius: 23px !important;
+  max-height: 230px !important;
+  border-radius: 22px !important;
   overflow: hidden !important;
   background: linear-gradient(135deg, #eefbf1, #ffffff) !important;
 }
@@ -4709,41 +4709,42 @@ select option {
 .product-card .pic img {
   width: 100% !important;
   height: 100% !important;
+  max-height: 230px !important;
   object-fit: contain !important;
-  padding: 42px 14px 42px !important;
-  filter: drop-shadow(0 14px 18px rgba(15, 122, 55, 0.16));
+  padding: 40px 12px 42px !important;
+  filter: drop-shadow(0 12px 16px rgba(15, 122, 55, 0.14));
 }
 
 /* Rating */
 .rating-pill {
   position: absolute !important;
-  top: 10px !important;
-  left: 10px !important;
+  top: 9px !important;
+  left: 9px !important;
   z-index: 8 !important;
-  height: 34px !important;
-  padding: 6px 11px !important;
+  height: 31px !important;
+  padding: 5px 10px !important;
   border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 5px !important;
   background: rgba(255, 255, 255, 0.95) !important;
   color: #111827 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 950 !important;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.11) !important;
 }
 
-/* Sevimli */
+/* Ürək */
 .product-card .fav-btn {
-  top: 10px !important;
-  right: 10px !important;
+  top: 9px !important;
+  right: 9px !important;
   z-index: 9 !important;
-  width: 42px !important;
-  height: 42px !important;
+  width: 39px !important;
+  height: 39px !important;
   border-radius: 50% !important;
   background: rgba(255, 255, 255, 0.96) !important;
   color: #db0061 !important;
-  font-size: 21px !important;
+  font-size: 19px !important;
 }
 
 .product-card .fav-btn.active {
@@ -4751,61 +4752,63 @@ select option {
   background: linear-gradient(135deg, #ec0064, #be004b) !important;
 }
 
-/* Təzə məhsul və keyfiyyət */
+/* Təzə məhsul + keyfiyyət zəmanəti */
 .fresh-badge,
 .quality-badge {
   position: absolute !important;
   z-index: 9 !important;
-  height: 28px !important;
+  height: 25px !important;
   border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   white-space: nowrap !important;
-  font-size: 10px !important;
   font-weight: 950 !important;
   line-height: 1 !important;
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.10) !important;
 }
 
 .fresh-badge {
-  left: 10px !important;
-  bottom: 12px !important;
-  max-width: 138px !important;
-  padding: 0 12px !important;
+  left: 9px !important;
+  bottom: 10px !important;
+  max-width: 126px !important;
+  padding: 0 10px !important;
   color: #ffffff !important;
   background: linear-gradient(135deg, #e00063, #c00055) !important;
+  font-size: 9px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
 
 .quality-badge {
-  right: 10px !important;
-  bottom: 12px !important;
-  max-width: 112px !important;
-  padding: 0 9px !important;
+  right: 9px !important;
+  bottom: 10px !important;
+  max-width: 98px !important;
+  padding: 0 8px !important;
   color: #166534 !important;
   background: rgba(255, 255, 255, 0.94) !important;
   text-align: center !important;
-  font-size: 9px !important;
+  font-size: 8px !important;
 }
 
-/* Ad + vahid */
+/* Məhsul adı */
 .product-title-row {
-  min-height: 54px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
   display: flex !important;
   align-items: flex-start !important;
   justify-content: space-between !important;
-  gap: 8px !important;
+  gap: 7px !important;
 }
 
 .product-card h3 {
   flex: 1 !important;
   min-width: 0 !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
   margin: 0 !important;
-  font-size: 18px !important;
-  line-height: 1.18 !important;
+  font-size: 16px !important;
+  line-height: 1.12 !important;
   font-weight: 950 !important;
   letter-spacing: -0.03em !important;
   overflow: hidden !important;
@@ -4820,32 +4823,32 @@ select option {
 
 .unit-badge {
   flex: 0 0 auto !important;
-  min-width: 46px !important;
-  height: 38px !important;
-  padding: 0 12px !important;
+  min-width: 42px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   border-radius: 999px !important;
   background: #dcfce7 !important;
   color: #047857 !important;
-  font-size: 13px !important;
+  font-size: 12px !important;
   font-weight: 950 !important;
 }
 
 /* Qiymət paneli */
 .price-panel {
   position: relative !important;
-  min-height: 106px !important;
-  height: 106px !important;
-  padding: 14px !important;
-  border-radius: 22px !important;
+  min-height: 88px !important;
+  height: 88px !important;
+  padding: 11px 12px !important;
+  border-radius: 20px !important;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) auto auto !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 7px !important;
   background: rgba(255, 255, 255, 0.92) !important;
-  box-shadow: 0 12px 26px rgba(15, 122, 55, 0.10) !important;
+  box-shadow: 0 10px 22px rgba(15, 122, 55, 0.10) !important;
 }
 
 .discount-product-card .price-panel {
@@ -4861,7 +4864,7 @@ select option {
 .price {
   display: block !important;
   color: #07803f !important;
-  font-size: 34px !important;
+  font-size: 29px !important;
   font-weight: 1000 !important;
   line-height: 0.95 !important;
   letter-spacing: -0.06em !important;
@@ -4870,43 +4873,42 @@ select option {
 
 .price-panel small {
   display: block !important;
-  margin-top: 8px !important;
+  margin-top: 6px !important;
   color: #d0005d !important;
-  font-size: 13px !important;
+  font-size: 11px !important;
   font-weight: 950 !important;
   line-height: 1.1 !important;
 }
 
-/* Endirim nişanı */
 .discount-flag {
-  width: 64px !important;
-  min-width: 64px !important;
-  height: 76px !important;
+  width: 56px !important;
+  min-width: 56px !important;
+  height: 66px !important;
   margin: 0 !important;
-  padding: 9px 6px !important;
+  padding: 8px 5px !important;
   display: grid !important;
   place-items: center !important;
   text-align: center !important;
   color: #ffffff !important;
   background: linear-gradient(180deg, #15803d, #16a34a) !important;
   clip-path: polygon(0 0, 100% 0, 100% 82%, 50% 100%, 0 82%) !important;
-  filter: drop-shadow(0 8px 10px rgba(21, 128, 61, 0.28)) !important;
+  filter: drop-shadow(0 7px 9px rgba(21, 128, 61, 0.25)) !important;
 }
 
 .discount-flag b {
-  font-size: 20px !important;
+  font-size: 17px !important;
   line-height: 1 !important;
 }
 
 .discount-flag span {
-  font-size: 9px !important;
+  font-size: 7px !important;
   font-weight: 950 !important;
 }
 
 .old-price {
-  max-width: 72px !important;
+  max-width: 62px !important;
   color: rgba(17, 24, 39, 0.46) !important;
-  font-size: 13px !important;
+  font-size: 11px !important;
   font-weight: 850 !important;
   text-decoration: line-through !important;
   white-space: nowrap !important;
@@ -4915,12 +4917,12 @@ select option {
 
 /* Qısa açıqlama */
 .short-desc {
-  min-height: 38px !important;
-  max-height: 38px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
   margin: 0 !important;
   color: #1f2937 !important;
-  font-size: 14px !important;
-  line-height: 1.35 !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
   overflow: hidden !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
@@ -4929,27 +4931,27 @@ select option {
 
 /* Səbət düyməsi */
 .cart-btn {
-  margin-top: auto !important;
+  margin-top: 2px !important;
   width: 100% !important;
-  min-height: 50px !important;
+  min-height: 44px !important;
   border-radius: 999px !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
   font-weight: 950 !important;
 }
 
 .discount-product-card .cart-btn {
   background: linear-gradient(135deg, #e00063, #be004b) !important;
-  box-shadow: 0 14px 28px rgba(190, 0, 75, 0.24) !important;
+  box-shadow: 0 12px 24px rgba(190, 0, 75, 0.22) !important;
 }
 
-/* Köhnə endirim neon işığı product detail-də görünməsin */
+/* Product detail-də köhnə neon endirim işığı gizlənsin */
 .product-detail-pro .discount-leaf,
 .product-detail-pro .discount-leaf::after {
   display: none !important;
 }
 
 /* ============================================================
-   PRODUCT DETAIL
+   PRODUCT DETAIL COMPACT FIX
    ============================================================ */
 
 .product-detail-pro {
@@ -4972,22 +4974,20 @@ select option {
 
 .product-detail-pro .product-detail-image {
   position: relative !important;
-  min-height: 500px !important;
+  height: 470px !important;
+  min-height: 470px !important;
+  max-height: 470px !important;
   border-radius: 30px !important;
   overflow: hidden !important;
-  background: linear-gradient(135deg, #eaffef, #ffffff) !important;
-}
-
-.product-detail-pro.detail-discount .product-detail-image {
   background: linear-gradient(135deg, #eaffef, #ffffff) !important;
 }
 
 .product-detail-pro .product-detail-image img {
   width: 100% !important;
   height: 100% !important;
-  max-height: none !important;
+  max-height: 470px !important;
   object-fit: contain !important;
-  padding: 70px 24px 70px !important;
+  padding: 68px 22px 68px !important;
   filter: drop-shadow(0 18px 26px rgba(15, 122, 55, 0.16)) !important;
 }
 
@@ -5015,8 +5015,8 @@ select option {
 }
 
 .product-detail-info h1 {
-  margin: 18px 0 !important;
-  font-size: clamp(42px, 5vw, 72px) !important;
+  margin: 14px 0 !important;
+  font-size: clamp(40px, 5vw, 68px) !important;
   line-height: 0.95 !important;
   font-weight: 1000 !important;
   letter-spacing: -0.07em !important;
@@ -5026,13 +5026,13 @@ select option {
   display: flex !important;
   gap: 10px !important;
   flex-wrap: wrap !important;
-  margin: 8px 0 16px !important;
+  margin: 8px 0 14px !important;
 }
 
 .detail-unit-line span,
 .detail-unit-line b {
   border-radius: 999px !important;
-  padding: 10px 16px !important;
+  padding: 9px 15px !important;
   background: #dcfce7 !important;
   color: #047857 !important;
   font-weight: 900 !important;
@@ -5040,50 +5040,41 @@ select option {
 
 .detail-price-panel {
   max-width: 100% !important;
-  height: 104px !important;
-  min-height: 104px !important;
+  height: 98px !important;
+  min-height: 98px !important;
 }
 
 .detail-price-panel .price {
-  font-size: clamp(38px, 5vw, 52px) !important;
+  font-size: clamp(36px, 5vw, 50px) !important;
   white-space: nowrap !important;
 }
 
 .detail-desc {
-  margin: 20px 0 0 !important;
+  margin: 18px 0 0 !important;
   color: #1f2937 !important;
-  font-size: 17px !important;
-  line-height: 1.6 !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
 }
 
 .detail-actions {
   display: flex !important;
   flex-wrap: wrap !important;
   gap: 12px !important;
-  margin-top: 22px !important;
+  margin-top: 20px !important;
 }
 
 .detail-actions .btn {
-  min-height: 54px !important;
-  padding-inline: 24px !important;
+  min-height: 52px !important;
+  padding-inline: 22px !important;
   border-radius: 999px !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 950 !important;
 }
 
-/* Oxşar məhsullar */
-.related-products {
-  margin-top: 26px !important;
-}
-
-/* Planşet */
+/* Desktop ölçülər */
 @media (max-width: 1180px) {
   .product-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-
-  .product-card {
-    min-height: 570px !important;
   }
 }
 
@@ -5097,7 +5088,9 @@ select option {
   }
 
   .product-detail-pro .product-detail-image {
+    height: 430px !important;
     min-height: 430px !important;
+    max-height: 430px !important;
   }
 }
 
@@ -5105,100 +5098,111 @@ select option {
 @media (max-width: 640px) {
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   .product-card {
-    min-height: 470px !important;
-    padding: 9px !important;
-    border-radius: 24px !important;
-    gap: 8px !important;
+    padding: 8px !important;
+    border-radius: 23px !important;
+    gap: 7px !important;
   }
 
   .product-media {
-    height: 180px !important;
-    min-height: 180px !important;
-    border-radius: 20px !important;
+    height: 170px !important;
+    min-height: 170px !important;
+    max-height: 170px !important;
+    border-radius: 19px !important;
   }
 
   .product-card .pic img {
-    padding: 38px 8px 36px !important;
+    max-height: 170px !important;
+    padding: 34px 7px 34px !important;
   }
 
   .rating-pill {
-    height: 30px !important;
-    top: 8px !important;
-    left: 8px !important;
-    padding: 5px 9px !important;
-    font-size: 12px !important;
+    height: 28px !important;
+    top: 7px !important;
+    left: 7px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
   }
 
   .product-card .fav-btn {
-    width: 36px !important;
-    height: 36px !important;
-    top: 8px !important;
-    right: 8px !important;
-    font-size: 18px !important;
-  }
-
-  .fresh-badge {
-    height: 27px !important;
-    left: 9px !important;
-    bottom: 10px !important;
-    max-width: 130px !important;
-    font-size: 9px !important;
-  }
-
-  .quality-badge {
-    display: none !important;
-  }
-
-  .product-title-row {
-    min-height: 48px !important;
-  }
-
-  .product-card h3 {
-    min-height: 38px !important;
-    max-height: 38px !important;
+    width: 34px !important;
+    height: 34px !important;
+    top: 7px !important;
+    right: 7px !important;
     font-size: 17px !important;
   }
 
+  .fresh-badge {
+    height: 24px !important;
+    left: 7px !important;
+    bottom: 8px !important;
+    max-width: 96px !important;
+    padding: 0 8px !important;
+    font-size: 7px !important;
+  }
+
+  .quality-badge {
+    display: inline-flex !important;
+    height: 24px !important;
+    right: 7px !important;
+    bottom: 8px !important;
+    max-width: 78px !important;
+    padding: 0 6px !important;
+    font-size: 6px !important;
+  }
+
+  .product-title-row {
+    min-height: 38px !important;
+    max-height: 38px !important;
+  }
+
+  .product-card h3 {
+    min-height: 34px !important;
+    max-height: 34px !important;
+    font-size: 14px !important;
+    line-height: 1.12 !important;
+  }
+
   .unit-badge {
-    min-width: 42px !important;
-    height: 36px !important;
-    font-size: 13px !important;
-    padding: 0 10px !important;
+    min-width: 38px !important;
+    height: 31px !important;
+    font-size: 11px !important;
+    padding: 0 8px !important;
   }
 
   .price-panel {
-    height: 92px !important;
-    min-height: 92px !important;
-    padding: 12px !important;
-    border-radius: 20px !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    padding: 9px !important;
+    border-radius: 18px !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
   }
 
   .price {
-    font-size: 31px !important;
+    font-size: 25px !important;
     line-height: 0.95 !important;
   }
 
   .price-panel small {
-    font-size: 12px !important;
+    font-size: 10px !important;
+    margin-top: 5px !important;
   }
 
   .discount-flag {
-    width: 58px !important;
-    min-width: 58px !important;
-    height: 68px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 58px !important;
   }
 
   .discount-flag b {
-    font-size: 18px !important;
+    font-size: 15px !important;
   }
 
   .discount-flag span {
-    font-size: 8px !important;
+    font-size: 6px !important;
   }
 
   .old-price {
@@ -5206,46 +5210,50 @@ select option {
   }
 
   .short-desc {
-    min-height: 34px !important;
-    max-height: 34px !important;
-    font-size: 13px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
   }
 
   .cart-btn {
-    min-height: 46px !important;
-    font-size: 15px !important;
+    min-height: 40px !important;
+    font-size: 13px !important;
   }
 
   .product-detail-pro {
     padding: 14px !important;
     border-radius: 28px !important;
-    gap: 16px !important;
+    gap: 14px !important;
   }
 
   .product-detail-pro .product-detail-image {
-    min-height: 430px !important;
+    height: 400px !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
     border-radius: 24px !important;
   }
 
   .product-detail-pro .product-detail-image img {
-    padding: 62px 14px 66px !important;
+    max-height: 400px !important;
+    padding: 58px 12px 62px !important;
   }
 
   .product-detail-info h1 {
-    font-size: 44px !important;
+    font-size: 42px !important;
   }
 
   .detail-price-panel {
-    height: 100px !important;
-    min-height: 100px !important;
+    height: 92px !important;
+    min-height: 92px !important;
   }
 
   .detail-price-panel .price {
-    font-size: 38px !important;
+    font-size: 34px !important;
   }
 
   .detail-desc {
-    font-size: 16px !important;
+    font-size: 15px !important;
   }
 
   .detail-actions {
@@ -5260,40 +5268,56 @@ select option {
 /* Çox balaca telefon */
 @media (max-width: 420px) {
   .product-grid {
-    gap: 10px !important;
+    gap: 9px !important;
   }
 
   .product-card {
-    min-height: 440px !important;
-    padding: 8px !important;
+    padding: 7px !important;
+    gap: 6px !important;
   }
 
   .product-media {
-    height: 160px !important;
-    min-height: 160px !important;
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+  }
+
+  .product-card .pic img {
+    max-height: 150px !important;
+    padding: 31px 6px 31px !important;
+  }
+
+  .fresh-badge {
+    max-width: 88px !important;
+    font-size: 6px !important;
+  }
+
+  .quality-badge {
+    max-width: 70px !important;
+    font-size: 5.5px !important;
   }
 
   .product-card h3 {
-    font-size: 15px !important;
+    font-size: 13px !important;
   }
 
   .price {
-    font-size: 27px !important;
+    font-size: 22px !important;
   }
 
   .price-panel {
-    height: 86px !important;
-    min-height: 86px !important;
-    padding: 10px !important;
+    height: 76px !important;
+    min-height: 76px !important;
   }
 
   .discount-flag {
-    width: 52px !important;
-    min-width: 52px !important;
-    height: 62px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 54px !important;
   }
 
   .cart-btn {
-    font-size: 14px !important;
+    min-height: 38px !important;
+    font-size: 12px !important;
   }
 }
