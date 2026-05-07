@@ -1329,18 +1329,30 @@ async function exportPreparationExcel() {
   workbook.created = new Date();
 
 
+  
   let logoId = null;
 
   try {
     const logoUrl = new URL('../img/logo/Meyveci-logo.png', import.meta.url).href;
+    console.log('Excel logo URL:', logoUrl);
   
     const logoRes = await fetch(logoUrl, { cache: 'no-store' });
-    if (!logoRes.ok) throw new Error(`Logo tapılmadı: ${logoUrl}`);
   
-    const logoBuffer = await logoRes.arrayBuffer();
+    if (!logoRes.ok) {
+      throw new Error(`Logo tapılmadı: ${logoRes.status} - ${logoUrl}`);
+    }
+  
+    const logoBlob = await logoRes.blob();
+  
+    const logoBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(logoBlob);
+    });
   
     logoId = workbook.addImage({
-      buffer: logoBuffer,
+      base64: logoBase64,
       extension: 'png',
     });
   } catch (error) {
@@ -1349,6 +1361,7 @@ async function exportPreparationExcel() {
   }
   
 
+  
   const border = {
     top: { style: 'thin', color: { argb: 'FFB7E4C7' } },
     left: { style: 'thin', color: { argb: 'FFB7E4C7' } },
@@ -1422,7 +1435,7 @@ function addLogo(ws) {
 
   ws.addImage(logoId, {
     tl: { col: 0.08, row: 1.15 },
-    ext: { width: 170, height: 68 },
+    ext: { width: 165, height: 62 },
   });
 }
 
