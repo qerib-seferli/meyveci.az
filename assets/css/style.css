@@ -4632,3 +4632,14 @@ select option {
     font-size: 12px !important;
   }
 }
+
+
+/* Ana səyifədə 12 məhsul gələcək, aşağı sürüşdürəndə növbəti 12 məhsul avtomatik açılacaq. Buton da məhsulların aşağısında görünəcək.*/
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+/*====================================================*/
+
+
