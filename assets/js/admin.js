@@ -1414,7 +1414,6 @@ function addLogo(ws) {
   ws.getRow(3).height = 36;
 
   if (!logoId) {
-    ws.mergeCells('A2:A3');
     ws.getCell('A2').value = 'Meyveci.az';
     ws.getCell('A2').font = { bold: true, size: 16, color: { argb: 'FF047857' } };
     ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
