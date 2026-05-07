@@ -1336,10 +1336,7 @@ try {
     ? location.pathname.split('/admin/')[0]
     : '';
 
-  const logoUrl = new URL(
-    '../assets/img/logo/Meyveci-logo.png',
-    window.location.href
-  ).href;
+const logoUrl = `${location.origin}${location.pathname.includes('/admin/') ? '/../' : './'}assets/img/logo/Meyveci-logo.png`;
   
 const logoRes = await fetch(logoUrl, { cache: 'no-store' });
 
