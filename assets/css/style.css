@@ -5666,32 +5666,159 @@ select option {
   }
 }
 
-/*================“Endirimli məhsullar” seçimi çıxacaq.================*/
-.discount-category-card {
-  border-radius: 0 !important;
-  overflow: hidden !important;
-  border: 0 !important;
-  background: linear-gradient(135deg, #e00063, #ffcc00) !important;
-  color: #fff !important;
-  box-shadow: 0 18px 34px rgba(224, 0, 99, 0.22) !important;
+/* ============================================================
+   PRODUCT CARD PRICE FIX + TRENDYOL MENU DISCOUNT HEADER
+   ============================================================ */
+
+/* Qiymət panelində vahid yuxarıda, köhnə qiymət onun altında */
+.price-panel {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  column-gap: 8px !important;
 }
 
-.discount-category-card .discount-cat-bg {
+.price-panel .old-price {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  align-self: start !important;
+  justify-self: center !important;
+  margin-top: -8px !important;
+  display: inline-block !important;
+  max-width: 58px !important;
+  font-size: 10px !important;
+  color: rgba(17, 24, 39, 0.48) !important;
+  text-decoration: line-through !important;
+}
+
+.discount-flag {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  align-self: center !important;
+  margin-top: -4px !important;
+  border-radius: 0 !important;
+  animation: discountFlagWave 2.4s ease-in-out infinite !important;
+  transform-origin: top center !important;
+}
+
+.discount-flag::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #0f7a37;
+  border-radius: 8px 8px 0 0;
+}
+
+@keyframes discountFlagWave {
+  0%, 100% {
+    transform: rotate(-1deg) skewX(0deg);
+  }
+  50% {
+    transform: rotate(2deg) skewX(-3deg);
+  }
+}
+
+/* Ölçü vahidi məhsul adına daha yaxın olsun */
+.unit-badge {
+  margin-top: -2px !important;
+}
+
+.product-title-row {
+  margin-bottom: -4px !important;
+}
+
+/* Trendyol style menyunun başında endirim banneri */
+.catalog-discount-head {
   width: 100%;
   min-height: 86px;
+  border: 0;
+  border-radius: 0 !important;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.42), transparent 32%),
+    linear-gradient(135deg, #e00063 0%, #ff006e 42%, #ffc400 100%);
+  box-shadow: 0 18px 36px rgba(224, 0, 99, 0.24);
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+}
+
+.catalog-discount-head::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 45%, transparent 70%);
+  transform: translateX(-120%);
+  animation: discountShine 3s ease-in-out infinite;
+}
+
+.catalog-discount-head {
+  position: relative;
+}
+
+.discount-head-left {
+  position: relative;
+  z-index: 2;
   display: grid;
-  place-items: center;
-  text-align: center;
   gap: 4px;
 }
 
-.discount-category-card b {
-  font-size: 18px;
+.discount-head-left b {
+  font-size: 20px;
+  line-height: 1.1;
   font-weight: 950;
 }
 
-.discount-category-card small {
+.discount-head-left small {
   font-size: 12px;
   font-weight: 850;
-  opacity: 0.95;
+}
+
+.discount-head-percent {
+  position: relative;
+  z-index: 2;
+  min-width: 74px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  color: #e00063;
+  background: #ffffff;
+  border-radius: 18px;
+  font-size: 24px;
+  font-weight: 1000;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+}
+
+@keyframes discountShine {
+  0%, 55% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+/* Mobil kataloq menyuda daha gözəl görünsün */
+@media (max-width: 768px) {
+  .catalog-discount-head {
+    min-height: 78px;
+    margin: 4px 0 14px;
+  }
+
+  .discount-head-left b {
+    font-size: 18px;
+  }
+
+  .discount-head-percent {
+    min-width: 66px;
+    height: 52px;
+    font-size: 21px;
+  }
 }
