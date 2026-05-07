@@ -5822,3 +5822,77 @@ select option {
     font-size: 21px;
   }
 }
+
+/* ============================================================
+   KATALOQ ENDİRİM BANNERİ + BAYRAQ YERİ FINAL FIX
+   ============================================================ */
+
+/* Trendyol menyuda endirim banneri bütün sətri tutsun */
+@media (max-width: 768px) {
+  .catalog-left {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .catalog-discount-head {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 96px !important;
+    margin: 0 0 4px !important;
+    border-radius: 0 !important;
+  }
+
+  .catalog-left-item {
+    width: 100% !important;
+  }
+}
+
+/* Desktop menyuda da endirim banneri yuxarıda tam en olsun */
+@media (min-width: 769px) {
+  .catalog-discount-head {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+  }
+}
+
+/* Qiymət panelində bayraq yuxarı xəttdən asılmış kimi görünsün */
+.price-panel {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.discount-flag {
+  position: absolute !important;
+  top: -2px !important;
+  right: 48px !important;
+  z-index: 5 !important;
+  margin: 0 !important;
+  transform-origin: top center !important;
+}
+
+.discount-flag::before {
+  top: -4px !important;
+}
+
+/* Köhnə qiymət bayrağın sağında yuxarıda qalsın */
+.price-panel .old-price {
+  position: absolute !important;
+  top: 30px !important;
+  right: 10px !important;
+  z-index: 4 !important;
+  margin: 0 !important;
+}
+
+/* Telefon üçün bayraq daha səliqəli dursun */
+@media (max-width: 640px) {
+  .discount-flag {
+    top: -2px !important;
+    right: 44px !important;
+  }
+
+  .price-panel .old-price {
+    top: 31px !important;
+    right: 8px !important;
+  }
+}
