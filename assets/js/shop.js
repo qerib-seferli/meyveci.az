@@ -69,10 +69,37 @@ function setupHomeEvents() {
   });
 
   $('#loadMore')?.addEventListener('click', () => {
-    state.visible += 10;
+    state.visible += 12;
     renderProducts();
   });
 
+
+  
+  let autoLoadBusy = false;
+
+  window.addEventListener('scroll', () => {
+    const loadMoreButton = $('#loadMore');
+  
+    if (!loadMoreButton) return;
+    if (loadMoreButton.style.display === 'none') return;
+    if (autoLoadBusy) return;
+  
+    const nearBottom =
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
+  
+    if (!nearBottom) return;
+  
+    autoLoadBusy = true;
+    state.visible += 12;
+    renderProducts();
+  
+    setTimeout(() => {
+      autoLoadBusy = false;
+    }, 350);
+  });
+
+
+  
     const categoryRow = $('#homeCategoryChips');
 
   if (categoryRow) {
