@@ -672,6 +672,13 @@ async function catalog() {
 
   $('#productSearch')?.addEventListener('input', loadProducts);
   $('#categorySearch')?.addEventListener('input', loadCategories);
+
+  $('#productImportBtn')?.addEventListener('click', () => {
+  $('#productExcelImport')?.click();
+  });
+  
+  $('#productExcelImport')?.addEventListener('change', importProductsFromExcel);
+  
 }
 
 async function loadCategories() {
@@ -2332,3 +2339,95 @@ function fitAllCourierMarkers() {
     }
 
 
+  // 📥 Excel Import ⚡ Qiymət və Stok Yenilə 📊 Exceldən Məhsul Yenilə =====================================
+
+  async function importProductsFromExcel(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  if (!window.XLSX) {
+    toast('Excel kitabxanası yüklənməyib');
+    return;
+  }
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+    if (!rows.length) {
+      toast('Excel faylında məlumat tapılmadı');
+      return;
+    }
+
+    const { data: categories } = await supabase
+      .from('categories')
+      .select('id,name');
+
+    const categoryMap = new Map(
+      (categories || []).map((cat) => [
+        String(cat.name || '').trim().toLowerCase(),
+        cat.id,
+      ])
+    );
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const item of rows) {
+      const name = String(item['Məhsul adı'] || '').trim();
+      const sku = String(item['SKU'] || item['Sku'] || '').trim();
+      const oneCName = String(item['1c də olan məhsul adı'] || item['1C adı'] || '').trim();
+      const categoryName = String(item['Kateqoriya'] || '').trim();
+
+      if (!name && !sku && !oneCName) continue;
+
+      const row = {
+        name,
+        slug: String(item['Slug'] || slugify(name)).trim(),
+        category_id: categoryMap.get(categoryName.toLowerCase()) || null,
+        price: Number(item['Faktiki satış qiyməti'] || item['Qiymət'] || 0),
+        old_price: item['Köhnə qiymət'] ? Number(item['Köhnə qiymət']) : null,
+        stock_quantity: Number(item['Stok (anbar)'] || item['Stok'] || 0),
+        unit: String(item['Ölçü vahidi'] || item['Vahid'] || 'ədəd').trim(),
+        sku: sku || null,
+        one_c_name: oneCName || null,
+        status: 'active',
+        updated_at: new Date().toISOString(),
+      };
+
+      const matchColumn = sku ? 'sku' : 'one_c_name';
+      const matchValue = sku || oneCName;
+
+      let response;
+
+      if (matchValue) {
+        const exists = await supabase
+          .from('products')
+          .select('id')
+          .eq(matchColumn, matchValue)
+          .maybeSingle();
+
+        response = exists.data?.id
+          ? await supabase.from('products').update(row).eq('id', exists.data.id)
+          : await supabase.from('products').insert(row);
+      } else {
+        response = await supabase.from('products').insert(row);
+      }
+
+      if (response.error) {
+        console.warn('Import xətası:', response.error.message, item);
+        errorCount++;
+      } else {
+        successCount++;
+      }
+    }
+
+    toast(`Import tamamlandı: ${successCount} uğurlu, ${errorCount} xəta`);
+    event.target.value = '';
+    loadProducts();
+  } catch (error) {
+    toast(error.message);
+  }
+}
