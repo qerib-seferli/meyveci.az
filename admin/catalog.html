@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <title>Kataloq idarəsi | Meyvəçi.az</title>
 </head>
 <body data-page="admin-catalog">
@@ -42,7 +43,17 @@
     </div>
 
     <section id="productsPanel" class="tab-panel active card pro-card">
-      <div class="section-head"><h2>Məhsul əlavə/redaktə</h2></div>
+      
+      <div class="section-head admin-import-head">
+        <h2>Məhsul əlavə/redaktə</h2>
+      
+        <div class="action-row">
+          <input id="productExcelImport" type="file" accept=".xlsx,.xls,.csv" hidden>
+          <button id="productImportBtn" type="button" class="btn btn-soft btn-mini">
+            📥 Excel import
+          </button>
+        </div>
+      </div>
 
       <form id="productForm" class="form-grid">
         <input type="hidden" name="id">
