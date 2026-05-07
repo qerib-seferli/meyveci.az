@@ -507,6 +507,8 @@ async function toggleFavorite(productId, button) {
   toast('Sevimlilərə əlavə olundu');
 }
 
+
+
 async function initProduct() {
   const id = byId();
   const detail = $('#productDetail');
@@ -528,26 +530,48 @@ async function initProduct() {
   }
 
   const discount = getDiscount(product.price, product.old_price);
+  const rating = Number(product.rating_avg || 0).toFixed(1);
+  const hasDiscount = discount > 0;
 
   detail.innerHTML = `
-    <div class="card product-detail-grid">
+    <div class="product-detail-pro ${hasDiscount ? 'detail-discount' : 'detail-fresh'}">
       <div class="product-detail-image">
-        ${discount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
+        <div class="rating-pill detail-rating">⭐ <b>${rating > 0 ? rating : '5.0'}</b></div>
+        ${hasDiscount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
         <img src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+        <div class="fresh-badge detail-fresh-badge">🌿 TƏZƏ MƏHSUL</div>
+        <div class="quality-badge detail-quality-badge">🛡️ KEYFİYYƏT ZƏMANƏTİ</div>
       </div>
 
       <div class="product-detail-info">
         <span class="unit-badge">${product.categories?.name || 'Məhsul'}</span>
         <h1>${product.name}</h1>
-        <div class="price-row">
-          <span class="price">${money(product.price)}</span>
-          ${product.old_price ? `<span class="old-price">${money(product.old_price)}</span>` : ''}
+
+        <div class="detail-unit-line">
+          <span>${product.unit || 'ədəd'}</span>
+          <b>${product.stock_quantity > 0 ? 'Stokda var' : 'Stok soruşulsun'}</b>
         </div>
-        <p><b>Ölçü vahidi:</b> ${product.unit || 'ədəd'}</p>
-        <p class="muted">${product.description || product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
+
+        <div class="price-panel detail-price-panel">
+          <div>
+            <span class="price">${money(product.price)}</span>
+            <small>Meyvəçi qiyməti</small>
+          </div>
+
+          ${hasDiscount ? `
+            <div class="discount-flag">
+              <b>${discount}%</b>
+              <span>ENDİRİM</span>
+            </div>
+            <span class="old-price">${money(product.old_price)}</span>
+          ` : ''}
+        </div>
+
+        <p class="detail-desc">🌿 ${product.description || product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
+
         <div class="detail-actions">
-          <button id="addCartDetail" class="btn btn-primary">Səbətə əlavə et</button>
-          <button id="addFavDetail" class="btn btn-soft">Sevimlilərə əlavə et</button>
+          <button id="addCartDetail" class="btn btn-primary">🛒 Səbətə əlavə et</button>
+          <button id="addFavDetail" class="btn btn-soft">♥ Sevimlilərə əlavə et</button>
         </div>
       </div>
     </div>
@@ -557,6 +581,8 @@ async function initProduct() {
   $('#addFavDetail').addEventListener('click', () => toggleFavorite(product.id, $('#addFavDetail')));
   await renderRelatedProducts(product);
 }
+
+
 
 // Məhsul detalının altında eyni kateqoriyadan oxşar məhsullar göstərilir.
 async function renderRelatedProducts(product) {
