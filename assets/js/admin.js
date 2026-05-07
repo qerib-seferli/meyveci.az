@@ -1572,8 +1572,13 @@ function addLogo(ws) {
   ws.getRow(8).values = ['Ünvan:', fullAddress || 'Ünvan yoxdur', '', 'Ödəniş üsulu:', methodAz(order.payment_method)];
   ws.getRow(9).values = ['Sifariş statusu:', statusAz(order.status), '', 'Ödəniş statusu:', statusAz(order.payment_status)];
 
-  ws.mergeCells('B8:C8');
-  ws.getRow(8).height = 40;
+    ws.mergeCells('B8:C8');
+    ws.getCell('B8').alignment = {
+      wrapText: true,
+      vertical: 'middle',
+      horizontal: 'left',
+    };
+    ws.getRow(8).height = 24;
 
   [6, 7, 8, 9].forEach((rowNo) => {
     ws.getRow(rowNo).eachCell((cell) => {
