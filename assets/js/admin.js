@@ -776,7 +776,7 @@ async function loadProducts() {
   const q = ($('#productSearch')?.value || '').trim();
 
   const [products, categories] = await Promise.all([
-    supabase.from('products').select('*,categories(name)').order('created_at', { ascending: false }).limit(300),
+    supabase.from('products').select('*,categories(name)').order('created_at', { ascending: false }).limit(5000),
     supabase.from('categories').select('id,name').order('sort_order'),
   ]);
 
@@ -2343,7 +2343,7 @@ function fitAllCourierMarkers() {
 
   // 📥 Excel Import ⚡ Qiymət və Stok Yenilə 📊 Exceldən Məhsul Yenilə =====================================
 
-  async function importProductsFromExcel(event) {
+async function importProductsFromExcel(event) {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -2374,8 +2374,45 @@ function fitAllCourierMarkers() {
       ])
     );
 
-    let successCount = 0;
-    let errorCount = 0;
+    const { data: existingProducts } = await supabase
+      .from('products')
+      .select('id,sku,one_c_name,slug');
+
+    const bySku = new Map();
+    const byOneC = new Map();
+    const usedSlugs = new Set();
+
+    (existingProducts || []).forEach((p) => {
+      if (p.sku) bySku.set(String(p.sku).trim(), p);
+      if (p.one_c_name) byOneC.set(String(p.one_c_name).trim(), p);
+      if (p.slug) usedSlugs.add(String(p.slug).trim());
+    });
+
+    const parseNum = (value) => {
+      const clean = String(value || '0')
+        .replace(',', '.')
+        .replace(/[^\d.]/g, '');
+      return Number(clean || 0);
+    };
+
+    const makeUniqueSlug = (baseSlug, currentOldSlug = '') => {
+      let slug = baseSlug || `mehsul-${Date.now()}`;
+      let finalSlug = slug;
+      let i = 2;
+
+      while (usedSlugs.has(finalSlug) && finalSlug !== currentOldSlug) {
+        finalSlug = `${slug}-${i}`;
+        i++;
+      }
+
+      usedSlugs.add(finalSlug);
+      return finalSlug;
+    };
+
+    let added = 0;
+    let updated = 0;
+    let skipped = 0;
+    let errors = 0;
 
     for (const item of rows) {
       const name = String(item['Məhsul adı'] || '').trim();
@@ -2383,15 +2420,26 @@ function fitAllCourierMarkers() {
       const oneCName = String(item['1c də olan məhsul adı'] || item['1C adı'] || '').trim();
       const categoryName = String(item['Kateqoriya'] || '').trim();
 
-      if (!name && !sku && !oneCName) continue;
+      if (!name) {
+        skipped++;
+        continue;
+      }
+
+      const matched =
+        (sku && bySku.get(sku)) ||
+        (oneCName && byOneC.get(oneCName)) ||
+        null;
+
+      const baseSlug = String(item['Slug'] || slugify(name)).trim();
+      const finalSlug = makeUniqueSlug(baseSlug, matched?.slug || '');
 
       const row = {
         name,
-        slug: String(item['Slug'] || slugify(name)).trim(),
+        slug: finalSlug,
         category_id: categoryMap.get(categoryName.toLowerCase()) || null,
-        price: Number(item['Faktiki satış qiyməti'] || item['Qiymət'] || 0),
-        old_price: item['Köhnə qiymət'] ? Number(item['Köhnə qiymət']) : null,
-        stock_quantity: Number(item['Stok (anbar)'] || item['Stok'] || 0),
+        price: parseNum(item['Faktiki satış qiyməti'] || item['Qiymət']),
+        old_price: item['Köhnə qiymət'] ? parseNum(item['Köhnə qiymət']) : null,
+        stock_quantity: Math.round(parseNum(item['Stok (anbar)'] || item['Stok'])),
         unit: String(item['Ölçü vahidi'] || item['Vahid'] || 'ədəd').trim(),
         sku: sku || null,
         one_c_name: oneCName || null,
@@ -2399,34 +2447,37 @@ function fitAllCourierMarkers() {
         updated_at: new Date().toISOString(),
       };
 
-      const matchColumn = sku ? 'sku' : 'one_c_name';
-      const matchValue = sku || oneCName;
-
       let response;
 
-      if (matchValue) {
-        const exists = await supabase
+      if (matched?.id) {
+        response = await supabase
           .from('products')
-          .select('id')
-          .eq(matchColumn, matchValue)
-          .maybeSingle();
+          .update(row)
+          .eq('id', matched.id);
 
-        response = exists.data?.id
-          ? await supabase.from('products').update(row).eq('id', exists.data.id)
-          : await supabase.from('products').insert(row);
+        updated++;
       } else {
-        response = await supabase.from('products').insert(row);
+        response = await supabase
+          .from('products')
+          .insert(row)
+          .select('id,sku,one_c_name,slug')
+          .single();
+
+        if (response.data) {
+          if (response.data.sku) bySku.set(response.data.sku, response.data);
+          if (response.data.one_c_name) byOneC.set(response.data.one_c_name, response.data);
+        }
+
+        added++;
       }
 
       if (response.error) {
         console.warn('Import xətası:', response.error.message, item);
-        errorCount++;
-      } else {
-        successCount++;
+        errors++;
       }
     }
 
-    toast(`Import tamamlandı: ${successCount} uğurlu, ${errorCount} xəta`);
+    toast(`Import tamamlandı: əlavə ${added}, yenilənən ${updated}, boş keçilən ${skipped}, xəta ${errors}`);
     event.target.value = '';
     loadProducts();
   } catch (error) {
