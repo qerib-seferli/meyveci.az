@@ -1336,23 +1336,26 @@ try {
     ? location.pathname.split('/admin/')[0]
     : '';
 
-  const logoUrl = `${location.origin}${basePath}/assets/img/logo/Meyveci-logo.png`;
-  const logoRes = await fetch(logoUrl);
-  if (!logoRes.ok) throw new Error('Logo tapılmadı');
+const logoUrl = new URL('../assets/img/logo/Meyveci-logo.png', window.location.href).href;
+const logoRes = await fetch(logoUrl, { cache: 'no-store' });
 
-  const logoBlob = await logoRes.blob();
+if (!logoRes.ok) throw new Error(`Logo tapılmadı: ${logoUrl}`);
 
-  const logoBase64 = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(logoBlob);
-  });
+const logoBlob = await logoRes.blob();
 
-  logoId = workbook.addImage({
-    base64: logoBase64,
-    extension: 'png',
-  });
+const logoBase64 = await new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onloadend = () => resolve(reader.result);
+  reader.onerror = reject;
+  reader.readAsDataURL(logoBlob);
+});
+
+logoId = workbook.addImage({
+  base64: logoBase64,
+  extension: 'png',
+});
+
+  
 } catch (error) {
   console.warn('Excel logo yüklənmədi:', error.message);
   logoId = null;
@@ -1420,28 +1423,15 @@ function safeSheetName(name) {
   
 
 function addLogo(ws) {
-  ws.getCell('A2').fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFFFFFFF' },
-  };
-
-  ws.getCell('A3').fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFFFFFFF' },
-  };
-
   if (!logoId) {
     ws.getCell('A2').value = 'Meyvəçi.az';
     ws.getCell('A2').font = { bold: true, size: 16, color: { argb: 'FF047857' } };
-    ws.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
     return;
   }
 
   ws.addImage(logoId, {
-    tl: { col: 0.1, row: 1.15 },
-    ext: { width: 160, height: 60 },
+    tl: { col: 0.05, row: 1.1 },
+    ext: { width: 165, height: 58 },
   });
 }
 
@@ -1630,8 +1620,8 @@ styleBody(totalRow);
 totalRow.getCell(3).font = { bold: true, size: 14 };
 totalRow.getCell(4).font = { bold: true, size: 16, color: { argb: 'FF047857' } };
 
-totalRow.getCell(3).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
-totalRow.getCell(4).alignment = { horizontal: 'right', vertical: 'middle', wrapText: false };
+totalRow.getCell(3).alignment = { horizontal: 'left', vertical: 'middle', wrapText: false };
+totalRow.getCell(4).alignment = { horizontal: 'left', vertical: 'middle', wrapText: false };
 
   ws.addRow([]);
 
