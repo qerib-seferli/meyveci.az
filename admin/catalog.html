@@ -44,16 +44,21 @@
 
     <section id="productsPanel" class="tab-panel active card pro-card">
       
-      <div class="section-head admin-import-head">
-        <h2>Məhsul əlavə/redaktə</h2>
-      
-        <div class="action-row">
-          <input id="productExcelImport" type="file" accept=".xlsx,.xls,.csv" hidden>
-          <button id="productImportBtn" type="button" class="btn btn-soft btn-mini">
-            📥 1C Exceldən Məhsul Yenilə
-          </button>
+        <div class="section-head admin-import-head">
+          <h2>Məhsul əlavə/redaktə</h2>
+        
+          <div class="action-row">
+            <input id="productExcelImport" type="file" accept=".xlsx,.xls,.csv" hidden>
+        
+            <button id="productImportBtn" type="button" class="btn btn-soft btn-mini">
+              📥 1C Exceldən Məhsul Yenilə
+            </button>
+        
+            <button id="productTemplateBtn" type="button" class="btn btn-soft btn-mini">
+              📄 Excel Şablonu
+            </button>
+          </div>
         </div>
-      </div>
 
       <form id="productForm" class="form-grid">
         <input type="hidden" name="id">
