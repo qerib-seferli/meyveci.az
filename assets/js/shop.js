@@ -360,7 +360,10 @@ function renderCategoryChips() {
 function filteredProducts() {
   return state.products.filter((product) => {
     
-    const categoryMatch = state.category === 'all' || product.category_id === state.category;
+    const categoryMatch =
+      state.category === 'all' ||
+      (state.category === 'discounts' && Number(product.old_price) > Number(product.price)) ||
+      product.category_id === state.category;
     
     const searchMatch = !state.query || product.name.toLowerCase().includes(state.query);
     return categoryMatch && searchMatch;
