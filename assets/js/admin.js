@@ -678,6 +678,7 @@ async function catalog() {
   });
   
   $('#productExcelImport')?.addEventListener('change', importProductsFromExcel);
+  $('#productTemplateBtn')?.addEventListener('click', downloadProductExcelTemplate);
   
 }
 
@@ -2430,4 +2431,34 @@ function fitAllCourierMarkers() {
   } catch (error) {
     toast(error.message);
   }
+}
+
+
+// Excel Şablonu düyməsinə vuranda hazır .xlsx faylı yüklənsin========================
+function downloadProductExcelTemplate() {
+  if (!window.XLSX) {
+    toast('Excel kitabxanası yüklənməyib');
+    return;
+  }
+
+  const rows = [
+    {
+      'SKU': 'UBC470',
+      'Məhsul adı': 'Ümid Balı – Çiçək Balı 470 qr',
+      'Slug': 'umid-bali-cicek-bali-470qr',
+      'Kateqoriya': 'Arıçılıq Məhsulları',
+      'Faktiki satış qiyməti': 14.90,
+      'Köhnə qiymət': 16.50,
+      'Stok (anbar)': 25,
+      'Ölçü vahidi': 'ədəd',
+      '1c də olan məhsul adı': 'Umid Bal Cicek 0.470Qr',
+    },
+  ];
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Mehsul Import');
+
+  XLSX.writeFile(workbook, 'meyveci-mehsul-import-sablonu.xlsx');
 }
