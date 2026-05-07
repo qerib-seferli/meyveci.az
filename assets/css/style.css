@@ -5540,3 +5540,158 @@ select option {
     font-size: 29px !important;
   }
 }
+
+/* ============================================================
+   FINAL MINI FIX - Kart qısaltma + endirim bayrağı animasiya
+   ============================================================ */
+
+.product-card {
+  gap: 6px !important;
+}
+
+.product-media {
+  height: 190px !important;
+  min-height: 190px !important;
+  max-height: 190px !important;
+}
+
+.product-card .pic img {
+  max-height: 190px !important;
+  padding: 28px 8px 32px !important;
+}
+
+.product-title-row {
+  min-height: 34px !important;
+  max-height: 34px !important;
+}
+
+.product-card h3 {
+  min-height: 30px !important;
+  max-height: 30px !important;
+  font-size: 13px !important;
+}
+
+.unit-badge {
+  height: 29px !important;
+  min-width: 36px !important;
+  font-size: 10px !important;
+}
+
+.price-panel {
+  height: 74px !important;
+  min-height: 74px !important;
+  padding: 8px 9px !important;
+}
+
+.price {
+  font-size: 22px !important;
+}
+
+.price-panel small {
+  font-size: 9px !important;
+}
+
+.short-desc {
+  min-height: 24px !important;
+  max-height: 24px !important;
+  font-size: 10px !important;
+}
+
+.cart-btn {
+  min-height: 36px !important;
+  font-size: 11px !important;
+}
+
+/* Endirim bayrağı */
+.discount-flag {
+  animation: discountFlagWave 2.2s ease-in-out infinite !important;
+  transform-origin: top center !important;
+}
+
+.discount-flag b {
+  font-size: 13px !important;
+}
+
+.discount-flag span {
+  font-size: 5.8px !important;
+}
+
+@keyframes discountFlagWave {
+  0%, 100% {
+    transform: rotate(-1deg) skewX(0deg);
+  }
+
+  50% {
+    transform: rotate(2deg) skewX(-3deg);
+  }
+}
+
+/* Mobil kart daha kompakt */
+@media (max-width: 640px) {
+  .product-media {
+    height: 165px !important;
+    min-height: 165px !important;
+    max-height: 165px !important;
+  }
+
+  .product-card .pic img {
+    max-height: 165px !important;
+    padding: 24px 4px 28px !important;
+    transform: scale(1.14);
+  }
+
+  .price-panel {
+    height: 72px !important;
+    min-height: 72px !important;
+  }
+
+  .old-price {
+    display: inline-block !important;
+    font-size: 8px !important;
+    max-width: 42px !important;
+  }
+
+  .discount-flag {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 50px !important;
+  }
+
+  .discount-flag b {
+    font-size: 13px !important;
+  }
+
+  .discount-flag span {
+    font-size: 5.5px !important;
+  }
+}
+
+/*================“Endirimli məhsullar” seçimi çıxacaq.================*/
+.discount-category-card {
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  background: linear-gradient(135deg, #e00063, #ffcc00) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 34px rgba(224, 0, 99, 0.22) !important;
+}
+
+.discount-category-card .discount-cat-bg {
+  width: 100%;
+  min-height: 86px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.discount-category-card b {
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.discount-category-card small {
+  font-size: 12px;
+  font-weight: 850;
+  opacity: 0.95;
+}
