@@ -1424,7 +1424,7 @@ function safeSheetName(name) {
 
 function addLogo(ws) {
   if (!logoId) {
-    ws.getCell('A2').value = 'Meyvəçi.az';
+    ws.getCell('A2').value = 'Meyveci.az';
     ws.getCell('A2').font = { bold: true, size: 16, color: { argb: 'FF047857' } };
     return;
   }
@@ -1494,7 +1494,21 @@ function addLogo(ws) {
     styleBody(r);
   });
 
-  summarySheet.views = [{ state: 'frozen', ySplit: 6 }];
+  summarySheet.pageSetup = {
+  paperSize: 9,
+  orientation: 'portrait',
+  fitToPage: true,
+  fitToWidth: 1,
+  fitToHeight: 1,
+  margins: {
+    left: 0.25,
+    right: 0.25,
+    top: 0.35,
+    bottom: 0.35,
+    header: 0.1,
+    footer: 0.1,
+  },
+};
 
 
   preparationOrdersCache.forEach((data, index) => {
