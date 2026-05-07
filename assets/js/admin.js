@@ -1459,7 +1459,7 @@ function addLogo(ws) {
     { key: 'e', width: 20 },
   ];
 
-  addLogo(summarySheet);
+  //addLogo(summarySheet);
 
   summarySheet.mergeCells('A1:E3');
   const titleCell = summarySheet.getCell('A1');
