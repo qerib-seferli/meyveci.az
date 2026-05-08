@@ -6028,6 +6028,27 @@ select option {
   }
 }
 
+/* Desktop + telefon qiymət və AZN yan-yana qalsın */
+.price {
+  display: inline-block !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  overflow-wrap: normal !important;
+  letter-spacing: -0.07em !important;
+  line-height: 1 !important;
+}
+
+/* Desktop */
+@media (min-width: 641px) {
+  .price {
+    font-size: 24px !important;
+  }
+
+  .price-panel {
+    padding-right: 86px !important;
+  }
+}
+
 /* Telefonda qiymət və AZN yan-yana qalsın */
 @media (max-width: 640px) {
   .price {
