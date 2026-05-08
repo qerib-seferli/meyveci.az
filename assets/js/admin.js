@@ -680,6 +680,12 @@ async function catalog() {
   $('#productExcelImport')?.addEventListener('change', importProductsFromExcel);
   $('#productTemplateBtn')?.addEventListener('click', downloadProductExcelTemplate);
   $('#productExportBtn')?.addEventListener('click', exportProductsToExcel);
+
+    await loadDiscountCards();
+
+  $('#discountCardSearch')?.addEventListener('input', loadDiscountCards);
+  $('#discountPrintAllBtn')?.addEventListener('click', printAllDiscountCards);
+  $('#discountPdfAllBtn')?.addEventListener('click', printAllDiscountCards);
   
 }
 
@@ -2591,3 +2597,200 @@ async function exportProductsToExcel() {
     toast(error.message);
   }
 }
+
+
+// ============================================================
+// MEYVƏÇİ.AZ - ENDİRİM KARTLARI
+// Bazada old_price > price olan məhsulları avtomatik endirim kartına çevirir.
+// ============================================================
+
+const discountOriginOptions = [
+  'YERLİ FERMER',
+  'İDXAL',
+  'İSTİXANA',
+  'EKZOTİK',
+  'SELEKSİYA',
+  'ORQANİK',
+];
+
+let discountCardsCache = [];
+
+function discountPercent(price, oldPrice) {
+  const p = Number(price || 0);
+  const o = Number(oldPrice || 0);
+  if (!p || !o || o <= p) return 0;
+  return Math.round(((o - p) / o) * 100);
+}
+
+function discountOriginSelect(productId) {
+  return `
+    <select class="discount-origin-select" data-id="${productId}">
+      ${discountOriginOptions.map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join('')}
+    </select>
+  `;
+}
+
+async function loadDiscountCards() {
+  const grid = $('#discountCardsGrid');
+  if (!grid) return;
+
+  const search = ($('#discountCardSearch')?.value || '').trim().toLowerCase();
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('id,name,price,old_price,unit,status,image_url,categories(name)')
+    .eq('status', 'active')
+    .not('old_price', 'is', null)
+    .order('name', { ascending: true })
+    .limit(5000);
+
+  if (error) {
+    grid.innerHTML = `<div class="muted">${esc(error.message)}</div>`;
+    return;
+  }
+
+  discountCardsCache = (data || []).filter((product) => {
+    const isDiscount = Number(product.old_price || 0) > Number(product.price || 0);
+    const matchSearch = !search || String(product.name || '').toLowerCase().includes(search);
+    return isDiscount && matchSearch;
+  });
+
+  grid.innerHTML = discountCardsCache.map((product) => renderDiscountCard(product)).join('')
+    || '<div class="muted">Endirimli məhsul yoxdur. Endirim üçün məhsulda “Köhnə qiymət” faktiki qiymətdən böyük olmalıdır.</div>';
+
+  bindDiscountCardEvents();
+}
+
+function renderDiscountCard(product) {
+  const percent = discountPercent(product.price, product.old_price);
+  const unit = product.unit || 'ədəd';
+
+  return `
+    <div class="discount-card-wrap" data-id="${product.id}">
+      <div class="discount-card-admin-actions">
+        ${discountOriginSelect(product.id)}
+        <button type="button" class="btn btn-soft btn-mini print-discount-card" data-id="${product.id}">🖨️ Çap</button>
+        <button type="button" class="btn btn-soft btn-mini pdf-discount-card" data-id="${product.id}">📄 PDF</button>
+      </div>
+
+      <div class="meyveci-discount-card" id="discount-card-${product.id}">
+        <div class="discount-card-bg-pattern"></div>
+
+        <div class="discount-card-top">
+          <h3>ENDİRİM</h3>
+          <div class="discount-leaf-badge">
+            <strong>-${percent}%</strong>
+            <span>ENDİRİM</span>
+          </div>
+        </div>
+
+        <div class="discount-card-body">
+          <div class="discount-left">
+            <h4>${esc(product.name)}</h4>
+            <p>${esc(unit)}</p>
+
+            <ul>
+              <li><span>🌿</span> TƏBİİ VƏ TƏZƏ</li>
+              <li><span>📍</span> <b class="origin-text" data-id="${product.id}">YERLİ FERMER</b></li>
+              <li><span>✅</span> KEYFİYYƏT ZƏMANƏTİ</li>
+            </ul>
+          </div>
+
+          <div class="discount-right">
+            <div class="old-price">${money(product.old_price)}</div>
+            <div class="new-price">${Number(product.price || 0).toFixed(2)}<small>₼</small></div>
+            <div class="meyveci-price-text">meyvəçi qiyməti</div>
+          </div>
+        </div>
+
+        <div class="discount-card-bottom">
+          <div class="discount-logo-box">
+            <img src="../assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
+          </div>
+
+          <div class="discount-card-label">
+            <span>💳</span>
+            <b>ENDİRİM<br>KARTI İLƏ</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindDiscountCardEvents() {
+  $$('.discount-origin-select').forEach((select) => {
+    select.addEventListener('change', () => {
+      const text = document.querySelector(`.origin-text[data-id="${select.dataset.id}"]`);
+      if (text) text.textContent = select.value;
+    });
+  });
+
+  $$('.print-discount-card').forEach((btn) => {
+    btn.addEventListener('click', () => printSingleDiscountCard(btn.dataset.id));
+  });
+
+  $$('.pdf-discount-card').forEach((btn) => {
+    btn.addEventListener('click', () => printSingleDiscountCard(btn.dataset.id));
+  });
+}
+
+function printSingleDiscountCard(id) {
+  const card = document.querySelector(`#discount-card-${CSS.escape(id)}`);
+  if (!card) return;
+
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="az">
+    <head>
+      <meta charset="UTF-8">
+      <title>Endirim kartı</title>
+      <link rel="stylesheet" href="../assets/css/style.css">
+      <link rel="stylesheet" href="../assets/css/admin.css">
+    </head>
+    <body class="discount-print-body single">
+      ${card.outerHTML}
+      <script>
+        window.onload = () => {
+          window.print();
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
+}
+
+function printAllDiscountCards() {
+  const cards = [...document.querySelectorAll('.meyveci-discount-card')];
+  if (!cards.length) {
+    toast('Çap üçün endirim kartı yoxdur');
+    return;
+  }
+
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="az">
+    <head>
+      <meta charset="UTF-8">
+      <title>Toplu endirim kartları</title>
+      <link rel="stylesheet" href="../assets/css/style.css">
+      <link rel="stylesheet" href="../assets/css/admin.css">
+    </head>
+    <body class="discount-print-body all">
+      <div class="discount-print-sheet">
+        ${cards.map((card) => card.outerHTML).join('')}
+      </div>
+      <script>
+        window.onload = () => {
+          window.print();
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
+}
+
