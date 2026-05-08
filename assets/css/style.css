@@ -5590,6 +5590,47 @@ select option {
     font-size: 23px !important;
   }
 }
+
+/* ============================================================
+   MOBİL ŞƏKİL KƏSİLMƏSİ FIX
+   Desktop cover qalır, telefonda məhsul tam görünsün.
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .product-card .pic img {
+    object-fit: contain !important;
+    object-position: center center !important;
+    padding: 18px 6px 34px !important;
+    transform: scale(1.18) !important;
+  }
+
+  .discount-product-card .pic img {
+    transform: scale(1.14) !important;
+  }
+
+  .product-detail-pro .product-detail-image img {
+    object-fit: contain !important;
+    object-position: center center !important;
+    padding: 42px 10px 56px !important;
+    transform: scale(1.10) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .product-card .pic img {
+    padding: 18px 5px 32px !important;
+    transform: scale(1.14) !important;
+  }
+
+  .discount-product-card .pic img {
+    transform: scale(1.10) !important;
+  }
+
+  .product-detail-pro .product-detail-image img {
+    transform: scale(1.06) !important;
+  }
+}
+
 /*=================================================================================================================================================================*/
 
 /* ============================================================
