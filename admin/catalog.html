@@ -40,6 +40,7 @@
     <div class="tabs">
       <button class="tab active" data-tab="productsPanel">Məhsullar</button>
       <button class="tab" data-tab="catsPanel">Kateqoriyalar</button>
+      <button class="tab" data-tab="discountCardsPanel">Endirim kartları</button>
     </div>
 
     <section id="productsPanel" class="tab-panel active card pro-card">
@@ -135,6 +136,29 @@
     </section>
   </div>
 </section>
+
+
+    <section id="discountCardsPanel" class="tab-panel card pro-card">
+      <div class="section-head admin-import-head">
+        <div>
+          <h2>Endirim kartları</h2>
+          <p class="muted">Bazadakı endirimli məhsullar üçün avtomatik çap kartları.</p>
+        </div>
+    
+        <div class="action-row">
+          <button id="discountPrintAllBtn" type="button" class="btn btn-primary btn-mini">🖨️ Toplu çap et</button>
+          <button id="discountPdfAllBtn" type="button" class="btn btn-soft btn-mini">📄 Toplu PDF saxla</button>
+        </div>
+      </div>
+    
+      <div class="admin-table-toolbar">
+        <h2>Endirimli məhsullar</h2>
+        <input id="discountCardSearch" class="admin-search" type="search" placeholder="Məhsul adına görə axtar...">
+      </div>
+    
+      <div id="discountCardsGrid" class="discount-cards-grid"></div>
+    </section>
+
     
   </div></main><script type="module" src="../assets/js/admin.js"></script>
 </body>
