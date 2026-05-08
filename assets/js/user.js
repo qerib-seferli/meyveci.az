@@ -282,12 +282,15 @@ async function fillCheckoutFromProfile() {
   form.lng.value = activeProfile.lng || '';
 }
 
+
+
+
 async function renderCart() {
   const activeUser = await requireAuth();
 
   const { data, error } = await supabase
     .from('cart_items')
-    .select('id,quantity,products(id,name,price,image_url,unit,short_description)')
+    .select('id,quantity,products(id,name,price,old_price,image_url,unit,short_description)')
     .eq('user_id', activeUser.id)
     .order('created_at', { ascending: false });
 
@@ -302,23 +305,45 @@ async function renderCart() {
 
   list.innerHTML = (data || []).map((item) => {
     const product = item.products;
-    total += Number(product.price) * item.quantity;
+    const discount = getDiscount(product.price, product.old_price);
+    const hasDiscount = discount > 0;
+    const lineTotal = Number(product.price || 0) * Number(item.quantity || 0);
+
+    total += lineTotal;
 
     return `
-      <div class="compact-row">
-        <div style="display:flex;gap:10px;align-items:center;min-width:0;">
-          <img class="preview-img" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
-          <div style="min-width:0;">
-            <b>${product.name}</b><br>
-            <small class="muted">${money(product.price)} × ${item.quantity} ${product.unit || 'ədəd'}</small>
+      <div class="compact-row cart-product-row ${hasDiscount ? 'cart-discount-row' : 'cart-fresh-row'}">
+        <div class="cart-product-main">
+          <div class="cart-img-wrap">
+            <img class="preview-img" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+            ${hasDiscount ? `<span class="cart-mini-discount">-${discount}%</span>` : ''}
+          </div>
+
+          <div class="cart-product-info">
+            <b>${product.name}</b>
+
+            <small class="cart-price-line">
+              ${hasDiscount ? `<span class="cart-old-price">${money(product.old_price)}</span>` : ''}
+              <span class="cart-new-price">${money(product.price)}</span>
+              <span class="cart-dot">×</span>
+              <span>${item.quantity} ${product.unit || 'ədəd'}</span>
+            </small>
+
+            <small class="cart-desc">
+              🌿 ${product.short_description || (hasDiscount ? 'Endirimli və keyfiyyətli məhsul.' : 'Təzə və keyfiyyətli məhsul.')}
+            </small>
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
-          <button class="btn btn-soft qty" data-id="${item.id}" data-q="${item.quantity - 1}">−</button>
-          <b>${item.quantity}</b>
-          <button class="btn btn-soft qty" data-id="${item.id}" data-q="${item.quantity + 1}">+</button>
-          <button class="btn btn-danger del" data-id="${item.id}">Sil</button>
+        <div class="cart-row-actions">
+          <div class="cart-line-total">${money(lineTotal)}</div>
+
+          <div class="cart-qty-actions">
+            <button class="btn btn-soft qty" data-id="${item.id}" data-q="${item.quantity - 1}">−</button>
+            <b>${item.quantity}</b>
+            <button class="btn btn-soft qty" data-id="${item.id}" data-q="${item.quantity + 1}">+</button>
+            <button class="btn btn-danger del" data-id="${item.id}">Sil</button>
+          </div>
         </div>
       </div>
     `;
@@ -334,6 +359,9 @@ async function renderCart() {
     button.addEventListener('click', () => removeItem(button.dataset.id));
   });
 }
+
+
+
 
 async function updateQty(id, quantity) {
   const response = quantity < 1
