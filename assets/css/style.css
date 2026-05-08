@@ -5587,3 +5587,208 @@ select option {
 }
 /*=================================================================================================================================================================*/
 
+/* ============================================================
+   MEYVƏÇİ.AZ - SƏBƏT MƏHSUL KARTLARI
+   Endirimli məhsul sarı, normal məhsul ağ/yaşıl premium stil.
+   ============================================================ */
+
+.cart-product-row {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(34, 197, 94, 0.18) !important;
+  box-shadow: 0 14px 32px rgba(15, 122, 55, 0.10) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+}
+
+.cart-fresh-row {
+  background: linear-gradient(135deg, #ffffff, #f4fff8) !important;
+}
+
+.cart-discount-row {
+  background:
+    radial-gradient(circle at 18% 15%, rgba(255,255,255,0.55), transparent 34%),
+    linear-gradient(135deg, #fff35a 0%, #ffd817 58%, #ffc400 100%) !important;
+  border-color: rgba(250, 204, 21, 0.75) !important;
+}
+
+.cart-product-main {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+.cart-img-wrap {
+  position: relative !important;
+  width: 76px !important;
+  height: 64px !important;
+  flex: 0 0 76px !important;
+  border-radius: 18px !important;
+  background: rgba(220, 252, 231, 0.9) !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.cart-discount-row .cart-img-wrap {
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+
+.cart-img-wrap .preview-img {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 5px !important;
+  object-fit: contain !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+}
+
+.cart-mini-discount {
+  position: absolute !important;
+  right: -7px !important;
+  bottom: -6px !important;
+  border-radius: 999px !important;
+  padding: 3px 7px !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #15803d, #16a34a) !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 7px 14px rgba(21, 128, 61, 0.24) !important;
+}
+
+.cart-product-info {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+.cart-product-info > b {
+  color: #102019 !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+}
+
+.cart-price-line {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+  color: #64756b !important;
+  font-size: 13px !important;
+}
+
+.cart-new-price {
+  color: #07803f !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+}
+
+.cart-old-price {
+  position: relative !important;
+  color: rgba(17, 24, 39, 0.52) !important;
+  font-weight: 900 !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+
+.cart-old-price::after {
+  content: "" !important;
+  position: absolute !important;
+  left: -2px !important;
+  right: -2px !important;
+  top: 50% !important;
+  height: 2px !important;
+  background: #ef4444 !important;
+  transform: rotate(-8deg) !important;
+  border-radius: 999px !important;
+}
+
+.cart-desc {
+  color: #1f2937 !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+}
+
+.cart-row-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: 0 0 auto !important;
+}
+
+.cart-line-total {
+  color: #07803f !important;
+  font-size: 18px !important;
+  font-weight: 1000 !important;
+  white-space: nowrap !important;
+}
+
+.cart-qty-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex-wrap: nowrap !important;
+}
+
+.cart-product-row .qty {
+  min-width: 34px !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+}
+
+.cart-product-row .del {
+  min-height: 36px !important;
+  padding: 7px 13px !important;
+}
+
+/* Telefon səbət görünüşü */
+@media (max-width: 640px) {
+  .cart-product-row {
+    padding: 12px !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .cart-product-main {
+    width: 100% !important;
+    align-items: flex-start !important;
+  }
+
+  .cart-img-wrap {
+    width: 94px !important;
+    height: 82px !important;
+    flex-basis: 94px !important;
+  }
+
+  .cart-product-info > b {
+    font-size: 17px !important;
+  }
+
+  .cart-price-line {
+    font-size: 14px !important;
+  }
+
+  .cart-new-price {
+    font-size: 16px !important;
+  }
+
+  .cart-desc {
+    font-size: 13px !important;
+  }
+
+  .cart-row-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .cart-line-total {
+    font-size: 20px !important;
+  }
+}
