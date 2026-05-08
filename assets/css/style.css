@@ -5950,7 +5950,7 @@ select option {
 .discount-flag {
   position: absolute !important;
   top: -1px !important;
-  right: 32px !important;    /* bayraq daha sağa gedəcək.*/
+  right: 28px !important;    /* bayraq daha sağa gedəcək.*/
   width: 52px !important;    /* bayraq daha sola gələcək. */
   min-width: 52px !important;
   height: 62px !important;
@@ -5972,11 +5972,11 @@ select option {
 }
 
 .discount-flag b {
-  font-size: 14px !important;
+  font-size: 18px !important;   /* Endirim Fazinin rəqəmin böyüdür .*/
 }
 
 .discount-flag span {
-  font-size: 6px !important;
+  font-size: 8px !important;   /* Endirim Fazinin ENDİRİM sözünü böyüdür .*/
 }
 
 /* Endirimli kartlarda qiymət köhnə qiymətə görə aşağı başlasın */
@@ -6009,21 +6009,42 @@ select option {
   }
 
   .discount-flag {
-    right: 24px !important;   /* bayraq daha sağa gedəcək.*/
+    right: 16px !important;   /* bayraq daha sağa gedəcək.*/
     width: 48px !important;   /* bayraq daha sola gələcək. */
     min-width: 48px !important;
     height: 58px !important;
   }
 
   .discount-flag b {
-    font-size: 13px !important;
+    font-size: 16px !important;   /* Endirim Fazinin rəqəmin böyüdür .*/
   }
 
   .discount-flag span {
-    font-size: 5.5px !important;
+    font-size: 7.5px !important;   /* Endirim Fazinin ENDİRİM sözünü böyüdür .*/
   }
 
   .discount-product-card .price {
     margin-top: 13px !important;
+  }
+}
+
+/* Telefonda qiymət və AZN yan-yana qalsın */
+@media (max-width: 640px) {
+  .price {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    letter-spacing: -0.07em !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+  }
+
+  .discount-product-card .price {
+    margin-top: 13px !important;
+  }
+
+  .price-panel {
+    padding-right: 76px !important;
   }
 }
