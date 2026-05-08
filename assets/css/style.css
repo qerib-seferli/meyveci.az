@@ -4717,8 +4717,9 @@ select option {
   width: 100% !important;
   height: 100% !important;
   max-height: 190px !important;
-  object-fit: contain !important;
-  padding: 28px 8px 32px !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  padding: 0 !important;
   filter: drop-shadow(0 12px 16px rgba(15, 122, 55, 0.14)) !important;
 }
 
@@ -5066,14 +5067,15 @@ select option {
   background: linear-gradient(135deg, #eaffef, #ffffff) !important;
 }
 
-.product-detail-pro .product-detail-image img {
-  width: 100% !important;
-  height: 100% !important;
-  max-height: 430px !important;
-  object-fit: contain !important;
-  padding: 58px 18px 62px !important;
-  filter: drop-shadow(0 18px 26px rgba(15,122,55,0.16)) !important;
-}
+   .product-detail-pro .product-detail-image img {
+     width: 100% !important;
+     height: 100% !important;
+     max-height: 430px !important;
+     object-fit: cover !important;
+     object-position: center center !important;
+     padding: 0 !important;
+     filter: drop-shadow(0 18px 26px rgba(15,122,55,0.16)) !important;
+   }
 
 .detail-rating {
   top: 18px !important;
@@ -5314,11 +5316,13 @@ select option {
     border-radius: 19px !important;
   }
 
-  .product-card .pic img {
-    max-height: 165px !important;
-    padding: 24px 4px 28px !important;
-    transform: scale(1.12) !important;
-  }
+   .product-card .pic img {
+     max-height: 165px !important;
+     object-fit: cover !important;
+     object-position: center center !important;
+     padding: 0 !important;
+     transform: none !important;
+   }
 
   .rating-pill {
     height: 28px !important;
@@ -5531,11 +5535,12 @@ select option {
     max-height: 150px !important;
   }
 
-  .product-card .pic img {
-    max-height: 150px !important;
-    padding: 22px 4px 26px !important;
-  }
-
+   .product-card .pic img {
+     max-height: 150px !important;
+     object-fit: cover !important;
+     object-position: center center !important;
+     padding: 0 !important;
+   }
   .fresh-badge {
     max-width: 88px !important;
     font-size: 6px !important;
