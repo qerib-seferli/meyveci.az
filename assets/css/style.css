@@ -5594,14 +5594,14 @@ select option {
 /* ============================================================
    MOBİL ŞƏKİL KƏSİLMƏSİ FIX
    Desktop cover qalır, telefonda məhsul tam görünsün.
-   ============================================================ 
+   ============================================================*/ 
 
 @media (max-width: 640px) {
   .product-card .pic img {
     object-fit: contain !important;
     object-position: center center !important;
     padding: 18px 6px 34px !important;
-    transform: scale(1.18) !important;
+    transform: scale(1.08) !important;
   }
 
   .discount-product-card .pic img {
@@ -5629,7 +5629,7 @@ select option {
   .product-detail-pro .product-detail-image img {
     transform: scale(1.06) !important;
   }
-}*/
+}
 
 
 /*=================================================================================================================================================================*/
