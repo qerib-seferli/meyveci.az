@@ -6009,8 +6009,8 @@ select option {
   }
 
   .discount-flag {
-    right: 40px !important;
-    width: 48px !important;
+    right: 36px !important;   /* bayraq daha sağa gedəcək.*/
+    width: 48px !important;   /* bayraq daha sola gələcək. */
     min-width: 48px !important;
     height: 58px !important;
   }
