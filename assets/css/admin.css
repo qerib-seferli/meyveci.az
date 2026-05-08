@@ -1540,3 +1540,343 @@ th {
     flex-direction: column;
   }
 }
+
+/* ============================================================
+   MEYVƏÇİ.AZ - ENDİRİM KARTLARI ADMIN + PRINT
+   ============================================================ */
+
+.discount-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.discount-card-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.discount-card-admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.discount-origin-select {
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,197,94,.22);
+  background: rgba(236,253,245,.9);
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 10px;
+}
+
+.meyveci-discount-card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.42 / 1;
+  border-radius: 24px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.35), transparent 26%),
+    linear-gradient(135deg, #fff200 0%, #ffe600 45%, #ffd400 100%);
+  border: 4px solid rgba(255,255,255,.86);
+  box-shadow: 0 18px 40px rgba(15,23,42,.22);
+  color: #050505;
+}
+
+.discount-card-bg-pattern {
+  position: absolute;
+  right: -20px;
+  bottom: -25px;
+  width: 58%;
+  height: 42%;
+  opacity: .16;
+  background:
+    radial-gradient(circle, #047857 1.5px, transparent 2px);
+  background-size: 18px 18px;
+  pointer-events: none;
+}
+
+.discount-card-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.discount-card-top h3 {
+  margin: 0;
+  color: #d80a68;
+  font-size: clamp(38px, 4.4vw, 76px);
+  line-height: .86;
+  letter-spacing: -3px;
+  font-weight: 1000;
+}
+
+.discount-leaf-badge {
+  width: 104px;
+  height: 104px;
+  border-radius: 50% 50% 48% 48%;
+  background: linear-gradient(135deg,#18a336,#04731e);
+  border: 5px solid #fff;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+}
+
+.discount-leaf-badge strong {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.discount-leaf-badge span {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.discount-card-body {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.discount-left h4 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 1000;
+}
+
+.discount-left p {
+  margin: 6px 0 22px;
+  font-size: 22px;
+}
+
+.discount-left ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.discount-left li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.discount-right {
+  text-align: right;
+}
+
+.old-price {
+  display: inline-block;
+  position: relative;
+  font-size: 31px;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.old-price::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -8px;
+  top: 50%;
+  height: 4px;
+  border-radius: 999px;
+  background: #d80a68;
+  transform: rotate(-2deg);
+}
+
+.new-price {
+  font-size: 92px;
+  line-height: .88;
+  font-weight: 1000;
+  letter-spacing: -5px;
+}
+
+.new-price small {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.meyveci-price-text {
+  display: inline-block;
+  margin-top: 4px;
+  color: #07852e;
+  font-family: cursive;
+  font-size: 28px;
+  font-weight: 900;
+  font-style: italic;
+  border-bottom: 4px double #07852e;
+}
+
+.discount-card-bottom {
+  position: absolute;
+  z-index: 3;
+  left: 22px;
+  right: 0;
+  bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+}
+
+.discount-logo-box img {
+  width: 220px;
+  max-width: 100%;
+  display: block;
+}
+
+.discount-card-label {
+  min-width: 190px;
+  border-radius: 24px 0 0 24px;
+  padding: 14px 18px;
+  background: #d80a68;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 1000;
+}
+
+.discount-card-label span {
+  font-size: 28px;
+}
+
+@media (max-width: 1200px) {
+  .discount-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .discount-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meyveci-discount-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .discount-card-top h3 {
+    font-size: 44px;
+  }
+
+  .discount-leaf-badge {
+    width: 82px;
+    height: 82px;
+  }
+
+  .discount-leaf-badge strong {
+    font-size: 25px;
+  }
+
+  .discount-left h4 {
+    font-size: 23px;
+  }
+
+  .new-price {
+    font-size: 66px;
+  }
+
+  .discount-logo-box img {
+    width: 170px;
+  }
+}
+
+/* Çap görünüşü */
+.discount-print-body {
+  margin: 0;
+  background: #fff;
+}
+
+.discount-print-body.single {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.discount-print-body.single .meyveci-discount-card {
+  width: 270mm;
+  max-width: calc(100vw - 40px);
+}
+
+.discount-print-sheet {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8mm;
+  padding: 8mm;
+}
+
+.discount-print-sheet .meyveci-discount-card {
+  width: 100%;
+  box-shadow: none;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .discount-print-body *,
+  .discount-print-sheet *,
+  .meyveci-discount-card,
+  .meyveci-discount-card * {
+    visibility: visible;
+  }
+
+  .discount-card-admin-actions,
+  .sidebar,
+  .admin-sidebar,
+  .admin-hero,
+  .tabs,
+  .section-head,
+  .admin-table-toolbar {
+    display: none !important;
+  }
+
+  .discount-print-body {
+    background: #fff !important;
+  }
+
+  .discount-print-sheet {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8mm !important;
+    padding: 8mm !important;
+  }
+
+  .meyveci-discount-card {
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 6mm;
+  }
+}
