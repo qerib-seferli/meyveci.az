@@ -5950,7 +5950,7 @@ select option {
 .discount-flag {
   position: absolute !important;
   top: -1px !important;
-  right: 36px !important;    /* bayraq daha sağa gedəcək.*/
+  right: 32px !important;    /* bayraq daha sağa gedəcək.*/
   width: 52px !important;    /* bayraq daha sola gələcək. */
   min-width: 52px !important;
   height: 62px !important;
@@ -6009,7 +6009,7 @@ select option {
   }
 
   .discount-flag {
-    right: 28px !important;   /* bayraq daha sağa gedəcək.*/
+    right: 24px !important;   /* bayraq daha sağa gedəcək.*/
     width: 48px !important;   /* bayraq daha sola gələcək. */
     min-width: 48px !important;
     height: 58px !important;
