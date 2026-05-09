@@ -258,7 +258,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.font = '1000 54px Inter, Arial, sans-serif';
 
   const nameX = 140; // sola çəkmək üçün azalt, sağa üçün artır
-  const nameY = 390; // yuxarı üçün azalt, aşağı üçün artır
+  const nameY = 380; // yuxarı üçün azalt, aşağı üçün artır
   const nameMaxWidth = 390;
   const nameLineHeight = 58;
 
@@ -271,7 +271,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.font = '500 40px Inter, Arial, sans-serif';
 
   const unitX = 140; // sola çəkmək üçün azalt
-  const unitY = 500; // yuxarı üçün azalt
+  const unitY = 510; // yuxarı üçün azalt
 
   ctx.fillText(unit, unitX, unitY);
 
@@ -284,8 +284,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '1000 25px Inter, Arial, sans-serif';
 
-  const featureX = 200; // sağa aparmaq üçün artır, sola üçün azalt
-  const featureY = 540; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
+  const featureX = 190; // sağa aparmaq üçün artır, sola üçün azalt
+  const featureY = 550; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
   const featureGap = 52; // sətirlər arası məsafə
 
   ctx.fillText('TƏBİİ VƏ TƏZƏ', featureX, featureY);
@@ -313,7 +313,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.lineWidth = 8;
   ctx.beginPath();
 
-  ctx.moveTo(905, 490);  // xəttin sol başlanğıcı
+  ctx.moveTo(925, 490);  // xəttin sol başlanğıcı
   ctx.lineTo(1280, 470); // xəttin sağ sonu
 
   ctx.stroke();
