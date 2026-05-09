@@ -277,10 +277,10 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // 5) ÖLÇÜ VAHİDİ - kq, ədəd və s.
   // unitX/unitY: ölçü vahidinin yeri
   // ============================================================
-  ctx.font = '500 40px Inter, Arial, sans-serif';
+  ctx.font = '500 32px Inter, Arial, sans-serif';
 
   const unitX = 140; // sola çəkmək üçün azalt
-  const unitY = 490; // yuxarı üçün azalt
+  const unitY = 510; // yuxarı üçün azalt
 
   ctx.fillText(unit, unitX, unitY);
 
