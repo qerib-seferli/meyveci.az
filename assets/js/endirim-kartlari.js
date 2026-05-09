@@ -451,14 +451,14 @@ export async function printAllDiscountCards() {
 
         .sheet {
           display: grid;
-          grid-template-columns: repeat(2, 96mm);
-          gap: 7mm;
+          grid-template-columns: repeat(2, 99mm);
+          gap: 3mm;
           justify-content: center;
           align-content: start;
         }
 
         img {
-          width: 96mm;
+          width: 99mm;
           height: auto;
           display: block;
           break-inside: avoid;
@@ -523,14 +523,14 @@ const selectedIds = [...selectedDiscountCardIds];
 
         .sheet {
           display: grid;
-          grid-template-columns: repeat(2, 96mm);
-          gap: 7mm;
+          grid-template-columns: repeat(2, 99mm);
+          gap: 3mm;
           justify-content: center;
           align-content: start;
         }
 
         img {
-          width: 96mm;
+          width: 99mm;
           height: auto;
           display: block;
           break-inside: avoid;
