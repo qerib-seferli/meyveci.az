@@ -1542,13 +1542,14 @@ th {
 }
 
 /* ============================================================
-   MEYVƏÇİ.AZ - ENDİRİM KARTLARI ADMIN + PRINT
+   MEYVƏÇİ.AZ - PRO ENDİRİM KARTI FINAL
+   Kart görünüşü referans şəklə uyğun sabit dizayn kimi qurulub.
    ============================================================ */
 
 .discount-cards-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 22px;
   align-items: start;
 }
 
@@ -1565,137 +1566,183 @@ th {
 }
 
 .discount-origin-select {
-  min-height: 34px;
+  min-height: 36px;
+  width: 100%;
   border-radius: 999px;
-  border: 1px solid rgba(34,197,94,.22);
-  background: rgba(236,253,245,.9);
+  border: 1px solid rgba(34,197,94,.25);
+  background: rgba(236,253,245,.92);
   color: #047857;
   font-size: 12px;
-  font-weight: 900;
-  padding: 0 10px;
+  font-weight: 950;
+  padding: 0 13px;
 }
 
+/* Kartın əsas forması */
 .meyveci-discount-card {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 1.42 / 1;
-  border-radius: 24px;
-  padding: 22px;
+  width: 100%;
+  aspect-ratio: 1.55 / 1;
+  border-radius: 26px;
   background:
-    radial-gradient(circle at 35% 25%, rgba(255,255,255,.35), transparent 26%),
-    linear-gradient(135deg, #fff200 0%, #ffe600 45%, #ffd400 100%);
-  border: 4px solid rgba(255,255,255,.86);
-  box-shadow: 0 18px 40px rgba(15,23,42,.22);
+    radial-gradient(circle at 32% 20%, rgba(255,255,255,.45), transparent 28%),
+    linear-gradient(135deg, #fff600 0%, #ffe900 42%, #ffd900 100%);
+  border: 4px solid rgba(255,255,255,.92);
+  box-shadow:
+    0 18px 42px rgba(15,23,42,.22),
+    inset 0 0 0 1px rgba(255,255,255,.55);
   color: #050505;
+  font-family: Inter, Arial, sans-serif;
 }
 
-.discount-card-bg-pattern {
+/* ENDİRİM başlığı */
+.dc-title {
   position: absolute;
-  right: -20px;
-  bottom: -25px;
-  width: 58%;
-  height: 42%;
-  opacity: .16;
-  background:
-    radial-gradient(circle, #047857 1.5px, transparent 2px);
-  background-size: 18px 18px;
-  pointer-events: none;
-}
-
-.discount-card-top {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.discount-card-top h3 {
-  margin: 0;
+  left: 5.6%;
+  top: 8.2%;
   color: #d80a68;
-  font-size: clamp(38px, 4.4vw, 76px);
-  line-height: .86;
+  font-size: clamp(36px, 4.7vw, 74px);
+  line-height: .82;
   letter-spacing: -3px;
   font-weight: 1000;
 }
 
-.discount-leaf-badge {
-  width: 104px;
-  height: 104px;
-  border-radius: 50% 50% 48% 48%;
-  background: linear-gradient(135deg,#18a336,#04731e);
-  border: 5px solid #fff;
+/* Yaşıl endirim yarpağı */
+.dc-badge {
+  position: absolute;
+  right: 6.1%;
+  top: 7.1%;
+  width: 15.3%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #19a83b, #04751f);
   color: #fff;
+  border: 5px solid #fff;
+  box-shadow: 0 10px 20px rgba(0,0,0,.22);
   display: grid;
   place-items: center;
   align-content: center;
-  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+  z-index: 3;
 }
 
-.discount-leaf-badge strong {
-  font-size: 32px;
-  line-height: 1;
+.dc-badge::after {
+  content: "";
+  position: absolute;
+  right: -34%;
+  top: -24%;
+  width: 58%;
+  height: 58%;
+  background: linear-gradient(135deg, #21a337, #05711f);
+  border: 4px solid #fff;
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 90% 0 90%;
+  transform: rotate(8deg);
+  z-index: -1;
 }
 
-.discount-leaf-badge span {
-  font-size: 13px;
-  font-weight: 950;
-}
-
-.discount-card-body {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: .9fr 1.1fr;
-  gap: 10px;
-  margin-top: 22px;
-}
-
-.discount-left h4 {
-  margin: 0;
-  font-size: 30px;
-  line-height: 1;
+.dc-badge strong {
+  font-size: clamp(19px, 2.3vw, 42px);
+  line-height: .9;
   font-weight: 1000;
 }
 
-.discount-left p {
-  margin: 6px 0 22px;
-  font-size: 22px;
+.dc-badge span {
+  font-size: clamp(8px, .9vw, 15px);
+  font-weight: 1000;
 }
 
-.discount-left ul {
-  list-style: none;
-  padding: 0;
+/* Məhsul adı və sol məlumatlar */
+.dc-product {
+  position: absolute;
+  left: 6.1%;
+  top: 39%;
+  width: 38%;
+  z-index: 3;
+}
+
+.dc-product h4 {
   margin: 0;
-  display: grid;
-  gap: 9px;
-  font-size: 14px;
-  font-weight: 900;
+  font-size: clamp(20px, 2.35vw, 42px);
+  line-height: .98;
+  font-weight: 1000;
+  letter-spacing: -1px;
+  max-height: 2.05em;
+  overflow: hidden;
 }
 
-.discount-left li {
+.dc-product p {
+  margin: 5px 0 20px;
+  font-size: clamp(16px, 1.8vw, 32px);
+  line-height: 1;
+}
+
+.dc-product ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: clamp(10px, 1.02vw, 18px);
+  font-weight: 950;
+}
+
+.dc-product li {
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
-.discount-right {
+.dc-i {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.dc-i.green {
+  color: #059669;
+}
+
+.dc-i.pink {
+  color: #d80a68;
+}
+
+.dc-i.shield {
+  border-radius: 4px;
+  color: #fff;
+  background: #0aa33a;
+  font-weight: 1000;
+}
+
+/* Qiymət bloku */
+.dc-price {
+  position: absolute;
+  right: 6.7%;
+  top: 36.5%;
+  width: 42%;
   text-align: right;
+  z-index: 3;
 }
 
-.old-price {
+.dc-old-price {
   display: inline-block;
   position: relative;
-  font-size: 31px;
+  color: #000;
+  font-size: clamp(24px, 3.15vw, 54px);
   line-height: 1;
-  margin-bottom: 3px;
+  font-weight: 500;
+  opacity: .98;
 }
 
-.old-price::after {
+.dc-old-price::after {
   content: "";
   position: absolute;
-  left: -4px;
-  right: -8px;
+  left: -5%;
+  right: -6%;
   top: 50%;
   height: 4px;
   border-radius: 999px;
@@ -1703,108 +1750,115 @@ th {
   transform: rotate(-2deg);
 }
 
-.new-price {
-  font-size: 92px;
-  line-height: .88;
+.dc-new-price {
+  margin-top: 8px;
+  color: #000;
+  font-size: clamp(58px, 8.2vw, 138px);
+  line-height: .78;
   font-weight: 1000;
-  letter-spacing: -5px;
+  letter-spacing: -6px;
 }
 
-.new-price small {
-  font-size: 36px;
-  font-weight: 900;
+.dc-new-price small {
+  font-size: clamp(24px, 3vw, 52px);
   letter-spacing: 0;
+  font-weight: 950;
 }
 
-.meyveci-price-text {
+/* meyvəçi qiyməti yazısı */
+.dc-meyveci-price {
   display: inline-block;
-  margin-top: 4px;
+  margin-top: 10px;
   color: #07852e;
-  font-family: cursive;
-  font-size: 28px;
+  font-family: "Brush Script MT", "Segoe Script", cursive;
+  font-size: clamp(20px, 2.45vw, 44px);
+  line-height: 1;
   font-weight: 900;
   font-style: italic;
-  border-bottom: 4px double #07852e;
+  border-bottom: 5px double #07852e;
+  padding: 0 10px 5px 10px;
+  transform: rotate(-1.5deg);
 }
 
-.discount-card-bottom {
+/* Logo */
+.dc-logo {
   position: absolute;
-  z-index: 3;
-  left: 22px;
-  right: 0;
-  bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: 12px;
+  left: 5.7%;
+  bottom: 6.9%;
+  width: 34%;
+  z-index: 4;
 }
 
-.discount-logo-box img {
-  width: 220px;
-  max-width: 100%;
+.dc-logo img {
+  width: 100%;
   display: block;
 }
 
-.discount-card-label {
-  min-width: 190px;
-  border-radius: 24px 0 0 24px;
-  padding: 14px 18px;
+/* Alt meyvə naxış effekti */
+.dc-pattern {
+  position: absolute;
+  right: -2%;
+  bottom: -3%;
+  width: 58%;
+  height: 35%;
+  opacity: .16;
+  background:
+    radial-gradient(circle, #047857 1.6px, transparent 2px);
+  background-size: 17px 17px;
+  z-index: 1;
+}
+
+/* Sağ altdakı endirim kartı ilə bloku */
+.dc-card-label {
+  position: absolute;
+  right: 0;
+  bottom: 8.1%;
+  min-width: 24%;
+  height: 16.5%;
+  border-radius: 28px 0 0 28px;
   background: #d80a68;
   color: #fff;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 18px;
+  justify-content: center;
+  gap: 13px;
+  padding: 0 22px;
+  z-index: 5;
+  box-shadow: 0 10px 24px rgba(216,10,104,.25);
+}
+
+.dc-card-label span {
+  font-size: clamp(20px, 2.3vw, 38px);
+}
+
+.dc-card-label b {
+  font-size: clamp(12px, 1.45vw, 25px);
+  line-height: 1.12;
   font-weight: 1000;
 }
 
-.discount-card-label span {
-  font-size: 28px;
-}
-
-@media (max-width: 1200px) {
+/* Admin görünüşündə 3 kart */
+@media (max-width: 1350px) {
   .discount-cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   .discount-cards-grid {
     grid-template-columns: 1fr;
   }
 
   .meyveci-discount-card {
-    padding: 16px;
-    border-radius: 20px;
-  }
-
-  .discount-card-top h3 {
-    font-size: 44px;
-  }
-
-  .discount-leaf-badge {
-    width: 82px;
-    height: 82px;
-  }
-
-  .discount-leaf-badge strong {
-    font-size: 25px;
-  }
-
-  .discount-left h4 {
-    font-size: 23px;
-  }
-
-  .new-price {
-    font-size: 66px;
-  }
-
-  .discount-logo-box img {
-    width: 170px;
+    border-radius: 22px;
   }
 }
 
-/* Çap görünüşü */
+/* ============================================================
+   PRINT / PDF
+   A4-də 2 sütun 3 sıra üçün sabit ölçü
+   ============================================================ */
+
 .discount-print-body {
   margin: 0;
   background: #fff;
@@ -1814,19 +1868,20 @@ th {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 18px;
+  padding: 10mm;
 }
 
 .discount-print-body.single .meyveci-discount-card {
-  width: 270mm;
-  max-width: calc(100vw - 40px);
+  width: 260mm;
+  max-width: 100%;
+  box-shadow: none;
 }
 
 .discount-print-sheet {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8mm;
-  padding: 8mm;
+  gap: 7mm;
+  padding: 7mm;
 }
 
 .discount-print-sheet .meyveci-discount-card {
@@ -1837,15 +1892,40 @@ th {
 }
 
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    size: A4 portrait;
+    margin: 6mm;
   }
 
-  .discount-print-body *,
-  .discount-print-sheet *,
-  .meyveci-discount-card,
-  .meyveci-discount-card * {
-    visibility: visible;
+  html,
+  body {
+    width: 210mm;
+    background: #fff !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .discount-print-sheet {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6mm !important;
+    padding: 0 !important;
+  }
+
+  .discount-print-sheet .meyveci-discount-card {
+    width: 96mm !important;
+    height: 62mm !important;
+    aspect-ratio: auto !important;
+    border-radius: 8mm !important;
+    border-width: 1.5mm !important;
+  }
+
+  .discount-print-body.single .meyveci-discount-card {
+    width: 180mm !important;
+    height: 116mm !important;
+    aspect-ratio: auto !important;
   }
 
   .discount-card-admin-actions,
@@ -1856,27 +1936,5 @@ th {
   .section-head,
   .admin-table-toolbar {
     display: none !important;
-  }
-
-  .discount-print-body {
-    background: #fff !important;
-  }
-
-  .discount-print-sheet {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8mm !important;
-    padding: 8mm !important;
-  }
-
-  .meyveci-discount-card {
-    box-shadow: none !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  @page {
-    size: A4 portrait;
-    margin: 6mm;
   }
 }
