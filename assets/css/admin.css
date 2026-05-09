@@ -1542,8 +1542,7 @@ th {
 }
 
 /* ============================================================
-   MEYVƏÇİ.AZ - ENDİRİM KARTI PNG ŞABLON İLƏ FINAL
-   Şablon: assets/img/fotolar/Endirim-karti.png
+   MEYVƏÇİ.AZ - ENDİRİM KARTI PNG ŞABLON FINAL FIX
    ============================================================ */
 
 .discount-cards-grid {
@@ -1556,81 +1555,83 @@ th {
 .discount-card-wrap {
   display: grid;
   gap: 10px;
+  padding: 14px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 14px 34px rgba(15,122,55,.08);
 }
 
 .discount-card-admin-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
-  flex-wrap: wrap;
   align-items: center;
 }
 
 .discount-origin-select {
-  min-height: 36px;
-  width: 100%;
+  min-height: 38px;
   border-radius: 999px;
   border: 1px solid rgba(34,197,94,.25);
-  background: rgba(236,253,245,.92);
+  background: rgba(236,253,245,.96);
   color: #047857;
   font-size: 12px;
   font-weight: 950;
   padding: 0 13px;
 }
 
-/* Hazır PNG kart şablonu */
 .meyveci-discount-card {
   position: relative;
   overflow: hidden;
   width: 100%;
   aspect-ratio: 1.45 / 1;
-  border-radius: 26px;
+  border-radius: 22px;
   background-image: url("../img/fotolar/Endirim-karti.png");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 18px 42px rgba(15,23,42,.24);
+  box-shadow: 0 16px 34px rgba(15,23,42,.18);
   font-family: Inter, Arial, sans-serif;
   color: #050505;
 }
 
-/* Məhsul şəkli — yazıların arxasında solğun görünür */
+/* Məhsul şəkli */
 .dc-product-watermark {
   position: absolute;
-  left: 34%;
+  left: 29%;
   top: 24%;
   width: 30%;
-  height: 48%;
+  height: 38%;
   object-fit: contain;
-  opacity: .16;
-  filter: saturate(1.15) contrast(1.05);
+  opacity: .34;
+  filter: saturate(1.2) contrast(1.08);
   z-index: 1;
   pointer-events: none;
 }
 
-/* Yaşıl endirim dairəsinin üstündə faiz */
+/* Endirim faizi */
 .dc-percent {
   position: absolute;
-  right: 9.2%;
-  top: 15.3%;
-  width: 12.5%;
-  aspect-ratio: 1 / 1;
+  right: 8.7%;
+  top: 14.4%;
+  width: 13.5%;
+  height: 13.5%;
   display: grid;
   place-items: center;
   align-content: center;
   color: #fff;
   text-align: center;
-  z-index: 3;
+  z-index: 4;
 }
 
 .dc-percent strong {
-  font-size: clamp(18px, 2.15vw, 39px);
-  line-height: .9;
+  font-size: clamp(15px, 2vw, 36px);
+  line-height: .85;
   font-weight: 1000;
 }
 
 .dc-percent span {
-  margin-top: 3px;
-  font-size: clamp(7px, .8vw, 14px);
+  margin-top: 2px;
+  font-size: clamp(6px, .72vw, 12px);
   font-weight: 1000;
 }
 
@@ -1638,56 +1639,56 @@ th {
 .dc-product-info {
   position: absolute;
   left: 6.2%;
-  top: 37.5%;
-  width: 39%;
-  z-index: 4;
+  top: 36.4%;
+  width: 34%;
+  z-index: 5;
 }
 
 .dc-product-info h4 {
   margin: 0;
-  font-size: clamp(20px, 2.25vw, 41px);
-  line-height: .98;
+  font-size: clamp(15px, 1.75vw, 30px);
+  line-height: 1.02;
   font-weight: 1000;
-  letter-spacing: -1px;
-  max-height: 2em;
+  letter-spacing: -.6px;
+  max-height: 2.1em;
   overflow: hidden;
 }
 
 .dc-product-info p {
-  margin: 6px 0 20px;
-  font-size: clamp(15px, 1.75vw, 30px);
+  margin: 4px 0 15px;
+  font-size: clamp(11px, 1.25vw, 22px);
   line-height: 1;
 }
 
 .dc-product-info ul {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 39px;
+  padding: 0 0 0 32px;
   display: grid;
-  gap: 8px;
-  font-size: clamp(9px, .98vw, 17px);
-  font-weight: 950;
+  gap: 7px;
+  font-size: clamp(7px, .78vw, 13px);
+  line-height: 1;
+  font-weight: 1000;
 }
 
 .dc-product-info li {
   white-space: nowrap;
 }
 
-/* Sağ qiymət bloku */
+/* Sağ qiymət */
 .dc-price-box {
   position: absolute;
-  right: 6.7%;
-  top: 36.7%;
-  width: 42%;
+  right: 7.4%;
+  top: 37.4%;
+  width: 39%;
   text-align: right;
-  z-index: 4;
+  z-index: 5;
 }
 
 .dc-old-price {
   display: inline-block;
   position: relative;
-  color: #000;
-  font-size: clamp(23px, 3vw, 52px);
+  font-size: clamp(15px, 2.3vw, 40px);
   line-height: 1;
   font-weight: 500;
 }
@@ -1695,31 +1696,30 @@ th {
 .dc-old-price::after {
   content: "";
   position: absolute;
-  left: -6%;
-  right: -7%;
+  left: -5%;
+  right: -6%;
   top: 50%;
-  height: 4px;
+  height: 3px;
   border-radius: 999px;
   background: #d80a68;
   transform: rotate(-2deg);
 }
 
 .dc-new-price {
-  margin-top: 9px;
-  color: #000;
-  font-size: clamp(58px, 8vw, 136px);
-  line-height: .78;
+  margin-top: 7px;
+  font-size: clamp(38px, 6.1vw, 104px);
+  line-height: .76;
   font-weight: 1000;
-  letter-spacing: -6px;
+  letter-spacing: -4px;
 }
 
 .dc-new-price small {
-  font-size: clamp(24px, 3vw, 52px);
+  font-size: clamp(16px, 2.3vw, 38px);
   letter-spacing: 0;
   font-weight: 950;
 }
 
-/* Admin grid responsive */
+/* Admin görünüş */
 @media (max-width: 1350px) {
   .discount-cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1732,7 +1732,7 @@ th {
   }
 }
 
-/* Çap / PDF */
+/* Çap */
 .discount-print-body {
   margin: 0;
   background: #fff;
@@ -1742,7 +1742,7 @@ th {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 10mm;
+  padding: 8mm;
 }
 
 .discount-print-body.single .meyveci-discount-card {
@@ -1754,9 +1754,12 @@ th {
 
 .discount-print-sheet {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6mm;
-  padding: 6mm;
+  grid-template-columns: repeat(2, 96mm);
+  grid-auto-rows: 66mm;
+  gap: 7mm;
+  justify-content: center;
+  align-content: start;
+  padding: 7mm;
 }
 
 .discount-print-sheet .meyveci-discount-card {
@@ -1774,26 +1777,24 @@ th {
     margin: 6mm;
   }
 
+  html,
   body {
+    width: 210mm;
     background: #fff !important;
+  }
+
+  body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  .discount-card-admin-actions,
-  .sidebar,
-  .admin-sidebar,
-  .admin-hero,
-  .tabs,
-  .section-head,
-  .admin-table-toolbar {
-    display: none !important;
-  }
-
   .discount-print-sheet {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6mm !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 96mm) !important;
+    grid-auto-rows: 66mm !important;
+    gap: 7mm !important;
     padding: 0 !important;
+    justify-content: center !important;
   }
 
   .discount-print-sheet .meyveci-discount-card {
