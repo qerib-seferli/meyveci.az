@@ -53,13 +53,20 @@ function discountOriginSelect(productId) {
 function renderDiscountCard(product) {
   return `
     <div class="discount-card-wrap" data-id="${product.id}">
-      <div class="discount-card-admin-actions">
-        ${discountOriginSelect(product.id)}
-        <button type="button" class="btn btn-primary btn-mini print-discount-card" data-id="${product.id}">
-          🖨️ Çap
-        </button>
-      </div>
-
+    
+   <div class="discount-card-admin-actions">
+    <label class="discount-select-card">
+      <input type="checkbox" class="discount-card-check" data-id="${product.id}">
+      <span>Seç</span>
+    </label>
+  
+    ${discountOriginSelect(product.id)}
+  
+    <button type="button" class="btn btn-primary btn-mini print-discount-card" data-id="${product.id}">
+      🖨️ Çap
+    </button>
+  </div>
+    
       <div class="discount-canvas-box">
         <canvas
           class="discount-card-canvas"
@@ -467,3 +474,74 @@ export async function printAllDiscountCards() {
 // Admin.js bu funksiyaları görə bilsin deyə window-a bağlayırıq
 window.loadDiscountCards = loadDiscountCards;
 window.printAllDiscountCards = printAllDiscountCards;
+
+
+export async function printSelectedDiscountCards() {
+  await drawAllDiscountCanvases();
+
+  const selectedIds = [...document.querySelectorAll('.discount-card-check:checked')]
+    .map((input) => input.dataset.id);
+
+  if (!selectedIds.length) {
+    toast('Çap üçün heç bir endirim kartı seçilməyib');
+    return;
+  }
+
+  const canvases = selectedIds
+    .map((id) => document.querySelector(`#discount-card-${CSS.escape(id)}`))
+    .filter(Boolean);
+
+  const images = canvases.map((canvas) => canvas.toDataURL('image/png'));
+
+  const win = window.open('', '_blank');
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="az">
+    <head>
+      <meta charset="UTF-8">
+      <title>Seçilmiş endirim kartları</title>
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 7mm;
+        }
+
+        body {
+          margin: 0;
+          background: #fff;
+        }
+
+        .sheet {
+          display: grid;
+          grid-template-columns: repeat(2, 96mm);
+          gap: 7mm;
+          justify-content: center;
+          align-content: start;
+        }
+
+        img {
+          width: 96mm;
+          height: auto;
+          display: block;
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="sheet">
+        ${images.map((src) => `<img src="${src}" alt="Endirim kartı">`).join('')}
+      </div>
+
+      <script>
+        window.onload = () => window.print();
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+}
+
+window.printSelectedDiscountCards = printSelectedDiscountCards;
