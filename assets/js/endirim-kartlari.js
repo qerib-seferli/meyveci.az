@@ -262,7 +262,16 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   const nameMaxWidth = 390;
   const nameLineHeight = 58;
 
-  wrapText(ctx, product.name, nameX, nameY, nameMaxWidth, nameLineHeight, 2);
+  drawTextFit(
+    ctx,
+    product.name,
+    nameX,
+    nameY,
+    420, // maksimum en
+    54,  // başlanğıc font
+    28,  // minimum font
+    '1000'
+  );
 
   // ============================================================
   // 5) ÖLÇÜ VAHİDİ - kq, ədəd və s.
@@ -313,7 +322,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.lineWidth = 8;
   ctx.beginPath();
 
-  ctx.moveTo(925, 490);  // xəttin sol başlanğıcı
+  ctx.moveTo(965, 490);  // xəttin sol başlanğıcı
   ctx.lineTo(1280, 470); // xəttin sağ sonu
 
   ctx.stroke();
