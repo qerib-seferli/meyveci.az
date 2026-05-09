@@ -238,7 +238,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
 
-  const percentX = 1120; // sola çəkmək üçün azalt, sağa üçün artır
+  const percentX = 1130; // sola çəkmək üçün azalt, sağa üçün artır
   const percentY = 245;  // yuxarı üçün azalt, aşağı üçün artır
 
   drawTextFit(ctx, `-${percent}%`, percentX, percentY, 150, 56, 34, '1000');
@@ -337,7 +337,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '1000 62px Inter, Arial, sans-serif';
 
-  const manatX = 1325; // sola üçün azalt, sağa üçün artır
+  const manatX = 1290; // sola üçün azalt, sağa üçün artır
   const manatY = 650;  // yuxarı üçün azalt, aşağı üçün artır
 
   ctx.fillText('₼', manatX, manatY);
