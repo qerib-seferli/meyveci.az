@@ -1586,20 +1586,22 @@ const distributionProducts = preparationRowsCache.map((row) => ({
   total_quantity: Number(row.total_quantity || 0),
 }));
 
-const distributionStartCol = 7; // G sütunu
-const distributionTitleRow = 2;
-const distributionDateRow = 4;
-const distributionHeaderRow = 6;
-const distributionProductHeaderRow = 7;
-const distributionFirstCustomerRow = 8;
+const orderSheetNameMap = new Map();
 
-const productStartCol = distributionStartCol + 2; // I sütunu
+const distributionStartCol = 7; // G sütunu
+const distributionTitleRow = 1;
+const distributionDateRow = 3;
+const distributionHeaderRow = 5;
+const distributionProductHeaderRow = 6;
+const distributionFirstCustomerRow = 7;
+
+const productStartCol = distributionStartCol + 1; // H sütunu
 const printCol = productStartCol + distributionProducts.length;
 
 summarySheet.mergeCells(
   distributionTitleRow,
   distributionStartCol,
-  distributionTitleRow + 1,
+  distributionTitleRow,
   printCol
 );
 
@@ -1665,7 +1667,6 @@ distributionProducts.forEach((product, index) => {
 });
 
 summarySheet.getColumn(distributionStartCol).width = 28;
-summarySheet.getColumn(distributionStartCol + 1).width = 2;
 summarySheet.getColumn(printCol).width = 22;
 
 const remainingStockMap = new Map(
@@ -1678,15 +1679,15 @@ preparationOrdersCache.forEach((data, orderIndex) => {
   const order = data.order || {};
   const rowNo = distributionFirstCustomerRow + orderIndex;
   const customerLabel = getCustomerOrderLabel(data, orderIndex);
+  const orderKey = order.id || order.order_code || String(orderIndex);
   const sheetName = safeSheetName(customerLabel);
+  orderSheetNameMap.set(orderKey, sheetName);
 
   const customerCell = summarySheet.getCell(rowNo, distributionStartCol);
   customerCell.value = customerLabel;
   customerCell.font = { bold: true, color: { argb: 'FF064E3B' } };
   customerCell.border = border;
   customerCell.alignment = { vertical: 'middle', wrapText: true };
-
-  summarySheet.getCell(rowNo, distributionStartCol + 1).border = border;
 
   let hasShortage = false;
 
@@ -1814,9 +1815,10 @@ shortageNotes.forEach((note, index) => {
 
   const shortCode = String(order.order_code || order.id || index + 1).slice(-6);
 
-  const ws = workbook.addWorksheet(
-    safeSheetName(`${customerName}-${shortCode}`)
-  );
+  const orderKey = order.id || order.order_code || String(index);
+  const sheetName = orderSheetNameMap.get(orderKey) || safeSheetName(`${customerName}-${shortCode}`);
+  
+  const ws = workbook.addWorksheet(sheetName);
 
   ws.columns = [
     { key: 'a', width: 22 },
