@@ -1,1 +1,58 @@
+.discount-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  gap: 22px;
+  align-items: start;
+}
 
+.discount-card-wrap {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 26px;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 16px 36px rgba(15,122,55,.10);
+}
+
+.discount-card-admin-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.discount-origin-select {
+  min-height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,197,94,.28);
+  background: rgba(236,253,245,.96);
+  color: #047857;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 0 14px;
+}
+
+.discount-canvas-box {
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fffbe6;
+  box-shadow: 0 14px 30px rgba(15,23,42,.16);
+}
+
+.discount-card-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 1350px) {
+  .discount-cards-grid {
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .discount-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
