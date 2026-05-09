@@ -1667,7 +1667,7 @@ distributionProducts.forEach((product, index) => {
 });
 
 summarySheet.getColumn(distributionStartCol).width = 28;
-summarySheet.getColumn(printCol).width = 12;
+summarySheet.getColumn(printCol).width = 15;
 
 const remainingStockMap = new Map(
   distributionProducts.map((product) => [product.product_id || product.product_name, product.stock])
