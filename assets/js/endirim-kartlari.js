@@ -188,27 +188,37 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
 async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER') {
   const ctx = canvas.getContext('2d');
 
+  // Kartın real ölçüsü
   const W = 1408;
   const H = 1024;
 
   ctx.clearRect(0, 0, W, H);
 
-  // Fon PNG
+  // 1) Arxa fon PNG şablonu
   const bg = await loadCanvasImage(DISCOUNT_CARD_BG);
   ctx.drawImage(bg, 0, 0, W, H);
 
-  // Məhsul şəkli
+  // ============================================================
+  // 2) MƏHSUL ŞƏKLİ
+  // x: sağa-sola
+  // y: yuxarı-aşağı
+  // w: en
+  // h: hündürlük
+  // globalAlpha: şəffaflıq
+  // ============================================================
   if (product.image_url) {
     try {
       const productImg = await loadCanvasImage(product.image_url);
 
       ctx.save();
-      ctx.globalAlpha = 0.72;
+      ctx.globalAlpha = 0.78; // Şəklin görünmə gücü
 
-      // Məhsul şəklinin yeri
-      // x = sağa/sola, y = yuxarı/aşağı, width/height = ölçü
-      ctx.drawImage(productImg, 455, 275, 355, 270);
+      const imgX = 430; // sağa artır, sola azalt
+      const imgY = 260; // aşağı artır, yuxarı azalt
+      const imgW = 420; // şəkli böyütmək üçün artır
+      const imgH = 310; // şəkli böyütmək üçün artır
 
+      ctx.drawImage(productImg, imgX, imgY, imgW, imgH);
       ctx.restore();
     } catch (error) {
       console.warn('Məhsul şəkli yüklənmədi:', error.message);
@@ -220,53 +230,121 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   const oldPrice = Number(product.old_price || 0).toFixed(2);
   const unit = product.unit || 'ədəd';
 
-  // Endirim faizi
+  // ============================================================
+  // 3) ENDİRİM FAİZİ - YAŞIL DAİRƏNİN İÇİ
+  // percentX: sola-sağa
+  // percentY: yuxarı-aşağı
+  // ============================================================
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
-  drawTextFit(ctx, `-${percent}%`, 1175, 265, 165, 56, 34, '1000');
+
+  const percentX = 1160; // sola çəkmək üçün azalt, sağa üçün artır
+  const percentY = 245;  // yuxarı üçün azalt, aşağı üçün artır
+
+  drawTextFit(ctx, `-${percent}%`, percentX, percentY, 150, 56, 34, '1000');
 
   ctx.font = '1000 20px Inter, Arial, sans-serif';
-  ctx.fillText('ENDİRİM', 1175, 315);
+  ctx.fillText('ENDİRİM', percentX, percentY + 50);
 
-  // Məhsul adı
+  // ============================================================
+  // 4) MƏHSUL ADI
+  // nameX/nameY: məhsul adının yeri
+  // font: məhsul adı ölçüsü
+  // maxWidth: uzun adların sığacağı sahə
+  // ============================================================
   ctx.fillStyle = '#050505';
   ctx.textAlign = 'left';
+
   ctx.font = '1000 54px Inter, Arial, sans-serif';
-  wrapText(ctx, product.name, 118, 455, 395, 58, 2);
 
-  // Ölçü vahidi
+  const nameX = 105; // sola çəkmək üçün azalt, sağa üçün artır
+  const nameY = 455; // yuxarı üçün azalt, aşağı üçün artır
+  const nameMaxWidth = 390;
+  const nameLineHeight = 58;
+
+  wrapText(ctx, product.name, nameX, nameY, nameMaxWidth, nameLineHeight, 2);
+
+  // ============================================================
+  // 5) ÖLÇÜ VAHİDİ - kq, ədəd və s.
+  // unitX/unitY: ölçü vahidinin yeri
+  // ============================================================
   ctx.font = '500 40px Inter, Arial, sans-serif';
-  ctx.fillText(unit, 118, 555);
 
-  // Sol xüsusiyyət yazıları
+  const unitX = 105; // sola çəkmək üçün azalt
+  const unitY = 555; // yuxarı üçün azalt
+
+  ctx.fillText(unit, unitX, unitY);
+
+  // ============================================================
+  // 6) SOL XÜSUSİYYƏT YAZILARI
+  // Bu yazılar ikonların qarşısında dayanır.
+  // featureX: sağa-sola
+  // featureY: ilk sətrin yeri
+  // featureGap: sətirlər arası məsafə
+  // ============================================================
   ctx.font = '1000 25px Inter, Arial, sans-serif';
-  ctx.fillText('TƏBİİ VƏ TƏZƏ', 205, 655);
-  ctx.fillText(originText, 205, 710);
-  ctx.fillText('KEYFİYYƏT ZƏMANƏTİ', 205, 765);
 
-  // Köhnə qiymət
+  const featureX = 198; // sağa aparmaq üçün artır, sola üçün azalt
+  const featureY = 622; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
+  const featureGap = 52; // sətirlər arası məsafə
+
+  ctx.fillText('TƏBİİ VƏ TƏZƏ', featureX, featureY);
+  ctx.fillText(originText, featureX, featureY + featureGap);
+  ctx.fillText('KEYFİYYƏT ZƏMANƏTİ', featureX, featureY + featureGap * 2);
+
+  // ============================================================
+  // 7) KÖHNƏ QİYMƏT
+  // oldPriceX/oldPriceY: köhnə qiymətin yeri
+  // ============================================================
   ctx.textAlign = 'right';
   ctx.fillStyle = '#050505';
   ctx.font = '500 70px Inter, Arial, sans-serif';
-  ctx.fillText(`${oldPrice} ₼`, 1260, 500);
 
-  // Köhnə qiymət xətti
+  const oldPriceX = 1260; // sola üçün azalt, sağa üçün artır
+  const oldPriceY = 500;  // yuxarı üçün azalt, aşağı üçün artır
+
+  ctx.fillText(`${oldPrice} ₼`, oldPriceX, oldPriceY);
+
+  // ============================================================
+  // 8) KÖHNƏ QİYMƏTİN ÜSTÜNDƏKİ XƏTT
+  // moveTo və lineTo koordinatları ilə xətti oynada bilərsən.
+  // ============================================================
   ctx.strokeStyle = '#d80a68';
   ctx.lineWidth = 8;
   ctx.beginPath();
-  ctx.moveTo(930, 490);
-  ctx.lineTo(1280, 470);
+
+  ctx.moveTo(905, 490);  // xəttin sol başlanğıcı
+  ctx.lineTo(1280, 470); // xəttin sağ sonu
+
   ctx.stroke();
 
-  // Yeni qiymət
+  // ============================================================
+  // 9) YENİ BÖYÜK QİYMƏT
+  // priceX/priceY: qiymətin yeri
+  // font: qiymətin ölçüsü
+  // ============================================================
   ctx.fillStyle = '#050505';
-  ctx.font = '1000 150px Inter, Arial, sans-serif';
-  ctx.fillText(price, 1250, 665);
+  ctx.font = '1000 172px Inter, Arial, sans-serif';
 
-  // ₼ işarəsi
-  ctx.font = '1000 58px Inter, Arial, sans-serif';
-  ctx.fillText('₼', 1325, 665);
+  const priceX = 1230; // sola çəkmək üçün azalt
+  const priceY = 650;  // yuxarı qaldırmaq üçün azalt
+
+  ctx.fillText(price, priceX, priceY);
+
+  // ============================================================
+  // 10) ₼ İŞARƏSİ
+  // manatX/manatY: manat işarəsinin yeri
+  // ============================================================
+  ctx.font = '1000 62px Inter, Arial, sans-serif';
+
+  const manatX = 1325; // sola üçün azalt, sağa üçün artır
+  const manatY = 650;  // yuxarı üçün azalt, aşağı üçün artır
+
+  ctx.fillText('₼', manatX, manatY);
 }
+
+
+
 
 function printSingleDiscountCanvas(id) {
   const canvas = document.querySelector(`#discount-card-${CSS.escape(id)}`);
