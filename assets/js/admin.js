@@ -23,6 +23,7 @@ import { initLayout } from './layout.js';
 import {
   loadDiscountCards,
   printAllDiscountCards,
+  printSelectedDiscountCards,
 } from './endirim-kartlari.js';
 
 let adminProfile = null;
@@ -690,6 +691,7 @@ async function catalog() {
 
   $('#discountCardSearch')?.addEventListener('input', loadDiscountCards);
   $('#discountPrintAllBtn')?.addEventListener('click', printAllDiscountCards);
+  $('#discountPrintSelectedBtn')?.addEventListener('click', printSelectedDiscountCards);
   
 }
 
