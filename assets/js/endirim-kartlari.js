@@ -213,10 +213,10 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
       ctx.save();
       ctx.globalAlpha = 0.78; // Şəklin görünmə gücü
 
-      const imgX = 430; // sağa artır, sola azalt
+      const imgX = 420; // sağa artır, sola azalt
       const imgY = 260; // aşağı artır, yuxarı azalt
       const imgW = 550; // şəkli böyütmək üçün artır
-      const imgH = 420; // şəkli böyütmək üçün artır
+      const imgH = 440; // şəkli böyütmək üçün artır
 
       ctx.drawImage(productImg, imgX, imgY, imgW, imgH);
       ctx.restore();
@@ -271,7 +271,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.font = '500 40px Inter, Arial, sans-serif';
 
   const unitX = 140; // sola çəkmək üçün azalt
-  const unitY = 510; // yuxarı üçün azalt
+  const unitY = 490; // yuxarı üçün azalt
 
   ctx.fillText(unit, unitX, unitY);
 
