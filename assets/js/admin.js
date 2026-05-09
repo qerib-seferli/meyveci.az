@@ -2672,14 +2672,11 @@ function renderDiscountCard(product) {
     <div class="discount-card-wrap" data-id="${product.id}">
       <div class="discount-card-admin-actions">
         ${discountOriginSelect(product.id)}
-        <button type="button" class="btn btn-soft btn-mini print-discount-card" data-id="${product.id}">🖨️ Çap</button>
-        <button type="button" class="btn btn-soft btn-mini pdf-discount-card" data-id="${product.id}">📄 PDF</button>
+        <button type="button" class="btn btn-primary btn-mini print-discount-card" data-id="${product.id}">🖨️ Çap</button>
       </div>
 
       <div class="meyveci-discount-card" id="discount-card-${product.id}">
-        ${product.image_url ? `
-          <img class="dc-product-watermark" src="${esc(product.image_url)}" alt="">
-        ` : ''}
+        ${product.image_url ? `<img class="dc-product-watermark" src="${esc(product.image_url)}" alt="">` : ''}
 
         <div class="dc-percent">
           <strong>-${percent}%</strong>
@@ -2716,10 +2713,6 @@ function bindDiscountCardEvents() {
   });
 
   $$('.print-discount-card').forEach((btn) => {
-    btn.addEventListener('click', () => printSingleDiscountCard(btn.dataset.id));
-  });
-
-  $$('.pdf-discount-card').forEach((btn) => {
     btn.addEventListener('click', () => printSingleDiscountCard(btn.dataset.id));
   });
 }
