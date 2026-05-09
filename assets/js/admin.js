@@ -1094,21 +1094,31 @@ let preparationRowsCache = [];
 let preparationPurchaseCache = [];
 let preparationOrdersCache = [];
 
+function localDateValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+
 function initPreparationDates() {
   const start = $('#prepStartDate');
   const end = $('#prepEndDate');
+
   if (!start || !end) return;
 
   const today = new Date();
 
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    .toISOString()
-    .slice(0, 10);
+  const firstDayOfMonth = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
 
-  const currentDay = today.toISOString().slice(0, 10);
-
-  start.value = firstDayOfMonth;
-  end.value = currentDay;
+  start.value = localDateValue(firstDayOfMonth);
+  end.value = localDateValue(today);
 }
 
 
