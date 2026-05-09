@@ -1543,50 +1543,45 @@ th {
 
 /*===================================================================================================================================================/
 /* ============================================================
-   MEYVƏÇİ.AZ - ENDİRİM KARTI / 1-Cİ MƏRHƏLƏ
-   YALNIZ ADMIN PANELDƏ GÖRÜNƏN KART DİZAYNI
+   MEYVƏÇİ.AZ - ENDİRİM KARTI ADMIN GÖRÜNÜŞ FINAL
+   Yalnız admin paneldə görünən kart üçündür.
    ============================================================ */
 
-/* Kartların admin paneldə düzülüşü */
 .discount-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, minmax(330px, 1fr));
   gap: 22px;
   align-items: start;
 }
 
-/* Hər endirim kartının admin qutusu */
 .discount-card-wrap {
   display: grid;
   gap: 10px;
   padding: 14px;
   border-radius: 26px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 16px 36px rgba(15, 122, 55, 0.10);
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 16px 36px rgba(15,122,55,.10);
 }
 
-/* Select + çap düyməsi */
 .discount-card-admin-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
-/* YERLİ FERMER seçimi */
 .discount-origin-select {
-  width: 100%;
   min-height: 38px;
   border-radius: 999px;
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  background: rgba(236, 253, 245, 0.96);
+  border: 1px solid rgba(34,197,94,.28);
+  background: rgba(236,253,245,.96);
   color: #047857;
   font-size: 12px;
   font-weight: 950;
-  padding: 0 13px;
+  padding: 0 14px;
 }
 
-/* Əsas PNG kart */
+/* Əsas kart */
 .meyveci-discount-card {
   position: relative;
   overflow: hidden;
@@ -1597,7 +1592,7 @@ th {
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 14px 30px rgba(15,23,42,.18);
   font-family: Inter, Arial, sans-serif;
   color: #050505;
 }
@@ -1605,13 +1600,13 @@ th {
 /* Məhsul şəkli */
 .dc-product-watermark {
   position: absolute;
-  left: 28%;
+  left: 29%;
   top: 24%;
-  width: 28%;
-  height: 36%;
+  width: 29%;
+  height: 38%;
   object-fit: contain;
-  opacity: 0.50;
-  filter: saturate(1.2) contrast(1.05);
+  opacity: .52;
+  filter: saturate(1.2) contrast(1.08);
   z-index: 1;
   pointer-events: none;
 }
@@ -1619,66 +1614,63 @@ th {
 /* Endirim faizi */
 .dc-percent {
   position: absolute;
-  right: 8.6%;
-  top: 14.7%;
-  width: 13.2%;
-  height: 13.2%;
+  right: 8.9%;
+  top: 15.2%;
+  width: 12.8%;
+  height: 12.8%;
   display: grid;
   place-items: center;
   align-content: center;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
-  z-index: 4;
+  z-index: 5;
 }
 
 .dc-percent strong {
-  font-size: clamp(16px, 2vw, 31px);
-  line-height: 0.85;
+  font-size: 22px;
+  line-height: .85;
   font-weight: 1000;
 }
 
 .dc-percent span {
   margin-top: 2px;
-  font-size: clamp(6px, 0.72vw, 11px);
+  font-size: 8px;
   line-height: 1;
   font-weight: 1000;
 }
 
-/* Sol məhsul bloku */
+/* Sol məhsul məlumatı */
 .dc-product-info {
   position: absolute;
-  left: 6.3%;
-  top: 37.4%;
+  left: 6.4%;
+  top: 38.2%;
   width: 31%;
   z-index: 5;
 }
 
-/* Məhsul adı */
 .dc-product-info h4 {
   margin: 0;
-  font-size: clamp(18px, 1.75vw, 28px);
-  line-height: 1.02;
+  font-size: 22px;
+  line-height: 1;
   font-weight: 1000;
-  letter-spacing: -0.5px;
-  max-height: 2.05em;
+  letter-spacing: -.4px;
+  max-height: 44px;
   overflow: hidden;
 }
 
-/* Ölçü vahidi */
 .dc-product-info p {
-  margin: 4px 0 13px;
-  font-size: clamp(12px, 1.2vw, 20px);
+  margin: 3px 0 15px;
+  font-size: 15px;
   line-height: 1;
 }
 
-/* Sol 3 məlumat yazısı */
 .dc-product-info ul {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 32px;
+  padding: 0 0 0 31px;
   display: grid;
-  gap: 6px;
-  font-size: clamp(8px, 0.72vw, 12px);
+  gap: 5px;
+  font-size: 9px;
   line-height: 1;
   font-weight: 1000;
 }
@@ -1690,23 +1682,21 @@ th {
 /* Sağ qiymət bloku */
 .dc-price-box {
   position: absolute;
-  right: 7.2%;
-  top: 38.2%;
+  right: 7.4%;
+  top: 38.8%;
   width: 35%;
   text-align: right;
   z-index: 5;
 }
 
-/* Köhnə qiymət */
 .dc-old-price {
   display: inline-block;
   position: relative;
-  font-size: clamp(18px, 2vw, 34px);
+  font-size: 25px;
   line-height: 1;
   font-weight: 500;
 }
 
-/* Köhnə qiymət xətti */
 .dc-old-price::after {
   content: "";
   position: absolute;
@@ -1719,30 +1709,27 @@ th {
   transform: rotate(-2deg);
 }
 
-/* Yeni böyük qiymət */
 .dc-new-price {
   margin-top: 8px;
-  font-size: clamp(42px, 5.15vw, 86px);
-  line-height: 0.76;
+  font-size: 58px;
+  line-height: .76;
   font-weight: 1000;
-  letter-spacing: -4px;
+  letter-spacing: -3px;
 }
 
-/* ₼ işarəsi */
 .dc-new-price small {
-  font-size: clamp(17px, 2vw, 32px);
+  font-size: 22px;
   letter-spacing: 0;
   font-weight: 950;
 }
 
-/* Ekran kiçiləndə 2 kart */
+/* Ekran ölçüləri */
 @media (max-width: 1350px) {
   .discount-cards-grid {
-    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    grid-template-columns: repeat(2, minmax(330px, 1fr));
   }
 }
 
-/* Telefonda 1 kart */
 @media (max-width: 760px) {
   .discount-cards-grid {
     grid-template-columns: 1fr;
@@ -1751,6 +1738,17 @@ th {
   .discount-card-wrap {
     padding: 10px;
   }
+
+  .dc-percent strong { font-size: 19px; }
+  .dc-percent span { font-size: 7px; }
+
+  .dc-product-info h4 { font-size: 19px; }
+  .dc-product-info p { font-size: 13px; }
+  .dc-product-info ul { font-size: 8px; }
+
+  .dc-old-price { font-size: 21px; }
+  .dc-new-price { font-size: 48px; }
+  .dc-new-price small { font-size: 18px; }
 }
 /*===================================================================================================================================================/
 
