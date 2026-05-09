@@ -215,8 +215,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
 
       const imgX = 430; // sağa artır, sola azalt
       const imgY = 260; // aşağı artır, yuxarı azalt
-      const imgW = 620; // şəkli böyütmək üçün artır
-      const imgH = 510; // şəkli böyütmək üçün artır
+      const imgW = 550; // şəkli böyütmək üçün artır
+      const imgH = 410; // şəkli böyütmək üçün artır
 
       ctx.drawImage(productImg, imgX, imgY, imgW, imgH);
       ctx.restore();
@@ -238,7 +238,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
 
-  const percentX = 960; // sola çəkmək üçün azalt, sağa üçün artır
+  const percentX = 880; // sola çəkmək üçün azalt, sağa üçün artır
   const percentY = 245;  // yuxarı üçün azalt, aşağı üçün artır
 
   drawTextFit(ctx, `-${percent}%`, percentX, percentY, 150, 56, 34, '1000');
@@ -257,8 +257,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
 
   ctx.font = '1000 54px Inter, Arial, sans-serif';
 
-  const nameX = 125; // sola çəkmək üçün azalt, sağa üçün artır
-  const nameY = 405; // yuxarı üçün azalt, aşağı üçün artır
+  const nameX = 135; // sola çəkmək üçün azalt, sağa üçün artır
+  const nameY = 415; // yuxarı üçün azalt, aşağı üçün artır
   const nameMaxWidth = 390;
   const nameLineHeight = 58;
 
@@ -271,7 +271,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.font = '500 40px Inter, Arial, sans-serif';
 
   const unitX = 125; // sola çəkmək üçün azalt
-  const unitY = 505; // yuxarı üçün azalt
+  const unitY = 515; // yuxarı üçün azalt
 
   ctx.fillText(unit, unitX, unitY);
 
@@ -284,7 +284,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '1000 25px Inter, Arial, sans-serif';
 
-  const featureX = 198; // sağa aparmaq üçün artır, sola üçün azalt
+  const featureX = 218; // sağa aparmaq üçün artır, sola üçün azalt
   const featureY = 522; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
   const featureGap = 52; // sətirlər arası məsafə
 
@@ -337,7 +337,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '1000 62px Inter, Arial, sans-serif';
 
-  const manatX = 1225; // sola üçün azalt, sağa üçün artır
+  const manatX = 1325; // sola üçün azalt, sağa üçün artır
   const manatY = 650;  // yuxarı üçün azalt, aşağı üçün artır
 
   ctx.fillText('₼', manatX, manatY);
