@@ -216,7 +216,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
       const imgX = 430; // sağa artır, sola azalt
       const imgY = 260; // aşağı artır, yuxarı azalt
       const imgW = 550; // şəkli böyütmək üçün artır
-      const imgH = 410; // şəkli böyütmək üçün artır
+      const imgH = 420; // şəkli böyütmək üçün artır
 
       ctx.drawImage(productImg, imgX, imgY, imgW, imgH);
       ctx.restore();
@@ -270,8 +270,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '500 40px Inter, Arial, sans-serif';
 
-  const unitX = 150; // sola çəkmək üçün azalt
-  const unitY = 520; // yuxarı üçün azalt
+  const unitX = 140; // sola çəkmək üçün azalt
+  const unitY = 500; // yuxarı üçün azalt
 
   ctx.fillText(unit, unitX, unitY);
 
@@ -284,8 +284,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '1000 25px Inter, Arial, sans-serif';
 
-  const featureX = 220; // sağa aparmaq üçün artır, sola üçün azalt
-  const featureY = 530; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
+  const featureX = 200; // sağa aparmaq üçün artır, sola üçün azalt
+  const featureY = 540; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
   const featureGap = 52; // sətirlər arası məsafə
 
   ctx.fillText('TƏBİİ VƏ TƏZƏ', featureX, featureY);
