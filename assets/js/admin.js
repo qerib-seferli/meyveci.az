@@ -1595,7 +1595,7 @@ const distributionHeaderRow = 5;
 const distributionProductHeaderRow = 6;
 const distributionFirstCustomerRow = 7;
 
-const productStartCol = distributionStartCol + 1; // H sütunu
+const productStartCol = distributionStartCol + 2;
 const printCol = productStartCol + distributionProducts.length;
 
 summarySheet.mergeCells(
@@ -1617,7 +1617,7 @@ summarySheet.mergeCells(
   distributionHeaderRow,
   distributionStartCol,
   distributionProductHeaderRow,
-  distributionStartCol + 1
+  distributionStartCol
 );
 
 const customerHead = summarySheet.getCell(distributionHeaderRow, distributionStartCol);
