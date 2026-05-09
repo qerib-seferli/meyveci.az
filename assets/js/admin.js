@@ -20,6 +20,11 @@ import {
 
 import { initLayout } from './layout.js';
 
+import {
+  loadDiscountCards,
+  printAllDiscountCards,
+} from './endirim-kartlari.js';
+
 let adminProfile = null;
 let courierMap = null;
 let courierMarkers = new Map();
@@ -2596,70 +2601,6 @@ async function exportProductsToExcel() {
     toast(error.message);
   }
 }
-
-
-// ============================================================
-// MEYVƏÇİ.AZ - ENDİRİM KARTLARI
-// Bazada old_price > price olan məhsulları avtomatik endirim kartına çevirir.
-// ============================================================
-
-const discountOriginOptions = [
-  'YERLİ FERMER',
-  'İDXAL',
-  'İSTİXANA',
-  'EKZOTİK',
-  'SELEKSİYA',
-  'ORQANİK',
-];
-
-let discountCardsCache = [];
-
-function discountPercent(price, oldPrice) {
-  const p = Number(price || 0);
-  const o = Number(oldPrice || 0);
-  if (!p || !o || o <= p) return 0;
-  return Math.round(((o - p) / o) * 100);
-}
-
-function discountOriginSelect(productId) {
-  return `
-    <select class="discount-origin-select" data-id="${productId}">
-      ${discountOriginOptions.map((item) => `<option value="${esc(item)}">${esc(item)}</option>`).join('')}
-    </select>
-  `;
-}
-
-async function loadDiscountCards() {
-  const grid = $('#discountCardsGrid');
-  if (!grid) return;
-
-  const search = ($('#discountCardSearch')?.value || '').trim().toLowerCase();
-
-  const { data, error } = await supabase
-    .from('products')
-    .select('id,name,price,old_price,unit,status,image_url,categories(name)')
-    .eq('status', 'active')
-    .not('old_price', 'is', null)
-    .order('name', { ascending: true })
-    .limit(5000);
-
-  if (error) {
-    grid.innerHTML = `<div class="muted">${esc(error.message)}</div>`;
-    return;
-  }
-
-  discountCardsCache = (data || []).filter((product) => {
-    const isDiscount = Number(product.old_price || 0) > Number(product.price || 0);
-    const matchSearch = !search || String(product.name || '').toLowerCase().includes(search);
-    return isDiscount && matchSearch;
-  });
-
-  grid.innerHTML = discountCardsCache.map((product) => renderDiscountCard(product)).join('')
-    || '<div class="muted">Endirimli məhsul yoxdur. Endirim üçün məhsulda “Köhnə qiymət” faktiki qiymətdən böyük olmalıdır.</div>';
-
-  bindDiscountCardEvents();
-}
-
 
 //=======================================================================================================
 
