@@ -1590,10 +1590,10 @@ const orderSheetNameMap = new Map();
 
 const distributionStartCol = 7; // G sütunu
 const distributionTitleRow = 1;
-const distributionDateRow = 3;
-const distributionHeaderRow = 5;
-const distributionProductHeaderRow = 6;
-const distributionFirstCustomerRow = 7;
+const distributionDateRow = 4;
+const distributionHeaderRow = 6;
+const distributionProductHeaderRow = 7;
+const distributionFirstCustomerRow = 8;
 
 const productStartCol = distributionStartCol + 1;
 const printCol = productStartCol + distributionProducts.length;
@@ -1667,7 +1667,7 @@ distributionProducts.forEach((product, index) => {
 });
 
 summarySheet.getColumn(distributionStartCol).width = 28;
-summarySheet.getColumn(printCol).width = 22;
+summarySheet.getColumn(printCol).width = 12;
 
 const remainingStockMap = new Map(
   distributionProducts.map((product) => [product.product_id || product.product_name, product.stock])
@@ -1743,7 +1743,7 @@ preparationOrdersCache.forEach((data, orderIndex) => {
   }
 });
 
-const totalRowNo = distributionFirstCustomerRow + preparationOrdersCache.length;
+const totalRowNo = distributionFirstCustomerRow + preparationOrdersCache.length + 1;
 const remainRowNo = totalRowNo + 1;
 
 summarySheet.getCell(totalRowNo, distributionStartCol).value = 'Cəmi miqdar:';
