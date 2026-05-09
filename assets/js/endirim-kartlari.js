@@ -257,8 +257,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
 
   ctx.font = '1000 54px Inter, Arial, sans-serif';
 
-  const nameX = 135; // sola çəkmək üçün azalt, sağa üçün artır
-  const nameY = 415; // yuxarı üçün azalt, aşağı üçün artır
+  const nameX = 140; // sola çəkmək üçün azalt, sağa üçün artır
+  const nameY = 390; // yuxarı üçün azalt, aşağı üçün artır
   const nameMaxWidth = 390;
   const nameLineHeight = 58;
 
@@ -270,8 +270,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '500 40px Inter, Arial, sans-serif';
 
-  const unitX = 125; // sola çəkmək üçün azalt
-  const unitY = 515; // yuxarı üçün azalt
+  const unitX = 130; // sola çəkmək üçün azalt
+  const unitY = 540; // yuxarı üçün azalt
 
   ctx.fillText(unit, unitX, unitY);
 
@@ -284,8 +284,8 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // ============================================================
   ctx.font = '1000 25px Inter, Arial, sans-serif';
 
-  const featureX = 218; // sağa aparmaq üçün artır, sola üçün azalt
-  const featureY = 522; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
+  const featureX = 200; // sağa aparmaq üçün artır, sola üçün azalt
+  const featureY = 530; // yuxarı qaldırmaq üçün azalt, aşağı üçün artır
   const featureGap = 52; // sətirlər arası məsafə
 
   ctx.fillText('TƏBİİ VƏ TƏZƏ', featureX, featureY);
@@ -338,7 +338,7 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   ctx.font = '1000 62px Inter, Arial, sans-serif';
 
   const manatX = 1290; // sola üçün azalt, sağa üçün artır
-  const manatY = 650;  // yuxarı üçün azalt, aşağı üçün artır
+  const manatY = 660;  // yuxarı üçün azalt, aşağı üçün artır
 
   ctx.fillText('₼', manatX, manatY);
 }
