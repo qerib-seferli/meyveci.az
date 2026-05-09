@@ -1560,7 +1560,7 @@ th {
 .discount-card-wrap {
   display: grid;
   gap: 10px; /* Seçim yeri ilə kart arası məsafə */
-  padding: 14px; /* Ağ qutunun iç boşluğu */
+  padding: 8px; /* Ağ qutunun iç boşluğu */
   border-radius: 24px; /* Ağ qutunun yumru kənarı */
   background: rgba(255,255,255,.72);
   box-shadow: 0 14px 34px rgba(15,122,55,.08);
@@ -1613,10 +1613,10 @@ th {
   position: absolute;
   left: 31%;      /* Şəkli sağa aparmaq üçün artır, sola aparmaq üçün azalt */
   top: 25%;       /* Şəkli aşağı salmaq üçün artır, yuxarı qaldırmaq üçün azalt */
-  width: 32%;     /* Şəkli böyütmək üçün artır, kiçiltmək üçün azalt */
+  width: 52%;     /* Şəkli böyütmək üçün artır, kiçiltmək üçün azalt */
   height: 42%;    /* Şəklin hündürlüyü */
   object-fit: contain;
-  opacity: .45;   /* Şəkil görünmə gücü: .20 solğun, .45 normal, .65 daha görünən */
+  opacity: .55;   /* Şəkil görünmə gücü: .20 solğun, .45 normal, .65 daha görünən */
   filter: saturate(1.25) contrast(1.08);
   z-index: 1;
   pointer-events: none;
@@ -1630,10 +1630,10 @@ th {
    ============================================================ */
 .dc-percent {
   position: absolute;
-  right: 8.5%;    /* Faizi sola çəkmək üçün artır, sağa aparmaq üçün azalt */
+  right: 14.5%;    /* Faizi sola çəkmək üçün artır, sağa aparmaq üçün azalt */
   top: 15.2%;     /* Faizi aşağı salmaq üçün artır, yuxarı qaldırmaq üçün azalt */
-  width: 13.8%;   /* Faiz blokunun eni */
-  height: 13.8%;  /* Faiz blokunun hündürlüyü */
+  width: 15.8%;   /* Faiz blokunun eni */
+  height: 15.8%;  /* Faiz blokunun hündürlüyü */
   display: grid;
   place-items: center;
   align-content: center;
@@ -1644,15 +1644,15 @@ th {
 
 /* -57% yazısı */
 .dc-percent strong {
-  font-size: clamp(13px, 2vw, 34px); /* Faiz rəqəmini böyüt/kiçilt */
+  font-size: clamp(15px, 2vw, 34px); /* Faiz rəqəmini böyüt/kiçilt */
   line-height: .85;
   font-weight: 1000;
 }
 
 /* ENDİRİM sözü */
 .dc-percent span {
-  margin-top: 2px; /* ENDİRİM sözünü aşağı-yuxarı oynat */
-  font-size: clamp(6px, .72vw, 12px); /* ENDİRİM sözünün ölçüsü */
+  margin-top: 4px; /* ENDİRİM sözünü aşağı-yuxarı oynat */
+  font-size: clamp(6px, .72vw, 16px); /* ENDİRİM sözünün ölçüsü */
   font-weight: 1000;
 }
 
@@ -1662,8 +1662,8 @@ th {
    ============================================================ */
 .dc-product-info {
   position: absolute;
-  left: 6.5%;     /* Bütün sol yazı blokunu sağa aparmaq üçün artır, sola üçün azalt */
-  top: 37.5%;     /* Bütün sol yazı blokunu aşağı salmaq üçün artır, yuxarı üçün azalt */
+  left: 10.5%;     /* Bütün sol yazı blokunu sağa aparmaq üçün artır, sola üçün azalt */
+  top: 40.5%;     /* Bütün sol yazı blokunu aşağı salmaq üçün artır, yuxarı üçün azalt */
   width: 32%;     /* Məhsul adı üçün sahə. Uzun ad sığmasa artır */
   z-index: 5;
 }
@@ -1690,9 +1690,9 @@ th {
 .dc-product-info ul {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 34px; /* Yazıları ikonlardan sağa-sola oynadır. Artırsa sağa gedir */
+  padding: 0 0 0 44px; /* Yazıları ikonlardan sağa-sola oynadır. Artırsa sağa gedir */
   display: grid;
-  gap: 7px; /* 3 sətir arası məsafə */
+  gap: 6px; /* 3 sətir arası məsafə */
   font-size: clamp(6px, .70vw, 12px); /* Bu 3 yazının ölçüsü */
   line-height: 1;
   font-weight: 1000;
@@ -1709,8 +1709,8 @@ th {
    ============================================================ */
 .dc-price-box {
   position: absolute;
-  right: 8.4%;    /* Qiymət blokunu sola çəkmək üçün artır, sağa üçün azalt */
-  top: 38%;       /* Qiymət blokunu aşağı salmaq üçün artır, yuxarı üçün azalt */
+  right: 12.4%;    /* Qiymət blokunu sola çəkmək üçün artır, sağa üçün azalt */
+  top: 48%;       /* Qiymət blokunu aşağı salmaq üçün artır, yuxarı üçün azalt */
   width: 36%;     /* Qiymət sahəsi. Daşırsa azalt və ya sağ/solu düzəlt */
   text-align: right;
   z-index: 5;
@@ -1735,13 +1735,13 @@ th {
   height: 3px;    /* Xətt qalınlığı */
   border-radius: 999px;
   background: #d80a68;
-  transform: rotate(-2deg); /* Xəttin əyriliyi */
+  transform: rotate(-4deg); /* Xəttin əyriliyi */
 }
 
 /* Yeni böyük qiymət */
 .dc-new-price {
   margin-top: 7px; /* Köhnə qiymətlə yeni qiymət arası məsafə */
-  font-size: clamp(32px, 5.2vw, 88px); /* Böyük qiyməti böyüt/kiçilt */
+  font-size: clamp(36px, 5.2vw, 88px); /* Böyük qiyməti böyüt/kiçilt */
   line-height: .76;
   font-weight: 1000;
   letter-spacing: -4px; /* Rəqəmlər arası sıxlıq */
@@ -1802,12 +1802,12 @@ th {
   gap: 7mm; /* Kartlar arası məsafə */
   justify-content: center;
   align-content: start;
-  padding: 7mm; /* A4 iç boşluğu */
+  padding: 5mm; /* A4 iç boşluğu */
 }
 
 .discount-print-sheet .meyveci-discount-card {
-  width: 96mm;  /* Toplu çap kart eni */
-  height: 66mm; /* Toplu çap kart hündürlüyü */
+  width: 106mm;  /* Toplu çap kart eni */
+  height: 76mm; /* Toplu çap kart hündürlüyü */
   aspect-ratio: auto;
   box-shadow: none;
   break-inside: avoid;
@@ -1820,7 +1820,7 @@ th {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 6mm; /* A4 kənar boşluğu */
+    margin: 4mm; /* A4 kənar boşluğu */
   }
 
   html,
@@ -1836,16 +1836,16 @@ th {
 
   .discount-print-sheet {
     display: grid !important;
-    grid-template-columns: repeat(2, 96mm) !important; /* Printdə kart eni */
-    grid-auto-rows: 66mm !important; /* Printdə kart hündürlüyü */
-    gap: 7mm !important; /* Printdə kartlar arası məsafə */
+    grid-template-columns: repeat(2, 106mm) !important; /* Printdə kart eni */
+    grid-auto-rows: 76mm !important; /* Printdə kart hündürlüyü */
+    gap: 5mm !important; /* Printdə kartlar arası məsafə */
     padding: 0 !important;
     justify-content: center !important;
   }
 
   .discount-print-sheet .meyveci-discount-card {
-    width: 96mm !important;  /* Printdə toplu kart eni */
-    height: 66mm !important; /* Printdə toplu kart hündürlüyü */
+    width: 106mm !important;  /* Printdə toplu kart eni */
+    height: 76mm !important; /* Printdə toplu kart hündürlüyü */
   }
 
   .discount-print-body.single .meyveci-discount-card {
