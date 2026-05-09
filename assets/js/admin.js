@@ -2661,6 +2661,10 @@ async function loadDiscountCards() {
   bindDiscountCardEvents();
 }
 
+
+
+//=======================================================================================================
+
 function renderDiscountCard(product) {
   const percent = discountPercent(product.price, product.old_price);
   const unit = product.unit || 'ədəd';
@@ -2674,44 +2678,39 @@ function renderDiscountCard(product) {
       </div>
 
       <div class="meyveci-discount-card" id="discount-card-${product.id}">
-        <div class="discount-card-bg-pattern"></div>
+        <div class="dc-title">ENDİRİM</div>
 
-        <div class="discount-card-top">
-          <h3>ENDİRİM</h3>
-          <div class="discount-leaf-badge">
-            <strong>-${percent}%</strong>
-            <span>ENDİRİM</span>
-          </div>
+        <div class="dc-badge">
+          <strong>-${percent}%</strong>
+          <span>ENDİRİM</span>
         </div>
 
-        <div class="discount-card-body">
-          <div class="discount-left">
-            <h4>${esc(product.name)}</h4>
-            <p>${esc(unit)}</p>
+        <div class="dc-product">
+          <h4>${esc(product.name)}</h4>
+          <p>${esc(unit)}</p>
 
-            <ul>
-              <li><span>🌿</span> TƏBİİ VƏ TƏZƏ</li>
-              <li><span>📍</span> <b class="origin-text" data-id="${product.id}">YERLİ FERMER</b></li>
-              <li><span>✅</span> KEYFİYYƏT ZƏMANƏTİ</li>
-            </ul>
-          </div>
-
-          <div class="discount-right">
-            <div class="old-price">${money(product.old_price)}</div>
-            <div class="new-price">${Number(product.price || 0).toFixed(2)}<small>₼</small></div>
-            <div class="meyveci-price-text">meyvəçi qiyməti</div>
-          </div>
+          <ul>
+            <li><span class="dc-i green">⌁</span> TƏBİİ VƏ TƏZƏ</li>
+            <li><span class="dc-i pink">●</span> <b class="origin-text" data-id="${product.id}">YERLİ FERMER</b></li>
+            <li><span class="dc-i shield">✓</span> KEYFİYYƏT ZƏMANƏTİ</li>
+          </ul>
         </div>
 
-        <div class="discount-card-bottom">
-          <div class="discount-logo-box">
-            <img src="../assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
-          </div>
+        <div class="dc-price">
+          <div class="dc-old-price">${Number(product.old_price || 0).toFixed(2)} ₼</div>
+          <div class="dc-new-price">${Number(product.price || 0).toFixed(2)}<small>₼</small></div>
+          <div class="dc-meyveci-price">meyvəçi qiyməti</div>
+        </div>
 
-          <div class="discount-card-label">
-            <span>💳</span>
-            <b>ENDİRİM<br>KARTI İLƏ</b>
-          </div>
+        <div class="dc-logo">
+          <img src="../assets/img/logo/Meyveci-logo.png" alt="Meyvəçi">
+        </div>
+
+        <div class="dc-pattern"></div>
+
+        <div class="dc-card-label">
+          <span>💳</span>
+          <b>ENDİRİM<br>KARTI İLƏ</b>
         </div>
       </div>
     </div>
@@ -2793,4 +2792,6 @@ function printAllDiscountCards() {
   `);
   win.document.close();
 }
+
+//=======================================================================================================
 
