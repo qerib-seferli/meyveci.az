@@ -1100,16 +1100,17 @@ function initPreparationDates() {
   if (!start || !end) return;
 
   const today = new Date();
-  
+
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
     .toISOString()
     .slice(0, 10);
-  
+
   const currentDay = today.toISOString().slice(0, 10);
-  
-  if (!start.value) start.value = firstDayOfMonth;
-  if (!end.value) end.value = currentDay;
+
+  start.value = firstDayOfMonth;
+  end.value = currentDay;
 }
+
 
 function getPreparationRange() {
   const startValue = $('#prepStartDate')?.value;
