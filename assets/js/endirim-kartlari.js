@@ -267,9 +267,9 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
     product.name,
     nameX,
     nameY,
-    420, // maksimum en
-    54,  // başlanğıc font
-    28,  // minimum font
+    400, // maksimum en
+    44,  // başlanğıc font
+    38,  // minimum font
     '1000'
   );
 
