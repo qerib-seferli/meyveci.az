@@ -685,7 +685,6 @@ async function catalog() {
 
   $('#discountCardSearch')?.addEventListener('input', loadDiscountCards);
   $('#discountPrintAllBtn')?.addEventListener('click', printAllDiscountCards);
-  $('#discountPdfAllBtn')?.addEventListener('click', printAllDiscountCards);
   
 }
 
