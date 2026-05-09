@@ -12,6 +12,7 @@ import {
 } from './core.js';
 
 let discountCardsCache = [];
+const selectedDiscountCardIds = new Set();
 
 const DISCOUNT_CARD_BG = '../assets/img/fotolar/Endirim-karti.png';
 
@@ -56,7 +57,7 @@ function renderDiscountCard(product) {
     
    <div class="discount-card-admin-actions">
     <label class="discount-select-card">
-      <input type="checkbox" class="discount-card-check" data-id="${product.id}">
+      <input type="checkbox" class="discount-card-check" data-id="${product.id}" ${selectedDiscountCardIds.has(String(product.id)) ? 'checked' : ''}>
       <span>Seç</span>
     </label>
   
@@ -114,6 +115,15 @@ export async function loadDiscountCards() {
 function bindDiscountCardEvents() {
   drawAllDiscountCanvases();
 
+  $$('.discount-card-check').forEach((input) => {
+    input.addEventListener('change', () => {
+      const id = String(input.dataset.id);
+  
+      if (input.checked) selectedDiscountCardIds.add(id);
+      else selectedDiscountCardIds.delete(id);
+    });
+  });
+  
   $$('.discount-origin-select').forEach((select) => {
     select.addEventListener('change', () => {
       drawAllDiscountCanvases();
@@ -479,8 +489,7 @@ window.printAllDiscountCards = printAllDiscountCards;
 export async function printSelectedDiscountCards() {
   await drawAllDiscountCanvases();
 
-  const selectedIds = [...document.querySelectorAll('.discount-card-check:checked')]
-    .map((input) => input.dataset.id);
+const selectedIds = [...selectedDiscountCardIds];
 
   if (!selectedIds.length) {
     toast('Çap üçün heç bir endirim kartı seçilməyib');
