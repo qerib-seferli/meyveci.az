@@ -2678,44 +2678,35 @@ function renderDiscountCard(product) {
       </div>
 
       <div class="meyveci-discount-card" id="discount-card-${product.id}">
-        <div class="dc-title">ENDİRİM</div>
+        ${product.image_url ? `
+          <img class="dc-product-watermark" src="${esc(product.image_url)}" alt="">
+        ` : ''}
 
-        <div class="dc-badge">
+        <div class="dc-percent">
           <strong>-${percent}%</strong>
           <span>ENDİRİM</span>
         </div>
 
-        <div class="dc-product">
+        <div class="dc-product-info">
           <h4>${esc(product.name)}</h4>
           <p>${esc(unit)}</p>
 
           <ul>
-            <li><span class="dc-i green">⌁</span> TƏBİİ VƏ TƏZƏ</li>
-            <li><span class="dc-i pink">●</span> <b class="origin-text" data-id="${product.id}">YERLİ FERMER</b></li>
-            <li><span class="dc-i shield">✓</span> KEYFİYYƏT ZƏMANƏTİ</li>
+            <li>TƏBİİ VƏ TƏZƏ</li>
+            <li><b class="origin-text" data-id="${product.id}">YERLİ FERMER</b></li>
+            <li>KEYFİYYƏT ZƏMANƏTİ</li>
           </ul>
         </div>
 
-        <div class="dc-price">
+        <div class="dc-price-box">
           <div class="dc-old-price">${Number(product.old_price || 0).toFixed(2)} ₼</div>
           <div class="dc-new-price">${Number(product.price || 0).toFixed(2)}<small>₼</small></div>
-          <div class="dc-meyveci-price">meyvəçi qiyməti</div>
-        </div>
-
-        <div class="dc-logo">
-          <img src="../assets/img/logo/Meyveci-logo.png" alt="Meyvəçi">
-        </div>
-
-        <div class="dc-pattern"></div>
-
-        <div class="dc-card-label">
-          <span>💳</span>
-          <b>ENDİRİM<br>KARTI İLƏ</b>
         </div>
       </div>
     </div>
   `;
 }
+
 
 function bindDiscountCardEvents() {
   $$('.discount-origin-select').forEach((select) => {
