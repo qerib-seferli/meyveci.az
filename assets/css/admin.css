@@ -1541,52 +1541,60 @@ th {
   }
 }
 
+/*===================================================================================================================================================/
 /* ============================================================
-   MEYVƏÇİ.AZ - ENDİRİM KARTI PNG ŞABLON FINAL FIX
+   MEYVƏÇİ.AZ - ENDİRİM KARTI PNG ŞABLON AYARLI VERSİYA
+   Burada left/right/top/width/font-size dəyərlərini dəyişərək
+   yazıları sağa-sola, yuxarı-aşağı, böyük-kiçik edə bilərsən.
    ============================================================ */
 
+/* Admin paneldə kartların ümumi düzülüşü */
 .discount-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 kart yan-yana. 2 etmək istəsən repeat(2...) */
+  gap: 22px; /* Kartlar arası məsafə */
   align-items: start;
 }
 
+/* Hər kartın ağ çərçivəli admin qutusu */
 .discount-card-wrap {
   display: grid;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 24px;
+  gap: 10px; /* Seçim yeri ilə kart arası məsafə */
+  padding: 14px; /* Ağ qutunun iç boşluğu */
+  border-radius: 24px; /* Ağ qutunun yumru kənarı */
   background: rgba(255,255,255,.72);
   box-shadow: 0 14px 34px rgba(15,122,55,.08);
 }
 
+/* YERLİ FERMER seçimi və çap düyməsi */
 .discount-card-admin-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto; /* select solda, çap sağda */
   gap: 8px;
   align-items: center;
 }
 
+/* YERLİ FERMER select görünüşü */
 .discount-origin-select {
-  min-height: 38px;
+  min-height: 38px; /* Select hündürlüyü */
   border-radius: 999px;
   border: 1px solid rgba(34,197,94,.25);
   background: rgba(236,253,245,.96);
   color: #047857;
-  font-size: 12px;
+  font-size: 12px; /* Select yazı ölçüsü */
   font-weight: 950;
   padding: 0 13px;
 }
 
+/* ƏSAS ENDİRİM KARTI */
 .meyveci-discount-card {
   position: relative;
   overflow: hidden;
   width: 100%;
-  aspect-ratio: 1.45 / 1;
-  border-radius: 22px;
+  aspect-ratio: 1.45 / 1; /* Kartın forma nisbəti. Hündürlük az/çox olsa bunu dəyiş */
+  border-radius: 22px; /* Kart kənar yumruluğu */
   background-image: url("../img/fotolar/Endirim-karti.png");
-  background-size: 100% 100%;
+  background-size: 100% 100%; /* Şəkil kartı tam doldursun */
   background-position: center;
   background-repeat: no-repeat;
   box-shadow: 0 16px 34px rgba(15,23,42,.18);
@@ -1594,27 +1602,38 @@ th {
   color: #050505;
 }
 
-/* Məhsul şəkli */
+/* ============================================================
+   MƏHSUL ŞƏKLİ - ARXADA SOLĞUN GÖRÜNƏN ŞƏKİL
+   left: sağa-sola hərəkət
+   top: yuxarı-aşağı hərəkət
+   width/height: böyüt/kiçilt
+   opacity: şəffaflıq
+   ============================================================ */
 .dc-product-watermark {
   position: absolute;
-  left: 29%;
-  top: 24%;
-  width: 30%;
-  height: 38%;
+  left: 31%;      /* Şəkli sağa aparmaq üçün artır, sola aparmaq üçün azalt */
+  top: 25%;       /* Şəkli aşağı salmaq üçün artır, yuxarı qaldırmaq üçün azalt */
+  width: 32%;     /* Şəkli böyütmək üçün artır, kiçiltmək üçün azalt */
+  height: 42%;    /* Şəklin hündürlüyü */
   object-fit: contain;
-  opacity: .34;
-  filter: saturate(1.2) contrast(1.08);
+  opacity: .45;   /* Şəkil görünmə gücü: .20 solğun, .45 normal, .65 daha görünən */
+  filter: saturate(1.25) contrast(1.08);
   z-index: 1;
   pointer-events: none;
 }
 
-/* Endirim faizi */
+/* ============================================================
+   ENDİRİM FAİZİ - YAŞIL DAİRƏNİN İÇİ
+   right: sola-sağa
+   top: yuxarı-aşağı
+   width/height: faiz blokunun ölçüsü
+   ============================================================ */
 .dc-percent {
   position: absolute;
-  right: 8.7%;
-  top: 14.4%;
-  width: 13.5%;
-  height: 13.5%;
+  right: 8.5%;    /* Faizi sola çəkmək üçün artır, sağa aparmaq üçün azalt */
+  top: 15.2%;     /* Faizi aşağı salmaq üçün artır, yuxarı qaldırmaq üçün azalt */
+  width: 13.8%;   /* Faiz blokunun eni */
+  height: 13.8%;  /* Faiz blokunun hündürlüyü */
   display: grid;
   place-items: center;
   align-content: center;
@@ -1623,116 +1642,136 @@ th {
   z-index: 4;
 }
 
+/* -57% yazısı */
 .dc-percent strong {
-  font-size: clamp(15px, 2vw, 36px);
+  font-size: clamp(13px, 2vw, 34px); /* Faiz rəqəmini böyüt/kiçilt */
   line-height: .85;
   font-weight: 1000;
 }
 
+/* ENDİRİM sözü */
 .dc-percent span {
-  margin-top: 2px;
-  font-size: clamp(6px, .72vw, 12px);
+  margin-top: 2px; /* ENDİRİM sözünü aşağı-yuxarı oynat */
+  font-size: clamp(6px, .72vw, 12px); /* ENDİRİM sözünün ölçüsü */
   font-weight: 1000;
 }
 
-/* Sol məhsul məlumatları */
+/* ============================================================
+   SOL MƏHSUL MƏLUMATLARI
+   Məhsul adı, ölçü vahidi və 3 xüsusiyyət yazısı
+   ============================================================ */
 .dc-product-info {
   position: absolute;
-  left: 6.2%;
-  top: 36.4%;
-  width: 34%;
+  left: 6.5%;     /* Bütün sol yazı blokunu sağa aparmaq üçün artır, sola üçün azalt */
+  top: 37.5%;     /* Bütün sol yazı blokunu aşağı salmaq üçün artır, yuxarı üçün azalt */
+  width: 32%;     /* Məhsul adı üçün sahə. Uzun ad sığmasa artır */
   z-index: 5;
 }
 
+/* Məhsul adı */
 .dc-product-info h4 {
   margin: 0;
-  font-size: clamp(15px, 1.75vw, 30px);
-  line-height: 1.02;
+  font-size: clamp(13px, 1.55vw, 27px); /* Məhsul adını böyüt/kiçilt */
+  line-height: 1.02; /* Sətirlər arası məsafə */
   font-weight: 1000;
-  letter-spacing: -.6px;
-  max-height: 2.1em;
+  letter-spacing: -.5px;
+  max-height: 2.1em; /* Uzun ad 2 sətrdə qalsın */
   overflow: hidden;
 }
 
+/* Ölçü vahidi: kg, ədəd və s. */
 .dc-product-info p {
-  margin: 4px 0 15px;
-  font-size: clamp(11px, 1.25vw, 22px);
+  margin: 4px 0 14px; /* 1-ci rəqəm yuxarı-aşağı, 3-cü rəqəm aşağıdakı siyahıya məsafə */
+  font-size: clamp(10px, 1.15vw, 20px); /* Ölçü vahidi yazı ölçüsü */
   line-height: 1;
 }
 
+/* TƏBİİ VƏ TƏZƏ / YERLİ FERMER / KEYFİYYƏT ZƏMANƏTİ siyahısı */
 .dc-product-info ul {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 32px;
+  padding: 0 0 0 34px; /* Yazıları ikonlardan sağa-sola oynadır. Artırsa sağa gedir */
   display: grid;
-  gap: 7px;
-  font-size: clamp(7px, .78vw, 13px);
+  gap: 7px; /* 3 sətir arası məsafə */
+  font-size: clamp(6px, .70vw, 12px); /* Bu 3 yazının ölçüsü */
   line-height: 1;
   font-weight: 1000;
 }
 
+/* Siyahıdakı hər sətir */
 .dc-product-info li {
   white-space: nowrap;
 }
 
-/* Sağ qiymət */
+/* ============================================================
+   SAĞ QİYMƏT BLOKU
+   Köhnə qiymət + yeni böyük qiymət
+   ============================================================ */
 .dc-price-box {
   position: absolute;
-  right: 7.4%;
-  top: 37.4%;
-  width: 39%;
+  right: 8.4%;    /* Qiymət blokunu sola çəkmək üçün artır, sağa üçün azalt */
+  top: 38%;       /* Qiymət blokunu aşağı salmaq üçün artır, yuxarı üçün azalt */
+  width: 36%;     /* Qiymət sahəsi. Daşırsa azalt və ya sağ/solu düzəlt */
   text-align: right;
   z-index: 5;
 }
 
+/* Köhnə qiymət */
 .dc-old-price {
   display: inline-block;
   position: relative;
-  font-size: clamp(15px, 2.3vw, 40px);
+  font-size: clamp(13px, 2vw, 35px); /* Köhnə qiyməti böyüt/kiçilt */
   line-height: 1;
   font-weight: 500;
 }
 
+/* Köhnə qiymətin üstündən keçən çəhrayı xətt */
 .dc-old-price::after {
   content: "";
   position: absolute;
-  left: -5%;
-  right: -6%;
-  top: 50%;
-  height: 3px;
+  left: -5%;      /* Xəttin sol uzunluğu */
+  right: -6%;     /* Xəttin sağ uzunluğu */
+  top: 50%;       /* Xətti yuxarı-aşağı oynat */
+  height: 3px;    /* Xətt qalınlığı */
   border-radius: 999px;
   background: #d80a68;
-  transform: rotate(-2deg);
+  transform: rotate(-2deg); /* Xəttin əyriliyi */
 }
 
+/* Yeni böyük qiymət */
 .dc-new-price {
-  margin-top: 7px;
-  font-size: clamp(38px, 6.1vw, 104px);
+  margin-top: 7px; /* Köhnə qiymətlə yeni qiymət arası məsafə */
+  font-size: clamp(32px, 5.2vw, 88px); /* Böyük qiyməti böyüt/kiçilt */
   line-height: .76;
   font-weight: 1000;
-  letter-spacing: -4px;
+  letter-spacing: -4px; /* Rəqəmlər arası sıxlıq */
 }
 
+/* ₼ işarəsi */
 .dc-new-price small {
-  font-size: clamp(16px, 2.3vw, 38px);
+  font-size: clamp(14px, 2vw, 32px); /* Manat işarəsini böyüt/kiçilt */
   letter-spacing: 0;
   font-weight: 950;
 }
 
-/* Admin görünüş */
+/* ============================================================
+   ADMIN GÖRÜNÜŞ RESPONSIVE
+   ============================================================ */
 @media (max-width: 1350px) {
   .discount-cards-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* Ekran balacalaşanda 2 kart */
   }
 }
 
 @media (max-width: 760px) {
   .discount-cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Telefonda 1 kart */
   }
 }
 
-/* Çap */
+/* ============================================================
+   ÇAP - TƏK KART
+   ============================================================ */
 .discount-print-body {
   margin: 0;
   background: #fff;
@@ -1742,39 +1781,46 @@ th {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 8mm;
+  padding: 8mm; /* Tək çapda səhifə kənar boşluğu */
 }
 
 .discount-print-body.single .meyveci-discount-card {
-  width: 180mm;
-  height: 124mm;
+  width: 180mm;  /* Tək çapda kart eni */
+  height: 124mm; /* Tək çapda kart hündürlüyü */
   aspect-ratio: auto;
   box-shadow: none;
 }
 
+/* ============================================================
+   ÇAP - TOPLU KARTLAR
+   A4-də 2 sütun 3 sıra üçün əsas ölçülər
+   ============================================================ */
 .discount-print-sheet {
   display: grid;
-  grid-template-columns: repeat(2, 96mm);
-  grid-auto-rows: 66mm;
-  gap: 7mm;
+  grid-template-columns: repeat(2, 96mm); /* Toplu çapda 2 sütun. Kart eni 96mm */
+  grid-auto-rows: 66mm; /* Hər kartın hündürlüyü */
+  gap: 7mm; /* Kartlar arası məsafə */
   justify-content: center;
   align-content: start;
-  padding: 7mm;
+  padding: 7mm; /* A4 iç boşluğu */
 }
 
 .discount-print-sheet .meyveci-discount-card {
-  width: 96mm;
-  height: 66mm;
+  width: 96mm;  /* Toplu çap kart eni */
+  height: 66mm; /* Toplu çap kart hündürlüyü */
   aspect-ratio: auto;
   box-shadow: none;
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
+/* ============================================================
+   BRAUZER PRINT REJİMİ
+   ============================================================ */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 6mm;
+    margin: 6mm; /* A4 kənar boşluğu */
   }
 
   html,
@@ -1790,20 +1836,23 @@ th {
 
   .discount-print-sheet {
     display: grid !important;
-    grid-template-columns: repeat(2, 96mm) !important;
-    grid-auto-rows: 66mm !important;
-    gap: 7mm !important;
+    grid-template-columns: repeat(2, 96mm) !important; /* Printdə kart eni */
+    grid-auto-rows: 66mm !important; /* Printdə kart hündürlüyü */
+    gap: 7mm !important; /* Printdə kartlar arası məsafə */
     padding: 0 !important;
     justify-content: center !important;
   }
 
   .discount-print-sheet .meyveci-discount-card {
-    width: 96mm !important;
-    height: 66mm !important;
+    width: 96mm !important;  /* Printdə toplu kart eni */
+    height: 66mm !important; /* Printdə toplu kart hündürlüyü */
   }
 
   .discount-print-body.single .meyveci-discount-card {
-    width: 180mm !important;
-    height: 124mm !important;
+    width: 180mm !important;  /* Printdə tək kart eni */
+    height: 124mm !important; /* Printdə tək kart hündürlüyü */
   }
 }
+
+/*===================================================================================================================================================/
+
