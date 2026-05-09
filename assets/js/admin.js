@@ -1595,13 +1595,13 @@ const distributionHeaderRow = 5;
 const distributionProductHeaderRow = 6;
 const distributionFirstCustomerRow = 7;
 
-const productStartCol = distributionStartCol + 2;
+const productStartCol = distributionStartCol + 1;
 const printCol = productStartCol + distributionProducts.length;
 
 summarySheet.mergeCells(
   distributionTitleRow,
   distributionStartCol,
-  distributionTitleRow,
+  distributionTitleRow + 2,
   printCol
 );
 
