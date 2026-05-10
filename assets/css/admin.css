@@ -1597,5 +1597,35 @@ th {
   }
 }
 
+.admin-chat-btn {
+  position: relative !important;
+  overflow: visible !important;
+  padding-right: 16px !important;
+}
+
+.admin-chat-badge {
+  position: absolute !important;
+  top: -10px !important;
+  right: -9px !important;
+
+  min-width: 22px !important;
+  height: 22px !important;
+  border-radius: 999px !important;
+
+  background: #ef4444 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+
+  font-size: 12px !important;
+  font-weight: 900 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45) !important;
+  z-index: 20 !important;
+}
+
 /*=============================================================================================================================================================/
 
