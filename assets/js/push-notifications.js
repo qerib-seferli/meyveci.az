@@ -1,11 +1,11 @@
 // ============================================================
-// MEYVƏÇİ.AZ - WEB PUSH NOTIFICATIONS
-// Push subscription Supabase-də saxlanılır.
+// MEYVƏÇİ.AZ - PUSH SUBSCRIPTION
+// İstifadəçinin cihazını push_subscriptions cədvəlinə yazır.
 // ============================================================
 
 import { supabase, profile, toast } from './core.js';
 
-const VAPID_PUBLIC_KEY = 'BURAYA_VAPID_PUBLIC_KEY_YAZILACAQ';
+const VAPID_PUBLIC_KEY = 'BURAYA_CREATE_VAPID_PUBLIC_KEY_YAZ';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -18,35 +18,24 @@ function urlBase64ToUint8Array(base64String) {
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return null;
 
-  const registration = await navigator.serviceWorker.register('./sw.js', {
+  return await navigator.serviceWorker.register('./sw.js', {
     scope: './'
   });
-
-  return registration;
-}
-
-async function askNotificationPermission() {
-  if (!('Notification' in window)) return 'unsupported';
-
-  if (Notification.permission === 'granted') return 'granted';
-  if (Notification.permission === 'denied') return 'denied';
-
-  return await Notification.requestPermission();
 }
 
 async function savePushSubscription(subscription) {
   const activeProfile = await profile();
   if (!activeProfile || !subscription) return;
 
-  const sub = subscription.toJSON();
+  const json = subscription.toJSON();
 
   const { error } = await supabase
     .from('push_subscriptions')
     .upsert({
       user_id: activeProfile.id,
-      endpoint: sub.endpoint,
-      p256dh: sub.keys?.p256dh,
-      auth: sub.keys?.auth,
+      endpoint: json.endpoint,
+      p256dh: json.keys?.p256dh,
+      auth: json.keys?.auth,
       user_agent: navigator.userAgent,
       is_active: true,
       updated_at: new Date().toISOString()
@@ -55,20 +44,25 @@ async function savePushSubscription(subscription) {
     });
 
   if (error) {
-    console.warn('Push subscription saxlanmadı:', error.message);
+    console.warn('Push subscription yazılmadı:', error.message);
   }
 }
 
-async function subscribeToPush() {
+async function enablePush() {
   const activeProfile = await profile();
   if (!activeProfile) return;
 
-  if (VAPID_PUBLIC_KEY === 'BURAYA_VAPID_PUBLIC_KEY_YAZILACAQ') {
-    console.warn('VAPID_PUBLIC_KEY hələ yazılmayıb.');
+  if (VAPID_PUBLIC_KEY === 'BURAYA_CREATE_VAPID_PUBLIC_KEY_YAZ') {
+    console.warn('VAPID_PUBLIC_KEY yazılmayıb.');
     return;
   }
 
-  const permission = await askNotificationPermission();
+  if (!('Notification' in window)) return;
+
+  const permission =
+    Notification.permission === 'granted'
+      ? 'granted'
+      : await Notification.requestPermission();
 
   if (permission !== 'granted') {
     if (permission === 'denied') {
@@ -78,7 +72,7 @@ async function subscribeToPush() {
   }
 
   const registration = await registerServiceWorker();
-  if (!registration) return;
+  if (!registration || !registration.pushManager) return;
 
   const existing = await registration.pushManager.getSubscription();
 
@@ -95,9 +89,7 @@ async function subscribeToPush() {
   await savePushSubscription(subscription);
 }
 
-async function updateAppBadgeFromUnread() {
-  if (!('setAppBadge' in navigator) && !('clearAppBadge' in navigator)) return;
-
+async function updateAppBadge() {
   const activeProfile = await profile();
   if (!activeProfile) return;
 
@@ -122,7 +114,9 @@ async function updateAppBadgeFromUnread() {
   try {
     if (total > 0 && 'setAppBadge' in navigator) {
       await navigator.setAppBadge(total);
-    } else if ('clearAppBadge' in navigator) {
+    }
+
+    if (total < 1 && 'clearAppBadge' in navigator) {
       await navigator.clearAppBadge();
     }
   } catch (_) {}
@@ -131,12 +125,10 @@ async function updateAppBadgeFromUnread() {
 document.addEventListener('DOMContentLoaded', async () => {
   await registerServiceWorker();
 
-  // Login olan istifadəçidə push subscription avtomatik yoxlanır.
-  // İcazə pəncərəsi yalnız brauzer icazə istəyəndə çıxacaq.
   setTimeout(() => {
-    subscribeToPush();
-    updateAppBadgeFromUnread();
-  }, 1800);
+    enablePush();
+    updateAppBadge();
+  }, 1600);
 
-  window.addEventListener('focus', updateAppBadgeFromUnread);
+  window.addEventListener('focus', updateAppBadge);
 });
