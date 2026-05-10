@@ -31,6 +31,7 @@ let courierMap = null;
 let courierMarkers = new Map();
 let adminSoundReady = false;
 let adminAlarmLoop = null;
+let adminChatUnreadMap = new Map();
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -214,6 +215,54 @@ function statusBadge(status) {
 function payBadge(status) {
   return `<span class="payment-status-pill status-${status || 'pending'}">${statusAz(status)}</span>`;
 }
+
+function adminChatUrl(orderId) {
+  return `../messages.html?order=${encodeURIComponent(orderId || '')}`;
+}
+
+function adminChatButton(orderId) {
+  const count = adminChatUnreadMap.get(orderId) || 0;
+
+  return `
+    <a class="btn btn-soft btn-mini admin-chat-btn" href="${adminChatUrl(orderId)}">
+      💬 Söypət aç
+      ${count > 0 ? `<span class="admin-chat-badge">${count}</span>` : ''}
+    </a>
+  `;
+}
+
+async function loadAdminChatUnreadCounts(orderIds = []) {
+  adminChatUnreadMap = new Map();
+
+  const ids = [...new Set(orderIds)].filter(Boolean);
+  if (!ids.length) return;
+
+  const { data: threads, error: threadError } = await supabase
+    .from('chat_threads')
+    .select('id, order_id')
+    .in('order_id', ids);
+
+  if (threadError || !threads?.length) return;
+
+  const threadToOrder = new Map(threads.map((t) => [t.id, t.order_id]));
+  const threadIds = threads.map((t) => t.id);
+
+  const { data: messages, error: msgError } = await supabase
+    .from('chat_messages')
+    .select('id, thread_id, sender_role, is_read')
+    .in('thread_id', threadIds)
+    .neq('sender_role', 'admin')
+    .eq('is_read', false);
+
+  if (msgError) return;
+
+  (messages || []).forEach((msg) => {
+    const orderId = threadToOrder.get(msg.thread_id);
+    if (!orderId) return;
+    adminChatUnreadMap.set(orderId, (adminChatUnreadMap.get(orderId) || 0) + 1);
+  });
+}
+
 
 function statusIcon(status) {
   const root = location.pathname.includes('/admin/') ? '../' : './';
@@ -957,6 +1006,7 @@ async function loadOrders() {
   }).join('');
 
   let rows = ordersRes.data || [];
+  await loadAdminChatUnreadCounts(rows.map((o) => o.id));
   if (search) {
     rows = rows.filter((o) => {
       const p = profilesMap.get(o.user_id) || {};
@@ -1003,6 +1053,7 @@ async function loadOrders() {
         </td>
         <td>
           <div class="action-row">
+            ${adminChatButton(order.id)}
             <button class="btn btn-soft btn-mini view-order" data-row="${rowAttr({ order, profile: p, items: itemsMap.get(order.id) || [], payment: paymentsMap.get(order.id) || {} })}">Detallar</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="preparing">Hazırla</button>
@@ -2054,11 +2105,12 @@ async function loadPayments() {
 
   const { data } = await supabase
     .from('payments')
-    .select('*,orders(order_code,payment_method,total_amount)')
+    .select('*,orders(id,order_code,payment_method,total_amount)')
     .order('created_at', { ascending: false })
     .limit(250);
 
   let rows = data || [];
+  await loadAdminChatUnreadCounts(rows.map((p) => p.orders?.id));
   if (search) rows = rows.filter((p) => [p.orders?.order_code, p.provider, p.status, p.transaction_ref].join(' ').toLowerCase().includes(search));
 
   $('#paymentsTable').innerHTML = rows.map((payment) => `
@@ -2076,6 +2128,7 @@ async function loadPayments() {
       <td>${payment.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
       <td>
         <div class="action-row">
+          ${adminChatButton(payment.orders?.id)}
           <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
           <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
         </div>
