@@ -224,12 +224,11 @@ function adminChatButton(orderId) {
   const count = adminChatUnreadMap.get(orderId) || 0;
 
   return `
-    <a class="btn btn-soft btn-mini admin-chat-btn" href="${adminChatUrl(orderId)}">
-      💬 Söypət aç
-      ${count > 0 ? `<span class="admin-chat-badge">${count}</span>` : ''}
+    <a class="btn btn-soft btn-mini admin-chat-btn ${count > 0 ? 'has-unread' : ''}" href="${adminChatUrl(orderId)}">
+      💬 Söypət aç ${count > 0 ? count : ''}
     </a>
   `;
-} 
+}
 
 async function loadAdminChatUnreadCounts(orderIds = []) {
   adminChatUnreadMap = new Map();
