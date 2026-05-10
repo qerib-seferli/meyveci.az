@@ -1627,5 +1627,35 @@ th {
   z-index: 20 !important;
 }
 
+.admin-chat-btn.has-unread {
+  background: #ef4444 !important;
+  color: #fff !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+  animation: unreadChatBlink 1s infinite;
+}
+
+.admin-chat-btn.has-unread:hover {
+  background: #dc2626 !important;
+  color: #fff !important;
+}
+
+@keyframes unreadChatBlink {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px rgba(239, 68, 68, 0.16);
+    transform: scale(1.04);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    transform: scale(1);
+  }
+}
+
 /*=============================================================================================================================================================/
 
