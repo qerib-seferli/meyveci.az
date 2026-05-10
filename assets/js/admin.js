@@ -225,7 +225,7 @@ function adminChatButton(orderId) {
 
   return `
     <a class="admin-chat-wrap ${count > 0 ? 'has-unread' : ''}" href="${adminChatUrl(orderId)}">
-      💬 Söypət aç ${count > 0 ? `· ${count} yeni mesaj` : ''}
+      💬 Söypət aç ${count > 0 ? `· ${count} mesaj` : ''}
     </a>
   `;
 }
