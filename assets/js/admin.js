@@ -1053,13 +1053,13 @@ async function loadOrders() {
         </td>
         <td>
           <div class="action-row">
-            ${adminChatButton(order.id)}
             <button class="btn btn-soft btn-mini view-order" data-row="${rowAttr({ order, profile: p, items: itemsMap.get(order.id) || [], payment: paymentsMap.get(order.id) || {} })}">Detallar</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="preparing">Hazırla</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
             <button class="btn btn-primary btn-mini status" data-id="${order.id}" data-s="delivered">Təhvil</button>
             <button class="btn btn-danger btn-mini status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
+            ${adminChatButton(order.id)}
           </div>
         </td>
       </tr>
@@ -2128,9 +2128,9 @@ async function loadPayments() {
       <td>${payment.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
       <td>
         <div class="action-row">
-          ${adminChatButton(payment.orders?.id)}
           <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
           <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
+          ${adminChatButton(payment.orders?.id)}
         </div>
       </td>
     </tr>
