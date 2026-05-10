@@ -188,6 +188,18 @@ async function refreshBadges() {
   setBadge('notifyCount', notifications.count || 0);
   setBadge('messageCount', messages.count || 0);
   setBadge('newOrderCount', newOrders.count || 0);
+
+    const totalAppBadge =
+    Number(notifications.count || 0) +
+    Number(messages.count || 0);
+
+  if ('setAppBadge' in navigator && totalAppBadge > 0) {
+    navigator.setAppBadge(totalAppBadge).catch(() => {});
+  }
+
+  if ('clearAppBadge' in navigator && totalAppBadge < 1) {
+    navigator.clearAppBadge().catch(() => {});
+  }
 }
 
 function setBadge(id, count) {
