@@ -1577,10 +1577,10 @@ th {
 
 
 .order-actions {
-  display: grid !important;
-  grid-template-columns: repeat(4, max-content);
-  gap: 8px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   align-items: center;
+  gap: 8px !important;
 }
 
 .payment-actions {
@@ -1620,6 +1620,12 @@ th {
   50% {
     transform: scale(1.04);
   }
+}
+
+.order-actions .btn-mini,
+.order-actions .admin-chat-wrap {
+  flex: 0 0 auto !important;
+  width: auto !important;
 }
 
 /*=============================================================================================================================================================/
