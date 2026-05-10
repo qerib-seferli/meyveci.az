@@ -224,8 +224,8 @@ function adminChatButton(orderId) {
   const count = adminChatUnreadMap.get(orderId) || 0;
 
   return `
-    <a class="btn btn-soft btn-mini admin-chat-btn ${count > 0 ? 'has-unread' : ''}" href="${adminChatUrl(orderId)}">
-      💬 Söypət aç ${count > 0 ? `${count} yeni mesajınız var` : ''}
+    <a class="admin-chat-wrap ${count > 0 ? 'has-unread' : ''}" href="${adminChatUrl(orderId)}">
+      💬 Söypət aç ${count > 0 ? `· ${count} yeni mesaj` : ''}
     </a>
   `;
 }
@@ -1051,7 +1051,7 @@ async function loadOrders() {
           <small class="muted">${esc(fullName(courier))}</small>
         </td>
         <td>
-          <div class="action-row">
+          <div class="action-row order-actions">
             <button class="btn btn-soft btn-mini view-order" data-row="${rowAttr({ order, profile: p, items: itemsMap.get(order.id) || [], payment: paymentsMap.get(order.id) || {} })}">Detallar</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
             <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="preparing">Hazırla</button>
@@ -2126,7 +2126,7 @@ async function loadPayments() {
       <td>${payBadge(payment.status)}</td>
       <td>${payment.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
       <td>
-        <div class="action-row">
+        <div class="action-row payment-actions">
           <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
           <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
           ${adminChatButton(payment.orders?.id)}
