@@ -189,17 +189,19 @@ async function refreshBadges() {
   setBadge('messageCount', messages.count || 0);
   setBadge('newOrderCount', newOrders.count || 0);
 
-    const totalAppBadge =
+  const totalAppBadge =
     Number(notifications.count || 0) +
     Number(messages.count || 0);
-
-  if ('setAppBadge' in navigator && totalAppBadge > 0) {
-    navigator.setAppBadge(totalAppBadge).catch(() => {});
-  }
-
-  if ('clearAppBadge' in navigator && totalAppBadge < 1) {
-    navigator.clearAppBadge().catch(() => {});
-  }
+  
+  try {
+    if (totalAppBadge > 0 && 'setAppBadge' in navigator) {
+      navigator.setAppBadge(totalAppBadge);
+    }
+  
+    if (totalAppBadge < 1 && 'clearAppBadge' in navigator) {
+      navigator.clearAppBadge();
+    }
+  } catch (_) {}
 }
 
 function setBadge(id, count) {
