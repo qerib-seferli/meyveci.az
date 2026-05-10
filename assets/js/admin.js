@@ -229,7 +229,7 @@ function adminChatButton(orderId) {
       ${count > 0 ? `<span class="admin-chat-badge">${count}</span>` : ''}
     </a>
   `;
-}
+} 
 
 async function loadAdminChatUnreadCounts(orderIds = []) {
   adminChatUnreadMap = new Map();
