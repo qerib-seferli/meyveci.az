@@ -5632,7 +5632,7 @@ select option {
 }
 
 
-/*=================================================================================================================================================================*/
+/*=============================================================================================================*/
 
 /* ============================================================
    MEYVƏÇİ.AZ - SƏBƏT MƏHSUL KARTLARI
@@ -5839,3 +5839,86 @@ select option {
     font-size: 20px !important;
   }
 }
+
+/*=============================================================================================================*/
+/* ============================================================
+   MEYVƏÇİ.AZ - ADVANCED PWA INSTALL BUTTON
+   Ana səhifədə topbar altında sağda üzən tətbiq yüklə düyməsi.
+   ============================================================ */
+
+.meyveci-install-btn {
+  position: fixed;
+  top: calc(var(--topbar-height) + 12px);
+  right: 14px;
+  z-index: 250;
+  min-height: 44px;
+  border: 1px solid rgba(34, 197, 94, 0.32);
+  border-radius: 999px;
+  padding: 7px 13px 7px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #064e3b;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(220, 252, 231, 0.94));
+  box-shadow:
+    0 16px 38px rgba(22, 163, 74, 0.22),
+    0 0 0 4px rgba(187, 247, 208, 0.28);
+  font-size: 13px;
+  font-weight: 950;
+  backdrop-filter: blur(18px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.meyveci-install-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 20px 44px rgba(22, 163, 74, 0.28),
+    0 0 0 5px rgba(187, 247, 208, 0.36);
+}
+
+.meyveci-install-btn img {
+  width: 31px;
+  height: 31px;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 6px 10px rgba(34, 197, 94, 0.28));
+}
+
+.meyveci-install-modal .install-modal-body {
+  display: grid;
+  gap: 12px;
+  place-items: center;
+  text-align: center;
+  padding-top: 12px;
+}
+
+.meyveci-install-modal .install-modal-body img {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(34, 197, 94, 0.28));
+}
+
+.meyveci-install-modal .install-modal-body p {
+  margin: 0;
+  line-height: 1.6;
+  color: #14532d;
+}
+
+@media (max-width: 640px) {
+  .meyveci-install-btn {
+    top: calc(var(--topbar-height) + 8px);
+    right: 10px;
+    min-height: 40px;
+    padding: 6px 10px 6px 6px;
+    font-size: 12px;
+  }
+
+  .meyveci-install-btn img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/*=============================================================================================================*/
