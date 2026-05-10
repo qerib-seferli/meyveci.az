@@ -1574,5 +1574,53 @@ th {
   }
 }
 
+
+
+.order-actions {
+  display: grid !important;
+  grid-template-columns: repeat(4, max-content);
+  gap: 8px !important;
+  align-items: center;
+}
+
+.payment-actions {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+}
+
+.admin-chat-wrap {
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+}
+
+.admin-chat-wrap.has-unread {
+  background: #ef4444 !important;
+  color: #fff !important;
+  border: 1px solid #dc2626 !important;
+  animation: unreadChatBlink .9s infinite;
+}
+
+@keyframes unreadChatBlink {
+  0%, 100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+}
+
 /*=============================================================================================================================================================/
 
