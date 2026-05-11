@@ -388,21 +388,48 @@ async function startNotificationPolling() {
   }, 5000);
 }
 
-  function handleIncomingNotification(item) {
-    if (!item) return;
-  
-    lastNotificationTime = item.created_at || new Date().toISOString();
-  
-    refreshBadges();
-  
-    if (item.title === 'Yeni mesaj') {
-      playNotifySound();
-      return;
-    }
-  
-    playNotifySound();
-    showRealtimeToast(item.title || 'Yeni bildiriş', notificationBodyAz(item.body || 'Yeni bildiriş gəldi.'));
+
+async function showPhoneNotification(item) {
+  if (!item) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  if (!('serviceWorker' in navigator)) return;
+
+  const registration = await navigator.serviceWorker.ready;
+
+  await registration.showNotification(item.title || 'Meyvəçi', {
+    body: notificationBodyAz(item.body || 'Yeni bildiriş gəldi.'),
+    icon: './assets/img/logo/Cilek-logo.png',
+    badge: './assets/img/logo/Cilek-logo.png',
+    vibrate: [160, 80, 160],
+    tag: `meyveci-${item.id || Date.now()}`,
+    renotify: true,
+    data: {
+      url: item.link_url || './messages.html',
+    },
+  });
+}
+
+
+function handleIncomingNotification(item) {
+  if (!item) return;
+
+  lastNotificationTime = item.created_at || new Date().toISOString();
+
+  refreshBadges();
+  playNotifySound();
+
+  showPhoneNotification(item).catch(() => {});
+
+  if (item.title === 'Yeni mesaj') {
+    return;
   }
+
+  showRealtimeToast(
+    item.title || 'Yeni bildiriş',
+    notificationBodyAz(item.body || 'Yeni bildiriş gəldi.')
+  );
+}
 
 
 function showRealtimeToast(title, body = '') {
