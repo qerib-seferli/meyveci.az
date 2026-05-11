@@ -1,7 +1,7 @@
 {
-  "name": "Meyvəçi",
+  "name": "Meyvəçi.az",
   "short_name": "Meyvəçi",
-  "description": "Meyvəçi - təzə meyvə, tərəvəz və market məhsulları qapına qədər.",
+  "description": "Meyvəçi.az - təzə meyvə, tərəvəz və market məhsulları qapına qədər.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
