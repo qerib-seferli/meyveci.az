@@ -1,7 +1,7 @@
 import { supabase, profile, toast } from './core.js';
 
 const VAPID_PUBLIC_KEY =
-  'BCMrpWdiv-Ifa7qoprpeV4hPRTT-UfFCHy7ELAsVgYd13hN8T3MFCHM6cidH_4d75_iMaIUdVnl1ExMVhUhDGGg';
+  'BCMrpWdiv-Ifa7qoprpeV4hPRTT-UfFCHy7ELAsVgYd13hN8T3MFCHM6cidH_4d75_iN8T3MFCHM6cidH_4d75_iMaIUdVnl1ExMVhUhDGGg'.replace('N8T3MFCHM6cidH_4d75_iN8T3MFCHM6cidH_4d75_i', 'N8T3MFCHM6cidH_4d75_i');
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -11,73 +11,77 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) return null;
+  if (!('serviceWorker' in navigator)) {
+    toast('Bu brauzer Service Worker dəstəkləmir.');
+    return null;
+  }
+
   return await navigator.serviceWorker.register('./sw.js', { scope: './' });
 }
 
-async function saveSubscription(subscription) {
-  const activeProfile = await profile();
-  if (!activeProfile || !subscription) return;
-
-  const json = subscription.toJSON();
-
-  const { error } = await supabase.from('push_subscriptions').upsert(
-    {
-      user_id: activeProfile.id,
-      endpoint: json.endpoint,
-      p256dh: json.keys?.p256dh,
-      auth: json.keys?.auth,
-      user_agent: navigator.userAgent,
-      is_active: true,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'endpoint' }
-  );
-
-  if (error) {
-    console.warn('Push subscription yazılmadı:', error.message);
-    toast('Bildiriş cihazı qeyd olunmadı.');
-  } else {
-    toast('Bildirişlər aktiv edildi.');
-  }
-}
-
 async function enablePush() {
-  const activeProfile = await profile();
-  if (!activeProfile) {
-    toast('Bildiriş üçün əvvəlcə hesaba daxil olun.');
-    return;
+  try {
+    const activeProfile = await profile(true);
+
+    if (!activeProfile?.id) {
+      toast('Bildiriş üçün əvvəlcə hesaba daxil olun.');
+      return;
+    }
+
+    if (!('Notification' in window)) {
+      toast('Bu brauzer bildiriş dəstəkləmir.');
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+
+    if (permission !== 'granted') {
+      toast('Bildiriş icazəsi verilmədi.');
+      return;
+    }
+
+    const registration = await registerServiceWorker();
+    if (!registration?.pushManager) {
+      toast('Push sistemi bu brauzerdə aktiv deyil.');
+      return;
+    }
+
+    let subscription = await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+
+    const json = subscription.toJSON();
+
+    const { error } = await supabase.from('push_subscriptions').upsert(
+      {
+        user_id: activeProfile.id,
+        endpoint: json.endpoint,
+        p256dh: json.keys?.p256dh,
+        auth: json.keys?.auth,
+        user_agent: navigator.userAgent,
+        is_active: true,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'endpoint' }
+    );
+
+    if (error) {
+      console.error('Push subscription error:', error);
+      toast('Push qeydiyyatı alınmadı: ' + error.message);
+      return;
+    }
+
+    toast('Bildirişlər aktiv edildi.');
+    document.getElementById('enablePushBtn')?.classList.add('hide');
+  } catch (error) {
+    console.error('Push enable error:', error);
+    toast('Bildiriş aktiv olmadı: ' + error.message);
   }
-
-  if (!('Notification' in window)) {
-    toast('Bu brauzer bildirişi dəstəkləmir.');
-    return;
-  }
-
-  const permission = await Notification.requestPermission();
-
-  if (permission !== 'granted') {
-    toast('Bildiriş icazəsi verilmədi.');
-    return;
-  }
-
-  const registration = await registerServiceWorker();
-  if (!registration?.pushManager) {
-    toast('Push sistemi bu brauzerdə aktiv deyil.');
-    return;
-  }
-
-  let subscription = await registration.pushManager.getSubscription();
-
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
-  }
-
-  await saveSubscription(subscription);
-  hidePushButton();
 }
 
 function createPushButton() {
@@ -85,46 +89,25 @@ function createPushButton() {
 
   const btn = document.createElement('button');
   btn.id = 'enablePushBtn';
-  btn.className = 'meyveci-push-btn hide';
+  btn.className = 'meyveci-push-btn';
   btn.type = 'button';
-  btn.innerHTML = '🔔 Bildirişləri aktiv et';
+  btn.textContent = '🔔 Bildirişləri aktiv et';
 
   document.body.appendChild(btn);
   btn.addEventListener('click', enablePush);
 }
 
-function showPushButton() {
-  document.getElementById('enablePushBtn')?.classList.remove('hide');
-}
-
-function hidePushButton() {
-  document.getElementById('enablePushBtn')?.classList.add('hide');
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  await registerServiceWorker();
   createPushButton();
 
-  const activeProfile = await profile();
-  if (!activeProfile) return;
+  const activeProfile = await profile(true);
 
-  if (!('Notification' in window)) return;
-
-  if (Notification.permission === 'granted') {
-    const registration = await navigator.serviceWorker.ready;
-    const existing = await registration.pushManager.getSubscription();
-
-    if (existing) {
-      await saveSubscription(existing);
-      hidePushButton();
-    } else {
-      showPushButton();
-    }
-
+  if (!activeProfile) {
+    document.getElementById('enablePushBtn')?.classList.add('hide');
     return;
   }
 
-  if (Notification.permission === 'default') {
-    showPushButton();
+  if (Notification.permission === 'granted') {
+    enablePush();
   }
 });
