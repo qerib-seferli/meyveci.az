@@ -4,7 +4,7 @@
 // Fayl root-da qalmalıdır: /sw.js
 // ============================================================
 
-const CACHE_NAME = 'meyveci-pwa-v3';
+const CACHE_NAME = 'meyveci-pwa-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -24,20 +24,20 @@ self.addEventListener('push', (event) => {
   }
 
   const title = data.title || 'Meyvəçi';
-  const body = data.body || data.message || 'Yeni bildiriş gəldi.';
+  const body = data.body || 'Yeni bildiriş gəldi.';
 
   const options = {
     body,
     icon: './assets/img/logo/Cilek-logo.png',
     badge: './assets/img/logo/Cilek-logo.png',
-    vibrate: [160, 80, 160],
+    vibrate: [180, 90, 180],
     tag: data.tag || `meyveci-${Date.now()}`,
     renotify: true,
     requireInteraction: false,
     data: {
       url: data.url || './messages.html',
-      badge_count: Number(data.badge_count || 1),
-    },
+      badge_count: Number(data.badge_count || 1)
+    }
   };
 
   event.waitUntil(
@@ -53,12 +53,12 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil((async () => {
     const windowClients = await clients.matchAll({
       type: 'window',
-      includeUncontrolled: true,
+      includeUncontrolled: true
     });
 
     for (const client of windowClients) {
       if ('focus' in client) {
-        client.focus();
+        await client.focus();
         client.navigate(targetUrl);
         return;
       }
