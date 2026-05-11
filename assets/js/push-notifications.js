@@ -5,7 +5,7 @@
 
 import { supabase, profile, toast } from './core.js';
 
-const VAPID_PUBLIC_KEY = 'BURAYA_CREATE_VAPID_PUBLIC_KEY_YAZ';
+const VAPID_PUBLIC_KEY = 'BCMrpWdiv-Ifa7qoprpeV4hPRTT-UfFCHy7ELAsVgYd13hN8T3MFCHM6cidH_4d75_iMaIUdVnl1ExMVhUhDGGg';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -52,7 +52,7 @@ async function enablePush() {
   const activeProfile = await profile();
   if (!activeProfile) return;
 
-  if (VAPID_PUBLIC_KEY === 'BURAYA_CREATE_VAPID_PUBLIC_KEY_YAZ') {
+  if (VAPID_PUBLIC_KEY === 'BCMrpWdiv-Ifa7qoprpeV4hPRTT-UfFCHy7ELAsVgYd13hN8T3MFCHM6cidH_4d75_iMaIUdVnl1ExMVhUhDGGg') {
     console.warn('VAPID_PUBLIC_KEY yazılmayıb.');
     return;
   }
