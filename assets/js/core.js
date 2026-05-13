@@ -45,17 +45,40 @@ export function toast(message) {
   setTimeout(() => toastBox.classList.remove('show'), 2800);
 }
 
+
 // Texniki Supabase/GitHub xətalarını istifadəçiyə sadə dildə göstərir.
+// Test mərhələsində xətanın real mətnini də göstəririk ki, hansı cədvəldə problem olduğunu tapaq.
 export function friendlyError(message) {
   const text = String(message || 'Əməliyyat tamamlanmadı');
-  if (text.includes('403') || text.toLowerCase().includes('row-level security')) return 'Bu əməliyyat üçün icazə yoxdur. SQL düzəliş faylını Supabase-də run edin.';
-  if (text.includes('404') || text.toLowerCase().includes('not found')) return 'Məlumat və ya şəkil yolu tapılmadı.';
-  if (text.toLowerCase().includes('failed to fetch')) return 'Serverlə bağlantı alınmadı. İnterneti və Supabase ayarlarını yoxlayın.';
-  if (text.includes('duplicate key')) return 'Bu məlumat artıq mövcuddur.';
-  if (text.includes('assigned_by') || text.includes('courier_assignments')) return 'Kuryer təyinat cədvəli yenilənməyib. SQL v4 faylını Supabase-də run edin.';
-  if (text.includes('undefined')) return 'Seçilən məlumat tapılmadı. Səhifəni yeniləyib təkrar yoxlayın.';
+
+  if (text.includes('403') || text.toLowerCase().includes('row-level security')) {
+    console.error('Supabase icazə/RLS xətası:', text);
+    return `Bu əməliyyat üçün icazə yoxdur. Texniki xəta: ${text}`;
+  }
+
+  if (text.includes('404') || text.toLowerCase().includes('not found')) {
+    return 'Məlumat və ya şəkil yolu tapılmadı.';
+  }
+
+  if (text.toLowerCase().includes('failed to fetch')) {
+    return 'Serverlə bağlantı alınmadı. İnterneti və Supabase ayarlarını yoxlayın.';
+  }
+
+  if (text.includes('duplicate key')) {
+    return 'Bu məlumat artıq mövcuddur.';
+  }
+
+  if (text.includes('assigned_by') || text.includes('courier_assignments')) {
+    return 'Kuryer təyinat cədvəli yenilənməyib. SQL v4 faylını Supabase-də run edin.';
+  }
+
+  if (text.includes('undefined')) {
+    return 'Seçilən məlumat tapılmadı. Səhifəni yeniləyib təkrar yoxlayın.';
+  }
+
   return text;
 }
+
 
 // URL-dən id parametrini oxuyur: product.html?id=...
 export function byId() {
