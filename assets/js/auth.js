@@ -78,13 +78,16 @@ function initForgot() {
     event.preventDefault();
 
     const data = formData(event.target);
-    const redirectTo = location.origin + location.pathname.replace('forgot-password.html', 'reset-password.html');
 
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
+    const redirectTo = 'https://meyveci.az/reset-password.html';
+
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo,
+    });
 
     if (error) return toast(error.message);
 
-    toast('Şifrə yeniləmə linki göndərildi');
+    toast('Şifrə yeniləmə linki email ünvanınıza göndərildi. Zəhmət olmasa emailinizi yoxlayın.');
   });
 }
 
@@ -94,15 +97,30 @@ function initReset() {
 
     const data = formData(event.target);
 
+    if (!data.password || data.password.length < 6) {
+      return toast('Şifrə ən azı 6 simvol olmalıdır');
+    }
+
     if (data.password !== data.password2) {
       return toast('Şifrələr eyni deyil');
     }
 
-    const { error } = await supabase.auth.updateUser({ password: data.password });
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (!sessionData?.session) {
+      return toast('Şifrə yeniləmə sessiyası tapılmadı. Zəhmət olmasa emaildəki linkə yenidən daxil olun.');
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: data.password,
+    });
 
     if (error) return toast(error.message);
 
-    toast('Şifrə yeniləndi');
-    setTimeout(() => location.href = './login.html', 900);
+    toast('Şifrə uğurla yeniləndi. İndi giriş edə bilərsiniz.');
+
+    setTimeout(() => {
+      location.href = './login.html';
+    }, 1200);
   });
 }
