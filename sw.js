@@ -4,7 +4,7 @@
 // Fayl root-da qalmalıdır: /sw.js
 // ============================================================
 
-const CACHE_NAME = 'meyveci-pwa-v5';
+const CACHE_NAME = 'meyveci-pwa-v6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
