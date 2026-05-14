@@ -41,6 +41,7 @@
               <button class="tab active" data-tab="ordersPanel">Sifarişlər</button>
               <button class="tab" data-tab="paymentsPanel">Ödənişlər</button>
               <button class="tab" data-tab="preparationPanel">Hazırlanma Mərkəzi</button>
+              <button class="tab" data-tab="deliveryTariffsPanel">Çatdırılma tarifləri</button>
             </div>
         
             <section id="ordersPanel" class="tab-panel active card pro-card">
@@ -176,6 +177,119 @@
             </div>
           </div>
         </section>
+
+            <section id="deliveryTariffsPanel" class="tab-panel card pro-card">
+              <div class="prep-head">
+                <div>
+                  <h2>Çatdırılma tarifləri</h2>
+                  <p class="muted">
+                    Rayon üzrə sabit qiymət və km məsafəsinə görə çatdırılma qiymətlərini buradan idarə et.
+                  </p>
+                </div>
+              </div>
+            
+              <div class="delivery-admin-grid">
+                <form id="deliverySettingsForm" class="card delivery-admin-card">
+                  <h3>Anbar / mağaza koordinatı</h3>
+            
+                  <input name="store_name" placeholder="Anbar adı">
+                  <input name="store_lat" type="number" step="any" placeholder="Anbar latitude">
+                  <input name="store_lng" type="number" step="any" placeholder="Anbar longitude">
+                  <input name="default_fee" type="number" step="0.01" placeholder="Default çatdırılma">
+                  <input name="min_fee" type="number" step="0.01" placeholder="Minimum çatdırılma">
+                  <input name="free_delivery_min" type="number" step="0.01" placeholder="Pulsuz çatdırılma limiti">
+            
+                  <button class="btn btn-primary" type="submit">Yadda saxla</button>
+                </form>
+            
+                <form id="regionTariffForm" class="card delivery-admin-card">
+                  <h3>Rayon / şəhər tarifi</h3>
+            
+                  <input type="hidden" name="id">
+                  <input name="city_region" placeholder="Məs: Bakı, Bərdə, Sumqayıt" required>
+                  <input name="fixed_fee" type="number" step="0.01" placeholder="Sabit qiymət" required>
+                  <input name="free_delivery_min" type="number" step="0.01" placeholder="Pulsuz limit">
+                  <label class="admin-check-row">
+                    <input name="is_active" type="checkbox" checked>
+                    Aktiv
+                  </label>
+            
+                  <div class="action-row">
+                    <button class="btn btn-primary" type="submit">Tarifi saxla</button>
+                    <button id="newRegionTariff" class="btn btn-soft" type="button">Yeni</button>
+                  </div>
+                </form>
+            
+                <form id="kmTariffForm" class="card delivery-admin-card">
+                  <h3>KM aralığı tarifi</h3>
+            
+                  <input type="hidden" name="id">
+                  <input name="title" placeholder="Məs: 5-10 km" required>
+                  <input name="min_km" type="number" step="0.01" placeholder="Min km" required>
+                  <input name="max_km" type="number" step="0.01" placeholder="Max km boş ola bilər">
+                  <input name="base_fee" type="number" step="0.01" placeholder="Başlanğıc qiymət" required>
+                  <input name="per_km_fee" type="number" step="0.01" placeholder="Hər km qiyməti">
+                  <label class="admin-check-row">
+                    <input name="is_active" type="checkbox" checked>
+                    Aktiv
+                  </label>
+            
+                  <div class="action-row">
+                    <button class="btn btn-primary" type="submit">KM tarifini saxla</button>
+                    <button id="newKmTariff" class="btn btn-soft" type="button">Yeni</button>
+                  </div>
+                </form>
+              </div>
+            
+              <div class="prep-grid">
+                <div class="prep-box">
+                  <div class="prep-box-head">
+                    <h3>Rayon / şəhər tarifləri</h3>
+                    <small>Şəhər və rayon üzrə sabit çatdırılma qiymətləri</small>
+                  </div>
+            
+                  <div class="table-wrap">
+                    <table class="pro-table">
+                      <thead>
+                        <tr>
+                          <th>Şəhər/rayon</th>
+                          <th>Qiymət</th>
+                          <th>Pulsuz limit</th>
+                          <th>Status</th>
+                          <th>Əməliyyat</th>
+                        </tr>
+                      </thead>
+                      <tbody id="regionTariffsTable"></tbody>
+                    </table>
+                  </div>
+                </div>
+            
+                <div class="prep-box">
+                  <div class="prep-box-head">
+                    <h3>KM tarifləri</h3>
+                    <small>Müştəri ilə anbar arası məsafəyə görə hesablanır</small>
+                  </div>
+            
+                  <div class="table-wrap">
+                    <table class="pro-table">
+                      <thead>
+                        <tr>
+                          <th>Ad</th>
+                          <th>Aralıq</th>
+                          <th>Başlanğıc</th>
+                          <th>Hər km</th>
+                          <th>Status</th>
+                          <th>Əməliyyat</th>
+                        </tr>
+                      </thead>
+                      <tbody id="kmTariffsTable"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            
       </div>
     </section>
       
