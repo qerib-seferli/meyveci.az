@@ -6113,19 +6113,30 @@ select option {
   .legal-card {
     padding: 16px;
   }
-}
 
-/*=============================*/
-.footer-grid > div {
-  padding: 14px;
-}
-
-.footer-grid h4 {
-  font-size: 15px;
-}
-
-.footer-grid a,
-.footer-grid span {
-  font-size: 13px;
+   /*============= 2 sətir 2 sütun ================*/
+   .footer-grid > div {
+     padding: 14px;
+   }
+   
+   .footer-grid h4 {
+     font-size: 15px;
+   }
+   
+   .footer-grid a,
+   .footer-grid span {
+     font-size: 13px;
+   }
+   
+   /*====== Telefon üçün tam ortada görünəcək =======*/
+  .footer-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.6;
+    text-align: center;
+    width: 100%;
+    align-items: center;
+  }
 }
 /*=============================================================================================================*/
