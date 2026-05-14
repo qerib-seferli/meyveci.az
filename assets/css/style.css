@@ -6456,6 +6456,64 @@ select option {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-/*=============================================================================================================*/
+
+/*======================= Şəhər/rayon seçəndə və lat/lng olduqda çatdırılma qiyməti avtomatik çıxmalıdır ============================*/
+
+.delivery-fee-box,
+.cart-summary-box {
+  border-radius: 22px;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 16px;
+}
+
+.delivery-fee-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.delivery-fee-box b {
+  color: var(--green-dark);
+}
+
+.delivery-fee-box p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.delivery-fee-box strong {
+  color: var(--green-dark);
+  font-size: 18px;
+}
+
+.cart-summary-box {
+  display: grid;
+  gap: 10px;
+}
+
+.cart-summary-box div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--muted);
+}
+
+.cart-summary-box b {
+  color: var(--dark);
+}
+
+.cart-summary-box .summary-total {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-weight: 900;
+}
+
+.cart-summary-box .summary-total b {
+  color: var(--green-dark);
+  font-size: 20px;
+}
+
 /*=============================================================================================================*/
 /*=============================================================================================================*/
