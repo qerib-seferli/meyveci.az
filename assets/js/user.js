@@ -511,6 +511,10 @@ async function initOrders() {
     button.addEventListener('click', () => cancelOrder(button.dataset.id));
   });
 
+  $$('.return-order-cart').forEach((button) => {
+    button.addEventListener('click', () => returnOrderToCart(button.dataset.id));
+  });
+
   $$('.follow-user-courier').forEach((button) => {
     button.addEventListener('click', () => {
       const orderId = button.dataset.id;
@@ -599,9 +603,23 @@ function orderCard(order, courier = null, courierLocation = null, address = {}) 
 
       <div class="order-actions">
         <button class="btn btn-primary open-chat" data-id="${order.id}">Sifarişlə bağlı sualın var?</button>
-        ${order.status === 'pending' ? `
-          <button class="btn btn-danger cancel-order" data-id="${order.id}">Sifarişi ləğv et</button>
-        ` : ''}
+        
+            ${order.status === 'paid_hold' ? `
+              <div class="paid-hold-box full">
+                <b>⏳ 5 dəqiqə ərzində dəyişiklik edilə bilər</b>
+                <span class="user-countdown" data-deadline="${order.edit_deadline}">
+                  Vaxt hesablanır...
+                </span>
+                <button class="btn btn-danger return-order-cart" type="button" data-id="${order.id}">
+                  Sifarişi səbətə qaytar
+                </button>
+              </div>
+            ` : ''}
+            
+            ${order.status === 'pending' ? `
+              <button class="btn btn-danger cancel-order" data-id="${order.id}">Sifarişi ləğv et</button>
+            ` : ''}
+        
       </div>
     </div>`;
 }
@@ -1834,3 +1852,44 @@ function animateUserMarker(marker, target) {
 
 /*===================================================================*/
 
+async function returnOrderToCart(orderId) {
+  if (!orderId) return;
+
+  if (!confirm('Sifariş məhsulları səbətə qaytarılsın? Ödəniş refund_pending kimi qeyd olunacaq.')) return;
+
+  const { data, error } = await supabase.rpc('restore_paid_hold_order_to_cart', {
+    p_order_id: orderId,
+  });
+
+  if (error) {
+    toast(error.message);
+    return;
+  }
+
+  toast('Məhsullar səbətə qaytarıldı');
+
+  setTimeout(() => {
+    location.href = 'cart.html';
+  }, 800);
+}
+
+setInterval(() => {
+  document.querySelectorAll('.user-countdown').forEach((el) => {
+    const deadline = new Date(el.dataset.deadline).getTime();
+    const diff = deadline - Date.now();
+
+    if (diff <= 0) {
+      el.textContent = 'Düzəliş vaxtı bitdi';
+      return;
+    }
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    el.textContent = `${minutes}:${String(seconds).padStart(2, '0')} qaldı`;
+  });
+}, 1000);
+
+/*===================================================================*/
+/*===================================================================*/
+/*===================================================================*/
