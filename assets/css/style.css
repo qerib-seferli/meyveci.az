@@ -6114,4 +6114,18 @@ select option {
     padding: 16px;
   }
 }
+
+/*=============================*/
+.footer-grid > div {
+  padding: 14px;
+}
+
+.footer-grid h4 {
+  font-size: 15px;
+}
+
+.footer-grid a,
+.footer-grid span {
+  font-size: 13px;
+}
 /*=============================================================================================================*/
