@@ -6292,6 +6292,67 @@ select option {
   height: 18px;
 }
 
+.cart-head-pro {
+  align-items: center;
+}
+
+.cart-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cart-bonus-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at top left, rgba(254, 240, 138, 0.9), transparent 38%),
+    linear-gradient(135deg, #fff7ed, #fefce8);
+  border: 1px solid rgba(250, 204, 21, 0.42);
+  box-shadow: 0 10px 24px rgba(202, 138, 4, 0.14);
+}
+
+.cart-bonus-badge > span {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  font-size: 18px;
+}
+
+.cart-bonus-badge small {
+  display: block;
+  font-size: 11px;
+  color: #92400e;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cart-bonus-badge b {
+  display: block;
+  color: #713f12;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+@media (max-width: 560px) {
+  .cart-head-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .cart-bonus-badge {
+    padding: 8px 10px;
+  }
+}
+
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 /*=============================================================================================================*/
