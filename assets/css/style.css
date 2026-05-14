@@ -6171,3 +6171,63 @@ select option {
      flex-shrink: 0;
    }
 /*=============================================================================================================*/
+/* ============================================================
+   ONLINE PAYMENT UI
+   ============================================================ */
+
+.payment-secure-box {
+  border-radius: 24px;
+  border: 1px solid rgba(34,197,94,.18);
+  background:
+    radial-gradient(circle at top left, rgba(190,242,100,.22), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(236,253,245,.92));
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  box-shadow: 0 12px 34px rgba(15,118,55,.08);
+}
+
+.payment-secure-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.payment-secure-head b {
+  font-size: 18px;
+  color: var(--green-dark);
+}
+
+.payment-secure-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.secure-pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(34,197,94,.12);
+  color: var(--green-dark);
+  font-weight: 900;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.payment-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.payment-trust-row span {
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(34,197,94,.12);
+  font-size: 13px;
+  color: var(--green-dark);
+  font-weight: 800;
+}
+/*=============================================================================================================*/
