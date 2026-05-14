@@ -365,16 +365,31 @@ function renderSiteFooter() {
         </div>
       </div>
 
-        <div class="footer-bottom">
-          <span class="footer-copy-left">
-            © 2026 Meyveci.az. Bütün hüquqlar qorunur.
-            “MAREHO” MMC tərəfindən idarə olunur.
-          </span>
-        
-          <span class="footer-copy-right">
-            - - -
-          </span>
+      <div class="footer-bottom">
+        <span class="footer-copy-left">
+          © 2026 Meyveci.az. Bütün hüquqlar qorunur.
+          “MAREHO” MMC tərəfindən idarə olunur.
+        </span>
+      
+        <div class="footer-socials">
+          <a href="https://instagram.com/meyveci.aze" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm0 2h10c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3zm10.5 1a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12 7a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6z"/>
+            </svg>
+      
+            <span>@meyveci.aze</span>
+          </a>
+      
+          <a href="https://tiktok.com/@meyveci.aze" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 8.3a6.5 6.5 0 01-3.8-1.2v8.2a5.3 5.3 0 11-5.3-5.3c.3 0 .6 0 .9.1v2.7a2.7 2.7 0 10 1.8 2.5V2h2.6a3.9 3.9 0 003.8 3.8v2.5z"/>
+            </svg>
+      
+            <span>@meyveci.aze</span>
+          </a>
         </div>
+      </div>
+      
     </div>
   `;
 
