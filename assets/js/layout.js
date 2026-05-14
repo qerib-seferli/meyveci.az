@@ -365,10 +365,16 @@ function renderSiteFooter() {
         </div>
       </div>
 
-      <div class="footer-bottom">
-        <span>© 2026 Meyveci.az. Bütün hüquqlar qorunur. “MAREHO” MMC tərəfindən idarə olunur.</span>
-        <span>Instagram: @meyveci.aze • TikTok: @meyveci.aze</span>
-      </div>
+        <div class="footer-bottom">
+          <span class="footer-copy-left">
+            © 2026 Meyveci.az. Bütün hüquqlar qorunur.
+            “MAREHO” MMC tərəfindən idarə olunur.
+          </span>
+        
+          <span class="footer-copy-right">
+            Instagram: @meyveci.aze • TikTok: @meyveci.aze
+          </span>
+        </div>
     </div>
   `;
 
