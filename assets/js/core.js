@@ -176,22 +176,27 @@ export function statusAz(status) {
   const statuses = {
     pending: 'Gözləyir',
     draft_payment: 'Ödəniş gözlənilir',
-    paid_hold: '5 dəqiqə gözləmə',
-    ready_to_confirm: 'Təsdiq gözləyir',
-    ready_for_courier: 'Kuryerə hazırdır',
+
+    paid_hold: 'Düzəliş vaxtı',
+    ready_to_confirm: 'Təsdiqə hazırdır',
+
     confirmed: 'Təsdiqləndi',
     preparing: 'Hazırlanır',
-    on_the_way: 'Kuryerə verildi',
+
+    ready_for_courier: 'Kuryerə hazırlanır',
+    on_the_way: 'Kuryer yoldadır',
     courier_near: 'Kuryer yaxınlaşır',
+
     delivered: 'Təhvil verildi',
     cancelled: 'Ləğv edildi',
+
     paid: 'Ödənildi',
-    rejected: 'Rədd edildi',
     approved: 'Təsdiqləndi',
+    rejected: 'Rədd edildi',
+
+    refund_pending: 'Geri ödəniş gözləyir',
+    refund_processing: 'Geri ödəniş icra olunur',
     refunded: 'Geri qaytarıldı',
-    paid_hold: '5 dəqiqə gözləmə',
-    ready_to_confirm: 'Təsdiq gözləyir',
-    ready_for_courier: 'Kuryerə hazırdır',
   };
 
   return statuses[status] || status || '—';
