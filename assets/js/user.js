@@ -1378,20 +1378,27 @@ function roleAz(role) {
   return map[role] || role || 'İstifadəçi';
 }
 
+
 function paymentStatusAz(status) {
   const map = {
-    pending: 'Gözləyir',
-    paid: 'Təsdiqləndi',
+    pending: 'Ödəniş gözlənilir',
+
+    paid: 'Ödənildi',
     approved: 'Təsdiqləndi',
     confirmed: 'Təsdiqləndi',
+
     rejected: 'Rədd edildi',
-    cancelled: 'Rədd edildi',
-    failed: 'Rədd edildi',
+    cancelled: 'Ləğv edildi',
+    failed: 'Ödəniş alınmadı',
+
+    refund_pending: 'Geri ödəniş gözləyir',
+    refund_processing: 'Geri ödəniş icra olunur',
     refunded: 'Geri qaytarıldı',
   };
 
-  return map[status] || status || 'Gözləyir';
+  return map[status] || status || 'Ödəniş gözlənilir';
 }
+
 
 function formatQty(value) {
   const number = Number(value || 0);
