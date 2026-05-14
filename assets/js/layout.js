@@ -372,7 +372,7 @@ function renderSiteFooter() {
           </span>
         
           <span class="footer-copy-right">
-            Instagram: @meyveci.aze • TikTok: @meyveci.aze
+            - - -
           </span>
         </div>
     </div>
