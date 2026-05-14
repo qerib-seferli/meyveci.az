@@ -261,9 +261,7 @@ async function initCart() {
   await fillCheckoutFromProfile();
   await renderCart();
 
-  $('#paymentMethod')?.addEventListener('change', updatePaymentHelp);
   $('#checkoutForm')?.addEventListener('submit', checkout);
-  updatePaymentHelp();
 }
 
 async function fillCheckoutFromProfile() {
@@ -377,36 +375,12 @@ async function removeItem(id) {
   renderCart();
 }
 
-function updatePaymentHelp() {
-  const method = $('#paymentMethod')?.value;
-  const help = $('#paymentHelp');
 
-  if (!help) return;
-
-  if (method === 'cash') {
-    help.innerHTML = '<b>Nağd ödəniş:</b> ümumi məbləğ məhsullar təhvil veriləndə kuryerə ödəniləcək.';
-  }
-
-  if (method === 'card_transfer') {
-    help.innerHTML = '<b>Kart köçürməsi:</b> 4169 7388 0000 0000 kartına ödəniş edin və çek şəklini yükləyin.';
-  }
-
-  if (method === 'pos') {
-    help.innerHTML = '<b>POS terminal:</b> yaxın ərazilərdə kuryerin üzərindəki POS terminal vasitəsilə ödəniş edə bilərsiniz.';
-  }
-
-  if (method === 'online_payment') {
-    help.innerHTML = '<b>Online ödəniş:</b> gələcək mərhələdə bank/payment inteqrasiyası qoşulduqda avtomatik ödəniş aktiv olacaq.';
-  }
-
-  help.classList.add('show');
-}
 
 async function checkout(event) {
   event.preventDefault();
 
   const data = formData(event.target);
-  const receiptFile = $('#receiptFile')?.files?.[0];
 
   // Sifariş tamamlananda telefondan/browserdən lokasiya icazəsi istəyirik.
   if (!data.lat || !data.lng || data.lat == 0 || data.lng == 0) {
@@ -433,12 +407,7 @@ async function checkout(event) {
     }
 
   try {
-    let receiptUrl = null;
-
-    if (receiptFile) {
-      receiptUrl = await uploadFile('receipts', receiptFile, 'receipts');
-    }
-
+    
     await supabase
       .from('profiles')
       .update({
@@ -461,8 +430,8 @@ async function checkout(event) {
       p_lat: data.lat ? Number(data.lat) : null,
       p_lng: data.lng ? Number(data.lng) : null,
       p_payment_method: data.payment_method,
-      p_transaction_ref: data.transaction_ref || null,
-      p_receipt_url: receiptUrl,
+      p_transaction_ref: null,
+      p_receipt_url: null,
     });
 
     if (error) throw error;
