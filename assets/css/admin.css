@@ -1541,7 +1541,7 @@ th {
   }
 }
 
-/*========= Sifarişlərdə də, Ödənişlərdə də hər kartın içində “💬 Söypət aç” görünəcək və müştəridən gələn oxunmamış mesaj sayı badge kimi çıxacaq ===========/
+/*========= Sifarişlərdə də, Ödənişlərdə də hər kartın içində “💬 Söypət aç” görünəcək və müştəridən gələn oxunmamış mesaj sayı badge kimi çıxacaq ===========*/
 
 /* Sifariş/ödəniş söhbət düyməsi */
 .admin-chat-btn.has-unread {
@@ -1664,6 +1664,64 @@ th {
 @media (max-width: 980px) {
   .delivery-admin-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.delivery-admin-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.delivery-admin-card input,
+.delivery-admin-card select {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
+  box-sizing: border-box;
+}
+
+.delivery-admin-card .btn {
+  min-height: 48px;
+  border-radius: 999px;
+}
+
+.prep-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.prep-box {
+  width: 100%;
+}
+
+.admin-check-row {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.10);
+}
+
+.admin-check-row input {
+  accent-color: #16a34a;
+}
+
+.admin-check-row:has(input:not(:checked)) {
+  background: rgba(239, 68, 68, 0.10);
+  color: #991b1b;
+}
+
+.action-row .btn,
+.delivery-admin-card .btn {
+  height: 48px;
+  padding-inline: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .delivery-admin-grid {
+    grid-template-columns: 1fr;
   }
 }
 /*=============================================================================================================================================================*/
