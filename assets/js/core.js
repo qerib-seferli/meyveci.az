@@ -189,6 +189,9 @@ export function statusAz(status) {
     rejected: 'Rədd edildi',
     approved: 'Təsdiqləndi',
     refunded: 'Geri qaytarıldı',
+    paid_hold: '5 dəqiqə gözləmə',
+    ready_to_confirm: 'Təsdiq gözləyir',
+    ready_for_courier: 'Kuryerə hazırdır',
   };
 
   return statuses[status] || status || '—';
