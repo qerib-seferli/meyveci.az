@@ -968,7 +968,12 @@ async function ordersPayments() {
 
 async function loadOrders() {
   const [ordersRes, profilesRes, couriersRes, paymentsRes, itemsRes] = await Promise.all([
-    supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(250),
+    supabase
+      .from('orders')
+      .select('*')
+      .neq('status', 'draft_payment')
+      .order('created_at', { ascending: false })
+      .limit(250),
     supabase.from('profiles').select('*'),
     supabase.from('couriers').select('*'),
     supabase.from('payments').select('*'),
@@ -1037,7 +1042,17 @@ async function loadOrders() {
         <td>
           <small>${esc(address || 'Ünvan yoxdur')}</small>
         </td>
-        <td>${statusBadge(order.status)}</td>
+        
+        <td>
+          ${statusBadge(order.status)}
+          ${order.status === 'paid_hold'
+            ? `<div class="countdown-badge" data-deadline="${order.edit_deadline}">
+                 ⏳ 5 dəqiqə gözləmə
+               </div>`
+            : ''
+          }
+        </td>
+        
         <td>${payBadge(order.payment_status)}</td>
         <td class="admin-money-cell">
           <b>${money(order.total_amount)}</b>
@@ -1053,10 +1068,9 @@ async function loadOrders() {
         <td>
           <div class="action-row order-actions">
             <button class="btn btn-soft btn-mini view-order" data-row="${rowAttr({ order, profile: p, items: itemsMap.get(order.id) || [], payment: paymentsMap.get(order.id) || {} })}">Detallar</button>
-            <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="confirmed">Təsdiq</button>
-            <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="preparing">Hazırla</button>
-            <button class="btn btn-soft btn-mini status" data-id="${order.id}" data-s="on_the_way">Kuryerə ver</button>
-            <button class="btn btn-primary btn-mini status" data-id="${order.id}" data-s="delivered">Təhvil</button>
+            <button class="btn btn-soft btn-mini status admin-status-btn" data-id="${order.id}" data-s="confirmed" ${order.status !== 'ready_to_confirm' ? 'disabled' : ''}>✅ Təsdiqlə</button>
+            <button class="btn btn-soft btn-mini status admin-status-btn" data-id="${order.id}" data-s="preparing" ${order.status !== 'confirmed' ? 'disabled' : ''}>🥝 Hazırla</button>
+            <button class="btn btn-primary btn-mini status admin-status-btn" data-id="${order.id}" data-s="ready_for_courier" ${order.status !== 'preparing' ? 'disabled' : ''}>🚚 Kuryerə ver</button>
             <button class="btn btn-danger btn-mini status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
             ${adminChatButton(order.id)}
           </div>
@@ -1129,7 +1143,7 @@ async function assignCourierSafe(orderId, courierId) {
   if (response.error) {
     const fallback = await supabase
       .from('orders')
-      .update({ courier_id: courierId, status: 'on_the_way', updated_at: new Date().toISOString() })
+      .update({ courier_id: courierId, status: 'ready_for_courier', updated_at: new Date().toISOString() })
       .eq('id', orderId);
 
     return { error: fallback.error || response.error };
@@ -2924,6 +2938,23 @@ async function exportProductsToExcel() {
 }
 
 //=======================================================================================================
+
+setInterval(() => {
+  document.querySelectorAll('.countdown-badge').forEach((el) => {
+    const deadline = new Date(el.dataset.deadline).getTime();
+    const diff = deadline - Date.now();
+
+    if (diff <= 0) {
+      el.innerHTML = '✅ Təsdiqləməyə hazırdır';
+      return;
+    }
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    el.innerHTML = `⏳ ${minutes}:${String(seconds).padStart(2, '0')} gözləmə`;
+  });
+}, 1000);
 
 //=======================================================================================================
 
