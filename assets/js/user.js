@@ -32,6 +32,9 @@ let userTrackingTimer = null;
 let presenceTimer = null;
 let cartCurrentTotal = 0;
 let userBonusBalance = 0;
+let cartDeliveryFee = 0;
+let cartPayableTotal = 0;
+let deliveryDistanceKm = null;
 
 const AZ_CITY_REGIONS = [
   'Abşeron',
@@ -264,6 +267,11 @@ async function initCart() {
   await renderCart();
   await initBonusBox();
 
+  $('#checkoutForm')?.city_region?.addEventListener('change', updateDeliveryFee);
+  $('#checkoutForm')?.lat?.addEventListener('input', updateDeliveryFee);
+  $('#checkoutForm')?.lng?.addEventListener('input', updateDeliveryFee);
+  await updateDeliveryFee();
+
   $('#checkoutForm')?.addEventListener('submit', checkout);
 
   $('#checkoutToggle')?.addEventListener('click', () => {
@@ -411,21 +419,32 @@ async function initBonusBox() {
   updateBonusPreview();
 }
 
+
 function updateBonusPreview() {
   const useBonus = $('#useBonus');
   const input = $('#bonusAmountInput');
   const help = $('#bonusHelpText');
 
-  if (!input || !help) return;
+  const productsTotal = Number(cartCurrentTotal || 0);
+  const deliveryFee = Number(cartDeliveryFee || 0);
+  const baseTotal = productsTotal + deliveryFee;
 
-  const maxBonus = Math.min(Number(userBonusBalance || 0), Number(cartCurrentTotal || 0));
+  if (!input || !help) {
+    cartPayableTotal = baseTotal;
+    updateCartSummary(0);
+    return;
+  }
+
+  const maxBonus = Math.min(Number(userBonusBalance || 0), baseTotal);
 
   input.disabled = !useBonus?.checked;
 
   if (!useBonus?.checked) {
     input.value = '';
-    help.textContent = `Bonus istifadə olunmayacaq. Ödəniləcək məbləğ: ${money(cartCurrentTotal)}`;
-    $('#cartTotal').textContent = money(cartCurrentTotal);
+    cartPayableTotal = baseTotal;
+    help.textContent = `Bonus istifadə olunmayacaq. Ödəniləcək məbləğ: ${money(cartPayableTotal)}`;
+    $('#cartTotal').textContent = money(cartPayableTotal);
+    updateCartSummary(0);
     return;
   }
 
@@ -436,11 +455,118 @@ function updateBonusPreview() {
 
   input.value = used.toFixed(2);
 
-  const payable = Math.max(Number(cartCurrentTotal || 0) - used, 0);
+  cartPayableTotal = Math.max(baseTotal - used, 0);
 
-  help.textContent = `${money(used)} bonus istifadə ediləcək. Ödəniləcək məbləğ: ${money(payable)}`;
-  $('#cartTotal').textContent = money(payable);
+  help.textContent = `${money(used)} bonus istifadə ediləcək. Ödəniləcək məbləğ: ${money(cartPayableTotal)}`;
+  $('#cartTotal').textContent = money(cartPayableTotal);
+  updateCartSummary(used);
 }
+
+
+async function updateDeliveryFee() {
+  const form = $('#checkoutForm');
+  const city = form?.city_region?.value;
+  const lat = Number(form?.lat?.value || 0);
+  const lng = Number(form?.lng?.value || 0);
+
+  const text = $('#deliveryFeeText');
+  const amount = $('#deliveryFeeAmount');
+
+  cartDeliveryFee = 0;
+  deliveryDistanceKm = null;
+
+  const [{ data: settings }, { data: regionTariff }, { data: kmTariffs }] = await Promise.all([
+    supabase
+      .from('delivery_settings')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+
+    city
+      ? supabase
+          .from('delivery_region_tariffs')
+          .select('*')
+          .eq('city_region', city)
+          .eq('is_active', true)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+
+    supabase
+      .from('delivery_km_tariffs')
+      .select('*')
+      .eq('is_active', true)
+      .order('min_km', { ascending: true }),
+  ]);
+
+  const productsTotal = Number(cartCurrentTotal || 0);
+
+  if (settings?.free_delivery_min && productsTotal >= Number(settings.free_delivery_min)) {
+    cartDeliveryFee = 0;
+    if (text) text.textContent = `Pulsuz çatdırılma aktiv oldu`;
+    if (amount) amount.textContent = money(0);
+    updateBonusPreview();
+    return;
+  }
+
+  if (regionTariff?.free_delivery_min && productsTotal >= Number(regionTariff.free_delivery_min)) {
+    cartDeliveryFee = 0;
+    if (text) text.textContent = `${city}: pulsuz çatdırılma aktiv oldu`;
+    if (amount) amount.textContent = money(0);
+    updateBonusPreview();
+    return;
+  }
+
+  if (settings?.store_lat && settings?.store_lng && lat && lng) {
+    deliveryDistanceKm = distanceKm(Number(settings.store_lat), Number(settings.store_lng), lat, lng);
+
+    const tariff = (kmTariffs || []).find((row) => {
+      const min = Number(row.min_km || 0);
+      const max = row.max_km === null || row.max_km === undefined ? Infinity : Number(row.max_km);
+      return deliveryDistanceKm >= min && deliveryDistanceKm <= max;
+    });
+
+    if (tariff) {
+      cartDeliveryFee = Number(tariff.base_fee || 0) + Math.max(deliveryDistanceKm - Number(tariff.min_km || 0), 0) * Number(tariff.per_km_fee || 0);
+    } else if (regionTariff) {
+      cartDeliveryFee = Number(regionTariff.fixed_fee || 0);
+    } else {
+      cartDeliveryFee = Number(settings.default_fee || 0);
+    }
+
+    cartDeliveryFee = Math.max(cartDeliveryFee, Number(settings.min_fee || 0));
+
+    if (text) text.textContent = `${deliveryDistanceKm.toFixed(1)} km məsafəyə görə hesablandı`;
+    if (amount) amount.textContent = money(cartDeliveryFee);
+
+    updateBonusPreview();
+    return;
+  }
+
+  if (regionTariff) {
+    cartDeliveryFee = Number(regionTariff.fixed_fee || 0);
+    if (text) text.textContent = `${city} üzrə rayon tarifi`;
+    if (amount) amount.textContent = money(cartDeliveryFee);
+    updateBonusPreview();
+    return;
+  }
+
+  cartDeliveryFee = Number(settings?.default_fee || 0);
+
+  if (text) text.textContent = city ? `${city} üçün default çatdırılma tarifi` : 'Şəhər/rayon seçildikdən sonra hesablanacaq';
+  if (amount) amount.textContent = money(cartDeliveryFee);
+
+  updateBonusPreview();
+}
+
+function updateCartSummary(bonusUsed = 0) {
+  if ($('#summaryProducts')) $('#summaryProducts').textContent = money(cartCurrentTotal);
+  if ($('#summaryDelivery')) $('#summaryDelivery').textContent = money(cartDeliveryFee);
+  if ($('#summaryBonus')) $('#summaryBonus').textContent = bonusUsed > 0 ? `-${money(bonusUsed)}` : money(0);
+  if ($('#summaryPayable')) $('#summaryPayable').textContent = money(cartPayableTotal || (cartCurrentTotal + cartDeliveryFee));
+}
+
 
 
 async function checkout(event) {
@@ -499,6 +625,7 @@ async function checkout(event) {
       p_transaction_ref: null,
       p_receipt_url: null,
       p_bonus_used: data.use_bonus === 'on' ? Number(data.bonus_used || 0) : 0,
+      p_delivery_fee: Number(cartDeliveryFee || 0),
     });
 
     if (error) throw error;
