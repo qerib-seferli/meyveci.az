@@ -54,6 +54,23 @@
                 
                   <input type="hidden" name="payment_method" value="online_payment">
                 </div>
+
+        
+              <div id="bonusBox" class="bonus-box full" hidden>
+                <div>
+                  <b>🎁 Bonus balansı</b>
+                  <p id="bonusBalanceText">Bonus yoxlanılır...</p>
+                </div>
+              
+                <label class="bonus-use-row">
+                  <input id="useBonus" name="use_bonus" type="checkbox">
+                  <span>Bonusdan istifadə et</span>
+                </label>
+              
+                <input id="bonusAmountInput" name="bonus_used" type="number" min="0" step="0.01" placeholder="İstifadə ediləcək bonus məbləği">
+                <small id="bonusHelpText" class="muted">Bonus məbləği sifariş məbləğindən çox ola bilməz.</small>
+              </div>
+
         
         <div id="paymentHelp" class="payment-help full"></div>
         <textarea class="full" name="note" placeholder="Qısa qeyd: döngə, bina, blok, qapı kodu və s."></textarea>
