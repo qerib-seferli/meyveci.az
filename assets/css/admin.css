@@ -1680,11 +1680,6 @@ th {
   box-sizing: border-box;
 }
 
-.delivery-admin-card .btn {
-  min-height: 48px;
-  border-radius: 999px;
-}
-
 .prep-grid {
   grid-template-columns: 1fr !important;
 }
@@ -1709,14 +1704,36 @@ th {
   color: #991b1b;
 }
 
-.action-row .btn,
+/* Çatdırılma bölməsi üçün minimalist PRO düymələr */
 .delivery-admin-card .btn {
-  height: 48px;
-  padding-inline: 18px;
+  min-height: 40px;
+  height: auto;
+  width: fit-content;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+}
+
+/* Form daxilində əsas yadda saxla düyməsi çox da enli olmasın */
+.delivery-admin-card > .btn-primary {
+  width: 100%;
+}
+
+/* Action row içindəki Yeni / saxla düymələri səliqəli qalsın */
+.delivery-admin-card .action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.delivery-admin-card .action-row .btn {
+  width: auto;
+  min-width: 82px;
 }
 
 @media (max-width: 980px) {
