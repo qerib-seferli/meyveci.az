@@ -6257,7 +6257,41 @@ select option {
   font-weight: 900;
 }
 
-/*=============================================================================================================*/
+/*=================== Müştəri bonusu varsa, səbətdə görəcək və istifadə edə biləcək =========================*/
+
+.bonus-box {
+  border-radius: 22px;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(254, 240, 138, 0.34), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(254,252,232,.9));
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.bonus-box b {
+  color: #854d0e;
+}
+
+.bonus-box p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.bonus-use-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  color: #713f12;
+}
+
+.bonus-use-row input {
+  width: 18px;
+  height: 18px;
+}
+
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 /*=============================================================================================================*/
