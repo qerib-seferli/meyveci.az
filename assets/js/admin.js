@@ -950,6 +950,7 @@ async function ordersPayments() {
   await loadOrders();
   await loadPayments();
   await loadPreparationCenter();
+  await loadDeliveryTariffsAdmin();
 
   $('#orderSearch')?.addEventListener('input', loadOrders);
   $('#paymentSearch')?.addEventListener('input', loadPayments);
@@ -962,6 +963,13 @@ async function ordersPayments() {
 
   $('#prepExportBtn')?.addEventListener('click', exportPreparationExcel);
   $('#prepPrintBtn')?.addEventListener('click', printPreparationCenter);
+
+  $('#deliverySettingsForm')?.addEventListener('submit', saveDeliverySettings);
+  $('#regionTariffForm')?.addEventListener('submit', saveRegionTariff);
+  $('#kmTariffForm')?.addEventListener('submit', saveKmTariff);
+  $('#newRegionTariff')?.addEventListener('click', () => resetForm('regionTariffForm'));
+  $('#newKmTariff')?.addEventListener('click', () => resetForm('kmTariffForm'));
+  
 }
 
 
@@ -1150,6 +1158,200 @@ async function assignCourierSafe(orderId, courierId) {
   }
 
   return { error: null };
+}
+
+
+async function loadDeliveryTariffsAdmin() {
+  if (!$('#deliverySettingsForm')) return;
+
+  await Promise.all([
+    loadDeliverySettings(),
+    loadRegionTariffs(),
+    loadKmTariffs(),
+  ]);
+}
+
+async function loadDeliverySettings() {
+  const form = $('#deliverySettingsForm');
+  if (!form) return;
+
+  const { data } = await supabase
+    .from('delivery_settings')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return;
+
+  form.store_name.value = data.store_name || '';
+  form.store_lat.value = data.store_lat || '';
+  form.store_lng.value = data.store_lng || '';
+  form.default_fee.value = data.default_fee || 0;
+  form.min_fee.value = data.min_fee || 0;
+  form.free_delivery_min.value = data.free_delivery_min || '';
+}
+
+async function saveDeliverySettings(event) {
+  event.preventDefault();
+
+  const data = formData(event.target);
+
+  const { data: oldRow } = await supabase
+    .from('delivery_settings')
+    .select('id')
+    .eq('is_active', true)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const row = {
+    store_name: data.store_name || 'Meyvəçi.az anbar',
+    store_lat: data.store_lat ? Number(data.store_lat) : null,
+    store_lng: data.store_lng ? Number(data.store_lng) : null,
+    default_fee: Number(data.default_fee || 0),
+    min_fee: Number(data.min_fee || 0),
+    free_delivery_min: data.free_delivery_min ? Number(data.free_delivery_min) : null,
+    is_active: true,
+    updated_at: new Date().toISOString(),
+  };
+
+  const response = oldRow?.id
+    ? await supabase.from('delivery_settings').update(row).eq('id', oldRow.id)
+    : await supabase.from('delivery_settings').insert(row);
+
+  toast(response.error ? response.error.message : 'Çatdırılma ayarları saxlanıldı');
+  loadDeliverySettings();
+}
+
+async function loadRegionTariffs() {
+  const { data, error } = await supabase
+    .from('delivery_region_tariffs')
+    .select('*')
+    .order('city_region', { ascending: true });
+
+  const table = $('#regionTariffsTable');
+  if (!table) return;
+
+  table.innerHTML = error
+    ? `<tr><td colspan="5">${esc(error.message)}</td></tr>`
+    : (data || []).map((row) => `
+      <tr>
+        <td><b>${esc(row.city_region)}</b></td>
+        <td>${money(row.fixed_fee)}</td>
+        <td>${row.free_delivery_min ? money(row.free_delivery_min) : '—'}</td>
+        <td>${row.is_active ? '<span class="mini-badge mini-green">Aktiv</span>' : '<span class="mini-badge mini-red">Passiv</span>'}</td>
+        <td>
+          <div class="action-row">
+            <button class="btn btn-soft btn-mini edit-region-tariff" data-row="${rowAttr(row)}">Redaktə</button>
+            <button class="btn btn-danger btn-mini del-region-tariff" data-id="${row.id}">Sil</button>
+          </div>
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="5">Rayon tarifi yoxdur.</td></tr>';
+
+  $$('.edit-region-tariff').forEach((button) => {
+    button.addEventListener('click', () => fillForm('regionTariffForm', JSON.parse(button.dataset.row)));
+  });
+
+  $$('.del-region-tariff').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!confirm('Rayon tarifi silinsin?')) return;
+      const { error } = await supabase.from('delivery_region_tariffs').delete().eq('id', button.dataset.id);
+      toast(error ? error.message : 'Rayon tarifi silindi');
+      loadRegionTariffs();
+    });
+  });
+}
+
+async function saveRegionTariff(event) {
+  event.preventDefault();
+
+  const data = formData(event.target);
+
+  const row = {
+    city_region: data.city_region,
+    fixed_fee: Number(data.fixed_fee || 0),
+    free_delivery_min: data.free_delivery_min ? Number(data.free_delivery_min) : null,
+    is_active: data.is_active === 'on',
+    updated_at: new Date().toISOString(),
+  };
+
+  const response = data.id
+    ? await supabase.from('delivery_region_tariffs').update(row).eq('id', data.id)
+    : await supabase.from('delivery_region_tariffs').insert(row);
+
+  toast(response.error ? response.error.message : 'Rayon tarifi saxlanıldı');
+  event.target.reset();
+  event.target.is_active.checked = true;
+  loadRegionTariffs();
+}
+
+async function loadKmTariffs() {
+  const { data, error } = await supabase
+    .from('delivery_km_tariffs')
+    .select('*')
+    .order('min_km', { ascending: true });
+
+  const table = $('#kmTariffsTable');
+  if (!table) return;
+
+  table.innerHTML = error
+    ? `<tr><td colspan="6">${esc(error.message)}</td></tr>`
+    : (data || []).map((row) => `
+      <tr>
+        <td><b>${esc(row.title)}</b></td>
+        <td>${row.min_km} km - ${row.max_km || '∞'} km</td>
+        <td>${money(row.base_fee)}</td>
+        <td>${money(row.per_km_fee)}</td>
+        <td>${row.is_active ? '<span class="mini-badge mini-green">Aktiv</span>' : '<span class="mini-badge mini-red">Passiv</span>'}</td>
+        <td>
+          <div class="action-row">
+            <button class="btn btn-soft btn-mini edit-km-tariff" data-row="${rowAttr(row)}">Redaktə</button>
+            <button class="btn btn-danger btn-mini del-km-tariff" data-id="${row.id}">Sil</button>
+          </div>
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="6">KM tarifi yoxdur.</td></tr>';
+
+  $$('.edit-km-tariff').forEach((button) => {
+    button.addEventListener('click', () => fillForm('kmTariffForm', JSON.parse(button.dataset.row)));
+  });
+
+  $$('.del-km-tariff').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (!confirm('KM tarifi silinsin?')) return;
+      const { error } = await supabase.from('delivery_km_tariffs').delete().eq('id', button.dataset.id);
+      toast(error ? error.message : 'KM tarifi silindi');
+      loadKmTariffs();
+    });
+  });
+}
+
+async function saveKmTariff(event) {
+  event.preventDefault();
+
+  const data = formData(event.target);
+
+  const row = {
+    title: data.title,
+    min_km: Number(data.min_km || 0),
+    max_km: data.max_km ? Number(data.max_km) : null,
+    base_fee: Number(data.base_fee || 0),
+    per_km_fee: Number(data.per_km_fee || 0),
+    is_active: data.is_active === 'on',
+    updated_at: new Date().toISOString(),
+  };
+
+  const response = data.id
+    ? await supabase.from('delivery_km_tariffs').update(row).eq('id', data.id)
+    : await supabase.from('delivery_km_tariffs').insert(row);
+
+  toast(response.error ? response.error.message : 'KM tarifi saxlanıldı');
+  event.target.reset();
+  event.target.is_active.checked = true;
+  loadKmTariffs();
 }
 
 
