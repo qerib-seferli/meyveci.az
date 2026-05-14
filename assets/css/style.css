@@ -6141,4 +6141,33 @@ select option {
     text-align: center;
   }
 }
+
+   /*=============== İnstagram TikTok ===============*/
+   .footer-socials {
+     display: flex;
+     align-items: center;
+     gap: 14px;
+     flex-wrap: wrap;
+   }
+   
+   .footer-socials a {
+     display: flex;
+     align-items: center;
+     gap: 7px;
+     color: var(--muted);
+     text-decoration: none;
+     font-size: 14px;
+     transition: .2s ease;
+   }
+   
+   .footer-socials a:hover {
+     color: var(--green-dark);
+     transform: translateY(-1px);
+   }
+   
+   .footer-socials svg {
+     width: 18px;
+     height: 18px;
+     flex-shrink: 0;
+   }
 /*=============================================================================================================*/
