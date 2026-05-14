@@ -265,6 +265,12 @@ async function initCart() {
   await initBonusBox();
 
   $('#checkoutForm')?.addEventListener('submit', checkout);
+
+  $('#checkoutToggle')?.addEventListener('click', () => {
+  $('#checkoutForm')?.classList.toggle('checkout-collapsed');
+  $('#checkoutToggle')?.classList.toggle('open');
+});
+  
 }
 
 async function fillCheckoutFromProfile() {
