@@ -33,11 +33,16 @@
 
     <section id="cartList" class="grid"></section>
 
-    <section class="card" style="margin-top: 16px;">
-      <h2>Sifarişi tamamla</h2>
-      <p class="muted">Ad, telefon və ünvan profil məlumatlarından avtomatik çəkilir. İstəsən burada dəyişə bilərsən.</p>
-
-      <form id="checkoutForm" class="form-grid checkout-compact">
+      <section class="card checkout-card" style="margin-top: 16px;">
+        <button id="checkoutToggle" class="checkout-toggle" type="button">
+          <span>
+            <b>Sifarişi tamamla</b>
+            <small>Ünvan və əlaqə məlumatlarını dəyişmək üçün aç</small>
+          </span>
+          <i>⌄</i>
+        </button>
+      
+        <form id="checkoutForm" class="form-grid checkout-compact checkout-collapsed">
         <input name="full_name" placeholder="Ad Soyad" required>
         <input name="phone" placeholder="Telefon" required>
           <select name="city_region" required>
