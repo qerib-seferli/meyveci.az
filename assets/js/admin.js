@@ -1059,7 +1059,7 @@ async function loadOrders() {
           <small>${itemsMap.get(order.id)?.length || 0} məhsul</small>
         </td>
         <td>
-          <select class="assign" data-id="${order.id}">
+          <select class="assign" data-id="${order.id}" ${order.status !== 'ready_for_courier' ? 'disabled' : ''}>
             <option value="">Kuryer seç</option>
             ${makeCourierOptions(order.courier_id)}
           </select>
