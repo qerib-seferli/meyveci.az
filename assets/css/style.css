@@ -6138,5 +6138,10 @@ select option {
     width: 100%;
     align-items: center;
   }
+
+  .footer-bottom {
+    justify-content: center;
+    text-align: center;
+  }
 }
 /*=============================================================================================================*/
