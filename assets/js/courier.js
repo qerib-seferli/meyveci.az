@@ -71,7 +71,7 @@ async function loadCourierOrders() {
     .from('orders')
     .select('*')
     .eq('courier_id', activeCourier.id)
-    .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near'])
+    .in('status', ['ready_for_courier', 'on_the_way', 'courier_near'])
     .order('created_at', { ascending: false })
     .limit(60);
 
@@ -529,7 +529,7 @@ async function saveCourierLocationToOrders(lat, lng, coords = {}) {
     .from('orders')
     .select('id, order_code, status, courier_id')
     .eq('courier_id', activeCourier.id)
-    .in('status', ['confirmed', 'preparing', 'on_the_way', 'courier_near']);
+    .in('status', ['ready_for_courier', 'on_the_way', 'courier_near']);
 
   console.log('Lokasiya yazılacaq sifarişlər:', orders, error);
 
