@@ -35,15 +35,26 @@
         <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
         <input name="lng" type="number" step="any" placeholder="Longitude / xəritə uzunluğu">
 
-        <select id="paymentMethod" name="payment_method">
-          <option value="cash">Nağd</option>
-          <option value="card_transfer">Kart köçürməsi</option>
-          <option value="pos">POS terminal</option>
-          <option value="online_payment">Online payment</option>
-        </select>
-
-        <input name="transaction_ref" placeholder="Əməliyyat kodu">
-        <input id="receiptFile" class="full" type="file" accept="image/*">
+        
+                <div class="payment-secure-box full">
+                  <div class="payment-secure-head">
+                    <div>
+                      <b>Online ödəniş</b>
+                      <p>Təhlükəsiz Kapital Bank ödəniş sistemi</p>
+                    </div>
+                
+                    <span class="secure-pill">SSL / 3D Secure</span>
+                  </div>
+                
+                  <div class="payment-trust-row">
+                    <span>🔒 Kart məlumatları saxlanılmır</span>
+                    <span>🏦 Kapital Bank</span>
+                    <span>🛡️ Protected Checkout</span>
+                  </div>
+                
+                  <input type="hidden" name="payment_method" value="online_payment">
+                </div>
+        
         <div id="paymentHelp" class="payment-help full"></div>
         <textarea class="full" name="note" placeholder="Qısa qeyd: döngə, bina, blok, qapı kodu və s."></textarea>
         <button class="btn btn-primary full">Sifariş ver</button>
