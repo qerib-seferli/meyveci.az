@@ -175,6 +175,10 @@ export function setLoading(isVisible = false) {
 export function statusAz(status) {
   const statuses = {
     pending: 'Gözləyir',
+    draft_payment: 'Ödəniş gözlənilir',
+    paid_hold: '5 dəqiqə gözləmə',
+    ready_to_confirm: 'Təsdiq gözləyir',
+    ready_for_courier: 'Kuryerə hazırdır',
     confirmed: 'Təsdiqləndi',
     preparing: 'Hazırlanır',
     on_the_way: 'Kuryerə verildi',
