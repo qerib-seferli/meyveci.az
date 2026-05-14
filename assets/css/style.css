@@ -6230,4 +6230,34 @@ select option {
   color: var(--green-dark);
   font-weight: 800;
 }
+/*============ Sifariş məhsulları səbətə qaytarılsın? Ödəniş refund_pending kimi qeyd olunacaq ===============*/
+
+.paid-hold-box {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  background: rgba(254, 243, 199, 0.55);
+  display: grid;
+  gap: 8px;
+}
+
+.paid-hold-box b {
+  color: #92400e;
+}
+
+.user-countdown {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #b45309;
+  font-weight: 900;
+}
+
+/*=============================================================================================================*/
+/*=============================================================================================================*/
+/*=============================================================================================================*/
 /*=============================================================================================================*/
