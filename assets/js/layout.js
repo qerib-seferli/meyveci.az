@@ -28,6 +28,7 @@ const bottomNav = [
 export async function initLayout() {
   renderTopbar();
   renderBottomNav();
+  renderSiteFooter();
   await hydrateUserArea();
   startGlobalPresence();
   await refreshBadges();
@@ -316,6 +317,64 @@ function openNotificationModal(title, body, dateText = '') {
   $('#notifyModalDate').textContent = dateText || '';
   modal.classList.add('show');
 }
+
+
+function renderSiteFooter() {
+  if (document.querySelector('.site-footer')) return;
+  if (location.pathname.includes('/admin/') || location.pathname.includes('/courier/')) return;
+
+  const root = getRootPath();
+
+  const footer = document.createElement('footer');
+  footer.className = 'site-footer';
+  footer.innerHTML = `
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
+        <p>Meyvəçi.az — təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
+        <small>“MAREHO” MMC • VÖEN: 3105652551</small>
+      </div>
+
+      <div class="footer-grid">
+        <div>
+          <h4>Şirkət</h4>
+          <a href="${root}index.html">Ana səhifə</a>
+          <a href="${root}faq.html">Tez-tez verilən suallar</a>
+          <a href="${root}delivery.html">Çatdırılma</a>
+        </div>
+
+        <div>
+          <h4>Müştəri xidməti</h4>
+          <a href="${root}refund.html">Geri qaytarma siyasəti</a>
+          <a href="https://wa.me/994993909595" target="_blank" rel="noopener">WhatsApp dəstək</a>
+          <a href="mailto:meyveci@proton.me">Email dəstək</a>
+        </div>
+
+        <div>
+          <h4>Hüquqi</h4>
+          <a href="${root}privacy.html">Məxfilik siyasəti</a>
+          <a href="${root}terms.html">İstifadə şərtləri</a>
+          <a href="${root}security.html">Təhlükəsizlik</a>
+        </div>
+
+        <div>
+          <h4>Ödəniş və təhlükəsizlik</h4>
+          <a href="${root}payment-security.html">Ödəniş təhlükəsizliyi</a>
+          <span>SSL Secure Checkout</span>
+          <span>3D Secure dəstəyi</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Meyveci.az. Bütün hüquqlar qorunur. “MAREHO” MMC tərəfindən idarə olunur.</span>
+        <span>Instagram: @meyveci.aze • TikTok: @meyveci.aze</span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(footer);
+}
+
 
 function getRootPath() {
   return location.pathname.includes('/admin/') || location.pathname.includes('/courier/') ? '../' : './';
