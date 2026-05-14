@@ -33,26 +33,31 @@
 
     <section id="cartList" class="grid"></section>
 
-      <section class="card checkout-card" style="margin-top: 16px;">
-        <button id="checkoutToggle" class="checkout-toggle" type="button">
-          <span>
-            <b>Sifarişi tamamla</b>
-            <small>Ünvan və əlaqə məlumatlarını dəyişmək üçün aç</small>
-          </span>
-          <i>⌄</i>
-        </button>
-      
-        <form id="checkoutForm" class="form-grid checkout-compact checkout-collapsed">
-        <input name="full_name" placeholder="Ad Soyad" required>
-        <input name="phone" placeholder="Telefon" required>
-          <select name="city_region" required>
-            <option value="" disabled selected>Şəhər / rayon seçin</option>
-          </select>
-        <input name="address" placeholder="Ünvan" required>
-        <input name="apartment" placeholder="Bina, blok, mənzil">
-        <input name="door_code" placeholder="Qapı kodu">
-        <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
-        <input name="lng" type="number" step="any" placeholder="Longitude / xəritə uzunluğu">
+        <section class="card checkout-card" style="margin-top: 16px;">
+          <h2>Sifarişi tamamla</h2>
+          <p class="muted">Online ödəniş, bonus və sifariş qeydi aşağıdadır. Ünvan məlumatını dəyişmək lazımdırsa aç.</p>
+        
+          <button id="checkoutToggle" class="checkout-toggle personal-toggle" type="button">
+            <span>
+              <b>Şəxsi məlumatlar və ünvan</b>
+              <small>Ad, telefon və ünvanı dəyişmək üçün aç</small>
+            </span>
+            <i>⌄</i>
+          </button>
+        
+          <form id="checkoutForm" class="form-grid checkout-compact">
+            <div id="personalFields" class="personal-fields checkout-collapsed full">
+              <input name="full_name" placeholder="Ad Soyad" required>
+              <input name="phone" placeholder="Telefon" required>
+              <select name="city_region" required>
+                <option value="" disabled selected>Şəhər / rayon seçin</option>
+              </select>
+              <input name="address" placeholder="Ünvan" required>
+              <input name="apartment" placeholder="Bina, blok, mənzil">
+              <input name="door_code" placeholder="Qapı kodu">
+              <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
+              <input name="lng" type="number" step="any" placeholder="Longitude / xəritə uzunluğu">
+            </div>
 
         
                 <div class="payment-secure-box full">
