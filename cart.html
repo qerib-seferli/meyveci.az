@@ -57,7 +57,6 @@
               <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
               <input name="lng" type="number" step="any" placeholder="Longitude / xəritə uzunluğu">
             </div>
-
         
                 <div class="payment-secure-box full">
                   <div class="payment-secure-head">
@@ -94,6 +93,22 @@
                 <small id="bonusHelpText" class="muted">Bonus məbləği sifariş məbləğindən çox ola bilməz.</small>
               </div>
 
+
+            <div id="deliveryFeeBox" class="delivery-fee-box full">
+              <div>
+                <b>🚚 Çatdırılma</b>
+                <p id="deliveryFeeText">Şəhər/rayon və məsafəyə görə hesablanacaq</p>
+              </div>
+              <strong id="deliveryFeeAmount">0 AZN</strong>
+            </div>
+            
+            <div id="cartSummaryBox" class="cart-summary-box full">
+              <div><span>Məhsullar</span><b id="summaryProducts">0 AZN</b></div>
+              <div><span>Çatdırılma</span><b id="summaryDelivery">0 AZN</b></div>
+              <div><span>Bonus</span><b id="summaryBonus">0 AZN</b></div>
+              <div class="summary-total"><span>Ödəniləcək</span><b id="summaryPayable">0 AZN</b></div>
+            </div>
+            
         
         <div id="paymentHelp" class="payment-help full"></div>
         <textarea class="full" name="note" placeholder="Qısa qeyd: döngə, bina, blok, qapı kodu və s."></textarea>
