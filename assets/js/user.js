@@ -396,6 +396,8 @@ async function initBonusBox() {
 
   box.hidden = false;
   $('#bonusBalanceText').textContent = `${money(userBonusBalance)} bonusunuz var`;
+  $('#cartBonusBadge')?.removeAttribute('hidden');
+  if ($('#cartBonusAmount')) $('#cartBonusAmount').textContent = money(userBonusBalance);
 
   $('#useBonus')?.addEventListener('change', updateBonusPreview);
   $('#bonusAmountInput')?.addEventListener('input', updateBonusPreview);
