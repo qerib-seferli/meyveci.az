@@ -30,6 +30,8 @@ let allUserThreadUnreadMap = new Map();
 let userOrderMaps = new Map();
 let userTrackingTimer = null;
 let presenceTimer = null;
+let cartCurrentTotal = 0;
+let userBonusBalance = 0;
 
 const AZ_CITY_REGIONS = [
   'Abşeron',
@@ -260,6 +262,7 @@ async function addCart(productId) {
 async function initCart() {
   await fillCheckoutFromProfile();
   await renderCart();
+  await initBonusBox();
 
   $('#checkoutForm')?.addEventListener('submit', checkout);
 }
@@ -348,6 +351,8 @@ async function renderCart() {
   }).join('') || '<div class="card">Səbət boşdur.</div>';
 
   $('#cartTotal').textContent = money(total);
+  cartCurrentTotal = total;
+  updateBonusPreview();
 
   $$('.qty').forEach((button) => {
     button.addEventListener('click', () => updateQty(button.dataset.id, Number(button.dataset.q)));
@@ -375,6 +380,59 @@ async function removeItem(id) {
   renderCart();
 }
 
+
+async function initBonusBox() {
+  const activeProfile = await profile(true);
+  const box = $('#bonusBox');
+
+  if (!box) return;
+
+  userBonusBalance = Number(activeProfile?.bonus_balance || 0);
+
+  if (userBonusBalance <= 0) {
+    box.hidden = true;
+    return;
+  }
+
+  box.hidden = false;
+  $('#bonusBalanceText').textContent = `${money(userBonusBalance)} bonusunuz var`;
+
+  $('#useBonus')?.addEventListener('change', updateBonusPreview);
+  $('#bonusAmountInput')?.addEventListener('input', updateBonusPreview);
+
+  updateBonusPreview();
+}
+
+function updateBonusPreview() {
+  const useBonus = $('#useBonus');
+  const input = $('#bonusAmountInput');
+  const help = $('#bonusHelpText');
+
+  if (!input || !help) return;
+
+  const maxBonus = Math.min(Number(userBonusBalance || 0), Number(cartCurrentTotal || 0));
+
+  input.disabled = !useBonus?.checked;
+
+  if (!useBonus?.checked) {
+    input.value = '';
+    help.textContent = `Bonus istifadə olunmayacaq. Ödəniləcək məbləğ: ${money(cartCurrentTotal)}`;
+    $('#cartTotal').textContent = money(cartCurrentTotal);
+    return;
+  }
+
+  if (!input.value) input.value = maxBonus.toFixed(2);
+
+  let used = Number(input.value || 0);
+  used = Math.min(Math.max(used, 0), maxBonus);
+
+  input.value = used.toFixed(2);
+
+  const payable = Math.max(Number(cartCurrentTotal || 0) - used, 0);
+
+  help.textContent = `${money(used)} bonus istifadə ediləcək. Ödəniləcək məbləğ: ${money(payable)}`;
+  $('#cartTotal').textContent = money(payable);
+}
 
 
 async function checkout(event) {
@@ -432,6 +490,7 @@ async function checkout(event) {
       p_payment_method: data.payment_method,
       p_transaction_ref: null,
       p_receipt_url: null,
+      p_bonus_used: data.use_bonus === 'on' ? Number(data.bonus_used || 0) : 0,
     });
 
     if (error) throw error;
