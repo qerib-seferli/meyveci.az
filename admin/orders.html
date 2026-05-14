@@ -206,7 +206,9 @@
                   <h3>Rayon / şəhər tarifi</h3>
             
                   <input type="hidden" name="id">
-                  <input name="city_region" placeholder="Məs: Bakı, Bərdə, Sumqayıt" required>
+                    <select name="city_region" required>
+                      <option value="">Şəhər / rayon seçin</option>
+                    </select>
                   <input name="fixed_fee" type="number" step="0.01" placeholder="Sabit qiymət" required>
                   <input name="free_delivery_min" type="number" step="0.01" placeholder="Pulsuz limit">
                   <label class="admin-check-row">
