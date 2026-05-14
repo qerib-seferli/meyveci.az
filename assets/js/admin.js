@@ -33,6 +33,32 @@ let adminSoundReady = false;
 let adminAlarmLoop = null;
 let adminChatUnreadMap = new Map();
 
+
+const AZ_CITY_REGIONS = [
+  'Abşeron','Ağcabədi','Ağdam','Ağdaş','Ağdərə','Ağstafa','Ağsu','Alabaşlı','Astara','Babək','Bakı',
+  'Balakən','Beyləqan','Bərdə','Biləsuvar','Culfa','Cəbrayıl','Cəlilabad','Daşkəsən','Dəliməmmədli',
+  'Füzuli','Goranboy','Göyçay','Göygöl','Göytəpə','Gədəbəy','Gəncə','Hacıqabul','Horadiz','Xaçmaz',
+  'Xankəndi','Xocalı','Xocavənd','Xudat','Xızı','İmişli','İsmayıllı','Kəlbəcər','Kəngərli','Kürdəmir',
+  'Laçın','Lerik','Liman','Lənkəran','Masallı','Mingəçevir','Naftalan','Naxçıvan','Neftçala','Oğuz',
+  'Ordubad','Qax','Qazax','Qobustan','Quba','Qubadlı','Qusar','Qəbələ','Saatlı','Sabirabad','Salyan',
+  'Samux','Siyəzən','Sumqayıt','Sədərək','Tərtər','Tovuz','Ucar','Xırdalan','Yardımlı','Yevlax',
+  'Zaqatala','Zəngilan','Zərdab','Şabran','Şahbuz','Şamaxı','Şəki','Şəmkir','Şərur','Şirvan','Şuşa'
+];
+
+function fillAdminCitySelect(form, selectedValue = '') {
+  const select = form?.city_region;
+  if (!select) return;
+
+  select.innerHTML = `
+    <option value="">Şəhər / rayon seçin</option>
+    ${AZ_CITY_REGIONS.map((city) => `
+      <option value="${city}" ${city === selectedValue ? 'selected' : ''}>${city}</option>
+    `).join('')}
+  `;
+}
+
+
+
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
 
@@ -1164,11 +1190,15 @@ async function assignCourierSafe(orderId, courierId) {
 async function loadDeliveryTariffsAdmin() {
   if (!$('#deliverySettingsForm')) return;
 
+  
+  fillAdminCitySelect($('#regionTariffForm'));
+  
   await Promise.all([
     loadDeliverySettings(),
     loadRegionTariffs(),
     loadKmTariffs(),
   ]);
+  
 }
 
 async function loadDeliverySettings() {
@@ -1219,7 +1249,7 @@ async function saveDeliverySettings(event) {
 
   const response = oldRow?.id
     ? await supabase.from('delivery_settings').update(row).eq('id', oldRow.id)
-    : await supabase.from('delivery_settings').insert(row);
+    : await supabase.from('delivery_settings').insert({ ...row, is_active: true });
 
   toast(response.error ? response.error.message : 'Çatdırılma ayarları saxlanıldı');
   loadDeliverySettings();
@@ -1252,7 +1282,11 @@ async function loadRegionTariffs() {
     `).join('') || '<tr><td colspan="5">Rayon tarifi yoxdur.</td></tr>';
 
   $$('.edit-region-tariff').forEach((button) => {
-    button.addEventListener('click', () => fillForm('regionTariffForm', JSON.parse(button.dataset.row)));
+    button.addEventListener('click', () => {
+      const row = JSON.parse(button.dataset.row);
+      fillForm('regionTariffForm', row);
+      fillAdminCitySelect($('#regionTariffForm'), row.city_region);
+    });
   });
 
   $$('.del-region-tariff').forEach((button) => {
