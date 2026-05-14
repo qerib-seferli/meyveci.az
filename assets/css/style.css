@@ -6129,18 +6129,15 @@ select option {
    }
    
    /*====== Telefon üçün tam ortada görünəcək =======*/
-  .footer-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    line-height: 1.6;
-    text-align: center;
-    width: 100%;
-    align-items: center;
-  }
-
   .footer-bottom {
     justify-content: center;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .footer-copy-left,
+  .footer-copy-right {
+    width: 100%;
     text-align: center;
   }
 }
