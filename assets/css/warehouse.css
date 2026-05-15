@@ -1,0 +1,29 @@
+/* ============================================================
+   MEYVƏÇİ.AZ — ANBARDAR PANELİ
+   ============================================================ */
+
+.warehouse-prep-filter {
+  grid-template-columns: minmax(220px, 1fr) auto;
+}
+
+.warehouse-action-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.warehouse-action-row .btn {
+  width: fit-content;
+}
+
+.warehouse-courier-select {
+  min-width: 160px;
+  max-width: 220px;
+}
+
+@media (max-width: 700px) {
+  .warehouse-prep-filter {
+    grid-template-columns: 1fr;
+  }
+}
