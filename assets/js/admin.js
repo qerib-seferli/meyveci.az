@@ -2444,6 +2444,7 @@ async function loadUsers() {
           <select class="role" data-id="${user.id}" ${user.email === masterEmail && adminProfile?.email !== masterEmail ? 'disabled' : ''}>
             <option value="user" ${user.role === 'user' ? 'selected' : ''}>Müştəri</option>
             <option value="courier" ${user.role === 'courier' ? 'selected' : ''}>Kuryer</option>
+            <option value="warehouse" ${user.role === 'warehouse' ? 'selected' : ''}>Anbardar</option>
             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
         </td>
