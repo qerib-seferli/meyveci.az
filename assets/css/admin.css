@@ -1781,7 +1781,244 @@ th {
   }
 }
 /*=============================================================================================================================================================*/
+/* ============================================================
+   ADMIN USER ROLE MANAGER + MOBILE COMPACT PRO
+   ============================================================ */
 
+.role-manager-cell {
+  display: grid;
+  gap: 7px;
+  min-width: 145px;
+}
+
+.role-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.role-user {
+  color: #047857;
+  background: #dcfce7;
+}
+
+.role-courier {
+  color: #075985;
+  background: #e0f2fe;
+}
+
+.role-warehouse {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.role-admin {
+  color: #ffffff;
+  background: linear-gradient(135deg, #16a34a, #047857);
+}
+
+.role-select-pro {
+  height: 38px;
+  min-height: 38px;
+  border-radius: 14px;
+  font-size: 12px;
+  padding: 0 10px;
+  background: rgba(255,255,255,.92);
+}
+
+/* Telefon üçün admin/anbardar panelini daha minimalist edir */
+@media (max-width: 720px) {
+  .app-shell {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .admin-sidebar {
+    padding: 9px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-sidebar b {
+    font-size: 13px !important;
+    margin-bottom: 7px !important;
+  }
+
+  .side-nav {
+    gap: 6px !important;
+  }
+
+  .side-link {
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+  }
+
+  .admin-main {
+    gap: 11px !important;
+  }
+
+  .admin-hero {
+    padding: 13px !important;
+    border-radius: 20px !important;
+    gap: 8px !important;
+  }
+
+  .admin-eyebrow {
+    font-size: 10.5px !important;
+    padding: 5px 8px !important;
+  }
+
+  .admin-hero h1 {
+    font-size: 22px !important;
+    line-height: 1.05 !important;
+  }
+
+  .admin-hero p {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  .pro-card,
+  .card {
+    border-radius: 18px !important;
+  }
+
+  .pro-kpi-grid,
+  .prep-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .pro-kpi,
+  .prep-kpi {
+    min-height: 82px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .pro-kpi span,
+  .prep-kpi span {
+    font-size: 10.5px !important;
+  }
+
+  .pro-kpi strong,
+  .prep-kpi b {
+    font-size: 20px !important;
+    margin-top: 5px !important;
+  }
+
+  .pro-kpi small,
+  .prep-kpi small {
+    font-size: 10px !important;
+  }
+
+  .admin-dashboard-grid {
+    gap: 10px !important;
+  }
+
+  .admin-map,
+  #courierMap {
+    height: 230px !important;
+    min-height: 230px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-live-card,
+  .admin-alert-card,
+  .pro-order-card {
+    padding: 9px !important;
+    border-radius: 15px !important;
+    gap: 6px !important;
+  }
+
+  .admin-avatar,
+  .admin-product-img {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .admin-table-toolbar {
+    gap: 8px !important;
+  }
+
+  .admin-table-toolbar h2,
+  .pro-card h2 {
+    font-size: 16px !important;
+  }
+
+  .admin-search {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  .tabs {
+    gap: 7px !important;
+    margin-bottom: 9px !important;
+  }
+
+  .tab {
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .table-wrap {
+    margin-top: 10px !important;
+  }
+
+  .pro-table th,
+  .pro-table td {
+    padding: 9px 10px !important;
+    font-size: 12px !important;
+  }
+
+  .btn-mini {
+    min-height: 29px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .mini-badge,
+  .status-pill,
+  .payment-status-pill,
+  .role-badge {
+    padding: 5px 8px !important;
+    font-size: 10.5px !important;
+  }
+
+  .role-manager-cell {
+    min-width: 120px;
+    gap: 5px;
+  }
+
+  .role-select-pro {
+    height: 34px;
+    min-height: 34px;
+    font-size: 11px;
+  }
+
+  .switch {
+    width: 42px !important;
+    height: 23px !important;
+  }
+
+  .switch span:before {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .switch input:checked + span:before {
+    transform: translateX(18px) !important;
+  }
+}
 /*=============================================================================================================================================================*/
 
 /*=============================================================================================================================================================*/
