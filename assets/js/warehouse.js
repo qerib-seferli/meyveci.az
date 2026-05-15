@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#warehousePrepSearch')?.addEventListener('input', loadWarehousePreparation);
   $('#warehousePrepRefresh')?.addEventListener('click', loadWarehousePreparation);
 
+  setupWarehouseTabs();
   subscribeWarehouseLive();
 });
 
@@ -426,4 +427,18 @@ function subscribeWarehouseLive() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => loadWarehousePanel())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => loadWarehousePreparation())
     .subscribe();
+}
+
+function setupWarehouseTabs() {
+  $$('.warehouse-tab-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const panelId = button.dataset.panel;
+
+      $$('.warehouse-tab-btn').forEach((btn) => btn.classList.remove('active'));
+      $$('.warehouse-panel').forEach((panel) => panel.classList.remove('active'));
+
+      button.classList.add('active');
+      $(`#${panelId}`)?.classList.add('active');
+    });
+  });
 }
