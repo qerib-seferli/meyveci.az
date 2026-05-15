@@ -85,9 +85,12 @@ async function loadCourierOrders() {
   const userIds = [...new Set((orders || []).map((order) => order.user_id).filter(Boolean))];
   const orderIds = [...new Set((orders || []).map((order) => order.id).filter(Boolean))];
 
-  const [{ data: profiles }, { data: locations }, { data: payments }] = await Promise.all([
+  const [{ data: profiles }, { data: locations }, { data: payments }, { data: items }] = await Promise.all([
     userIds.length
-      ? supabase.from('profiles').select('id,email,first_name,last_name,phone,avatar_url,city_region,address_line,apartment,door_code,lat,lng').in('id', userIds)
+      ? supabase
+          .from('profiles')
+          .select('id,email,first_name,last_name,phone,avatar_url,city_region,address_line,apartment,door_code,lat,lng')
+          .in('id', userIds)
       : Promise.resolve({ data: [] }),
 
     orderIds.length
@@ -97,18 +100,33 @@ async function loadCourierOrders() {
     orderIds.length
       ? supabase.from('payments').select('*').in('order_id', orderIds)
       : Promise.resolve({ data: [] }),
+
+    orderIds.length
+      ? supabase
+          .from('order_items')
+          .select('id,order_id,product_name,quantity,unit_price,line_total,product_id')
+          .in('order_id', orderIds)
+          .order('created_at', { ascending: true })
+      : Promise.resolve({ data: [] }),
   ]);
 
   const profilesMap = new Map((profiles || []).map((profile) => [profile.id, profile]));
   const locationsMap = new Map((locations || []).map((location) => [location.order_id, location]));
   const paymentsMap = new Map((payments || []).map((payment) => [payment.order_id, payment]));
 
+  const itemsMap = new Map();
+  (items || []).forEach((item) => {
+    if (!itemsMap.has(item.order_id)) itemsMap.set(item.order_id, []);
+    itemsMap.get(item.order_id).push(item);
+  });
+
   list.innerHTML = (orders || [])
     .map((order) => orderCard(
       order,
       profilesMap.get(order.user_id),
       locationsMap.get(order.id),
-      paymentsMap.get(order.id)
+      paymentsMap.get(order.id),
+      itemsMap.get(order.id) || []
     ))
     .join('') || '<div class="card">Hazırda təyin olunmuş sifariş yoxdur.</div>';
 
@@ -194,56 +212,99 @@ async function createCourierStatusNotification(orderId, status) {
 
 // ==============================================================================================
 
-function orderCard(order, customer = {}, location = {}, payment = null) {
+function orderCard(order, customer = {}, location = {}, payment = null, items = []) {
   const customerPhone = customer?.phone || order.phone || '';
-  const customerName = `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim() || order.full_name || customer?.email || 'Müştəri';
+  const customerName =
+    `${customer?.first_name || ''} ${customer?.last_name || ''}`.trim() ||
+    order.full_name ||
+    customer?.email ||
+    'Müştəri';
+
+  const city = order.city_region || customer?.city_region || 'Rayon qeyd edilməyib';
 
   const address = [
-    order.city_region || customer?.city_region,
     order.address_text || customer?.address_line,
-    order.apartment || customer?.apartment,
-    order.door_code || customer?.door_code,
+    order.apartment || customer?.apartment ? `Mənzil/blok: ${order.apartment || customer?.apartment}` : '',
+    order.door_code || customer?.door_code ? `Qapı kodu: ${order.door_code || customer?.door_code}` : '',
   ].filter(Boolean).join(', ');
+
+  const targetLat = order.lat || customer?.lat;
+  const targetLng = order.lng || customer?.lng;
 
   const eta = estimateEta(order, customer, location);
   const paymentText = courierPaymentText(order, payment);
+  const productCount = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
   return `
-    <article class="card courier-card" data-order-id="${order.id}">
-      <div class="section-head">
+    <article class="card courier-card pro-courier-card" data-order-id="${order.id}">
+      <div class="courier-card-head">
         <div>
-          <b>${order.order_code}</b>
-          <p class="muted">${statusAz(order.status)} • ${money(order.total_amount)}</p>
+          <span class="courier-order-code">${order.order_code || order.id}</span>
+          <h2>${statusAz(order.status)}</h2>
+          <p class="muted">${new Date(order.created_at).toLocaleString('az-AZ')} • ${money(order.total_amount)}</p>
         </div>
-        <span class="unit-badge" id="courierEta-${order.id}">ETA: ${eta}</span>
+
+        <span class="courier-eta-pill" id="courierEta-${order.id}">
+          ETA: ${eta}
+        </span>
+      </div>
+
+      <div class="courier-flow-mini">
+        <span class="${order.status === 'ready_for_courier' ? 'active' : ''}">📦 Kuryerə hazır</span>
+        <span class="${order.status === 'on_the_way' ? 'active' : ''}">🚚 Yoldadır</span>
+        <span class="${order.status === 'courier_near' ? 'active' : ''}">📍 Yaxınlaşır</span>
+        <span class="${order.status === 'delivered' ? 'active' : ''}">✅ Təhvil</span>
       </div>
 
       <div class="courier-payment-info">
         ${paymentText}
       </div>
 
-      <div class="compact-row customer-card-row">
+      <div class="courier-customer-box">
         <div class="customer-mini">
           <img class="preview-img customer-avatar" src="${customer?.avatar_url || PLACEHOLDER}" alt="Müştəri">
           <span>
-            <b>${customerName}</b><br>
-            <small class="muted">${customerPhone || 'Telefon yoxdur'}</small>
+            <b>${customerName}</b>
+            <small>${customerPhone || 'Telefon yoxdur'}</small>
+            <small>📍 ${city}</small>
           </span>
         </div>
-        
+
         <div class="customer-actions">
-            ${customerPhone ? `<a class="btn btn-soft" href="tel:${customerPhone}">📞 Zəng</a>` : ''}
-            <button class="btn btn-soft open-chat" data-id="${order.id}">💬 Mesaj</button>
+          ${customerPhone ? `<a class="btn btn-soft" href="tel:${customerPhone}">📞 Zəng</a>` : ''}
+          <button class="btn btn-soft open-chat" data-id="${order.id}" type="button">💬 Mesaj</button>
         </div>
       </div>
 
-      <p><b>Ünvan:</b> ${address || 'Ünvan qeyd edilməyib'}</p>
+      <div class="courier-address-box">
+        <b>Ünvan</b>
+        <span>${address || 'Ünvan qeyd edilməyib'}</span>
+      </div>
 
-      <div class="map-toolbar">
+      <details class="courier-products-box" open>
+        <summary>
+          <b>🥝 Məhsullar</b>
+          <span>${items.length} növ • ${productCount} ümumi miqdar</span>
+        </summary>
+
+        <div class="courier-products-list">
+          ${items.map((item) => `
+            <div class="courier-product-row">
+              <span>
+                <b>${item.product_name || 'Məhsul'}</b>
+                <small>${Number(item.quantity || 0)} × ${money(item.unit_price || 0)}</small>
+              </span>
+              <strong>${money(item.line_total || 0)}</strong>
+            </div>
+          `).join('') || '<span class="muted">Məhsul siyahısı tapılmadı.</span>'}
+        </div>
+      </details>
+
+      <div class="map-toolbar courier-map-toolbar">
         <button class="btn btn-soft follow-courier-toggle" type="button">
           📍 Kuryeri izlə
         </button>
-        ${mapNavigationLinks(order.lat || customer?.lat, order.lng || customer?.lng)}
+        ${mapNavigationLinks(targetLat, targetLng)}
       </div>
 
       <div class="map-box order-live-map" id="courierMap-${order.id}"></div>
@@ -252,10 +313,33 @@ function orderCard(order, customer = {}, location = {}, payment = null) {
         Marşrut hesablanır...
       </p>
 
-      <div class="courier-actions">
-        <button class="btn btn-soft courier-status ${order.status === 'on_the_way' ? 'active-status' : ''}" data-id="${order.id}" data-s="on_the_way">Yoldayam</button>
-        <button class="btn btn-soft courier-status ${order.status === 'courier_near' ? 'active-status' : ''}" data-id="${order.id}" data-s="courier_near">Yaxınlaşıram</button>
-        <button class="btn btn-primary courier-status ${order.status === 'delivered' ? 'active-status' : ''}" data-id="${order.id}" data-s="delivered">Təhvil verdim</button>
+      <div class="courier-actions pro-courier-actions">
+        <button
+          class="btn btn-soft courier-status ${order.status === 'on_the_way' ? 'active-status' : ''}"
+          data-id="${order.id}"
+          data-s="on_the_way"
+          ${order.status !== 'ready_for_courier' ? 'disabled' : ''}
+        >
+          🚚 Yola çıxdım
+        </button>
+
+        <button
+          class="btn btn-soft courier-status ${order.status === 'courier_near' ? 'active-status' : ''}"
+          data-id="${order.id}"
+          data-s="courier_near"
+          ${order.status !== 'on_the_way' ? 'disabled' : ''}
+        >
+          📍 Ünvana yaxınam
+        </button>
+
+        <button
+          class="btn btn-primary courier-status ${order.status === 'delivered' ? 'active-status' : ''}"
+          data-id="${order.id}"
+          data-s="delivered"
+          ${order.status !== 'courier_near' ? 'disabled' : ''}
+        >
+          ✅ Təhvil verdim
+        </button>
       </div>
     </article>
   `;
@@ -264,58 +348,31 @@ function orderCard(order, customer = {}, location = {}, payment = null) {
 //==========================================================================================================
 
 function courierPaymentText(order, payment = null) {
-  const method = order.payment_method || payment?.provider || '';
-  const status = order.payment_status || payment?.status || '';
+  const status = order.payment_status || payment?.status || 'pending';
   const amount = Number(payment?.amount || order.total_amount || 0);
   const amountText = money(amount);
 
-  if (method === 'cash') {
+  if (status === 'paid' || status === 'approved') {
     return `
-      <b>💵 Nağd ödəniş</b>
-      <span>Müştəri kuryerə nağd ${amountText} ödəyəcək.</span>
+      <b>✅ Online ödəniş təsdiqlənib</b>
+      <span>${amountText} ödənilib. Müştəridən əlavə pul tələb etmə.</span>
     `;
   }
 
-  if (method === 'card_transfer') {
-    if (status === 'paid' || status === 'approved') {
-      return `
-        <b>💳 Kart köçürməsi</b>
-        <span>Müştəri kart köçürməsi ilə ${amountText} ödəniş edib. Müştəridən nağd pul tələb etmə.</span>
-      `;
-    }
-
+  if (status === 'refund_pending' || status === 'refund_processing') {
     return `
-      <b>💳 Kart köçürməsi</b>
-      <span>Müştəri ${amountText} məbləği karta köçürmə yolu ilə ödəməlidir. Status hələ təsdiqlənməyib.</span>
-    `;
-  }
-
-  if (method === 'pos') {
-    return `
-      <b>🏧 POS terminal</b>
-      <span>POS terminal hazır olsun. Müştəri ${amountText} məbləği POS vasitəsilə ödəyəcək.</span>
-    `;
-  }
-
-  if (method === 'online_payment' || method === 'online') {
-    if (status === 'paid' || status === 'approved') {
-      return `
-        <b>🌐 Online ödəniş</b>
-        <span>${amountText} online ödəniş edilib. Müştəridən əlavə pul tələb etmə.</span>
-      `;
-    }
-
-    return `
-      <b>🌐 Online ödəniş</b>
-      <span>Online ödəniş seçilib. Məbləğ: ${amountText}. Status hələ təsdiqlənməyib.</span>
+      <b>↩️ Geri ödəniş prosesi</b>
+      <span>Bu sifarişdə geri ödəniş prosesi ola bilər. Admin göstərişi olmadan təhvil etmə.</span>
     `;
   }
 
   return `
-    <b>💰 Ödəniş</b>
-    <span>Məbləğ: ${amountText}</span>
+    <b>⚠️ Ödəniş yoxlanılır</b>
+    <span>${amountText} üçün online ödəniş statusu hələ tam təsdiqlənməyib.</span>
   `;
 }
+
+
 
 function formatRouteDuration(seconds = 0) {
   const minutes = Math.max(1, Math.round(Number(seconds) / 60));
@@ -328,6 +385,8 @@ function formatRouteDuration(seconds = 0) {
 
   return `${minutes} dəqiqə`;
 }
+
+
 
 function updateCourierRouteInfo(orderId, distanceMeters, durationSeconds) {
   const km = Number(distanceMeters) / 1000;
@@ -419,9 +478,17 @@ function makeMapIcon(url) {
   });
 }
 
+
 function validPoint(lat, lng) {
-  return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  const nLat = Number(lat);
+  const nLng = Number(lng);
+
+  if (!Number.isFinite(nLat) || !Number.isFinite(nLng)) return false;
+  if (nLat === 0 && nLng === 0) return false;
+
+  return nLat >= 38 && nLat <= 42.5 && nLng >= 44 && nLng <= 51;
 }
+
 
 function estimateEta(order, customer = {}, location = {}) {
   const aLat = Number(location.lat || courierPosition?.lat);
