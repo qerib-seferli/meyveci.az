@@ -117,7 +117,10 @@ function renderTopbar() {
 }
 
 function renderBottomNav() {
-  if (location.pathname.includes('/admin/')) return;
+  if (
+    location.pathname.includes('/admin/') ||
+    location.pathname.includes('/warehouse/')
+  ) return;
   const root = getRootPath();
   const nav = document.createElement('nav');
   nav.className = 'bottom-nav';
@@ -193,11 +196,12 @@ async function refreshBadges() {
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).neq('title', 'Yeni mesaj'),
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).eq('title', 'Yeni mesaj'),
     activeProfile.role === 'admin'
-      ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['pending','confirmed','preparing','on_the_way','courier_near'])
+      ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['paid_hold','ready_to_confirm','confirmed','preparing','ready_for_courier','on_the_way','courier_near'])
       : activeProfile.role === 'courier'
         ? supabase.from('orders').select('id', { count: 'exact', head: true }).eq('courier_id', activeProfile.id).not('status', 'in', '(delivered,cancelled)')
-        : Promise.resolve({ count: 0 }),
-  ]);
+        : activeProfile.role === 'warehouse'
+          ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['confirmed','preparing','ready_for_courier'])
+          : Promise.resolve({ count: 0 }),  ]);
 
   setBadge('favCount', favorites.count || 0);
   setBadge('cartCount', cart.count || 0);
@@ -337,7 +341,11 @@ function openNotificationModal(title, body, dateText = '') {
 
 function renderSiteFooter() {
   if (document.querySelector('.site-footer')) return;
-  if (location.pathname.includes('/admin/') || location.pathname.includes('/courier/')) return;
+   if (
+    location.pathname.includes('/admin/') ||
+    location.pathname.includes('/courier/') ||
+    location.pathname.includes('/warehouse/')
+  ) return;
 
   const root = getRootPath();
 
@@ -414,7 +422,11 @@ function renderSiteFooter() {
 
 
 function getRootPath() {
-  return location.pathname.includes('/admin/') || location.pathname.includes('/courier/') ? '../' : './';
+  return (
+    location.pathname.includes('/admin/') ||
+    location.pathname.includes('/courier/') ||
+    location.pathname.includes('/warehouse/')
+  ) ? '../' : './';
 }
 
 function highlightNotificationBody(body = '') {
