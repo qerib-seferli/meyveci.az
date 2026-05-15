@@ -175,7 +175,7 @@ async function hydrateUserArea() {
 
   if (panelLink && activeProfile.role === 'warehouse') {
     panelLink.href = `${root}warehouse/index.html`;
-    panelLink.textContent = '📦 Anbardar';
+    panelLink.textContent = '📦';
     panelLink.title = 'Anbardar paneli';
     panelLink.classList.remove('hide');
   
