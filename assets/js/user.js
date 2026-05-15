@@ -1297,6 +1297,10 @@ async function initProfile() {
   form.lat.value = activeProfile.lat || '';
   form.lng.value = activeProfile.lng || '';
   form.bio.value = activeProfile.bio || '';
+  
+  updateProfileLocationText();
+  
+  $('#getProfileLocation')?.addEventListener('click', getProfileLocation);
 
   $('#profileEmail').textContent = activeProfile.email || '';
   $('#profileRole').textContent = activeProfile.role || 'user';
@@ -1332,12 +1336,67 @@ async function initProfile() {
         })
         .eq('id', activeProfile.id);
 
-      toast(error ? error.message : 'Profil yeniləndi');
+      if (error) {
+        toast(error.message);
+        return;
+      }
+      
+      toast('Profil yeniləndi');
+      
+      setTimeout(() => {
+        location.href = 'index.html';
+      }, 700);
+      
     } catch (error) {
       toast(error.message);
     }
   });
 }
+
+
+async function getProfileLocation() {
+  const button = $('#getProfileLocation');
+  const form = $('#profileForm');
+
+  if (!form || !button) return;
+
+  button.disabled = true;
+  button.textContent = '📍 Konum alınır...';
+
+  const locationPoint = await askLocation();
+
+  if (locationPoint) {
+    form.lat.value = locationPoint.lat;
+    form.lng.value = locationPoint.lng;
+
+    updateProfileLocationText();
+    toast('Konum təyin edildi');
+  } else {
+    toast('Konum alınmadı');
+  }
+
+  button.disabled = false;
+  button.textContent = '📍 Konumu təyin et';
+}
+
+function updateProfileLocationText() {
+  const form = $('#profileForm');
+  const text = $('#profileLocationText');
+
+  if (!form || !text) return;
+
+  const lat = Number(form.lat?.value || 0);
+  const lng = Number(form.lng?.value || 0);
+
+  if (lat && lng) {
+    text.textContent = `Konum seçildi: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    text.classList.add('ok');
+  } else {
+    text.textContent = 'Konum seçilməyib';
+    text.classList.remove('ok');
+  }
+}
+
 
 async function initMessages() {
   await startPresenceLive();
