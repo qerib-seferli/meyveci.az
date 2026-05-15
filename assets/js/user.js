@@ -271,6 +271,12 @@ async function initCart() {
   $('#checkoutForm')?.lat?.addEventListener('input', updateDeliveryFee);
   $('#checkoutForm')?.lng?.addEventListener('input', updateDeliveryFee);
   await updateDeliveryFee();
+  
+  $('#getCheckoutLocation')?.addEventListener('click', getCheckoutLocation);
+  updateCheckoutLocationText();
+
+  $('#checkoutForm')?.address?.addEventListener('input', updateDeliveryFee);
+  $('#checkoutForm')?.apartment?.addEventListener('input', updateDeliveryFee);
 
   $('#checkoutForm')?.addEventListener('submit', checkout);
 
@@ -295,6 +301,7 @@ async function fillCheckoutFromProfile() {
   form.door_code.value = activeProfile.door_code || '';
   form.lat.value = activeProfile.lat || '';
   form.lng.value = activeProfile.lng || '';
+  updateCheckoutLocationText();
 }
 
 
@@ -558,6 +565,51 @@ async function updateDeliveryFee() {
   if (amount) amount.textContent = money(cartDeliveryFee);
 
   updateBonusPreview();
+}
+
+
+async function getCheckoutLocation() {
+  const button = $('#getCheckoutLocation');
+  const form = $('#checkoutForm');
+
+  if (!form) return;
+
+  button.disabled = true;
+  button.textContent = '📍 Lokasiya alınır...';
+
+  const locationPoint = await askLocation();
+
+  if (locationPoint) {
+    form.lat.value = locationPoint.lat;
+    form.lng.value = locationPoint.lng;
+
+    toast('Lokasiya yeniləndi');
+    updateCheckoutLocationText();
+    await updateDeliveryFee();
+  } else {
+    toast('Lokasiya alınmadı');
+  }
+
+  button.disabled = false;
+  button.textContent = '📍 Lokasiyamı götür';
+}
+
+function updateCheckoutLocationText() {
+  const form = $('#checkoutForm');
+  const text = $('#checkoutLocationText');
+
+  if (!form || !text) return;
+
+  const lat = Number(form.lat?.value || 0);
+  const lng = Number(form.lng?.value || 0);
+
+  if (lat && lng) {
+    text.textContent = `Lokasiya seçildi: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    text.classList.add('ok');
+  } else {
+    text.textContent = 'Lokasiya seçilməyib';
+    text.classList.remove('ok');
+  }
 }
 
 function updateCartSummary(bonusUsed = 0) {
