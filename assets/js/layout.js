@@ -116,11 +116,15 @@ function renderTopbar() {
   });
 }
 
+
 function renderBottomNav() {
   if (
     location.pathname.includes('/admin/') ||
+    location.pathname.includes('/courier/') ||
     location.pathname.includes('/warehouse/')
   ) return;
+
+  
   const root = getRootPath();
   const nav = document.createElement('nav');
   nav.className = 'bottom-nav';
@@ -298,7 +302,7 @@ async function subscribeNotifications() {
       console.log('Notification realtime status:', status);
     });
 
-  if (activeProfile.role === 'admin' || activeProfile.role === 'courier') {
+  if (activeProfile.role === 'admin' || activeProfile.role === 'courier' || activeProfile.role === 'warehouse') {
     supabase
       .channel(`orders-badge-live-${activeProfile.id}`)
       .on(
