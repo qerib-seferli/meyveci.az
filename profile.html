@@ -37,8 +37,16 @@
         <input name="address_line" placeholder="Ev ünvanı">
         <input name="apartment" placeholder="Bina, blok, mənzil">
         <input name="door_code" placeholder="Qapı kodu">
-        <input name="lat" type="number" step="any" placeholder="Latitude">
-        <input name="lng" type="number" step="any" placeholder="Longitude">
+        
+        <input name="lat" type="hidden">
+        <input name="lng" type="hidden">        
+        <div class="location-action-box full">
+          <button id="getProfileLocation" class="btn btn-soft" type="button">
+            📍 Konumu təyin et
+          </button>
+          <span id="profileLocationText">Konum seçilməyib</span>
+        </div>
+        
         <textarea class="full" name="bio" placeholder="Əlavə profil qeydləri"></textarea>
         <button class="btn btn-primary full">Yadda saxla</button>
         <div id="mobileLogoutSlot" class="mobile-logout-slot"></div>   <!-- Bu bölmə çıxış düyməsi üçündür -->
