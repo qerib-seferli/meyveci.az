@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="icon" href="../assets/img/logo/Cilek-logo.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/warehouse.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Anbardar panel | Meyvəçi.az</title>
+</head>
+<body data-page="warehouse">
+  <main class="app-shell">
+    <div class="admin-layout">
+      <aside class="sidebar card admin-sidebar">
+        <b>📦 Anbardar Panel</b>
+        <nav class="side-nav">
+          <a class="side-link active" href="index.html">📊 Dashboard</a>
+          <a class="side-link" href="../index.html">🏠 Sayta qayıt</a>
+        </nav>
+      </aside>
+
+      <section class="admin-main">
+        <div class="admin-hero">
+          <div>
+            <span class="admin-eyebrow">Hazırlanma və təhvil idarəsi</span>
+            <h1>Anbardar paneli</h1>
+            <p>Sifarişlərin hazırlanması, məhsul cəmlənməsi və kuryerə təhvil prosesi.</p>
+          </div>
+          <button id="warehouseRefreshBtn" class="btn btn-primary">🔄 Yenilə</button>
+        </div>
+
+        <div id="warehouseKpis" class="pro-kpi-grid"></div>
+
+        <section class="card pro-card">
+          <div class="section-head">
+            <h2>📦 Sifarişlər</h2>
+            <input id="warehouseOrderSearch" class="admin-search" type="search" placeholder="Kod, müştəri, telefon axtar...">
+          </div>
+
+          <div class="table-wrap">
+            <table class="pro-table">
+              <thead>
+                <tr>
+                  <th>Kod</th>
+                  <th>Müştəri</th>
+                  <th>Ünvan</th>
+                  <th>Status</th>
+                  <th>Məbləğ</th>
+                  <th>Kuryer</th>
+                  <th>Əməliyyat</th>
+                </tr>
+              </thead>
+              <tbody id="warehouseOrdersTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card pro-card">
+          <div class="prep-head">
+            <div>
+              <h2>Hazırlanma Mərkəzi</h2>
+              <p class="muted">Təsdiqlənmiş və hazırlanmaqda olan sifarişlərin məhsul cəmlənməsi.</p>
+            </div>
+          </div>
+
+          <div class="prep-filter-grid warehouse-prep-filter">
+            <label>
+              <span>Məhsul axtar</span>
+              <input id="warehousePrepSearch" type="search" placeholder="Məs: alma, kivi...">
+            </label>
+            <button id="warehousePrepRefresh" class="btn btn-primary" type="button">Yenilə</button>
+          </div>
+
+          <div id="warehousePrepKpis" class="prep-kpi-grid"></div>
+
+          <div class="prep-grid">
+            <div class="prep-box">
+              <div class="prep-box-head">
+                <h3>Ümumi sifariş miqdarı</h3>
+                <small>Məhsullar cəmlənmiş formada</small>
+              </div>
+
+              <div class="table-wrap">
+                <table class="pro-table prep-table">
+                  <thead>
+                    <tr>
+                      <th>Məhsul</th>
+                      <th>Cəm miqdar</th>
+                      <th>Anbar qalığı</th>
+                      <th>Satınalma ehtiyacı</th>
+                      <th>Anbarda qalacaq</th>
+                    </tr>
+                  </thead>
+                  <tbody id="warehousePrepSummaryTable"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="prep-box">
+              <div class="prep-box-head">
+                <h3>Müştəri detalları</h3>
+                <small>Birinci sifariş verən əvvəl göstərilir</small>
+              </div>
+
+              <div id="warehousePrepDetailsList" class="prep-details-list"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="../assets/js/warehouse.js"></script>
+</body>
+</html>
