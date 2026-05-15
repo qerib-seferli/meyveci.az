@@ -27,3 +27,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.warehouse-panel {
+  display: none;
+}
+
+.warehouse-panel.active {
+  display: grid;
+  gap: 16px;
+}
+
+.warehouse-tab-btn {
+  border: 1px solid rgba(34,197,94,.16);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
