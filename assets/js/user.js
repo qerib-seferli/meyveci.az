@@ -471,22 +471,20 @@ function updateBonusPreview() {
 }
 
 
-async function updateDeliveryFee() {
 
-      if (Number(cartCurrentTotal || 0) <= 0) {
-      cartDeliveryFee = 0;
-      cartPayableTotal = 0;
-  
-      if ($('#deliveryFeeText')) $('#deliveryFeeText').textContent = 'Səbət boşdur';
-      if ($('#deliveryFeeAmount')) $('#deliveryFeeAmount').textContent = money(0);
-      if ($('#cartTotal')) $('#cartTotal').textContent = money(0);
-  
-      updateCartSummary(0);
-      return;
-    }
-  
+function validCheckoutPoint(lat, lng) {
+  const nLat = Number(lat);
+  const nLng = Number(lng);
+
+  if (!Number.isFinite(nLat) || !Number.isFinite(nLng)) return false;
+  if (nLat === 0 && nLng === 0) return false;
+
+  return nLat >= 38 && nLat <= 42.5 && nLng >= 44 && nLng <= 51;
+}
+
+async function updateDeliveryFee() {
   const form = $('#checkoutForm');
-  const city = form?.city_region?.value;
+  const city = form?.city_region?.value || '';
   const lat = Number(form?.lat?.value || 0);
   const lng = Number(form?.lng?.value || 0);
 
@@ -494,14 +492,23 @@ async function updateDeliveryFee() {
   const amount = $('#deliveryFeeAmount');
 
   cartDeliveryFee = 0;
+  cartPayableTotal = 0;
   deliveryDistanceKm = null;
+
+  if (Number(cartCurrentTotal || 0) <= 0) {
+    if (text) text.textContent = 'Səbət boşdur';
+    if (amount) amount.textContent = money(0);
+    if ($('#cartTotal')) $('#cartTotal').textContent = money(0);
+    updateCartSummary(0);
+    return;
+  }
 
   const [{ data: settings }, { data: regionTariff }, { data: kmTariffs }] = await Promise.all([
     supabase
       .from('delivery_settings')
       .select('*')
       .eq('is_active', true)
-      .order('created_at', { ascending: true })
+      .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
 
@@ -525,7 +532,7 @@ async function updateDeliveryFee() {
 
   if (settings?.free_delivery_min && productsTotal >= Number(settings.free_delivery_min)) {
     cartDeliveryFee = 0;
-    if (text) text.textContent = `Pulsuz çatdırılma aktiv oldu`;
+    if (text) text.textContent = 'Pulsuz çatdırılma aktiv oldu';
     if (amount) amount.textContent = money(0);
     updateBonusPreview();
     return;
@@ -539,7 +546,13 @@ async function updateDeliveryFee() {
     return;
   }
 
-  if (settings?.store_lat && settings?.store_lng && lat && lng) {
+  const hasValidDistance =
+    settings?.store_lat &&
+    settings?.store_lng &&
+    validCheckoutPoint(settings.store_lat, settings.store_lng) &&
+    validCheckoutPoint(lat, lng);
+
+  if (hasValidDistance) {
     deliveryDistanceKm = distanceKm(Number(settings.store_lat), Number(settings.store_lng), lat, lng);
 
     const tariff = (kmTariffs || []).find((row) => {
@@ -549,20 +562,18 @@ async function updateDeliveryFee() {
     });
 
     if (tariff) {
-      cartDeliveryFee = Number(tariff.base_fee || 0) + Math.max(deliveryDistanceKm - Number(tariff.min_km || 0), 0) * Number(tariff.per_km_fee || 0);
-    } else if (regionTariff) {
-      cartDeliveryFee = Number(regionTariff.fixed_fee || 0);
-    } else {
-      cartDeliveryFee = Number(settings.default_fee || 0);
+      cartDeliveryFee =
+        Number(tariff.base_fee || 0) +
+        Math.max(deliveryDistanceKm - Number(tariff.min_km || 0), 0) * Number(tariff.per_km_fee || 0);
+
+      cartDeliveryFee = Math.max(cartDeliveryFee, Number(settings?.min_fee || 0));
+      cartDeliveryFee = Number(cartDeliveryFee.toFixed(2));
+
+      if (text) text.textContent = `${deliveryDistanceKm.toFixed(1)} km məsafəyə görə hesablandı`;
+      if (amount) amount.textContent = money(cartDeliveryFee);
+      updateBonusPreview();
+      return;
     }
-
-    cartDeliveryFee = Math.max(cartDeliveryFee, Number(settings.min_fee || 0));
-
-    if (text) text.textContent = `${deliveryDistanceKm.toFixed(1)} km məsafəyə görə hesablandı`;
-    if (amount) amount.textContent = money(cartDeliveryFee);
-
-    updateBonusPreview();
-    return;
   }
 
   if (regionTariff) {
@@ -573,10 +584,15 @@ async function updateDeliveryFee() {
     return;
   }
 
-  cartDeliveryFee = Number(settings?.default_fee || 0);
+  cartDeliveryFee = 0;
 
-  if (text) text.textContent = city ? `${city} üçün default çatdırılma tarifi` : 'Şəhər/rayon seçildikdən sonra hesablanacaq';
-  if (amount) amount.textContent = money(cartDeliveryFee);
+  if (text) {
+    text.textContent = city
+      ? `${city} üçün çatdırılma tarifi təyin edilməyib`
+      : 'Şəhər/rayon seçin və lokasiyanı götürün';
+  }
+
+  if (amount) amount.textContent = money(0);
 
   updateBonusPreview();
 }
