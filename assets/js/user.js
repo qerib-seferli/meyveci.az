@@ -267,9 +267,21 @@ async function initCart() {
   await renderCart();
   await initBonusBox();
 
-  $('#checkoutForm')?.city_region?.addEventListener('change', updateDeliveryFee);
-  $('#checkoutForm')?.lat?.addEventListener('input', updateDeliveryFee);
-  $('#checkoutForm')?.lng?.addEventListener('input', updateDeliveryFee);
+  $('#checkoutForm')?.city_region?.addEventListener('change', () => {
+    clearCheckoutLocation();
+    updateDeliveryFee();
+  });
+  
+  $('#checkoutForm')?.address?.addEventListener('input', () => {
+    clearCheckoutLocation();
+    updateDeliveryFee();
+  });
+  
+  $('#checkoutForm')?.apartment?.addEventListener('input', () => {
+    clearCheckoutLocation();
+    updateDeliveryFee();
+  });
+  
   await updateDeliveryFee();
   
   $('#getCheckoutLocation')?.addEventListener('click', getCheckoutLocation);
@@ -641,6 +653,28 @@ function updateCheckoutLocationText() {
     text.classList.remove('ok');
   }
 }
+
+function clearCheckoutLocation() {
+  const form = $('#checkoutForm');
+  if (!form) return;
+
+  form.lat.value = '';
+  form.lng.value = '';
+
+  updateCheckoutLocationText();
+
+  cartDeliveryFee = 0;
+  deliveryDistanceKm = null;
+
+  if ($('#deliveryFeeText')) {
+    $('#deliveryFeeText').textContent = 'Yeni ünvan üçün lokasiyanı götürün';
+  }
+
+  if ($('#deliveryFeeAmount')) {
+    $('#deliveryFeeAmount').textContent = money(0);
+  }
+}
+
 
 function updateCartSummary(bonusUsed = 0) {
   if ($('#summaryProducts')) $('#summaryProducts').textContent = money(cartCurrentTotal);
