@@ -220,6 +220,23 @@ function fullName(profile = {}) {
   return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Adsız istifadəçi';
 }
 
+
+  function roleAzAdmin(role) {
+    const map = {
+      user: 'Müştəri',
+      courier: 'Kuryer',
+      warehouse: 'Anbardar',
+      admin: 'Admin',
+    };
+  
+    return map[role] || role || 'İstifadəçi';
+  }
+  
+  function roleBadge(role) {
+    return `<span class="role-badge role-${String(role || 'user')}">${roleAzAdmin(role)}</span>`;
+  }
+
+
 function isReallyOnline(profile = {}, device = null) {
   const lastSeen = profile.last_seen ? new Date(profile.last_seen).getTime() : 0;
   const heartbeat = device?.last_heartbeat ? new Date(device.last_heartbeat).getTime() : 0;
@@ -2448,12 +2465,15 @@ async function loadUsers() {
         </td>
         <td><small>${esc([user.city_region, user.address_line, user.apartment, user.door_code].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</small></td>
         <td>
-          <select class="role" data-id="${user.id}" ${user.email === masterEmail && adminProfile?.email !== masterEmail ? 'disabled' : ''}>
+          <div class="role-manager-cell">
+            ${roleBadge(user.role)}
+            <select class="role role-select-pro" data-id="${user.id}" ${user.email === masterEmail && adminProfile?.email !== masterEmail ? 'disabled' : ''}>
             <option value="user" ${user.role === 'user' ? 'selected' : ''}>Müştəri</option>
             <option value="courier" ${user.role === 'courier' ? 'selected' : ''}>Kuryer</option>
             <option value="warehouse" ${user.role === 'warehouse' ? 'selected' : ''}>Anbardar</option>
             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-          </select>
+            </select>
+          </div>
         </td>
         <td>
           ${
@@ -2499,7 +2519,7 @@ function bindUserEvents() {
           .eq('user_id', userId);
       }
       
-      toast(error ? error.message : 'Rol dəyişdi');
+      toast(error ? error.message : `İstifadəçi ${roleAzAdmin(select.value)} olaraq təyin edildi`);
       select.disabled = false;
       loadUsers();
     });
@@ -2523,7 +2543,7 @@ function bindUserEvents() {
         <div class="admin-detail-box"><b>Ad Soyad</b><span>${esc(`${u.first_name || ''} ${u.last_name || ''}`.trim())}</span></div>
         <div class="admin-detail-box"><b>Email</b><span>${esc(u.email)}</span></div>
         <div class="admin-detail-box"><b>Telefon</b><span>${esc(u.phone)}</span></div>
-        <div class="admin-detail-box"><b>Rol</b><span>${esc(u.role)}</span></div>
+        <div class="admin-detail-box"><b>Rol</b><span>${roleBadge(u.role)}</span></div>
         <div class="admin-detail-box"><b>Status</b><span>${u.is_active !== false ? 'Aktiv' : 'Passiv'}</span></div>
         <div class="admin-detail-box"><b>Online</b><span>${isReallyOnline(u) ? 'Online' : 'Offline'}</span></div>
         <div class="admin-detail-box"><b>Son giriş</b><span>${formatDate(u.last_seen)}</span></div>
