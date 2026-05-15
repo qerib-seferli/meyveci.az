@@ -1629,116 +1629,155 @@ th {
 }
 
 /*========================================================== ÇATDIRILMA ==========================================================*/
+/* ============================================================
+   ÇATDIRILMA TARİFLƏRİ — PRO MINIMAL ADMIN UI
+   Məqsəd:
+   - Admin paneldə tarif kartları səliqəli və yüngül görünsün
+   - Düymələr digər admin düymələrini pozmasın
+   - Input/select ölçüləri eyni olsun
+   - Aktiv/passiv seçimi daha professional görünsün
+   ============================================================ */
+
 .delivery-admin-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
   gap: 14px;
-  margin-top: 16px;
-  margin-bottom: 18px;
+  margin: 16px 0 18px;
+  align-items: stretch;
 }
 
 .delivery-admin-card {
   display: grid;
+  align-content: start;
   gap: 10px;
-  box-shadow: none;
+  padding: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.14);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 12px 28px rgba(15, 122, 55, 0.07);
 }
 
 .delivery-admin-card h3 {
   margin: 0 0 4px;
   color: #064e3b;
-}
-
-.admin-check-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 900;
-  color: #064e3b;
-}
-
-.admin-check-row input {
-  width: 18px;
-  height: 18px;
-}
-
-@media (max-width: 980px) {
-  .delivery-admin-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.delivery-admin-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
+  font-size: 18px;
+  line-height: 1.15;
 }
 
 .delivery-admin-card input,
 .delivery-admin-card select {
   width: 100%;
-  height: 56px;
-  min-height: 56px;
+  height: 46px;
+  min-height: 46px;
+  padding: 0 14px;
   box-sizing: border-box;
+  border-radius: 16px;
+  font-size: 13px;
 }
 
-.prep-grid {
-  grid-template-columns: 1fr !important;
-}
-
-.prep-box {
-  width: 100%;
-}
-
-.admin-check-row {
+/* Aktiv/passiv pill */
+.delivery-admin-card .admin-check-row {
   width: fit-content;
-  padding: 8px 12px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
   border-radius: 999px;
   background: rgba(34, 197, 94, 0.10);
+  color: #047857;
+  font-size: 13px;
+  font-weight: 900;
 }
 
-.admin-check-row input {
+.delivery-admin-card .admin-check-row input {
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
   accent-color: #16a34a;
 }
 
-.admin-check-row:has(input:not(:checked)) {
+.delivery-admin-card .admin-check-row:has(input:not(:checked)) {
   background: rgba(239, 68, 68, 0.10);
   color: #991b1b;
 }
 
-/* Çatdırılma bölməsi üçün minimalist PRO düymələr */
+/* Yalnız çatdırılma kartları içindəki düymələr */
 .delivery-admin-card .btn {
-  min-height: 40px;
-  height: auto;
   width: fit-content;
-  padding: 9px 14px;
+  min-width: 82px;
+  min-height: 38px;
+  padding: 8px 13px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12.5px;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
 }
 
-/* Form daxilində əsas yadda saxla düyməsi çox da enli olmasın */
+/* Anbar kartında tək Yadda saxla düyməsi çox iri yox, kartla balanslı olsun */
 .delivery-admin-card > .btn-primary {
   width: 100%;
+  min-height: 42px;
 }
 
-/* Action row içindəki Yeni / saxla düymələri səliqəli qalsın */
 .delivery-admin-card .action-row {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 2px;
 }
 
 .delivery-admin-card .action-row .btn {
   width: auto;
-  min-width: 82px;
 }
 
-@media (max-width: 980px) {
+/* Tarif cədvəlləri alt-alta və tam en */
+#deliveryTariffsPanel .prep-grid {
+  grid-template-columns: 1fr !important;
+  gap: 14px;
+}
+
+#deliveryTariffsPanel .prep-box {
+  width: 100%;
+}
+
+/* Çatdırılma panelində cədvəllər daha yığcam görünsün */
+#deliveryTariffsPanel .pro-table th,
+#deliveryTariffsPanel .pro-table td {
+  padding: 10px 12px !important;
+  font-size: 12.5px;
+}
+
+#deliveryTariffsPanel .table-wrap {
+  margin-top: 10px;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .delivery-admin-grid {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+/* Telefon */
+@media (max-width: 720px) {
   .delivery-admin-grid {
     grid-template-columns: 1fr;
+  }
+
+  .delivery-admin-card {
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .delivery-admin-card input,
+  .delivery-admin-card select {
+    height: 44px;
+    min-height: 44px;
   }
 }
 /*=============================================================================================================================================================*/
