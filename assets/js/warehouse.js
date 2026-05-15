@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#warehousePrepRefresh')?.addEventListener('click', loadWarehousePreparation);
 
   setupWarehouseTabs();
-  subscribeWarehouseLive();
+  startWarehouseAutoRefresh();
 });
 
 async function loadWarehousePanel() {
@@ -420,13 +420,10 @@ function renderWarehousePreparationDetails(rows) {
   `).join('') || '<span class="muted">Müştəri detalları yoxdur.</span>';
 }
 
-function subscribeWarehouseLive() {
-  supabase
-    .channel('warehouse-panel-live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadWarehousePanel())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => loadWarehousePanel())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => loadWarehousePreparation())
-    .subscribe();
+function startWarehouseAutoRefresh() {
+  setInterval(() => {
+    loadWarehousePanel();
+  }, 15000);
 }
 
 function setupWarehouseTabs() {
