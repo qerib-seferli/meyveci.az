@@ -54,8 +54,15 @@
               <input name="address" placeholder="Ünvan" required>
               <input name="apartment" placeholder="Bina, blok, mənzil">
               <input name="door_code" placeholder="Qapı kodu">
-              <input name="lat" type="number" step="any" placeholder="Latitude / xəritə eni">
-              <input name="lng" type="number" step="any" placeholder="Longitude / xəritə uzunluğu">
+              <input name="lat" type="hidden">
+              <input name="lng" type="hidden">
+              
+              <div class="location-action-box">
+                <button id="getCheckoutLocation" class="btn btn-soft" type="button">
+                  📍 Lokasiyamı götür
+                </button>
+                <span id="checkoutLocationText">Lokasiya seçilməyib</span>
+              </div>
             </div>
         
                 <div class="payment-secure-box full">
