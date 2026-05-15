@@ -633,7 +633,7 @@ async function getCheckoutLocation() {
   }
 
   button.disabled = false;
-  button.textContent = '📍 Lokasiyamı götür';
+  button.textContent = '📍 Olduğum yerə gətir';
 }
 
 function updateCheckoutLocationText() {
