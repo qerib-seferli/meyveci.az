@@ -472,6 +472,19 @@ function updateBonusPreview() {
 
 
 async function updateDeliveryFee() {
+
+      if (Number(cartCurrentTotal || 0) <= 0) {
+      cartDeliveryFee = 0;
+      cartPayableTotal = 0;
+  
+      if ($('#deliveryFeeText')) $('#deliveryFeeText').textContent = 'Səbət boşdur';
+      if ($('#deliveryFeeAmount')) $('#deliveryFeeAmount').textContent = money(0);
+      if ($('#cartTotal')) $('#cartTotal').textContent = money(0);
+  
+      updateCartSummary(0);
+      return;
+    }
+  
   const form = $('#checkoutForm');
   const city = form?.city_region?.value;
   const lat = Number(form?.lat?.value || 0);
@@ -567,19 +580,6 @@ async function updateDeliveryFee() {
 
   updateBonusPreview();
 }
-
-
-  if (Number(cartCurrentTotal || 0) <= 0) {
-    cartDeliveryFee = 0;
-    cartPayableTotal = 0;
-
-    if ($('#deliveryFeeText')) $('#deliveryFeeText').textContent = 'Səbət boşdur';
-    if ($('#deliveryFeeAmount')) $('#deliveryFeeAmount').textContent = money(0);
-    if ($('#cartTotal')) $('#cartTotal').textContent = money(0);
-
-    updateCartSummary(0);
-    return;
-  }
 
 
 async function getCheckoutLocation() {
