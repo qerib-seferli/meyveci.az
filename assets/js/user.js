@@ -372,8 +372,9 @@ async function renderCart() {
   }).join('') || '<div class="card">Səbət boşdur.</div>';
 
   $('#cartTotal').textContent = money(total);
-  cartCurrentTotal = total;
-  updateBonusPreview();
+  
+    cartCurrentTotal = total;
+    await updateDeliveryFee();
 
   $$('.qty').forEach((button) => {
     button.addEventListener('click', () => updateQty(button.dataset.id, Number(button.dataset.q)));
@@ -566,6 +567,19 @@ async function updateDeliveryFee() {
 
   updateBonusPreview();
 }
+
+
+  if (Number(cartCurrentTotal || 0) <= 0) {
+    cartDeliveryFee = 0;
+    cartPayableTotal = 0;
+
+    if ($('#deliveryFeeText')) $('#deliveryFeeText').textContent = 'Səbət boşdur';
+    if ($('#deliveryFeeAmount')) $('#deliveryFeeAmount').textContent = money(0);
+    if ($('#cartTotal')) $('#cartTotal').textContent = money(0);
+
+    updateCartSummary(0);
+    return;
+  }
 
 
 async function getCheckoutLocation() {
