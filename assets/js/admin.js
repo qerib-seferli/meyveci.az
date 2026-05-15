@@ -62,7 +62,8 @@ function fillAdminCitySelect(form, selectedValue = '') {
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
 
-  adminProfile = await requireRole('admin');
+  const isWarehousePanel = location.pathname.includes('/warehouse/');
+  adminProfile = await requireRole(isWarehousePanel ? 'warehouse' : 'admin');
   if (!adminProfile) return;
 
   initTabs();
@@ -71,9 +72,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const page = document.body.dataset.page;
 
-  if (page === 'admin-dashboard') dashboard();
+  if (page === 'admin-dashboard' || page === 'warehouse-dashboard') dashboard();
   if (page === 'admin-catalog') catalog();
-  if (page === 'admin-orders') ordersPayments();
+  if (page === 'admin-orders' || page === 'warehouse-orders') ordersPayments();
   if (page === 'admin-users') usersReviews();
   if (page === 'admin-content') content();
 
@@ -290,7 +291,12 @@ async function loadAdminChatUnreadCounts(orderIds = []) {
 
 
 function statusIcon(status) {
-  const root = location.pathname.includes('/admin/') ? '../' : './';
+    const root =
+    location.pathname.includes('/admin/') ||
+    location.pathname.includes('/warehouse/')
+      ? '../'
+      : './';
+  
   const icons = {
     pending: `${root}assets/img/icons/order-confirmed.png`,
     confirmed: `${root}assets/img/icons/order-confirmed.png`,
@@ -974,9 +980,9 @@ async function ordersPayments() {
   initPreparationDates();
 
   await loadOrders();
-  await loadPayments();
+  if ($('#paymentsTable')) await loadPayments();
   await loadPreparationCenter();
-  await loadDeliveryTariffsAdmin();
+  if ($('#deliverySettingsForm')) await loadDeliveryTariffsAdmin();
 
   $('#orderSearch')?.addEventListener('input', loadOrders);
   $('#paymentSearch')?.addEventListener('input', loadPayments);
@@ -2350,6 +2356,7 @@ function printPreparationCenter() {
 
 
 async function loadPayments() {
+  if (!$('#paymentsTable')) return;
   const search = ($('#paymentSearch')?.value || '').toLowerCase();
 
   const { data } = await supabase
@@ -2738,14 +2745,14 @@ function subscribeAdminRealtime() {
   supabase
     .channel('admin-pro-live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-      if (document.body.dataset.page === 'admin-dashboard') {
+      if (document.body.dataset.page === 'admin-dashboard' || document.body.dataset.page === 'warehouse-dashboard') {
         loadDashboardKpis();
         loadRecentOrders();
         loadCourierMonitor();
         loadAdminAlerts();
       }
     
-      if (document.body.dataset.page === 'admin-orders') {
+      if (document.body.dataset.page === 'admin-orders' || document.body.dataset.page === 'warehouse-orders') {
         loadOrders();
         loadPayments();
         loadPreparationCenter();
@@ -2753,17 +2760,17 @@ function subscribeAdminRealtime() {
     })
     
     .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
-      if (document.body.dataset.page === 'admin-orders') loadPayments();
-      if (document.body.dataset.page === 'admin-dashboard') loadDashboardKpis();
+      if (document.body.dataset.page === 'admin-orders' && $('#paymentsTable')) loadPayments();
+      if (document.body.dataset.page === 'admin-dashboard' || document.body.dataset.page === 'warehouse-dashboard') loadDashboardKpis();
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_locations' }, (payload) => {
-      if (document.body.dataset.page === 'admin-dashboard') handleCourierLocationRealtime(payload.new);
+      if (document.body.dataset.page === 'admin-dashboard' || document.body.dataset.page === 'warehouse-dashboard') handleCourierLocationRealtime(payload.new);
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'courier_device_status' }, () => {
-      if (document.body.dataset.page === 'admin-dashboard') loadCourierMonitor();
+      if (document.body.dataset.page === 'admin-dashboard' || document.body.dataset.page === 'warehouse-dashboard') loadCourierMonitor();
     })
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'admin_alerts' }, () => {
-      if (document.body.dataset.page === 'admin-dashboard') loadAdminAlerts();
+      if (document.body.dataset.page === 'admin-dashboard' || document.body.dataset.page === 'warehouse-dashboard') loadAdminAlerts();
       playAdminSound();
     })
     .subscribe();
