@@ -153,6 +153,7 @@ async function hydrateUserArea() {
     panelLink.classList.remove('hide');
     $('#adminOrdersBtn')?.classList.remove('hide');
   }
+  
   if (panelLink && activeProfile.role === 'courier') {
     panelLink.href = `${root}courier/index.html`;
     panelLink.textContent = '🚚';
@@ -162,6 +163,21 @@ async function hydrateUserArea() {
       courierOrdersBtn.href = `${root}courier/index.html`;
       courierOrdersBtn.title = 'Təyin edilmiş sifarişlər';
       courierOrdersBtn.classList.remove('hide');
+    }
+  }
+
+    if (panelLink && activeProfile.role === 'warehouse') {
+    panelLink.href = `${root}warehouse/index.html`;
+    panelLink.textContent = '📦';
+    panelLink.title = 'Anbardar paneli';
+    panelLink.classList.remove('hide');
+  
+    const warehouseOrdersBtn = $('#adminOrdersBtn');
+    if (warehouseOrdersBtn) {
+      warehouseOrdersBtn.href = `${root}warehouse/index.html`;
+      warehouseOrdersBtn.title = 'Hazırlanma mərkəzi';
+      warehouseOrdersBtn.textContent = '📦';
+      warehouseOrdersBtn.classList.remove('hide');
     }
   }
 }
