@@ -169,18 +169,15 @@ async function hydrateUserArea() {
     }
   }
 
-    if (panelLink && activeProfile.role === 'warehouse') {
+  if (panelLink && activeProfile.role === 'warehouse') {
     panelLink.href = `${root}warehouse/index.html`;
-    panelLink.textContent = '📦';
+    panelLink.textContent = '📦 Anbardar';
     panelLink.title = 'Anbardar paneli';
     panelLink.classList.remove('hide');
   
     const warehouseOrdersBtn = $('#adminOrdersBtn');
     if (warehouseOrdersBtn) {
-      warehouseOrdersBtn.href = `${root}warehouse/index.html`;
-      warehouseOrdersBtn.title = 'Hazırlanma mərkəzi';
-      warehouseOrdersBtn.textContent = '📦';
-      warehouseOrdersBtn.classList.remove('hide');
+      warehouseOrdersBtn.classList.add('hide');
     }
   }
 }
