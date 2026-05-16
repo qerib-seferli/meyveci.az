@@ -927,24 +927,39 @@ function orderCard(order, courier = null, courierLocation = null, address = {}) 
     address?.note ? `Qeyd: ${address.note}` : '',
   ].filter(Boolean).join(', ');
 
-const deadlineMs = getOrderEditDeadlineMs(order);
-const editDiff = deadlineMs - Date.now();
+  const deadlineMs = getOrderEditDeadlineMs(order);
+  const editDiff = deadlineMs - Date.now();
+  
+  const compactPastStatuses = ['cancelled', 'rejected', 'refund_pending', 'refund_processing', 'refunded', 'delivered'];
+  const isRefundFlow = ['refund_pending', 'refund_processing', 'refunded'].includes(order.status);
+  const isPast = compactPastStatuses.includes(order.status);
+  const isDeliveredCompact = order.status === 'delivered';
+  const isCancelledCompact = ['cancelled', 'rejected'].includes(order.status) || order.payment_status === 'rejected';
+  const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
+  const canShowEditBox = order.status === 'paid_hold' && editDiff > 0;
+  const canReturnToCart = order.status === 'paid_hold' && editDiff > 0;
+  const canCancel = ['pending'].includes(order.status);
 
-const isRefundFlow = ['refund_pending', 'refund_processing', 'refunded'].includes(order.status);
-const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
-const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
-const canShowEditBox = order.status === 'paid_hold' && editDiff > 0;
-const canReturnToCart = order.status === 'paid_hold' && editDiff > 0;
-const canCancel = ['pending'].includes(order.status);
 
+if (isRefundFlow || isDeliveredCompact || isCancelledCompact) {
+  const cardTone = isDeliveredCompact
+    ? 'delivered-only-card'
+    : isCancelledCompact
+      ? 'cancelled-only-card'
+      : 'refund-only-card';
 
-  if (isRefundFlow) {
+  const title = isDeliveredCompact
+    ? 'Təhvil verildi'
+    : isCancelledCompact
+      ? 'Ləğv edildi'
+      : statusAz(order.status);
+
   return `
-    <article class="card user-order-card refund-only-card" data-order-id="${order.id}">
+    <article class="card user-order-card compact-history-card ${cardTone}" data-order-id="${order.id}">
       <div class="user-order-top">
         <div>
           <span class="user-order-code">${order.order_code || order.id}</span>
-          <h2>${statusAz(order.status)}</h2>
+          <h2>${title}</h2>
           <p class="muted">${new Date(order.created_at).toLocaleString('az-AZ')}</p>
         </div>
 
@@ -954,22 +969,26 @@ const canCancel = ['pending'].includes(order.status);
         </div>
       </div>
 
-      <div class="user-order-info-grid refund-only-grid">
-        <div class="user-order-info-box">
-          <b>💳 Ödəniş</b>
-          <span>${paymentStatusAz(order.payment_status)}</span>
-        </div>
-
-        <div class="user-order-info-box">
-          <b>📦 Status</b>
-          <span>${statusAz(order.status)}</span>
-        </div>
+      <div class="history-status-line">
+        ${
+          isDeliveredCompact
+            ? `✅ Sifariş uğurla təhvil verildi${Number(order.bonus_earned || 0) > 0 ? ` • Bonus: ${money(order.bonus_earned)}` : ''}`
+            : isCancelledCompact
+              ? '❌ Sifariş ləğv edildi / ödəniş rədd edildi'
+              : `↩️ ${paymentStatusAz(order.payment_status)}`
+        }
       </div>
 
-      <div class="order-actions user-order-actions">
+      <div class="order-actions user-order-actions compact-history-actions">
         <button class="btn btn-primary open-chat" data-id="${order.id}">
           💬 Sifariş söhbəti
         </button>
+
+        ${isDeliveredCompact && courier?.phone ? `
+          <a class="btn btn-soft" href="tel:${courier.phone}">
+            📞 Kuryerə zəng
+          </a>
+        ` : ''}
       </div>
     </article>
   `;
@@ -1070,7 +1089,7 @@ const canCancel = ['pending'].includes(order.status);
             <img class="preview-img customer-avatar" src="${courier.avatar_url || PLACEHOLDER}" alt="Kuryer">
             <span>
               <b>${courier.first_name || ''} ${courier.last_name || ''}</b>
-              <small>${courier.phone || 'Telefon yoxdur'}</small>
+              <small>Kuryer</small>
             </span>
           </div>
           ${courier.phone ? `<a class="btn btn-soft" href="tel:${courier.phone}">📞 Kuryerə zəng</a>` : ''}
