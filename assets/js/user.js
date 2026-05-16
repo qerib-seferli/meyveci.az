@@ -889,6 +889,20 @@ function userOrderProgress(status) {
 }
 
 
+function getOrderEditDeadlineMs(order = {}) {
+  if (order.edit_deadline) {
+    return new Date(order.edit_deadline).getTime();
+  }
+
+  if (order.created_at) {
+    return new Date(order.created_at).getTime() + 5 * 60 * 1000;
+  }
+
+  return 0;
+}
+
+
+
 function orderCard(order, courier = null, courierLocation = null, address = {}) {
   const eta = estimateEta(
     { lat: address?.lat || order.lat, lng: address?.lng || order.lng, status: order.status },
@@ -903,11 +917,54 @@ function orderCard(order, courier = null, courierLocation = null, address = {}) 
     address?.note ? `Qeyd: ${address.note}` : '',
   ].filter(Boolean).join(', ');
 
-  const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
-  const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
-  const canReturnToCart = ['paid_hold', 'draft_payment'].includes(order.status);
-  const canCancel = ['pending'].includes(order.status);
+const deadlineMs = getOrderEditDeadlineMs(order);
+const editDiff = deadlineMs - Date.now();
 
+const isRefundFlow = ['refund_pending', 'refund_processing', 'refunded'].includes(order.status);
+const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
+const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
+const canReturnToCart = order.status === 'paid_hold' && editDiff > 0;
+const canCancel = ['pending'].includes(order.status);
+
+
+  if (isRefundFlow) {
+  return `
+    <article class="card user-order-card refund-only-card" data-order-id="${order.id}">
+      <div class="user-order-top">
+        <div>
+          <span class="user-order-code">${order.order_code || order.id}</span>
+          <h2>${statusAz(order.status)}</h2>
+          <p class="muted">${new Date(order.created_at).toLocaleString('az-AZ')}</p>
+        </div>
+
+        <div class="user-order-price">
+          <b>${money(order.total_amount)}</b>
+          <small>${paymentStatusAz(order.payment_status)}</small>
+        </div>
+      </div>
+
+      <div class="user-order-info-grid refund-only-grid">
+        <div class="user-order-info-box">
+          <b>💳 Ödəniş</b>
+          <span>${paymentStatusAz(order.payment_status)}</span>
+        </div>
+
+        <div class="user-order-info-box">
+          <b>📦 Status</b>
+          <span>${statusAz(order.status)}</span>
+        </div>
+      </div>
+
+      <div class="order-actions user-order-actions">
+        <button class="btn btn-primary open-chat" data-id="${order.id}">
+          💬 Sifariş söhbəti
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+  
   return `
     <article class="card user-order-card" data-order-id="${order.id}">
       <div class="user-order-top">
@@ -2338,7 +2395,7 @@ async function returnOrderToCart(orderId) {
   }
 
   if (data === false) {
-    toast('Düzəliş vaxtı bitib. Dəyişiklik üçün mağaza ilə əlaqə saxlayın.');
+    toast('5 dəqiqəlik düzəliş vaxtı bitib. Sifarişi səbətə qaytarmaq mümkün deyil.');
     await initOrders();
     return;
   }
@@ -2362,9 +2419,18 @@ function updateUserCountdowns() {
       : fallbackDeadline;
 
     const diff = deadline - Date.now();
+    const card = el.closest('.user-paid-hold-box');
+    const button = card?.querySelector('.return-order-cart');
 
     if (diff <= 0) {
       el.textContent = 'Düzəliş vaxtı bitdi';
+
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Düzəliş vaxtı bitib';
+        button.classList.add('disabled');
+      }
+
       return;
     }
 
@@ -2372,11 +2438,14 @@ function updateUserCountdowns() {
     const seconds = Math.floor((diff % 60000) / 1000);
 
     el.textContent = `⏳ ${minutes}:${String(seconds).padStart(2, '0')} qaldı`;
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Sifarişi səbətə qaytar';
+      button.classList.remove('disabled');
+    }
   });
 }
-
-updateUserCountdowns();
-setInterval(updateUserCountdowns, 1000);
 
 /*===================================================================*/
 /*===================================================================*/
