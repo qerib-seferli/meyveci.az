@@ -196,7 +196,7 @@ export function statusAz(status) {
 
     refund_pending: 'Geri ödəniş gözləyir',
     refund_processing: 'Geri ödəniş icra olunur',
-    refunded: 'Geri qaytarıldı',
+    refunded: 'Geri ödəndi',
   };
 
   return statuses[status] || status || '—';
