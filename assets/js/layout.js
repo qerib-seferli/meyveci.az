@@ -193,7 +193,21 @@ async function refreshBadges() {
   const [favorites, cart, orders, notifications, messages, newOrders] = await Promise.all([
     supabase.from('favorites').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
     supabase.from('cart_items').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
-    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).not('status', 'in', '(delivered,cancelled)'),
+    supabase
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', activeProfile.id)
+      .in('status', [
+        'draft_payment',
+        'pending',
+        'paid_hold',
+        'ready_to_confirm',
+        'confirmed',
+        'preparing',
+        'ready_for_courier',
+        'on_the_way',
+        'courier_near'
+      ]),
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).neq('title', 'Yeni mesaj'),
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).eq('title', 'Yeni mesaj'),
     activeProfile.role === 'admin'
