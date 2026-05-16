@@ -1742,8 +1742,15 @@ async function openThread(id) {
   });
 }
 
+
 function roleAz(role) {
-  const map = { admin: 'Admin', courier: 'Kuryer', user: 'Müştəri' };
+  const map = {
+    admin: 'Admin',
+    warehouse: 'Anbardar',
+    courier: 'Kuryer',
+    user: 'Müştəri',
+  };
+
   return map[role] || role || 'İstifadəçi';
 }
 
