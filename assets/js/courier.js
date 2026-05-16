@@ -243,17 +243,6 @@ function orderCard(order, customer = {}, location = {}, payment = null, items = 
           <h2>${statusAz(order.status)}</h2>
           <p class="muted">${new Date(order.created_at).toLocaleString('az-AZ')} • ${money(order.total_amount)}</p>
         </div>
-
-        <span class="courier-eta-pill" id="courierEta-${order.id}">
-          ETA: ${eta}
-        </span>
-      </div>
-
-      <div class="courier-flow-mini">
-        <span class="${order.status === 'ready_for_courier' ? 'active' : ''}">📦 Kuryerə hazır</span>
-        <span class="${order.status === 'on_the_way' ? 'active' : ''}">🚚 Yoldadır</span>
-        <span class="${order.status === 'courier_near' ? 'active' : ''}">📍 Yaxınlaşır</span>
-        <span class="${order.status === 'delivered' ? 'active' : ''}">✅ Təhvil</span>
       </div>
 
       <div class="courier-payment-info">
@@ -281,7 +270,7 @@ function orderCard(order, customer = {}, location = {}, payment = null, items = 
         <span>${address || 'Ünvan qeyd edilməyib'}</span>
       </div>
 
-      <details class="courier-products-box" open>
+      <details class="courier-products-box">
         <summary>
           <b>🥝 Məhsullar</b>
           <span>${items.length} növ • ${productCount} ümumi miqdar</span>
@@ -395,10 +384,6 @@ function updateCourierRouteInfo(orderId, distanceMeters, durationSeconds) {
 
   const etaBadge = $(`#courierEta-${orderId}`);
   const note = $(`#courierMapNote-${orderId}`);
-
-  if (etaBadge) {
-    etaBadge.textContent = `ETA: ${durationText}`;
-  }
 
   if (note) {
     note.textContent = `Marşrut: ${kmText} km • Təxmini çatma vaxtı: ${durationText}`;
