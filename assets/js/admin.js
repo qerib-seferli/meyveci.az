@@ -2417,12 +2417,14 @@ async function loadPayments() {
 
   $$('.pay').forEach((button) => {
     button.addEventListener('click', async () => {
+      const nextStatus = button.dataset.s;
+  
       const { error } = await supabase.rpc('admin_update_payment_status', {
         p_payment_id: button.dataset.id,
-        p_status: button.dataset.s,
-        p_admin_note: '',
+        p_status: nextStatus,
+        p_admin_note: nextStatus === 'refunded' ? 'Admin geri ödənişi tamamladı' : null,
       });
-
+  
       toast(error ? error.message : 'Ödəniş yeniləndi');
       loadPayments();
     });
