@@ -2401,8 +2401,14 @@ async function loadPayments() {
       <td>${payment.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
       <td>
         <div class="action-row payment-actions">
-          <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
-          <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
+          ${payment.status === 'refund_pending' || payment.status === 'refund_processing' ? `
+            <button class="btn btn-soft btn-mini pay refund-done-btn" data-id="${payment.id}" data-s="refunded">
+              ↩️ Geri ödəndi
+            </button>
+          ` : `
+            <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
+            <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
+          `}
           ${adminChatButton(payment.orders?.id)}
         </div>
       </td>
