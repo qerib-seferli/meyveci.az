@@ -946,7 +946,7 @@ function orderCard(order, courier = null, courierLocation = null, address = {}) 
         <div class="paid-hold-box user-paid-hold-box">
           <b>⏳ Düzəliş vaxtı aktivdir</b>
           <p>Bu müddət ərzində sifarişi səbətə qaytarıb dəyişiklik edə bilərsən.</p>
-          <span class="user-countdown" data-deadline="${order.edit_deadline}">
+          <span class="user-countdown" data-created="${order.created_at}" data-deadline="${order.edit_deadline || ''}">
             Vaxt hesablanır...
           </span>
           <button class="btn btn-danger return-order-cart" type="button" data-id="${order.id}">
@@ -2351,5 +2351,32 @@ async function returnOrderToCart(orderId) {
 }
 
 /*===================================================================*/
+
+function updateUserCountdowns() {
+  document.querySelectorAll('.user-countdown').forEach((el) => {
+    const created = new Date(el.dataset.created).getTime();
+    const fallbackDeadline = created + 5 * 60 * 1000;
+
+    const deadline = el.dataset.deadline
+      ? new Date(el.dataset.deadline).getTime()
+      : fallbackDeadline;
+
+    const diff = deadline - Date.now();
+
+    if (diff <= 0) {
+      el.textContent = 'Düzəliş vaxtı bitdi';
+      return;
+    }
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    el.textContent = `⏳ ${minutes}:${String(seconds).padStart(2, '0')} qaldı`;
+  });
+}
+
+updateUserCountdowns();
+setInterval(updateUserCountdowns, 1000);
+
 /*===================================================================*/
 /*===================================================================*/
