@@ -2326,7 +2326,7 @@ function animateUserMarker(marker, target) {
 async function returnOrderToCart(orderId) {
   if (!orderId) return;
 
-  if (!confirm('Sifariş məhsulları səbətə qaytarılsın? Ödəniş refund_pending kimi qeyd olunacaq.')) return;
+  if (!confirm('Sifariş məhsulları səbətə qaytarılsın? Məhsullar səbətə qayıdacaq və geri ödəniş prosesi başladılacaq.')) return;
 
   const { data, error } = await supabase.rpc('restore_paid_hold_order_to_cart', {
     p_order_id: orderId,
@@ -2337,29 +2337,18 @@ async function returnOrderToCart(orderId) {
     return;
   }
 
+  if (data === false) {
+    toast('Düzəliş vaxtı bitib. Dəyişiklik üçün mağaza ilə əlaqə saxlayın.');
+    await initOrders();
+    return;
+  }
+
   toast('Məhsullar səbətə qaytarıldı');
 
   setTimeout(() => {
     location.href = 'cart.html';
   }, 800);
 }
-
-setInterval(() => {
-  document.querySelectorAll('.user-countdown').forEach((el) => {
-    const deadline = new Date(el.dataset.deadline).getTime();
-    const diff = deadline - Date.now();
-
-    if (diff <= 0) {
-      el.textContent = 'Düzəliş vaxtı bitdi';
-      return;
-    }
-
-    const minutes = Math.floor(diff / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-
-    el.textContent = `${minutes}:${String(seconds).padStart(2, '0')} qaldı`;
-  });
-}, 1000);
 
 /*===================================================================*/
 /*===================================================================*/
