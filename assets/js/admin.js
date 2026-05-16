@@ -1474,7 +1474,7 @@ async function loadPreparationCenter() {
     .limit(500);
 
   if (status === 'active') {
-    ordersQuery = ordersQuery.in('status', ['confirmed', 'preparing']);
+    ordersQuery = ordersQuery.in('status', ['confirmed', 'preparing', 'ready_for_courier']);
   } else if (status !== 'all') {
     ordersQuery = ordersQuery.eq('status', status);
   }
@@ -2774,7 +2774,7 @@ function subscribeAdminRealtime() {
     
       if (document.body.dataset.page === 'admin-orders' || document.body.dataset.page === 'warehouse-orders') {
         loadOrders();
-        loadPayments();
+        if ($('#paymentsTable')) loadPayments();
         loadPreparationCenter();
       }
     })
