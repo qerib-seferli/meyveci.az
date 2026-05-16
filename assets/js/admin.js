@@ -2425,8 +2425,9 @@ async function loadPayments() {
         p_admin_note: nextStatus === 'refunded' ? 'Admin geri ödənişi tamamladı' : null,
       });
   
-      toast(error ? error.message : 'Ödəniş yeniləndi');
-      loadPayments();
+        toast(error ? error.message : 'Ödəniş yeniləndi');
+        loadPayments();
+        loadOrders();
     });
   });
 }
