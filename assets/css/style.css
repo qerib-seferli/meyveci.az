@@ -6864,4 +6864,49 @@ select option {
     font-size: 12px !important;
   }
 }
+
+/*=============================================================================
+5 dəqiqə bitməyibsə → “Sifarişi səbətə qaytar” aktiv
+5 dəqiqə bitibsə → düymə passiv
+Müştəri 5 dəqiqə içində qaytarırsa → status refund_pending
+Müştərinin sifariş kartında yalnız əsas başlıq + ödəniş + status + söhbət qalır
+Admin ödənişlərdə “Geri ödəndi” basır
+Müştəridə status “Geri ödəndi” sarı görünür ==================================*/
+
+.return-order-cart:disabled,
+.return-order-cart.disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  filter: grayscale(.25);
+  background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
+}
+
+.refund-only-card {
+  border-color: rgba(250, 204, 21, .38);
+  background:
+    radial-gradient(circle at 100% 0, rgba(250,204,21,.22), transparent 32%),
+    rgba(255,255,255,.94);
+}
+
+.refund-only-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.status-refund-pending,
+.status-refund-processing,
+.status-refunded,
+.payment-status-pill.status-refund_pending,
+.payment-status-pill.status-refund_processing,
+.payment-status-pill.status-refunded {
+  color: #92400e !important;
+  background: #fef3c7 !important;
+}
+
 /*=============================================================================================================*/
+/*=============================================================================================================*/
+/*=============================================================================================================*/
+/*=============================================================================================================*/
+/*=============================================================================================================*/
+/*=============================================================================================================*/
+/*=============================================================================================================*/
+
