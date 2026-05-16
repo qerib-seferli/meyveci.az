@@ -204,9 +204,14 @@ export function statusAz(status) {
 
 // Alt qovluqlardakı səhifələr üçün doğru fayl yolu düzəldir.
 export function pagePath(path) {
-  const isSubPage = location.pathname.includes('/admin/') || location.pathname.includes('/courier/');
+  const isSubPage =
+    location.pathname.includes('/admin/') ||
+    location.pathname.includes('/courier/') ||
+    location.pathname.includes('/warehouse/');
+
   return `${isSubPage ? '../' : './'}${path}`;
 }
+
 
 // Mətn dəyərini slug formatına çevirir.
 export function slugify(value) {
