@@ -13,20 +13,21 @@
 </head>
 <body data-page="orders">
   <main class="app-shell">
-    <div class="section-head">
-      <h1>Sifarişlərim</h1>
-      <p class="muted">Sifariş statusu, kuryer və izləmə məlumatları.</p>
+    <div class="orders-hero">
+      <div>
+        <span class="orders-eyebrow">Canlı sifariş izləmə</span>
+        <h1>Sifarişlərim</h1>
+        <p>Sifariş statusu, ödəniş, ünvan, kuryer və canlı izləmə məlumatları burada görünür.</p>
       </div>
-    <div class="order-rules">
-      <b style="color: red;">⚠️ Sifarişin ləğvi və qaytarılma şərtləri:</b><br>
-      Təsdiqlənməmiş sifarişlər: Sifariş mağaza tərəfindən təsdiqlənənə qədər ödənişsiz ləğv edilə bilər.
-      Hazırlanan, Yola çıxan sifarişlər: Sifariş təsdiqlənib kuryerə təhvil verildikdən sonra ləğv edilərsə, 
-      məhsulun dəyəri geri qaytarılır, lakin kuryer xidmətinin haqqı müştəri tərəfindən ödənilir.
     </div>
-      
-      
-      
+  
+    <div class="order-rules pro-order-rules">
+      <b>⚠️ Sifarişin ləğvi və geri ödəniş qaydası</b>
+      <span>
+        Düzəliş vaxtı bitməyən sifarişlər səbətə qaytarıla bilər. Sifariş təsdiqləndikdən sonra ləğv və geri ödəniş üçün mağaza ilə əlaqə saxlanmalıdır.
+      </span>
     </div>
+  
     <section id="ordersList" class="grid"></section>
   </main>
 
