@@ -770,10 +770,14 @@ async function checkout(event) {
   }
 }
 
-async function initOrders() {
-  const activeUser = await requireAuth();
-
-  const { data, error } = await supabase
+  async function initOrders() {
+    const activeUser = await requireAuth();
+  
+    // 5 dəqiqəsi bitmiş paid_hold sifarişləri əvvəl backend-də bağlayırıq.
+    // Beləliklə müştəri səhifəsində köhnə status qalarsa belə düymə aktiv görünməyəcək.
+    await supabase.rpc('auto_release_paid_orders');
+  
+    const { data, error } = await supabase
     .from('orders')
     .select('*')
     .eq('user_id', activeUser.id)
@@ -929,7 +933,7 @@ const editDiff = deadlineMs - Date.now();
 const isRefundFlow = ['refund_pending', 'refund_processing', 'refunded'].includes(order.status);
 const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
 const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
-const canShowEditBox = order.status === 'paid_hold';
+const canShowEditBox = order.status === 'paid_hold' && editDiff > 0;
 const canReturnToCart = order.status === 'paid_hold' && editDiff > 0;
 const canCancel = ['pending'].includes(order.status);
 
@@ -2395,7 +2399,19 @@ function animateUserMarker(marker, target) {
 async function returnOrderToCart(orderId) {
   if (!orderId) return;
 
-  if (!confirm('Sifariş məhsulları səbətə qaytarılsın? Məhsullar səbətə qayıdacaq və geri ödəniş prosesi başladılacaq.')) return;
+  const button = document.querySelector(`.return-order-cart[data-id="${orderId}"]`);
+
+  if (button?.disabled) {
+    toast('5 dəqiqəlik düzəliş vaxtı bitib. Sifarişi səbətə qaytarmaq mümkün deyil.');
+    return;
+  }
+
+  if (!confirm('Sifariş məhsulları səbətə qaytarılsın? Ödəniş olunubsa, geri ödəniş prosesi başladılacaq.')) return;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Gözləyin...';
+  }
 
   const { data, error } = await supabase.rpc('restore_paid_hold_order_to_cart', {
     p_order_id: orderId,
@@ -2403,6 +2419,10 @@ async function returnOrderToCart(orderId) {
 
   if (error) {
     toast(error.message);
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Sifarişi səbətə qaytar';
+    }
     return;
   }
 
@@ -2412,7 +2432,7 @@ async function returnOrderToCart(orderId) {
     return;
   }
 
-  toast('Məhsullar səbətə qaytarıldı');
+  toast('Məhsullar səbətə qaytarıldı. Geri ödəniş mağaza tərəfindən icra olunacaq.');
 
   setTimeout(() => {
     location.href = 'cart.html';
