@@ -905,8 +905,8 @@ function orderCard(order, courier = null, courierLocation = null, address = {}) 
 
   const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
   const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
-  const canReturnToCart = order.status === 'paid_hold';
-  const canCancel = ['pending', 'draft_payment'].includes(order.status);
+  const canReturnToCart = ['paid_hold', 'draft_payment'].includes(order.status);
+  const canCancel = ['pending'].includes(order.status);
 
   return `
     <article class="card user-order-card" data-order-id="${order.id}">
@@ -942,7 +942,7 @@ function orderCard(order, courier = null, courierLocation = null, address = {}) 
         </div>
       </div>
 
-      ${order.status === 'paid_hold' ? `
+      ${canReturnToCart ? `
         <div class="paid-hold-box user-paid-hold-box">
           <b>⏳ Düzəliş vaxtı aktivdir</b>
           <p>Bu müddət ərzində sifarişi səbətə qaytarıb dəyişiklik edə bilərsən.</p>
