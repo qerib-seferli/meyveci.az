@@ -6820,4 +6820,48 @@ select option {
     font-size: 21px;
   }
 }
+
+
+
+@media (max-width: 640px) {
+  .user-order-top {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: start !important;
+  }
+
+  .user-order-price {
+    justify-items: end !important;
+    text-align: right !important;
+    min-width: 104px;
+  }
+
+  .user-order-price b {
+    font-size: 18px !important;
+    white-space: nowrap;
+  }
+
+  .user-order-price small {
+    font-size: 10.5px !important;
+    padding: 4px 7px !important;
+    white-space: nowrap;
+  }
+
+  .user-order-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .user-order-info-box.full {
+    grid-column: 1 / -1 !important;
+  }
+
+  .user-order-info-box {
+    padding: 10px !important;
+  }
+
+  .user-order-info-box b,
+  .user-order-info-box span {
+    font-size: 12px !important;
+  }
+}
 /*=============================================================================================================*/
