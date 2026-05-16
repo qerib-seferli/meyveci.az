@@ -851,6 +851,7 @@ async function initOrders() {
   });
 
   initUserOrderMaps(data || [], couriersMap, locationsMap, addressesMap);
+  updateUserCountdowns();
   subscribeOrderTracking(activeUser.id);
 }
 
@@ -923,6 +924,7 @@ const editDiff = deadlineMs - Date.now();
 const isRefundFlow = ['refund_pending', 'refund_processing', 'refunded'].includes(order.status);
 const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
 const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
+const canShowEditBox = order.status === 'paid_hold';
 const canReturnToCart = order.status === 'paid_hold' && editDiff > 0;
 const canCancel = ['pending'].includes(order.status);
 
@@ -999,15 +1001,20 @@ const canCancel = ['pending'].includes(order.status);
         </div>
       </div>
 
-      ${canReturnToCart ? `
+      ${canShowEditBox ? `
         <div class="paid-hold-box user-paid-hold-box">
           <b>⏳ Düzəliş vaxtı aktivdir</b>
           <p>Bu müddət ərzində sifarişi səbətə qaytarıb dəyişiklik edə bilərsən.</p>
           <span class="user-countdown" data-created="${order.created_at}" data-deadline="${order.edit_deadline || ''}">
             Vaxt hesablanır...
           </span>
-          <button class="btn btn-danger return-order-cart" type="button" data-id="${order.id}">
-            Sifarişi səbətə qaytar
+          <button
+            class="btn btn-danger return-order-cart"
+            type="button"
+            data-id="${order.id}"
+            ${canReturnToCart ? '' : 'disabled'}
+          >
+            ${canReturnToCart ? 'Sifarişi səbətə qaytar' : 'Düzəliş vaxtı bitib'}
           </button>
         </div>
       ` : ''}
@@ -2446,6 +2453,8 @@ function updateUserCountdowns() {
     }
   });
 }
+
+setInterval(updateUserCountdowns, 1000);
 
 /*===================================================================*/
 /*===================================================================*/
