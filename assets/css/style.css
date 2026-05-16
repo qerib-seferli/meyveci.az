@@ -6903,6 +6903,38 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 /*=============================================================================================================*/
+
+.user-countdown {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.return-order-cart:disabled,
+.return-order-cart.disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  filter: grayscale(.25);
+  background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
+}
+
+.status-refund-pending,
+.status-refund-processing,
+.status-refunded,
+.status-refund_pending,
+.status-refund_processing,
+.payment-status-pill.status-refund_pending,
+.payment-status-pill.status-refund_processing,
+.payment-status-pill.status-refunded {
+  color: #92400e !important;
+  background: #fef3c7 !important;
+}
+
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 /*=============================================================================================================*/
