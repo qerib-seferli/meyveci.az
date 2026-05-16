@@ -855,84 +855,172 @@ async function initOrders() {
 }
 
 
+function userOrderProgress(status) {
+  const steps = [
+    { key: 'paid_hold', label: 'Düzəliş' },
+    { key: 'ready_to_confirm', label: 'Təsdiq gözləyir' },
+    { key: 'confirmed', label: 'Təsdiqləndi' },
+    { key: 'preparing', label: 'Hazırlanır' },
+    { key: 'ready_for_courier', label: 'Kuryerə hazır' },
+    { key: 'on_the_way', label: 'Yoldadır' },
+    { key: 'courier_near', label: 'Yaxındadır' },
+    { key: 'delivered', label: 'Təhvil verildi' },
+  ];
+
+  const currentIndex = steps.findIndex((step) => step.key === status);
+
+  if (status === 'cancelled') {
+    return `<div class="user-order-progress cancelled">❌ Sifariş ləğv edildi</div>`;
+  }
+
+  if (status === 'refunded') {
+    return `<div class="user-order-progress refunded">↩️ Məbləğ geri qaytarıldı</div>`;
+  }
+
+  return `
+    <div class="user-order-progress">
+      ${steps.map((step, index) => `
+        <span class="${index <= currentIndex ? 'done' : ''} ${step.key === status ? 'active' : ''}">
+          ${step.label}
+        </span>
+      `).join('')}
+    </div>
+  `;
+}
+
+
 function orderCard(order, courier = null, courierLocation = null, address = {}) {
   const eta = estimateEta(
-    { lat: address?.lat, lng: address?.lng, status: order.status },
+    { lat: address?.lat || order.lat, lng: address?.lng || order.lng, status: order.status },
     courierLocation
   );
 
   const fullAddress = [
     address?.city_region || order.city_region,
-    address?.address_line,
-    address?.apartment ? `Mənzil/blok: ${address.apartment}` : '',
-    address?.door_code ? `Qapı kodu: ${address.door_code}` : '',
+    address?.address_line || order.address_text,
+    address?.apartment || order.apartment ? `Mənzil/blok: ${address?.apartment || order.apartment}` : '',
+    address?.door_code || order.door_code ? `Qapı kodu: ${address?.door_code || order.door_code}` : '',
     address?.note ? `Qeyd: ${address.note}` : '',
   ].filter(Boolean).join(', ');
 
+  const isPast = ['delivered', 'cancelled', 'refunded'].includes(order.status);
+  const canTrack = Boolean(order.courier_id && ['on_the_way', 'courier_near'].includes(order.status));
+  const canReturnToCart = order.status === 'paid_hold';
+  const canCancel = ['pending', 'draft_payment'].includes(order.status);
+
   return `
-    <div class="card" data-order-id="${order.id}">
-      <div class="section-head">
+    <article class="card user-order-card" data-order-id="${order.id}">
+      <div class="user-order-top">
         <div>
-          <b>${order.order_code}</b>
+          <span class="user-order-code">${order.order_code || order.id}</span>
+          <h2>${statusAz(order.status)}</h2>
           <p class="muted">${new Date(order.created_at).toLocaleString('az-AZ')}</p>
         </div>
-        <span class="status-pill"><img src="${statusIcon(order.status)}" alt="Status">${statusAz(order.status)}</span>
+
+        <div class="user-order-price">
+          <b>${money(order.total_amount)}</b>
+          <small>${paymentStatusAz(order.payment_status)}</small>
+        </div>
       </div>
 
-      <p><b>Məbləğ:</b> ${money(order.total_amount)} • <b>Ödəniş:</b> ${statusAz(order.payment_status)}</p>
-      <p><b>Ünvan:</b> ${fullAddress || 'Ünvan qeyd edilməyib'}</p>
+      ${userOrderProgress(order.status)}
 
-      ${['delivered','cancelled'].includes(order.status) ? `
-        <div class="past-order-note">Bu sifariş artıq ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.</div>
-      ` : `
-        <div class="map-toolbar">
-          <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
-            📍 Kuryeri izlə
+      <div class="user-order-info-grid">
+        <div class="user-order-info-box">
+          <b>💳 Ödəniş</b>
+          <span>${paymentStatusAz(order.payment_status)}</span>
+        </div>
+
+        <div class="user-order-info-box">
+          <b>📦 Status</b>
+          <span>${statusAz(order.status)}</span>
+        </div>
+
+        <div class="user-order-info-box full">
+          <b>📍 Çatdırılma ünvanı</b>
+          <span>${fullAddress || 'Ünvan qeyd edilməyib'}</span>
+        </div>
+      </div>
+
+      ${order.status === 'paid_hold' ? `
+        <div class="paid-hold-box user-paid-hold-box">
+          <b>⏳ Düzəliş vaxtı aktivdir</b>
+          <p>Bu müddət ərzində sifarişi səbətə qaytarıb dəyişiklik edə bilərsən.</p>
+          <span class="user-countdown" data-deadline="${order.edit_deadline}">
+            Vaxt hesablanır...
+          </span>
+          <button class="btn btn-danger return-order-cart" type="button" data-id="${order.id}">
+            Sifarişi səbətə qaytar
           </button>
         </div>
+      ` : ''}
 
-        <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
-
-        <p class="muted map-note" id="userMapNote-${order.id}">
-          ${order.courier_id ? `Kuryer aktivdir • Təxmini çatma vaxtı: ${eta}` : 'Kuryer təyin olunandan sonra canlı izləmə aktiv olacaq.'}
-        </p>
-      `}
-
-      ${courier ? `
-        <div class="compact-row" style="margin-top: 12px;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <img class="preview-img customer-avatar" src="${courier.avatar_url || PLACEHOLDER}" alt="Kuryer">
+      ${canTrack ? `
+        <div class="user-track-panel">
+          <div class="user-track-head">
             <div>
-              <b>${courier.first_name || ''} ${courier.last_name || ''}</b><br>
-              <small class="muted">${courier.phone || 'Telefon yoxdur'}</small>
+              <b>🚚 Kuryer izləmə</b>
+              <small>Kuryer yolda olduqda xəritə aktiv görünür.</small>
             </div>
-          </div>
-          ${courier.phone ? `<a class="btn btn-soft" href="tel:${courier.phone}">Zəng</a>` : ''}
-        </div>
-      ` : '<p class="muted">Kuryer hələ təyin edilməyib.</p>'}
 
-      <div class="order-actions">
-        <button class="btn btn-primary open-chat" data-id="${order.id}">Sifarişlə bağlı sualın var?</button>
-        
-            ${order.status === 'paid_hold' ? `
-              <div class="paid-hold-box full">
-                <b>⏳ 5 dəqiqə ərzində dəyişiklik edilə bilər</b>
-                <span class="user-countdown" data-deadline="${order.edit_deadline}">
-                  Vaxt hesablanır...
-                </span>
-                <button class="btn btn-danger return-order-cart" type="button" data-id="${order.id}">
-                  Sifarişi səbətə qaytar
-                </button>
-              </div>
-            ` : ''}
-            
-            ${order.status === 'pending' ? `
-              <button class="btn btn-danger cancel-order" data-id="${order.id}">Sifarişi ləğv et</button>
-            ` : ''}
-        
+            <button class="btn btn-soft follow-user-courier" type="button" data-id="${order.id}">
+              📍 Kuryeri izlə
+            </button>
+          </div>
+
+          <div class="map-box order-live-map" id="userOrderMap-${order.id}"></div>
+
+          <p class="muted map-note" id="userMapNote-${order.id}">
+            Təxmini çatma vaxtı: ${eta}
+          </p>
+        </div>
+      ` : ''}
+
+      ${!canTrack && !isPast ? `
+        <div class="past-order-note">
+          ${order.courier_id
+            ? 'Kuryer təyin olunub. Kuryer yola çıxdıqda canlı xəritə aktiv olacaq.'
+            : 'Kuryer təyin olunandan sonra izləmə məlumatları görünəcək.'
+          }
+        </div>
+      ` : ''}
+
+      ${isPast ? `
+        <div class="past-order-note">
+          Bu sifariş ${statusAz(order.status).toLowerCase()}. Canlı xəritə keçmiş sifarişlərdə gizlədilir.
+        </div>
+      ` : ''}
+
+      <div class="user-courier-box">
+        ${courier ? `
+          <div class="customer-mini">
+            <img class="preview-img customer-avatar" src="${courier.avatar_url || PLACEHOLDER}" alt="Kuryer">
+            <span>
+              <b>${courier.first_name || ''} ${courier.last_name || ''}</b>
+              <small>${courier.phone || 'Telefon yoxdur'}</small>
+            </span>
+          </div>
+          ${courier.phone ? `<a class="btn btn-soft" href="tel:${courier.phone}">📞 Kuryerə zəng</a>` : ''}
+        ` : `
+          <span class="muted">Kuryer hələ təyin edilməyib.</span>
+        `}
       </div>
-    </div>`;
+
+      <div class="order-actions user-order-actions">
+        <button class="btn btn-primary open-chat" data-id="${order.id}">
+          💬 Sifariş söhbəti
+        </button>
+
+        ${canCancel ? `
+          <button class="btn btn-danger cancel-order" data-id="${order.id}">
+            Sifarişi ləğv et
+          </button>
+        ` : ''}
+      </div>
+    </article>
+  `;
 }
+
 
 
 function initUserOrderMaps(orders, couriersMap, locationsMap, addressesMap = new Map()) {
@@ -944,7 +1032,7 @@ function initUserOrderMaps(orders, couriersMap, locationsMap, addressesMap = new
   userOrderMaps.clear();
 
   orders.forEach((order) => {
-    if (['delivered', 'cancelled'].includes(order.status)) return;
+    if (!['on_the_way', 'courier_near'].includes(order.status)) return;
 
     const address = addressesMap.get(order.address_id) || {};
     const location = locationsMap.get(order.id) || {};
