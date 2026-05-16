@@ -852,6 +852,11 @@ async function initOrders() {
 
   initUserOrderMaps(data || [], couriersMap, locationsMap, addressesMap);
   updateUserCountdowns();
+  
+  if (!window.__meyveciUserCountdownTimer) {
+    window.__meyveciUserCountdownTimer = setInterval(updateUserCountdowns, 1000);
+  }
+  
   subscribeOrderTracking(activeUser.id);
 }
 
