@@ -2515,7 +2515,7 @@ async function loadPayments() {
 
   const search = ($('#paymentSearch')?.value || '').toLowerCase();
 
-  const [{ data: payments }, { data: allItems }] = await Promise.all([
+  const [{ data: payments }, { data: allItems }, { data: allOrders }, { data: profiles }] = await Promise.all([
     supabase
       .from('payments')
       .select('*,orders(id,order_code,payment_method,total_amount,bonus_used,delivery_fee,status,payment_status)')
@@ -2526,9 +2526,52 @@ async function loadPayments() {
       .from('order_items')
       .select('order_id,line_total')
       .limit(5000),
+
+    supabase
+      .from('orders')
+      .select('id,user_id,status,total_amount,bonus_used,delivery_fee,created_at')
+      .limit(5000),
+    
+    supabase
+      .from('profiles')
+      .select('id,email,first_name,last_name,phone,city_region,address_line,created_at')
+      .limit(5000),
   ]);
 
   const productTotalMap = new Map();
+
+  const profilesMap = new Map((profiles || []).map((profile) => [profile.id, profile]));
+    const customerStatsMap = new Map();
+    
+    (allOrders || []).forEach((order) => {
+      if (!order.user_id) return;
+    
+      if (!customerStatsMap.has(order.user_id)) {
+        customerStatsMap.set(order.user_id, {
+          totalOrders: 0,
+          deliveredOrders: 0,
+          totalSpent: 0,
+          totalBonusUsed: 0,
+          firstOrderAt: order.created_at,
+        });
+      }
+    
+      const stat = customerStatsMap.get(order.user_id);
+    
+      stat.totalOrders += 1;
+    
+      if (order.status === 'delivered') {
+        stat.deliveredOrders += 1;
+        stat.totalSpent += Number(order.total_amount || 0);
+      }
+    
+      stat.totalBonusUsed += Number(order.bonus_used || 0);
+    
+      if (new Date(order.created_at) < new Date(stat.firstOrderAt)) {
+        stat.firstOrderAt = order.created_at;
+      }
+    });
+  
 
   (allItems || []).forEach((item) => {
     productTotalMap.set(
@@ -2553,6 +2596,23 @@ async function loadPayments() {
 
   $('#paymentsTable').innerHTML = rows.map((payment) => {
     const order = payment.orders || {};
+    
+    const customer = profilesMap.get(order.user_id) || {};
+    const customerStats = customerStatsMap.get(order.user_id) || {
+      totalOrders: 0,
+      deliveredOrders: 0,
+      totalSpent: 0,
+      totalBonusUsed: 0,
+      firstOrderAt: null,
+    };
+    
+    const customerName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || customer.email || 'Müştəri';
+    const customerType = customerStats.totalOrders <= 1
+      ? 'Yeni müştəri'
+      : customerStats.totalOrders <= 3
+        ? 'Təzə müştəri'
+        : 'Daimi müştəri';
+    
     const productsTotal = Number(productTotalMap.get(order.id) || 0);
     const deliveryFee = Number(order.delivery_fee || 0);
     const bonusUsed = Number(order.bonus_used || 0);
@@ -2619,21 +2679,43 @@ async function loadPayments() {
           </div>
         </td>
       </tr>
-      <tr class="payment-detail-row hide" id="paymentDetail-${payment.id}">
-        <td colspan="6">
-          <div class="payment-detail-box">
-            <b>Ödəniş detalları</b>
-            <span>Məhsullar: ${money(productsTotal)}</span>
-            <span>Çatdırılma: ${money(deliveryFee)}</span>
-            <span>Ümumi məbləğ: ${money(orderGrossTotal)}</span>
-            <span>Bonusla ödənildi: -${money(bonusUsed)}</span>
-            <span>Kartla ödənildi: ${money(cardPayable)}</span>
-            <span>Sifariş statusu: ${statusAz(order.status)}</span>
-            <span>Ödəniş statusu: ${statusAz(payment.status)}</span>
-            <span>Admin qeyd: ${esc(payment.admin_note || 'Qeyd yoxdur')}</span>
-          </div>
-        </td>
-      </tr>
+        <tr class="payment-detail-row hide" id="paymentDetail-${payment.id}">
+          <td colspan="6">
+            <div class="payment-detail-box payment-detail-grid">
+        
+              <div class="payment-detail-section">
+                <b>💳 Ödəniş detalları</b>
+                <span>🥝 Məhsullar: <strong>${money(productsTotal)}</strong></span>
+                <span>🚚 Çatdırılma: <strong>${money(deliveryFee)}</strong></span>
+                <span>🧾 Ümumi məbləğ: <strong>${money(orderGrossTotal)}</strong></span>
+                <span>🎁 Bonusla ödənildi: <strong>-${money(bonusUsed)}</strong></span>
+                <span>💳 Kartla ödənildi: <strong>${money(cardPayable)}</strong></span>
+                <span>📦 Sifariş statusu: <strong>${statusAz(order.status)}</strong></span>
+                <span>✅ Ödəniş statusu: <strong>${statusAz(payment.status)}</strong></span>
+              </div>
+        
+              <div class="payment-detail-section">
+                <b>👤 Müştəri məlumatları</b>
+                <span>👥 Ad soyad: <strong>${esc(customerName)}</strong></span>
+                <span>📞 Telefon: <strong>${esc(customer.phone || 'Yoxdur')}</strong></span>
+                <span>📧 Email: <strong>${esc(customer.email || 'Yoxdur')}</strong></span>
+                <span>📍 Rayon/şəhər: <strong>${esc(customer.city_region || 'Qeyd edilməyib')}</strong></span>
+                <span>🏠 Ünvan: <strong>${esc(customer.address_line || 'Qeyd edilməyib')}</strong></span>
+              </div>
+        
+              <div class="payment-detail-section">
+                <b>📊 Müştəri analizi</b>
+                <span>🏷️ Müştəri tipi: <strong>${customerType}</strong></span>
+                <span>🛒 Ümumi sifariş sayı: <strong>${customerStats.totalOrders}</strong></span>
+                <span>✅ Təhvil alınan sifariş: <strong>${customerStats.deliveredOrders}</strong></span>
+                <span>💰 Uğurlu alış məbləği: <strong>${money(customerStats.totalSpent)}</strong></span>
+                <span>🎁 Ümumi bonus istifadəsi: <strong>${money(customerStats.totalBonusUsed)}</strong></span>
+                <span>📅 İlk sifariş tarixi: <strong>${customerStats.firstOrderAt ? formatDate(customerStats.firstOrderAt) : 'Yoxdur'}</strong></span>
+              </div>
+        
+            </div>
+          </td>
+        </tr>
     `;
   }).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
 
