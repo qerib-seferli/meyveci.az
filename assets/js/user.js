@@ -831,14 +831,7 @@ async function checkout(event) {
     
     setupUserOrderFilters();
     renderUserOrdersList();
-    
-        orderCard(
-          order,
-          couriersMap.get(order.courier_id),
-          locationsMap.get(order.id),
-          addressesMap.get(order.address_id)
-        )
-      ).join('') || '<div class="card">Sifariş yoxdur.</div>';
+  }
 
   $$('.open-chat').forEach((button) => {
     button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
