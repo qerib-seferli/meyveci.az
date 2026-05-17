@@ -2540,7 +2540,9 @@ async function exportPreparationExcel() {
       fullAddress || 'Ünvan yoxdur',
       '',
       'Ödəniş üsulu:',
-      'Bank kartı ilə ödəniş',
+      bonusUsed >= finalTotal && finalTotal > 0
+        ? 'Bonus balansı ilə ödəniş'
+        : 'Bank kartı ilə ödəniş',
     ];
  
     ws.getRow(9).values = [
