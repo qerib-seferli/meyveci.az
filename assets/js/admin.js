@@ -2540,7 +2540,7 @@ async function exportPreparationExcel() {
       fullAddress || 'Ünvan yoxdur',
       '',
       'Ödəniş üsulu:',
-      methodAz(payment.method || order.payment_method || 'Bank kartı ilə ödəniş'),
+      'Bank kartı ilə ödəniş',
     ];
  
     ws.getRow(9).values = [
