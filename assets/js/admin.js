@@ -2518,7 +2518,7 @@ async function loadPayments() {
   const [{ data: payments }, { data: allItems }, { data: allOrders }, { data: profiles }] = await Promise.all([
     supabase
       .from('payments')
-      .select('*,orders(id,order_code,payment_method,total_amount,bonus_used,delivery_fee,status,payment_status)')
+      .select('*,orders(id,user_id,order_code,full_name,phone,city_region,address_text,apartment,door_code,payment_method,total_amount,bonus_used,delivery_fee,status,payment_status)')
       .order('created_at', { ascending: false })
       .limit(250),
 
@@ -2597,7 +2597,7 @@ async function loadPayments() {
   $('#paymentsTable').innerHTML = rows.map((payment) => {
     const order = payment.orders || {};
     
-    const customer = profilesMap.get(order.user_id) || {};
+    const customer = profilesMap.get(order.user_id) || order || {};
     const customerStats = customerStatsMap.get(order.user_id) || {
       totalOrders: 0,
       deliveredOrders: 0,
@@ -2606,7 +2606,12 @@ async function loadPayments() {
       firstOrderAt: null,
     };
     
-    const customerName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || customer.email || 'Müştəri';
+    const customerName =
+      `${customer.first_name || ''} ${customer.last_name || ''}`.trim()
+      || customer.full_name
+      || customer.email
+      || 'Müştəri';
+      
     const customerType = customerStats.totalOrders <= 1
       ? 'Yeni müştəri'
       : customerStats.totalOrders <= 3
@@ -2697,10 +2702,10 @@ async function loadPayments() {
               <div class="payment-detail-section">
                 <b>👤 Müştəri məlumatları</b>
                 <span>👥 Ad soyad: <strong>${esc(customerName)}</strong></span>
-                <span>📞 Telefon: <strong>${esc(customer.phone || 'Yoxdur')}</strong></span>
+                <span>📞 Telefon: <strong>${esc(customer.phone || order.phone || 'Yoxdur')}</strong></span>
                 <span>📧 Email: <strong>${esc(customer.email || 'Yoxdur')}</strong></span>
-                <span>📍 Rayon/şəhər: <strong>${esc(customer.city_region || 'Qeyd edilməyib')}</strong></span>
-                <span>🏠 Ünvan: <strong>${esc(customer.address_line || 'Qeyd edilməyib')}</strong></span>
+                <span>📍 Rayon/şəhər: <strong>${esc(customer.city_region || order.city_region || 'Qeyd edilməyib')}</strong></span>
+                <span>🏠 Ünvan: <strong>${esc(customer.address_line || order.address_text || 'Qeyd edilməyib')}</strong></span>
               </div>
         
               <div class="payment-detail-section">
