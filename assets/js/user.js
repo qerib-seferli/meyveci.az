@@ -944,6 +944,32 @@ function renderUserOrdersList() {
 
   initUserOrderMaps(rows, couriersMap, locationsMap, addressesMap);
   updateUserCountdowns();
+
+    $$('.follow-user-courier').forEach((button) => {
+    button.addEventListener('click', () => {
+      const orderId = button.dataset.id;
+      const mapData = userOrderMaps.get(orderId);
+  
+      if (!mapData || !mapData.courierMarker) {
+        toast('Kuryerin konumu hələ görünmür');
+        return;
+      }
+  
+      mapData.followCourier = !mapData.followCourier;
+      button.classList.toggle('active-status', mapData.followCourier);
+      button.textContent = mapData.followCourier ? '📍 İzləmə aktivdir' : '📍 Kuryeri izlə';
+  
+      if (mapData.followCourier) {
+        mapData.map.panTo(mapData.courierMarker.getLatLng(), {
+          animate: true,
+          duration: 0.8,
+        });
+      }
+  
+      userOrderMaps.set(orderId, mapData);
+    });
+  });
+  
 }
 
 
