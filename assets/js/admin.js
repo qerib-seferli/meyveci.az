@@ -2495,7 +2495,7 @@ async function exportPreparationExcel() {
       },
     };
 
-    ws.getRow(1).height = 10;
+    ws.getRow(1).height = 16;
     ws.getRow(2).height = 24;
     ws.getRow(3).height = 24;
     ws.getRow(4).height = 10;
@@ -2540,7 +2540,7 @@ async function exportPreparationExcel() {
       fullAddress || 'Ünvan yoxdur',
       '',
       'Ödəniş üsulu:',
-      methodAz(payment.method || payment.provider || order.payment_method),
+      methodAz(payment.method || order.payment_method || 'Bank kartı ilə ödəniş'),
     ];
 
     ws.getRow(9).values = [
