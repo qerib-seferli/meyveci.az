@@ -677,10 +677,18 @@ function clearCheckoutLocation() {
 
 
 function updateCartSummary(bonusUsed = 0) {
-  if ($('#summaryProducts')) $('#summaryProducts').textContent = money(cartCurrentTotal);
-  if ($('#summaryDelivery')) $('#summaryDelivery').textContent = money(cartDeliveryFee);
-  if ($('#summaryBonus')) $('#summaryBonus').textContent = bonusUsed > 0 ? `-${money(bonusUsed)}` : money(0);
-  if ($('#summaryPayable')) $('#summaryPayable').textContent = money(cartPayableTotal || (cartCurrentTotal + cartDeliveryFee));
+  const productsTotal = Number(cartCurrentTotal || 0);
+  const deliveryFee = Number(cartDeliveryFee || 0);
+  const usedBonus = Number(bonusUsed || 0);
+  const payable = Math.max(productsTotal + deliveryFee - usedBonus, 0);
+
+  cartPayableTotal = payable;
+
+  if ($('#summaryProducts')) $('#summaryProducts').textContent = money(productsTotal);
+  if ($('#summaryDelivery')) $('#summaryDelivery').textContent = money(deliveryFee);
+  if ($('#summaryBonus')) $('#summaryBonus').textContent = usedBonus > 0 ? `-${money(usedBonus)}` : money(0);
+  if ($('#summaryPayable')) $('#summaryPayable').textContent = money(payable);
+  if ($('#cartTotal')) $('#cartTotal').textContent = money(payable);
 }
 
 
