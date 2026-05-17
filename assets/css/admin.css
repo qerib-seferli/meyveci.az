@@ -2361,5 +2361,36 @@ th {
   }
 }
 
+.admin-product-left {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-product-name {
+  font-weight: 900;
+  color: #102018;
+}
+
+.admin-discount-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.admin-normal-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #047857;
+  font-size: 11px;
+  font-weight: 900;
+}
 /*=================================================================================================================*/
 /*=================================================================================================================*/
