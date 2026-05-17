@@ -2180,6 +2180,49 @@ th {
 }
 
 /*=================================================================================================================*/
+
+.payment-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payment-detail-section {
+  display: grid;
+  gap: 7px;
+  padding: 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(34, 197, 94, .14);
+  background: rgba(255, 255, 255, .78);
+}
+
+.payment-detail-section b {
+  color: #064e3b;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.payment-detail-section span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #64756b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.payment-detail-section strong {
+  color: #102018;
+  text-align: right;
+  font-weight: 950;
+}
+
+@media (max-width: 1000px) {
+  .payment-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /*=================================================================================================================*/
 /*=================================================================================================================*/
 /*=================================================================================================================*/
