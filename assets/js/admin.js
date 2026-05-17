@@ -2476,7 +2476,7 @@ async function exportPreparationExcel() {
       { key: 'b', width: 36 },
       { key: 'c', width: 20 },
       { key: 'd', width: 22 },
-      { key: 'e', width: 22 },
+      { key: 'e', width: 24 },
     ];
 
     ws.pageSetup = {
