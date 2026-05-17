@@ -35,6 +35,9 @@ let userBonusBalance = 0;
 let cartDeliveryFee = 0;
 let cartPayableTotal = 0;
 let deliveryDistanceKm = null;
+let userOrdersCache = [];
+let userOrdersRenderContext = null;
+let userOrdersFilter = 'all';
 
 const AZ_CITY_REGIONS = [
   'Abşeron',
@@ -814,9 +817,21 @@ async function checkout(event) {
   const locationsMap = new Map((locations || []).map((location) => [location.order_id, location]));
   const addressesMap = new Map((addresses || []).map((address) => [address.id, address]));
 
-  $('#ordersList').innerHTML = error
-    ? `<div class="card">${error.message}</div>`
-    : (data || []).map((order) =>
+    if (error) {
+      $('#ordersList').innerHTML = `<div class="card">${error.message}</div>`;
+      return;
+    }
+    
+    userOrdersCache = data || [];
+    userOrdersRenderContext = {
+      couriersMap,
+      locationsMap,
+      addressesMap,
+    };
+    
+    setupUserOrderFilters();
+    renderUserOrdersList();
+    
         orderCard(
           order,
           couriersMap.get(order.courier_id),
@@ -871,6 +886,74 @@ async function checkout(event) {
   
   subscribeOrderTracking(activeUser.id);
 }
+
+
+
+function setupUserOrderFilters() {
+  $$('.orders-filter-btn').forEach((button) => {
+    if (button.dataset.ready === '1') return;
+    button.dataset.ready = '1';
+
+    button.addEventListener('click', () => {
+      userOrdersFilter = button.dataset.orderFilter || 'all';
+
+      $$('.orders-filter-btn').forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+
+      renderUserOrdersList();
+    });
+  });
+}
+
+
+function renderUserOrdersList() {
+  if (!userOrdersRenderContext) return;
+
+  const { couriersMap, locationsMap, addressesMap } = userOrdersRenderContext;
+
+  const historyStatuses = ['delivered', 'cancelled', 'refunded', 'refund_pending', 'refund_processing'];
+  const refundStatuses = ['refund_pending', 'refund_processing', 'refunded'];
+
+  let rows = [...userOrdersCache];
+
+  if (userOrdersFilter === 'active') {
+    rows = rows.filter((order) => !historyStatuses.includes(order.status));
+  }
+
+  if (userOrdersFilter === 'history') {
+    rows = rows.filter((order) => historyStatuses.includes(order.status));
+  }
+
+  if (userOrdersFilter === 'refund') {
+    rows = rows.filter((order) => refundStatuses.includes(order.status) || refundStatuses.includes(order.payment_status));
+  }
+
+  $('#ordersList').innerHTML = rows.map((order) =>
+    orderCard(
+      order,
+      couriersMap.get(order.courier_id),
+      locationsMap.get(order.id),
+      addressesMap.get(order.address_id)
+    )
+  ).join('') || '<div class="card">Bu filtr üzrə sifariş yoxdur.</div>';
+
+  $$('.open-chat').forEach((button) => {
+    button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
+  });
+
+  $$('.cancel-order').forEach((button) => {
+    button.addEventListener('click', () => cancelOrder(button.dataset.id));
+  });
+
+  $$('.return-order-cart').forEach((button) => {
+    button.addEventListener('click', () => returnOrderToCart(button.dataset.id));
+  });
+
+  initUserOrderMaps(rows, couriersMap, locationsMap, addressesMap);
+  updateUserCountdowns();
+}
+
+
 
 
 function userOrderProgress(status) {
