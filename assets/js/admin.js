@@ -1380,7 +1380,7 @@ function bindOrderEvents() {
             </div>
       
             <div class="admin-detail-panel admin-detail-wide">
-              <b>🥝 Məhsullar</b>
+              <b>🍓 Məhsullar</b>
       
               <div class="admin-detail-products">
                 ${(items || []).map((item) => {
@@ -1408,12 +1408,12 @@ function bindOrderEvents() {
                           hasDiscount
                             ? `
                               <small class="admin-discount-badge">
-                                🔥 Endirimli məhsul • ${discountPercent}% endirim
+                                🏷️ Endirimli məhsul • ${discountPercent}% endirim
                               </small>
                             `
                             : `
                               <small class="admin-normal-badge">
-                                🥝 Endirimsiz məhsul
+                                ✨ Endirimsiz məhsul
                               </small>
                             `
                         }
