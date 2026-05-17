@@ -1309,22 +1309,111 @@ function bindOrderEvents() {
   });
 }
 
-function showOrderDetails({ order, profile, items, payment }) {
+
+
+
+function showOrderDetails({ order, profile = {}, items = [], payment = {} }) {
+  const productsTotal = (items || []).reduce((sum, item) => sum + Number(item.line_total || 0), 0);
+  const deliveryFee = Number(order.delivery_fee || 0);
+  const bonusUsed = Number(order.bonus_used || 0);
+  const grossTotal = productsTotal + deliveryFee;
+  const cardPaid = Number(payment.amount || order.total_amount || 0);
+
+  const customerName =
+    order.full_name ||
+    `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
+    profile.email ||
+    'Müştəri';
+
+  const address = [
+    order.city_region,
+    order.address_text || profile.address_line,
+    order.apartment || profile.apartment,
+    order.door_code || profile.door_code,
+  ].filter(Boolean).join(', ');
+
   openAdminModal(`Sifariş detalları: ${safe(order.order_code)}`, `
-    <div class="admin-detail-grid">
-      <div class="admin-detail-box"><b>Müştəri</b><span>${esc(order.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email)}</span></div>
-      <div class="admin-detail-box"><b>Telefon</b><span>${esc(order.phone || profile.phone)}</span></div>
-      <div class="admin-detail-box"><b>Email</b><span>${esc(profile.email)}</span></div>
-      <div class="admin-detail-box"><b>Məbləğ</b><span>${money(order.total_amount)}</span></div>
-      <div class="admin-detail-box"><b>Status</b><span>${statusAz(order.status)}</span></div>
-      <div class="admin-detail-box"><b>Ödəniş</b><span>${statusAz(order.payment_status)} • ${esc(order.payment_method)}</span></div>
-      <div class="admin-detail-box admin-detail-full"><b>Ünvan</b><span>${esc([order.city_region, order.address_text || profile.address_line, order.apartment, order.door_code].filter(Boolean).join(', '))}</span></div>
-      <div class="admin-detail-box admin-detail-full"><b>Müştəri qeydi</b><span>${esc(order.customer_note || order.note || 'Qeyd yoxdur')}</span></div>
-      <div class="admin-detail-box admin-detail-full"><b>Məhsullar</b><span>${(items || []).map((i) => `${esc(i.product_name)} — ${i.quantity} × ${money(i.unit_price)} = ${money(i.line_total)}`).join('<br>') || 'Məhsul yoxdur'}</span></div>
-      <div class="admin-detail-box admin-detail-full"><b>Çek</b><span>${payment?.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : 'Çek yoxdur'}</span></div>
+    <div class="admin-order-detail-pro">
+
+      <div class="admin-detail-hero">
+        <div>
+          <span class="admin-detail-code">${esc(order.order_code || order.id)}</span>
+          <h2>${esc(customerName)}</h2>
+          <p>${formatDate(order.created_at)} tarixində yaradılıb</p>
+        </div>
+
+        <div class="admin-detail-price">
+          <b>${money(grossTotal)}</b>
+          <small>Ümumi sifariş dəyəri</small>
+        </div>
+      </div>
+
+      <div class="admin-detail-pro-grid">
+        <div class="admin-detail-panel">
+          <b>👤 Müştəri məlumatları</b>
+          <span>Ad soyad: <strong>${esc(customerName)}</strong></span>
+          <span>Telefon: <strong>${esc(order.phone || profile.phone || 'Yoxdur')}</strong></span>
+          <span>Email: <strong>${esc(profile.email || 'Yoxdur')}</strong></span>
+          <span>Şəhər/rayon: <strong>${esc(order.city_region || profile.city_region || 'Yoxdur')}</strong></span>
+        </div>
+
+        <div class="admin-detail-panel">
+          <b>💳 Ödəniş məlumatları</b>
+          <span>Məhsullar: <strong>${money(productsTotal)}</strong></span>
+          <span>Çatdırılma: <strong>${money(deliveryFee)}</strong></span>
+          <span>Bonus: <strong>-${money(bonusUsed)}</strong></span>
+          <span>Kartla ödənilən: <strong>${money(cardPaid)}</strong></span>
+          <span>Status: <strong>${statusAz(payment.status || order.payment_status)}</strong></span>
+        </div>
+
+        <div class="admin-detail-panel">
+          <b>📦 Sifariş statusu</b>
+          <span>Sifariş: <strong>${statusAz(order.status)}</strong></span>
+          <span>Ödəniş: <strong>${statusAz(order.payment_status)}</strong></span>
+          <span>Metod: <strong>${esc(methodAz(order.payment_method))}</strong></span>
+          <span>Yenilənmə: <strong>${formatDate(order.updated_at)}</strong></span>
+        </div>
+      </div>
+
+      <div class="admin-detail-panel admin-detail-wide">
+        <b>📍 Ünvan və çatdırılma</b>
+        <span>Ünvan: <strong>${esc(address || 'Ünvan yoxdur')}</strong></span>
+        <span>GPS: <strong>${order.lat && order.lng ? `${order.lat}, ${order.lng}` : 'GPS yoxdur'}</strong></span>
+        <span>Kuryerə verildi: <strong>${formatDate(order.ready_for_courier_at || order.courier_handover_at)}</strong></span>
+        <span>Təhvil vaxtı: <strong>${formatDate(order.delivered_at || order.delivered_confirmed_at)}</strong></span>
+      </div>
+
+      <div class="admin-detail-panel admin-detail-wide">
+        <b>🥝 Məhsullar</b>
+        <div class="admin-detail-products">
+          ${(items || []).map((item) => `
+            <div class="admin-detail-product-row">
+              <span>${esc(item.product_name)}</span>
+              <strong>${item.quantity} × ${money(item.unit_price)} = ${money(item.line_total)}</strong>
+            </div>
+          `).join('') || '<span>Məhsul yoxdur</span>'}
+        </div>
+      </div>
+
+      <div class="admin-detail-panel admin-detail-wide">
+        <b>📝 Qeydlər və əməliyyat</b>
+        <span>Müştəri qeydi: <strong>${esc(order.customer_note || 'Qeyd yoxdur')}</strong></span>
+        <span>Ləğv qeydi: <strong>${esc(order.cancel_note || 'Yoxdur')}</strong></span>
+        <span>Refund statusu: <strong>${statusAz(payment.status || order.payment_status)}</strong></span>
+
+        <div class="action-row">
+          <a class="btn btn-primary btn-mini" href="${adminChatUrl(order.id)}">💬 Sifariş söhbəti</a>
+          ${order.phone || profile.phone ? `<a class="btn btn-soft btn-mini" href="tel:${order.phone || profile.phone}">📞 Müştəriyə zəng</a>` : ''}
+        </div>
+      </div>
+
     </div>
   `);
 }
+
+
+
+
 
 async function assignCourierSafe(orderId, courierId) {
   const response = await supabase.rpc('assign_courier_to_order', {
