@@ -2374,63 +2374,136 @@ function printPreparationCenter() {
 
 async function loadPayments() {
   if (!$('#paymentsTable')) return;
+
   const search = ($('#paymentSearch')?.value || '').toLowerCase();
 
-  const { data } = await supabase
-    .from('payments')
-    .select('*,orders(id,order_code,payment_method,total_amount)')
-    .order('created_at', { ascending: false })
-    .limit(250);
+  const [{ data: payments }, { data: allItems }] = await Promise.all([
+    supabase
+      .from('payments')
+      .select('*,orders(id,order_code,payment_method,total_amount,bonus_used,delivery_fee,status,payment_status)')
+      .order('created_at', { ascending: false })
+      .limit(250),
 
-  let rows = data || [];
-  await loadAdminChatUnreadCounts(rows.map((p) => p.orders?.id));
-  if (search) rows = rows.filter((p) => [p.orders?.order_code, p.provider, p.status, p.transaction_ref].join(' ').toLowerCase().includes(search));
+    supabase
+      .from('order_items')
+      .select('order_id,line_total')
+      .limit(5000),
+  ]);
 
-  $('#paymentsTable').innerHTML = rows.map((payment) => `
-    <tr>
-      <td>
-        <b>${esc(payment.orders?.order_code || '—')}</b>
-        <small class="muted">${formatDate(payment.created_at)}</small>
-      </td>
-      <td>
-        <b>${esc(methodAz(payment.provider || payment.orders?.payment_method))}</b>
-        <small class="muted">${esc(payment.transaction_ref || '')}</small>
-      </td>
-      <td><b>${money(payment.amount)}</b></td>
-      <td>${payBadge(payment.status)}</td>
-      <td>${payment.receipt_url ? `<a class="btn btn-soft btn-mini" target="_blank" href="${payment.receipt_url}">Çekə bax</a>` : '—'}</td>
-      <td>
-        <div class="action-row payment-actions">
-          ${payment.status === 'refund_pending' || payment.status === 'refund_processing' ? `
-            <button class="btn btn-soft btn-mini pay refund-done-btn" data-id="${payment.id}" data-s="refunded">
-              ↩️ Geri ödəndi
-            </button>
-          ` : `
-            <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
-            <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
-          `}
-          ${adminChatButton(payment.orders?.id)}
-        </div>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
+  const productTotalMap = new Map();
+
+  (allItems || []).forEach((item) => {
+    productTotalMap.set(
+      item.order_id,
+      (productTotalMap.get(item.order_id) || 0) + Number(item.line_total || 0)
+    );
+  });
+
+  let rows = payments || [];
+
+  await loadAdminChatUnreadCounts(rows.map((payment) => payment.orders?.id));
+
+  if (search) {
+    rows = rows.filter((payment) => [
+      payment.orders?.order_code,
+      payment.provider,
+      payment.status,
+      payment.transaction_ref,
+      payment.orders?.payment_status,
+    ].join(' ').toLowerCase().includes(search));
+  }
+
+  $('#paymentsTable').innerHTML = rows.map((payment) => {
+    const order = payment.orders || {};
+    const productsTotal = Number(productTotalMap.get(order.id) || 0);
+    const deliveryFee = Number(order.delivery_fee || 0);
+    const bonusUsed = Number(order.bonus_used || 0);
+    const orderGrossTotal = productsTotal + deliveryFee;
+    const cardPayable = Number(payment.amount || 0);
+
+    const isRefund = ['refund_pending', 'refund_processing'].includes(payment.status);
+    const isFinal = ['refunded', 'rejected', 'cancelled', 'failed'].includes(payment.status);
+
+    return `
+      <tr>
+        <td>
+          <b>${esc(order.order_code || '—')}</b>
+          <small class="muted">${formatDate(payment.created_at)}</small>
+          <small class="muted">Sifariş: ${statusAz(order.status)}</small>
+        </td>
+
+        <td>
+          <b>${esc(methodAz(payment.provider || order.payment_method))}</b>
+          <small class="muted">${cardPayable <= 0 ? 'Bonusla tam ödəniş' : 'Kart / online ödəniş'}</small>
+        </td>
+
+        <td>
+          <div class="admin-payment-breakdown">
+            <span>Məhsullar: <b>${money(productsTotal)}</b></span>
+            <span>Çatdırılma: <b>${money(deliveryFee)}</b></span>
+            <span>Cəmi: <b>${money(orderGrossTotal)}</b></span>
+          </div>
+        </td>
+
+        <td>
+          <div class="admin-payment-breakdown">
+            <span>Bonus: <b class="${bonusUsed > 0 ? 'bonus-minus' : ''}">${bonusUsed > 0 ? '-' : ''}${money(bonusUsed)}</b></span>
+            <span>Kartla: <b>${money(cardPayable)}</b></span>
+          </div>
+        </td>
+
+        <td>${payBadge(payment.status)}</td>
+
+        <td>
+          <div class="action-row payment-actions">
+            ${isRefund ? `
+              ${cardPayable > 0 ? `
+                <button class="btn btn-soft btn-mini pay refund-done-btn" data-id="${payment.id}" data-s="refunded">
+                  ↩️ Geri ödəndi
+                </button>
+              ` : `
+                <button class="btn btn-soft btn-mini pay refund-done-btn" data-id="${payment.id}" data-s="refunded">
+                  ✅ Bonus geri qaytarıldı
+                </button>
+              `}
+            ` : isFinal ? `
+              <span class="mini-badge mini-blue">Əməliyyat bağlanıb</span>
+            ` : `
+              <button class="btn btn-soft btn-mini pay" data-id="${payment.id}" data-s="approved">Təsdiq</button>
+              <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
+            `}
+
+            ${adminChatButton(order.id)}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
 
   $$('.pay').forEach((button) => {
     button.addEventListener('click', async () => {
       const nextStatus = button.dataset.s;
-  
+
+      button.disabled = true;
+
       const { error } = await supabase.rpc('admin_update_payment_status', {
         p_payment_id: button.dataset.id,
         p_status: nextStatus,
-        p_admin_note: nextStatus === 'refunded' ? 'Admin geri ödənişi tamamladı' : null,
+        p_admin_note: nextStatus === 'refunded'
+          ? 'Admin geri ödənişi / bonus qaytarılmasını tamamladı'
+          : null,
       });
-  
-        toast(error ? error.message : 'Ödəniş yeniləndi');
-        loadPayments();
-        loadOrders();
+
+      toast(error ? error.message : 'Ödəniş yeniləndi');
+
+      button.disabled = false;
+      loadPayments();
+      loadOrders();
     });
   });
 }
+
+
 
 async function usersReviews() {
   await loadUsers();
