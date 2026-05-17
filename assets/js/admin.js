@@ -248,6 +248,96 @@ function isReallyOnline(profile = {}, device = null) {
 }
 
 
+function payIcon(status) {
+  const icons = {
+    pending: '⏳',
+    approved: '✅',
+    paid: '✅',
+    rejected: '❌',
+    cancelled: '🚫',
+    failed: '⚠️',
+    refund_pending: '↩️',
+    refund_processing: '🔄',
+    refunded: '💛',
+  };
+
+  return icons[status] || '💳';
+}
+
+function paymentTone(status) {
+  const map = {
+    paid: 'paid',
+    approved: 'paid',
+    pending: 'pending',
+    rejected: 'rejected',
+    cancelled: 'cancelled',
+    failed: 'rejected',
+    refund_pending: 'refund-pending',
+    refund_processing: 'refund-processing',
+    refunded: 'refunded',
+  };
+
+  return map[status] || 'pending';
+}
+
+function isFinalOrder(status, paymentStatus) {
+  return (
+    ['delivered', 'cancelled', 'refunded', 'refund_pending', 'refund_processing'].includes(status) ||
+    ['rejected', 'cancelled', 'failed', 'refunded'].includes(paymentStatus)
+  );
+}
+
+function isActivePrepStatus(status) {
+  return ['ready_to_confirm', 'confirmed', 'preparing', 'ready_for_courier'].includes(status);
+}
+
+function deliveryWarning(deliveryFee, productsTotal) {
+  const fee = Number(deliveryFee || 0);
+  const products = Number(productsTotal || 0);
+
+  if (fee <= 0) return '';
+  if (fee >= 20 && fee > products * 2) {
+    return `<small class="delivery-warning">⚠️ Çatdırılma yüksək görünür</small>`;
+  }
+
+  return '';
+}
+
+function ensureOrdersKpiBox() {
+  if ($('#ordersKpiBox')) return;
+
+  const panel = $('#ordersTable')?.closest('.pro-card') || $('#ordersTable')?.closest('.card');
+  if (!panel) return;
+
+  panel.insertAdjacentHTML('afterbegin', `
+    <div id="ordersKpiBox" class="admin-orders-kpi-grid"></div>
+  `);
+}
+
+function renderOrdersKpis(orders = []) {
+  ensureOrdersKpiBox();
+
+  const delivered = orders.filter((o) => o.status === 'delivered');
+  const active = orders.filter((o) => isActivePrepStatus(o.status) || ['paid_hold', 'on_the_way', 'courier_near'].includes(o.status));
+  const refund = orders.filter((o) => ['refund_pending', 'refund_processing', 'refunded'].includes(o.status) || ['refund_pending', 'refund_processing', 'refunded'].includes(o.payment_status));
+
+  const revenue = delivered.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+  const bonusUsed = orders.reduce((sum, o) => sum + Number(o.bonus_used || 0), 0);
+  const delivery = orders.reduce((sum, o) => sum + Number(o.delivery_fee || 0), 0);
+
+  if ($('#ordersKpiBox')) {
+    $('#ordersKpiBox').innerHTML = `
+      <div class="order-kpi"><span>Aktiv sifariş</span><b>${active.length}</b><small>Hazırda prosesdə</small></div>
+      <div class="order-kpi"><span>Təhvil verilən</span><b>${delivered.length}</b><small>${money(revenue)} real dövriyyə</small></div>
+      <div class="order-kpi"><span>Bonus istifadəsi</span><b>${money(bonusUsed)}</b><small>Müştəri bonusları</small></div>
+      <div class="order-kpi"><span>Çatdırılma</span><b>${money(delivery)}</b><small>Tarif gəliri</small></div>
+      <div class="order-kpi warn"><span>Refund</span><b>${refund.length}</b><small>Geri ödəniş axını</small></div>
+    `;
+  }
+}
+
+
+
 function statusClass(status) {
   return `status-${String(status || '').replaceAll('_', '-')}`;
 }
@@ -257,7 +347,12 @@ function statusBadge(status) {
 }
 
 function payBadge(status) {
-  return `<span class="payment-status-pill status-${status || 'pending'}">${statusAz(status)}</span>`;
+  return `
+    <span class="payment-status-pill payment-${paymentTone(status)}">
+      <span>${payIcon(status)}</span>
+      ${statusAz(status)}
+    </span>
+  `;
 }
 
 function adminChatUrl(orderId) {
@@ -1031,6 +1126,7 @@ async function loadOrders() {
       .neq('status', 'draft_payment')
       .order('created_at', { ascending: false })
       .limit(250),
+
     supabase.from('profiles').select('*'),
     supabase.from('couriers').select('*'),
     supabase.from('payments').select('*'),
@@ -1041,7 +1137,7 @@ async function loadOrders() {
   if (!table) return;
 
   if (ordersRes.error) {
-    table.innerHTML = `<tr><td colspan="11">${ordersRes.error.message}</td></tr>`;
+    table.innerHTML = `<tr><td colspan="8">${ordersRes.error.message}</td></tr>`;
     return;
   }
 
@@ -1062,73 +1158,110 @@ async function loadOrders() {
   const makeCourierOptions = (selectedId = '') => activeCouriers.map((courier) => {
     const p = courier.profile || {};
     const name = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email || 'Kuryer';
-    const phone = p.phone ? ` • ${p.phone}` : '';
-    return `<option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${esc(name)}${phone}${courier.vehicle_plate ? ` • ${esc(courier.vehicle_plate)}` : ''}</option>`;
+    return `<option value="${courier.user_id}" ${selectedId === courier.user_id ? 'selected' : ''}>${esc(name)}${courier.vehicle_plate ? ` • ${esc(courier.vehicle_plate)}` : ''}</option>`;
   }).join('');
 
   let rows = ordersRes.data || [];
+
   await loadAdminChatUnreadCounts(rows.map((o) => o.id));
+
   if (search) {
     rows = rows.filter((o) => {
       const p = profilesMap.get(o.user_id) || {};
-      return [o.order_code, o.full_name, o.phone, p.email, p.phone, p.first_name, p.last_name, o.address_text, o.city_region]
-        .join(' ')
-        .toLowerCase()
-        .includes(search);
+      return [
+        o.order_code,
+        o.full_name,
+        o.phone,
+        p.email,
+        p.phone,
+        p.first_name,
+        p.last_name,
+        o.address_text,
+        o.city_region,
+        o.status,
+        o.payment_status,
+      ].join(' ').toLowerCase().includes(search);
     });
   }
 
+  renderOrdersKpis(rows);
+
   table.innerHTML = rows.map((order) => {
     const p = profilesMap.get(order.user_id) || {};
+    const payment = paymentsMap.get(order.id) || {};
     const courier = profilesMap.get(order.courier_id) || {};
     const customerName = safe(order.full_name, `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email || 'Müştəri');
     const phone = safe(order.phone, p.phone || '—');
     const address = [order.city_region, order.address_text || p.address_line, order.apartment || p.apartment, order.door_code || p.door_code].filter(Boolean).join(', ');
+    const items = itemsMap.get(order.id) || [];
+    const productsTotal = items.reduce((sum, item) => sum + Number(item.line_total || 0), 0);
+    const deliveryFee = Number(order.delivery_fee || 0);
+    const bonusUsed = Number(order.bonus_used || 0);
+    const finalOrder = isFinalOrder(order.status, order.payment_status);
 
     return `
-      <tr>
+      <tr class="${bonusUsed > 0 ? 'bonus-order-row' : ''} ${finalOrder ? 'final-order-row' : ''}">
         <td>
           <b>${esc(order.order_code || order.id)}</b>
           <small class="muted">${formatDate(order.created_at)}</small>
+          ${order.ready_for_courier_at || order.courier_handover_at ? `
+            <small class="handover-time">🚚 Kuryerə verildi: ${formatDate(order.ready_for_courier_at || order.courier_handover_at)}</small>
+          ` : ''}
         </td>
+
         <td>
           <b>${esc(customerName)}</b>
           <small class="muted">${esc(p.email || 'Email yoxdur')}</small>
           <small class="muted">📞 ${esc(phone)}</small>
         </td>
+
         <td>
           <small>${esc(address || 'Ünvan yoxdur')}</small>
         </td>
-        
+
         <td>
           ${statusBadge(order.status)}
-          ${order.status === 'paid_hold'
-            ? `<div class="countdown-badge" data-deadline="${order.edit_deadline}">
-                 ⏳ 5 dəqiqə gözləmə
-               </div>`
-            : ''
-          }
+          ${order.status === 'paid_hold' ? `
+            <div class="countdown-badge" data-deadline="${order.edit_deadline}">
+              ⏳ 5 dəqiqə düzəliş
+            </div>
+          ` : ''}
         </td>
-        
-        <td>${payBadge(order.payment_status)}</td>
+
+        <td>
+          ${payBadge(order.payment_status)}
+          ${bonusUsed > 0 ? `<span class="bonus-order-chip">🎁 Bonus: -${money(bonusUsed)}</span>` : ''}
+        </td>
+
         <td class="admin-money-cell">
           <b>${money(order.total_amount)}</b>
-          <small>${itemsMap.get(order.id)?.length || 0} məhsul</small>
+          <small>${items.length || 0} məhsul</small>
+          <small>Məhsul: ${money(productsTotal)}</small>
+          <small>Çatdırılma: ${money(deliveryFee)}</small>
+          ${deliveryWarning(deliveryFee, productsTotal)}
         </td>
+
         <td>
-          <select class="assign" data-id="${order.id}" ${order.status !== 'ready_for_courier' ? 'disabled' : ''}>
+          <select class="assign" data-id="${order.id}" ${order.status !== 'ready_for_courier' || finalOrder ? 'disabled' : ''}>
             <option value="">Kuryer seç</option>
             ${makeCourierOptions(order.courier_id)}
           </select>
           <small class="muted">${esc(fullName(courier))}</small>
         </td>
+
         <td>
           <div class="action-row order-actions">
-            <button class="btn btn-soft btn-mini view-order" data-row="${rowAttr({ order, profile: p, items: itemsMap.get(order.id) || [], payment: paymentsMap.get(order.id) || {} })}">Detallar</button>
-            <button class="btn btn-soft btn-mini status admin-status-btn" data-id="${order.id}" data-s="confirmed" ${order.status !== 'ready_to_confirm' ? 'disabled' : ''}>✅ Təsdiqlə</button>
-            <button class="btn btn-soft btn-mini status admin-status-btn" data-id="${order.id}" data-s="preparing" ${order.status !== 'confirmed' ? 'disabled' : ''}>🥝 Hazırla</button>
-            <button class="btn btn-primary btn-mini status admin-status-btn" data-id="${order.id}" data-s="ready_for_courier" ${order.status !== 'preparing' ? 'disabled' : ''}>🚚 Kuryerə ver</button>
-            <button class="btn btn-danger btn-mini status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
+            <button class="btn btn-soft btn-mini view-order" data-row="${rowAttr({ order, profile: p, items, payment })}">Detallar</button>
+
+            ${finalOrder ? `
+              <span class="mini-badge mini-blue">Əməliyyat bağlanıb</span>
+            ` : `
+              <button class="btn btn-soft btn-mini status admin-status-btn" data-id="${order.id}" data-s="confirmed" ${order.status !== 'ready_to_confirm' ? 'disabled' : ''}>✅ Təsdiqlə</button>
+              <button class="btn btn-soft btn-mini status admin-status-btn" data-id="${order.id}" data-s="preparing" ${!['confirmed', 'ready_to_confirm'].includes(order.status) ? 'disabled' : ''}>🥝 Hazırla</button>
+              <button class="btn btn-primary btn-mini status admin-status-btn" data-id="${order.id}" data-s="ready_for_courier" ${order.status !== 'preparing' ? 'disabled' : ''}>🚚 Kuryerə ver</button>
+              <button class="btn btn-danger btn-mini status" data-id="${order.id}" data-s="cancelled">Ləğv</button>
+            `}
+
             ${adminChatButton(order.id)}
           </div>
         </td>
@@ -1138,6 +1271,9 @@ async function loadOrders() {
 
   bindOrderEvents();
 }
+
+
+
 
 function bindOrderEvents() {
   $$('.assign').forEach((select) => {
@@ -1473,11 +1609,11 @@ async function loadPreparationCenter() {
     .order('created_at', { ascending: true })
     .limit(500);
 
-  if (status === 'active') {
-    ordersQuery = ordersQuery.in('status', ['confirmed', 'preparing', 'ready_for_courier']);
-  } else if (status !== 'all') {
-    ordersQuery = ordersQuery.eq('status', status);
-  }
+    if (status === 'active') {
+      ordersQuery = ordersQuery.in('status', ['ready_to_confirm', 'confirmed', 'preparing', 'ready_for_courier']);
+    } else if (status !== 'all') {
+      ordersQuery = ordersQuery.eq('status', status);
+    }
 
   const [ordersRes, itemsRes, productsRes, profilesRes] = await Promise.all([
     ordersQuery,
@@ -1565,6 +1701,8 @@ async function loadPreparationCenter() {
 preparationRowsCache = rows;
 preparationPurchaseCache = rows.filter((row) => row.need_quantity > 0);
 
+  const activePrepOrders = orders.filter((order) => isActivePrepStatus(order.status));
+  
 preparationOrdersCache = orders.map((order) => {
   const profile = profilesMap.get(order.user_id) || {};
   const orderItems = items
@@ -1588,7 +1726,7 @@ preparationOrdersCache = orders.map((order) => {
 });
   
 
-  renderPreparationKpis(rows, orders);
+  renderPreparationKpis(rows, activePrepOrders);
   renderPreparationSummary(rows);
   renderPreparationDetails(rows);
   renderPreparationPurchase(preparationPurchaseCache);
