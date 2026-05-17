@@ -2611,13 +2611,45 @@ async function loadPayments() {
               <button class="btn btn-danger btn-mini pay" data-id="${payment.id}" data-s="rejected">Rədd</button>
             `}
 
+              <button class="btn btn-soft btn-mini toggle-payment-detail" data-id="${payment.id}">
+                📋 Detalları aç
+              </button>
+              
             ${adminChatButton(order.id)}
+          </div>
+        </td>
+      </tr>
+      <tr class="payment-detail-row hide" id="paymentDetail-${payment.id}">
+        <td colspan="6">
+          <div class="payment-detail-box">
+            <b>Ödəniş detalları</b>
+            <span>Məhsullar: ${money(productsTotal)}</span>
+            <span>Çatdırılma: ${money(deliveryFee)}</span>
+            <span>Ümumi məbləğ: ${money(orderGrossTotal)}</span>
+            <span>Bonusla ödənildi: -${money(bonusUsed)}</span>
+            <span>Kartla ödənildi: ${money(cardPayable)}</span>
+            <span>Sifariş statusu: ${statusAz(order.status)}</span>
+            <span>Ödəniş statusu: ${statusAz(payment.status)}</span>
+            <span>Admin qeyd: ${esc(payment.admin_note || 'Qeyd yoxdur')}</span>
           </div>
         </td>
       </tr>
     `;
   }).join('') || '<tr><td colspan="6">Ödəniş yoxdur.</td></tr>';
 
+      $$('.toggle-payment-detail').forEach((button) => {
+      button.addEventListener('click', () => {
+        const row = $(`#paymentDetail-${button.dataset.id}`);
+        if (!row) return;
+    
+        row.classList.toggle('hide');
+    
+        button.textContent = row.classList.contains('hide')
+          ? '📋 Detalları aç'
+          : '📋 Detalları bağla';
+      });
+    });
+  
   $$('.pay').forEach((button) => {
     button.addEventListener('click', async () => {
       const nextStatus = button.dataset.s;
