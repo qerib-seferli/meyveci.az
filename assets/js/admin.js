@@ -2542,7 +2542,7 @@ async function exportPreparationExcel() {
       'Ödəniş üsulu:',
       methodAz(payment.method || order.payment_method || 'Bank kartı ilə ödəniş'),
     ];
-
+ 
     ws.getRow(9).values = [
       'Sifariş statusu:',
       statusAz(order.status),
