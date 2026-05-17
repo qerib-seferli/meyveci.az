@@ -878,7 +878,7 @@ async function checkout(event) {
   }
   
   subscribeOrderTracking(activeUser.id);
-}
+
 
 
 
