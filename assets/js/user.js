@@ -865,8 +865,7 @@ const { data, error } = await supabase
   .from('orders')
   .select('*')
   .eq('user_id', activeUser.id)
-  .neq('status', 'draft_payment')
-  .neq('payment_status', 'pending')
+  .not('payment_status', 'eq', 'pending')
   .order('created_at', { ascending: false })
   .limit(60);
 
