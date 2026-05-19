@@ -788,11 +788,17 @@ async function checkout(event) {
       throw new Error('Bank ödəniş linki alınmadı');
     }
 
-    toast('Kapital Bank ödəniş səhifəsinə yönləndirilirsiniz...');
+localStorage.setItem('meyveciPendingKapitalPayment', JSON.stringify({
+  order_id: orderId,
+  bank_order_id: kapitalResult.kapital_order_id,
+  created_at: new Date().toISOString(),
+}));
 
-    setTimeout(() => {
-      window.location.href = kapitalResult.redirect_url;
-    }, 500);
+toast('Kapital Bank ödəniş səhifəsinə yönləndirilirsiniz...');
+
+setTimeout(() => {
+  window.location.href = kapitalResult.redirect_url;
+}, 500);
 
   } catch (error) {
     toast(error.message || 'Ödənişə yönləndirmə zamanı xəta baş verdi');
@@ -811,31 +817,38 @@ async function checkout(event) {
 async function initOrders() {
   const activeUser = await requireAuth();
 
-  const params = new URLSearchParams(location.search);
-  const localOrderId = params.get('track');
-  const bankOrderId = params.get('ID') || params.get('id');
+const params = new URLSearchParams(location.search);
+const localOrderId = params.get('track');
 
-  if (localOrderId && bankOrderId && !sessionStorage.getItem(`verified-${localOrderId}`)) {
-    sessionStorage.setItem(`verified-${localOrderId}`, '1');
+let bankOrderId = params.get('ID') || params.get('id');
 
-    const { data: verifyResult, error: verifyError } = await supabase.functions.invoke(
-      'kapital-verify-order',
-      {
-        body: {
-          order_id: localOrderId,
-          bank_order_id: bankOrderId,
-        },
-      }
-    );
+const pendingPayment = JSON.parse(localStorage.getItem('meyveciPendingKapitalPayment') || 'null');
 
-    if (verifyError) {
-      toast('Ödəniş yoxlanarkən xəta baş verdi');
-    } else if (verifyResult?.paid) {
-      toast('Ödəniş uğurla təsdiqləndi');
-    } else {
-      toast('Ödəniş tamamlanmadı və ya uğursuz oldu');
+const verifyOrderId = localOrderId || pendingPayment?.order_id;
+bankOrderId = bankOrderId || pendingPayment?.bank_order_id;
+
+if (verifyOrderId && bankOrderId && !sessionStorage.getItem(`verified-${verifyOrderId}`)) {
+  sessionStorage.setItem(`verified-${verifyOrderId}`, '1');
+
+  const { data: verifyResult, error: verifyError } = await supabase.functions.invoke(
+    'kapital-verify-order',
+    {
+      body: {
+        order_id: verifyOrderId,
+        bank_order_id: bankOrderId,
+      },
     }
+  );
+
+  if (verifyError) {
+    toast('Ödəniş yoxlanarkən xəta baş verdi');
+  } else if (verifyResult?.paid) {
+    localStorage.removeItem('meyveciPendingKapitalPayment');
+    toast('Ödəniş uğurla təsdiqləndi');
+  } else {
+    toast('Ödəniş tamamlanmadı və ya uğursuz oldu');
   }
+}
   
     // 5 dəqiqəsi bitmiş paid_hold sifarişləri əvvəl backend-də bağlayırıq.
     // Beləliklə müştəri səhifəsində köhnə status qalarsa belə düymə aktiv görünməyəcək.
