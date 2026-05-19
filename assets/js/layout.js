@@ -445,11 +445,16 @@ function getRootPath() {
   ) ? '../' : './';
 }
 
+
 function highlightNotificationBody(body = '') {
   return escapeAttr(body)
     .replace(/(MV-\d{8}-[A-Z0-9]+)/g, '<b class="notify-code">$1</b>')
-    .replace(/(\d+(?:\.\d{2})?\sAZN)/g, '<b class="notify-price">$1</b>');
+    .replace(/(\d+(?:\.\d{2})?\sAZN)/g, '<b class="notify-price">$1</b>')
+    .replace(/uğurla ödənildi/gi, '<span style="color:#16a34a;font-weight:700;">uğurla ödənildi</span>')
+    .replace(/ödənmədi/gi, '<span style="color:#dc2626;font-weight:700;">ödənmədi</span>')
+    .replace(/rədd edildi/gi, '<span style="color:#dc2626;font-weight:700;">rədd edildi</span>');
 }
+
 
 function escapeAttr(value) {
   return String(value || '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
