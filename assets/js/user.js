@@ -788,11 +788,18 @@ async function checkout(event) {
       throw new Error('Bank ödəniş linki alınmadı');
     }
 
-localStorage.setItem('meyveciPendingKapitalPayment', JSON.stringify({
-  order_id: orderId,
-  bank_order_id: kapitalResult.kapital_order_id,
-  created_at: new Date().toISOString(),
-}));
+  await supabase.rpc('mark_kapital_redirect', {
+    p_order_id: orderId,
+    p_bank_order_id: String(kapitalResult.kapital_order_id),
+    p_bank_session_id: String(kapitalResult.kapital_password || ''),
+    p_bank_status: String(kapitalResult.kapital_status || 'Preparing'),
+  });
+  
+  localStorage.setItem('meyveciPendingKapitalPayment', JSON.stringify({
+    order_id: orderId,
+    bank_order_id: kapitalResult.kapital_order_id,
+    created_at: new Date().toISOString(),
+  }));
 
 toast('Kapital Bank ödəniş səhifəsinə yönləndirilirsiniz...');
 
