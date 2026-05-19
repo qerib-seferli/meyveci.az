@@ -788,12 +788,12 @@ async function checkout(event) {
       throw new Error('Bank ödəniş linki alınmadı');
     }
 
-  await supabase.rpc('mark_kapital_redirect', {
-    p_order_id: orderId,
-    p_bank_order_id: String(kapitalResult.kapital_order_id),
-    p_bank_session_id: String(kapitalResult.kapital_password || ''),
-    p_bank_status: String(kapitalResult.kapital_status || 'Preparing'),
-  });
+await supabase.rpc('mark_kapital_redirect', {
+  p_order_id: orderId,
+  p_bank_order_id: String(kapitalResult.kapital_order_id || kapitalResult.order_id || ''),
+  p_session_id: String(kapitalResult.kapital_password || kapitalResult.password || ''),
+  p_status: String(kapitalResult.kapital_status || kapitalResult.status || 'Preparing'),
+});
   
   localStorage.setItem('meyveciPendingKapitalPayment', JSON.stringify({
     order_id: orderId,
