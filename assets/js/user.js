@@ -776,6 +776,8 @@ async function checkout(event) {
       {
         body: {
           order_id: orderId,
+          amount: Number(cartPayableTotal || 0),
+          description: `Meyveci.az order ${orderId}`,
         },
       }
     );
