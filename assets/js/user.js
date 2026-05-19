@@ -699,9 +699,14 @@ function updateCartSummary(bonusUsed = 0) {
 async function checkout(event) {
   event.preventDefault();
 
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Ödəniş səhifəsinə yönləndirilir...';
+  }
+
   const data = formData(event.target);
 
-  // Sifariş tamamlananda telefondan/browserdən lokasiya icazəsi istəyirik.
   if (!data.lat || !data.lng || data.lat == 0 || data.lng == 0) {
     toast('Çatdırılma üçün lokasiya icazəsi istənir...');
     const locationPoint = await askLocation();
@@ -709,24 +714,17 @@ async function checkout(event) {
     if (locationPoint) {
       data.lat = locationPoint.lat;
       data.lng = locationPoint.lng;
+
       if ($('#checkoutForm')?.lat) $('#checkoutForm').lat.value = locationPoint.lat;
       if ($('#checkoutForm')?.lng) $('#checkoutForm').lng.value = locationPoint.lng;
+    } else {
+      toast('Lokasiya alınmadı, xəritə düzgün işləməyə bilər');
     }
-
-        if (!data.lat || !data.lng) {
-          const locationPoint = await askLocation();
-        
-          if (locationPoint) {
-            data.lat = Number(locationPoint.lat);
-            data.lng = Number(locationPoint.lng);
-          } else {
-            toast('Lokasiya alınmadı, xəritə düzgün işləməyə bilər');
-          }
-        }
-    }
+  }
 
   try {
-    
+    const activeUser = await requireAuth();
+
     await supabase
       .from('profiles')
       .update({
@@ -737,8 +735,10 @@ async function checkout(event) {
         lat: data.lat ? Number(data.lat) : null,
         lng: data.lng ? Number(data.lng) : null,
       })
-      .eq('id', (await requireAuth()).id);
-        
+      .eq('id', activeUser.id);
+
+    const bonusUsed = data.use_bonus === 'on' ? Number(data.bonus_used || 0) : 0;
+
     const { data: orderId, error } = await supabase.rpc('create_order_from_cart_fast', {
       p_full_name: data.full_name,
       p_phone: data.phone,
@@ -748,38 +748,63 @@ async function checkout(event) {
       p_note: data.note || null,
       p_lat: data.lat ? Number(data.lat) : null,
       p_lng: data.lng ? Number(data.lng) : null,
-      p_payment_method: data.payment_method,
+      p_payment_method: 'online_payment',
       p_transaction_ref: null,
       p_receipt_url: null,
-      p_bonus_used: data.use_bonus === 'on' ? Number(data.bonus_used || 0) : 0,
+      p_bonus_used: bonusUsed,
       p_delivery_fee: Number(cartDeliveryFee || 0),
     });
 
     if (error) throw error;
-    
+
     await supabase
-    .from('orders')
-    .update({
-      full_name: data.full_name || null,
-      phone: data.phone || null,
-      city_region: data.city_region || null,
-      address_text: data.address || null,
-      apartment: data.apartment || null,
-      door_code: data.door_code || null,
-      lat: data.lat ? Number(data.lat) : null,
-      lng: data.lng ? Number(data.lng) : null,
-    })
-    .eq('id', orderId);
-    
-    toast('Sifariş adminə göndərildi');
-    
+      .from('orders')
+      .update({
+        full_name: data.full_name || null,
+        phone: data.phone || null,
+        city_region: data.city_region || null,
+        address_text: data.address || null,
+        apartment: data.apartment || null,
+        door_code: data.door_code || null,
+        lat: data.lat ? Number(data.lat) : null,
+        lng: data.lng ? Number(data.lng) : null,
+      })
+      .eq('id', orderId);
+
+    const { data: kapitalResult, error: kapitalError } = await supabase.functions.invoke(
+      'kapital-create-order',
+      {
+        body: {
+          order_id: orderId,
+        },
+      }
+    );
+
+    if (kapitalError) throw kapitalError;
+
+    if (!kapitalResult?.redirect_url) {
+      throw new Error('Bank ödəniş linki alınmadı');
+    }
+
+    toast('Kapital Bank ödəniş səhifəsinə yönləndirilirsiniz...');
+
     setTimeout(() => {
-      location.href = `orders.html?track=${orderId}`;
-    }, 900);
+      window.location.href = kapitalResult.redirect_url;
+    }, 500);
+
   } catch (error) {
-    toast(error.message);
+    toast(error.message || 'Ödənişə yönləndirmə zamanı xəta baş verdi');
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sifariş ver';
+    }
   }
 }
+
+
+
+
 
   async function initOrders() {
     const activeUser = await requireAuth();
