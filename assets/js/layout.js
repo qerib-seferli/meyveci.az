@@ -186,18 +186,22 @@ async function hydrateUserArea() {
   }
 }
 
+
+
 async function refreshBadges() {
   const activeProfile = await profile();
   if (!activeProfile) return;
 
   const [favorites, cart, orders, notifications, messages, newOrders] = await Promise.all([
     supabase.from('favorites').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
+
     supabase.from('cart_items').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id),
 
     supabase
       .from('orders')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', activeProfile.id)
+      .eq('payment_status', 'paid')
       .in('status', [
         'paid_hold',
         'ready_to_confirm',
@@ -206,18 +210,20 @@ async function refreshBadges() {
         'ready_for_courier',
         'on_the_way',
         'courier_near'
-      ])
-      .eq('payment_status', 'paid')
-    
+      ]),
+
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).neq('title', 'Yeni mesaj'),
+
     supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', activeProfile.id).eq('is_read', false).eq('title', 'Yeni mesaj'),
+
     activeProfile.role === 'admin'
       ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['paid_hold','ready_to_confirm','confirmed','preparing','ready_for_courier','on_the_way','courier_near'])
       : activeProfile.role === 'courier'
         ? supabase.from('orders').select('id', { count: 'exact', head: true }).eq('courier_id', activeProfile.id).not('status', 'in', '(delivered,cancelled)')
         : activeProfile.role === 'warehouse'
           ? supabase.from('orders').select('id', { count: 'exact', head: true }).in('status', ['confirmed','preparing','ready_for_courier'])
-          : Promise.resolve({ count: 0 }),  ]);
+          : Promise.resolve({ count: 0 }),
+  ]);
 
   setBadge('favCount', favorites.count || 0);
   setBadge('cartCount', cart.count || 0);
@@ -229,17 +235,19 @@ async function refreshBadges() {
   const totalAppBadge =
     Number(notifications.count || 0) +
     Number(messages.count || 0);
-  
+
   try {
     if (totalAppBadge > 0 && 'setAppBadge' in navigator) {
       navigator.setAppBadge(totalAppBadge);
     }
-  
+
     if (totalAppBadge < 1 && 'clearAppBadge' in navigator) {
       navigator.clearAppBadge();
     }
   } catch (_) {}
 }
+
+
 
 function setBadge(id, count) {
   const el = $(`#${id}`);
@@ -247,6 +255,7 @@ function setBadge(id, count) {
   el.textContent = count > 99 ? '99+' : String(count);
   el.classList.toggle('hide', count < 1);
 }
+
 
 async function loadNotifications() {
   const dropdown = $('#notifyDrop');
