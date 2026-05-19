@@ -815,12 +815,14 @@ async function checkout(event) {
     // Beləliklə müştəri səhifəsində köhnə status qalarsa belə düymə aktiv görünməyəcək.
     await supabase.rpc('auto_release_paid_orders');
   
-    const { data, error } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('user_id', activeUser.id)
-    .order('created_at', { ascending: false })
-    .limit(60);
+const { data, error } = await supabase
+  .from('orders')
+  .select('*')
+  .eq('user_id', activeUser.id)
+  .neq('status', 'draft_payment')
+  .neq('payment_status', 'pending')
+  .order('created_at', { ascending: false })
+  .limit(60);
 
   const courierIds = [...new Set((data || []).map((order) => order.courier_id).filter(Boolean))];
   const orderIds = [...new Set((data || []).map((order) => order.id).filter(Boolean))];
