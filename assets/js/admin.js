@@ -2827,8 +2827,17 @@ async function loadPayments() {
     );
   });
 
-  let rows = payments || [];
+  
+      let rows = (payments || []).filter((payment) => {
+      const order = payment.orders || {};
+    
+      return !(
+        order.status === 'draft_payment' &&
+        order.payment_status === 'pending'
+      );
+    });
 
+  
   await loadAdminChatUnreadCounts(rows.map((payment) => payment.orders?.id));
 
   if (search) {
