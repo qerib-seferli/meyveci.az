@@ -808,8 +808,34 @@ async function checkout(event) {
 
 
 
-  async function initOrders() {
-    const activeUser = await requireAuth();
+async function initOrders() {
+  const activeUser = await requireAuth();
+
+  const params = new URLSearchParams(location.search);
+  const localOrderId = params.get('track');
+  const bankOrderId = params.get('ID') || params.get('id');
+
+  if (localOrderId && bankOrderId && !sessionStorage.getItem(`verified-${localOrderId}`)) {
+    sessionStorage.setItem(`verified-${localOrderId}`, '1');
+
+    const { data: verifyResult, error: verifyError } = await supabase.functions.invoke(
+      'kapital-verify-order',
+      {
+        body: {
+          order_id: localOrderId,
+          bank_order_id: bankOrderId,
+        },
+      }
+    );
+
+    if (verifyError) {
+      toast('Ödəniş yoxlanarkən xəta baş verdi');
+    } else if (verifyResult?.paid) {
+      toast('Ödəniş uğurla təsdiqləndi');
+    } else {
+      toast('Ödəniş tamamlanmadı və ya uğursuz oldu');
+    }
+  }
   
     // 5 dəqiqəsi bitmiş paid_hold sifarişləri əvvəl backend-də bağlayırıq.
     // Beləliklə müştəri səhifəsində köhnə status qalarsa belə düymə aktiv görünməyəcək.
