@@ -7029,8 +7029,9 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 /* ================================== Telefonda CANLI XƏBƏR yazısını gizlət ==================================*/
+/* Telefonda canlı xəbər lentini tam gizlət */
 @media (max-width: 640px) {
-  .ticker-badge {
+  #newsTicker {
     display: none !important;
   }
 }
