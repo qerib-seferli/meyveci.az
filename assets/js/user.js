@@ -1,7 +1,7 @@
 // ============================================================
 // MEYVƏÇİ.AZ - İSTİFADƏÇİ SƏHİFƏLƏRİ 
 // Sevimlilər, səbət, sifariş, profil və mesaj səhifələrinin məntiqi buradadır.
-// Payment verify fallback updated: 2026-05-26
+// Payment verify fallback updated: 2026-05-26 
 // ============================================================
 
 import {
