@@ -1,5 +1,5 @@
 // ============================================================
-// MEYVƏÇİ.AZ - İSTİFADƏÇİ SƏHİFƏLƏRİ
+// MEYVƏÇİ.AZ - İSTİFADƏÇİ SƏHİFƏLƏRİ 
 // Sevimlilər, səbət, sifariş, profil və mesaj səhifələrinin məntiqi buradadır.
 // ============================================================
 
