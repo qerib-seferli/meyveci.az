@@ -771,6 +771,17 @@ async function checkout(event) {
       })
       .eq('id', orderId);
 
+    
+    if (Number(cartPayableTotal || 0) <= 0) {
+        localStorage.removeItem('meyveciPendingKapitalPayment');
+        toast('Sifariş bonusla ödənildi');
+        setTimeout(() => {
+          location.href = `orders.html?track=${orderId}`;
+        }, 700);
+        return;
+      }
+
+    
     const { data: kapitalResult, error: kapitalError } = await supabase.functions.invoke(
       'kapital-create-order',
       {
@@ -824,6 +835,7 @@ setTimeout(() => {
 async function initOrders() {
   const activeUser = await requireAuth();
 
+  
 const params = new URLSearchParams(location.search);
 const localOrderId = params.get('track');
 
@@ -834,8 +846,20 @@ const pendingPayment = JSON.parse(localStorage.getItem('meyveciPendingKapitalPay
 const verifyOrderId = localOrderId || pendingPayment?.order_id;
 bankOrderId = bankOrderId || pendingPayment?.bank_order_id;
 
-if (verifyOrderId && bankOrderId && !sessionStorage.getItem(`verified-${verifyOrderId}`)) {
-  sessionStorage.setItem(`verified-${verifyOrderId}`, '1');
+if (verifyOrderId && !bankOrderId) {
+  const { data: paymentRow } = await supabase
+    .from('payments')
+    .select('bank_order_id,status,callback_verified')
+    .eq('order_id', verifyOrderId)
+    .maybeSingle();
+
+  if (paymentRow?.bank_order_id && paymentRow?.status !== 'paid') {
+    bankOrderId = paymentRow.bank_order_id;
+  }
+}
+
+if (verifyOrderId && bankOrderId) {
+  const verifiedKey = `verified-${verifyOrderId}`;
 
   const { data: verifyResult, error: verifyError } = await supabase.functions.invoke(
     'kapital-verify-order',
@@ -848,14 +872,21 @@ if (verifyOrderId && bankOrderId && !sessionStorage.getItem(`verified-${verifyOr
   );
 
   if (verifyError) {
+    sessionStorage.removeItem(verifiedKey);
     toast('Ödəniş yoxlanarkən xəta baş verdi');
   } else if (verifyResult?.paid) {
+    sessionStorage.setItem(verifiedKey, '1');
     localStorage.removeItem('meyveciPendingKapitalPayment');
     toast('Ödəniş uğurla təsdiqləndi');
-  } else {
-    toast('Ödəniş tamamlanmadı və ya uğursuz oldu');
+  } else if (verifyResult?.pending) {
+    sessionStorage.removeItem(verifiedKey);
+    toast('Ödəniş hələ bank tərəfindən yekun təsdiqlənməyib');
+  } else if (verifyResult?.failed) {
+    sessionStorage.setItem(verifiedKey, '1');
+    toast('Ödəniş tamamlanmadı. Məhsullar səbətdə qalır.');
   }
 }
+  
   
     // 5 dəqiqəsi bitmiş paid_hold sifarişləri əvvəl backend-də bağlayırıq.
     // Beləliklə müştəri səhifəsində köhnə status qalarsa belə düymə aktiv görünməyəcək.
