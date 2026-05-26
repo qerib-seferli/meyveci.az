@@ -937,7 +937,7 @@ const { data, error } = await supabase
     
     setupUserOrderFilters();
     renderUserOrdersList();
-  }
+  
 
   $$('.open-chat').forEach((button) => {
     button.addEventListener('click', () => location.href = `messages.html?order=${button.dataset.id}`);
@@ -984,7 +984,7 @@ const { data, error } = await supabase
   }
   
   subscribeOrderTracking(activeUser.id);
-
+}
 
 
 
