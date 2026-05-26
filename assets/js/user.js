@@ -2714,7 +2714,9 @@ function updateUserCountdowns() {
   });
 }
 
-setInterval(updateUserCountdowns, 1000);
+if (!window.__meyveciUserCountdownTimer) {
+  window.__meyveciUserCountdownTimer = setInterval(updateUserCountdowns, 1000);
+}
 
 /*===================================================================*/
 /*===================================================================*/
