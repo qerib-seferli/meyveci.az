@@ -1545,3 +1545,66 @@
     font-size: 10px !important;
   }
 }
+
+
+
+/* SEÇİLMİŞ MƏHSUL - SƏLİQƏLİ HORIZONTAL FIX */
+.bulk-selected-row {
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+}
+
+.bulk-selected-row.has-discount {
+  padding-top: 10px !important;
+}
+
+.bulk-selected-main {
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  align-items: center !important;
+}
+
+.bulk-selected-actions {
+  display: contents !important;
+}
+
+.bulk-selected-actions .bulk-qty-box {
+  width: 108px !important;
+  justify-self: start !important;
+}
+
+.bulk-selected-actions > b {
+  justify-self: end !important;
+  align-self: center !important;
+  white-space: nowrap !important;
+}
+
+.bulk-remove {
+  align-self: center !important;
+}
+
+.bulk-selected-discount-badge {
+  top: 8px !important;
+  right: 48px !important;
+}
+
+@media (max-width: 640px) {
+  .bulk-selected-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .bulk-selected-actions {
+    display: grid !important;
+    grid-template-columns: 108px 1fr 28px !important;
+    align-items: center !important;
+  }
+
+  .bulk-selected-actions > b {
+    justify-self: end !important;
+  }
+
+  .bulk-selected-discount-badge {
+    right: 42px !important;
+  }
+}
