@@ -878,6 +878,7 @@ if (verifyOrderId && bankOrderId) {
   } else if (verifyResult?.paid) {
     sessionStorage.setItem(verifiedKey, '1');
     localStorage.removeItem('meyveciPendingKapitalPayment');
+    localStorage.removeItem('meyveciBulkOrderDraft');
     toast('Ödəniş uğurla təsdiqləndi');
   } else if (verifyResult?.pending) {
     sessionStorage.removeItem(verifiedKey);
