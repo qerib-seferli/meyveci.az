@@ -740,24 +740,10 @@ async function checkoutBulkOrder(event) {
 
   const data = formData(event.target);
 
-  if (!data.lat || !data.lng || data.lat == 0 || data.lng == 0) {
-    toast('Çatdırılma üçün lokasiya icazəsi istənir...');
-
-    const locationPoint = await askLocation();
-
-    if (locationPoint) {
-      data.lat = locationPoint.lat;
-      data.lng = locationPoint.lng;
-
-      if ($('#bulkCheckoutForm')?.lat) $('#bulkCheckoutForm').lat.value = locationPoint.lat;
-      if ($('#bulkCheckoutForm')?.lng) $('#bulkCheckoutForm').lng.value = locationPoint.lng;
-
-      updateCheckoutLocationText();
-      await updateDeliveryFee();
-    } else {
-      toast('Lokasiya alınmadı, xəritə düzgün işləməyə bilər');
+    if ((!data.lat || !data.lng || data.lat == 0 || data.lng == 0) && data.city_region) {
+      data.lat = null;
+      data.lng = null;
     }
-  }
 
   try {
     const activeUser = await requireAuth();
