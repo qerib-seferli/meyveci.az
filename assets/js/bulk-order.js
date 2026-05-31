@@ -35,6 +35,8 @@ const AZ_CITY_REGIONS = [
   'Şamaxı', 'Şəki', 'Şəmkir', 'Şərur', 'Şirvan', 'Şuşa',
 ];
 
+const BULK_STORAGE_KEY = 'meyveciBulkOrderDraft';
+
 const state = {
   categories: [],
   products: [],
@@ -142,9 +144,11 @@ async function loadBulkData() {
   state.categories = categoriesRes.data || [];
   state.products = productsRes.data || [];
 
+  restoreBulkDraft();
   renderCategories();
   renderProducts();
   renderSelected();
+  enableBulkCategoryDrag();
 }
 
 function renderCategories() {
@@ -393,6 +397,7 @@ function setProductQuantity(productId, quantity) {
     });
   }
 
+  saveBulkDraft();
   renderProducts();
   renderSelected();
   updateDeliveryFee();
@@ -400,6 +405,7 @@ function setProductQuantity(productId, quantity) {
 
 function removeProduct(productId) {
   state.selected.delete(productId);
+  saveBulkDraft();
   renderProducts();
   renderSelected();
   updateDeliveryFee();
@@ -838,6 +844,7 @@ async function checkoutBulkOrder(event) {
     if (Number(state.payableTotal || 0) <= 0) {
       localStorage.removeItem('meyveciPendingKapitalPayment');
       toast('Toplu sifariş bonusla ödənildi');
+      clearBulkDraft();
 
       setTimeout(() => {
         location.href = `orders.html?track=${orderId}`;
@@ -949,4 +956,77 @@ function safeText(value) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
+}
+
+
+
+function saveBulkDraft() {
+  const items = [...state.selected.values()].map((item) => ({
+    product_id: item.product.id,
+    quantity: item.quantity,
+  }));
+
+  localStorage.setItem(BULK_STORAGE_KEY, JSON.stringify({
+    items,
+    updated_at: new Date().toISOString(),
+  }));
+}
+
+function restoreBulkDraft() {
+  try {
+    const draft = JSON.parse(localStorage.getItem(BULK_STORAGE_KEY) || 'null');
+    const items = draft?.items || [];
+
+    items.forEach((item) => {
+      const product = state.products.find((p) => p.id === item.product_id);
+      const quantity = Number(item.quantity || 0);
+
+      if (product && quantity > 0) {
+        state.selected.set(product.id, { product, quantity });
+      }
+    });
+  } catch (_) {
+    localStorage.removeItem(BULK_STORAGE_KEY);
+  }
+}
+
+function clearBulkDraft() {
+  localStorage.removeItem(BULK_STORAGE_KEY);
+}
+
+function enableBulkCategoryDrag() {
+  const row = $('#bulkCategoryChips');
+  if (!row || row.dataset.dragReady === '1') return;
+
+  row.dataset.dragReady = '1';
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  row.addEventListener('mousedown', (event) => {
+    isDown = true;
+    row.classList.add('dragging');
+    startX = event.pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+  });
+
+  row.addEventListener('mouseleave', () => {
+    isDown = false;
+    row.classList.remove('dragging');
+  });
+
+  row.addEventListener('mouseup', () => {
+    isDown = false;
+    row.classList.remove('dragging');
+  });
+
+  row.addEventListener('mousemove', (event) => {
+    if (!isDown) return;
+    event.preventDefault();
+
+    const x = event.pageX - row.offsetLeft;
+    const walk = (x - startX) * 1.35;
+    row.scrollLeft = scrollLeft - walk;
+  });
 }
