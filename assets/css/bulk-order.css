@@ -706,372 +706,11 @@
 
 
 /* ============================================================
-   TOPLU SİFARİŞ - KOMPAKT / MINIMALIST FIX
+   TOPLU SİFARİŞ - FINAL CLEAN PRODUCT + SELECTED CARD FIX
+   Yalnız məhsul kartları və seçilmiş məhsullar üçün.
    ============================================================ */
 
-.bulk-product-grid {
-  gap: 10px !important;
-}
-
-.bulk-product-card {
-  border-radius: 18px !important;
-  box-shadow: 0 8px 20px rgba(15, 122, 55, 0.08) !important;
-}
-
-.bulk-product-img {
-  aspect-ratio: 1 / 0.74 !important;
-  margin: 8px 8px 0 !important;
-  border-radius: 15px !important;
-}
-
-.bulk-product-img img,
-.bulk-selected-img img {
-  object-fit: contain !important;
-  padding: 6px !important;
-  background: linear-gradient(135deg, #ecfccb, #dcfce7);
-}
-
-.bulk-product-body {
-  padding: 9px !important;
-}
-
-.bulk-product-title h3 {
-  min-height: auto !important;
-  font-size: 14px !important;
-  line-height: 1.18 !important;
-}
-
-.bulk-product-title span {
-  padding: 4px 7px !important;
-  font-size: 10px !important;
-}
-
-.bulk-price-row {
-  min-height: 34px !important;
-  margin: 6px 0 8px !important;
-}
-
-.bulk-price-row .price {
-  font-size: 18px !important;
-}
-
-.bulk-card-actions {
-  gap: 6px !important;
-}
-
-.bulk-qty-box {
-  height: 34px !important;
-  grid-template-columns: 34px minmax(0, 1fr) 34px !important;
-}
-
-.bulk-add {
-  min-height: 36px !important;
-  font-size: 13px !important;
-}
-
-.bulk-order-panel {
-  border-radius: 20px !important;
-}
-
-.bulk-selected-row {
-  border-radius: 15px !important;
-  padding: 8px !important;
-}
-
-.bulk-selected-main {
-  grid-template-columns: 48px minmax(0, 1fr) !important;
-}
-
-.bulk-selected-img {
-  width: 48px !important;
-  height: 44px !important;
-  border-radius: 13px !important;
-}
-
-.bulk-selected-main b {
-  font-size: 13px !important;
-}
-
-.bulk-selected-main small {
-  font-size: 11px !important;
-}
-
-.bulk-selected-actions {
-  grid-template-columns: auto 1fr 28px !important;
-}
-
-.bulk-qty-box.small {
-  width: 118px !important;
-  height: 32px !important;
-  grid-template-columns: 32px minmax(0, 1fr) 32px !important;
-}
-
-.bulk-remove {
-  width: 28px !important;
-  height: 28px !important;
-  font-size: 16px !important;
-}
-
-.bulk-summary-mini {
-  font-size: 13px !important;
-}
-
-/* Number input oxlarını gizlədir */
-.bulk-qty-box input::-webkit-outer-spin-button,
-.bulk-qty-box input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.bulk-qty-box input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Desktopda kateqoriya sürüşdürmə */
-.bulk-category-row {
-  cursor: grab;
-  user-select: none;
-}
-
-.bulk-category-row.dragging {
-  cursor: grabbing;
-}
-
-.bulk-category-row.dragging * {
-  pointer-events: none;
-}
-
-/* Mobil daha ensiz kart görünüşü */
-@media (max-width: 640px) {
-  .bulk-product-card {
-    grid-template-columns: 92px minmax(0, 1fr) !important;
-  }
-
-  .bulk-product-img {
-    height: auto !important;
-    min-height: 112px !important;
-    margin: 8px 0 8px 8px !important;
-  }
-
-  .bulk-product-img img {
-    padding: 5px !important;
-  }
-
-  .bulk-product-body {
-    padding: 8px !important;
-  }
-
-  .bulk-product-title h3 {
-    font-size: 13px !important;
-  }
-
-  .bulk-price-row .price {
-    font-size: 16px !important;
-  }
-
-  .bulk-add {
-    min-height: 34px !important;
-  }
-
-  .bulk-selected-row {
-    gap: 8px !important;
-  }
-}
-
-
-
-
-/* ============================================================
-   TOPLU SİFARİŞ - FINAL RESPONSIVE CARD FIX
-   ============================================================ */
-
-.bulk-category-row.dragging * {
-  pointer-events: auto !important;
-}
-
-/* Endirim faizi sağ yuxarı */
-.bulk-discount-badge {
-  left: auto !important;
-  right: 10px !important;
-  top: 10px !important;
-}
-
-.bulk-selected-row {
-  position: relative !important;
-}
-
-.bulk-selected-img span {
-  top: 8px !important;
-  left: auto !important;
-  right: 8px !important;
-  z-index: 5 !important;
-  font-size: 10px !important;
-  padding: 4px 7px !important;
-}
-
-/* Məhsul şəkilləri kəsilməsin */
-.bulk-product-img img,
-.bulk-selected-img img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  padding: 7px !important;
-}
-
-/* Desktop görünüş daha nizamlı */
-@media (min-width: 881px) {
-  .bulk-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 400px) !important;
-    gap: 16px !important;
-  }
-
-  .bulk-product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-
-  .bulk-product-card {
-    min-height: 270px !important;
-  }
-
-  .bulk-product-img {
-    height: 150px !important;
-    aspect-ratio: auto !important;
-  }
-
-  .bulk-product-title h3 {
-    font-size: 13px !important;
-    min-height: 32px !important;
-  }
-
-  .bulk-price-row .price {
-    font-size: 16px !important;
-  }
-}
-
-/* Telefon kart problemi tam düzəldilir */
-@media (max-width: 640px) {
-  .bulk-product-card {
-    display: grid !important;
-    grid-template-columns: 104px minmax(0, 1fr) !important;
-    gap: 10px !important;
-    padding: 8px !important;
-    min-height: 150px !important;
-    overflow: hidden !important;
-  }
-
-  .bulk-product-img {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    width: 104px !important;
-    height: 132px !important;
-    min-height: 132px !important;
-    margin: 0 !important;
-    border-radius: 16px !important;
-  }
-
-  .bulk-product-body {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    min-width: 0 !important;
-    padding: 0 !important;
-    display: grid !important;
-    align-content: start !important;
-    gap: 7px !important;
-  }
-
-  .bulk-product-title {
-    min-width: 0 !important;
-    align-items: flex-start !important;
-  }
-
-  .bulk-product-title h3 {
-    max-width: calc(100% - 44px) !important;
-    font-size: 14px !important;
-    line-height: 1.2 !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-  }
-
-  .bulk-product-title span {
-    position: absolute !important;
-    top: 9px !important;
-    right: 9px !important;
-  }
-
-  .bulk-price-row {
-    margin: 0 !important;
-    min-height: auto !important;
-  }
-
-  .bulk-price-row .price {
-    font-size: 17px !important;
-  }
-
-  .bulk-card-actions {
-    gap: 7px !important;
-  }
-
-  .bulk-qty-box {
-    height: 34px !important;
-  }
-
-  .bulk-add {
-    width: 100% !important;
-    min-height: 36px !important;
-    font-size: 13px !important;
-  }
-
-  .bulk-discount-badge {
-    top: 8px !important;
-    right: 8px !important;
-    left: auto !important;
-    font-size: 11px !important;
-    padding: 6px 8px !important;
-  }
-}
-
-/* Seçilmiş məhsullar mobil daha səliqəli */
-@media (max-width: 640px) {
-  .bulk-selected-row {
-    padding: 10px !important;
-  }
-
-  .bulk-selected-main {
-    grid-template-columns: 56px minmax(0, 1fr) !important;
-  }
-
-  .bulk-selected-img {
-    width: 56px !important;
-    height: 52px !important;
-  }
-
-  .bulk-selected-actions {
-    grid-template-columns: 118px 1fr 30px !important;
-  }
-
-  .bulk-selected-actions > b {
-    align-self: center !important;
-    justify-self: end !important;
-    font-size: 14px !important;
-  }
-}
-
-
-
-/* ============================================================
-   TOPLU SİFARİŞ - FINAL PRODUCT/CATEGORY ALIGN FIX
-   ============================================================ */
-
-/* 1) Kateqoriya şəkilləri tam sığsın */
-.bulk-category-chip img {
-  object-fit: contain !important;
-  object-position: center !important;
-  padding: 3px !important;
-  background: rgba(220, 252, 231, 0.95) !important;
-}
-
-/* 2) Filtri təmizlə sağda dayansın */
+/* Başlıq və filtr */
 .bulk-products-area > .section-head {
   flex-direction: row !important;
   align-items: center !important;
@@ -1083,317 +722,304 @@
   white-space: nowrap !important;
 }
 
-/* 3) Məhsul kartında - 0 + və əlavə et yan-yana */
+/* Kateqoriya şəkilləri */
+.bulk-category-chip img {
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 3px !important;
+  background: rgba(220, 252, 231, 0.95) !important;
+}
+
+/* Number input oxlarını gizlə */
+.bulk-qty-box input::-webkit-outer-spin-button,
+.bulk-qty-box input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.bulk-qty-box input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Kateqoriya drag */
+.bulk-category-row {
+  cursor: grab;
+  user-select: none;
+}
+
+.bulk-category-row.dragging {
+  cursor: grabbing;
+}
+
+/* ==================== MƏHSUL KARTI - DESKTOP ==================== */
+
+.bulk-product-grid {
+  gap: 10px !important;
+}
+
+.bulk-product-card {
+  position: relative !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border-radius: 17px !important;
+  border: 1px solid rgba(34, 197, 94, 0.22) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 8px 22px rgba(15, 122, 55, 0.08) !important;
+}
+
+.bulk-product-img {
+  position: relative !important;
+  height: 142px !important;
+  margin: 7px 7px 0 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  display: grid !important;
+  place-items: center !important;
+  background: linear-gradient(135deg, #ecfccb, #dcfce7) !important;
+}
+
+.bulk-product-img img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 7px !important;
+}
+
+.bulk-discount-badge {
+  position: absolute !important;
+  top: 9px !important;
+  right: 9px !important;
+  left: auto !important;
+  z-index: 10 !important;
+  padding: 5px 8px !important;
+  border-radius: 999px !important;
+  color: #78350f !important;
+  background: #facc15 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+.bulk-product-body {
+  padding: 8px !important;
+}
+
+.bulk-product-title {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 7px !important;
+}
+
+.bulk-product-title h3 {
+  margin: 0 !important;
+  min-height: 28px !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.bulk-product-title span {
+  flex: 0 0 auto !important;
+  padding: 4px 7px !important;
+  border-radius: 999px !important;
+  color: #047857 !important;
+  background: rgba(220, 252, 231, 0.95) !important;
+  font-size: 9px !important;
+  font-weight: 950 !important;
+}
+
+.bulk-price-row {
+  min-height: 32px !important;
+  margin: 5px 0 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+}
+
+.bulk-price-row .price {
+  font-size: 15px !important;
+  line-height: 1.1 !important;
+}
+
+.bulk-price-row .old-price {
+  font-size: 11px !important;
+}
+
+.bulk-price-row em {
+  padding: 4px 7px !important;
+  font-size: 10px !important;
+  white-space: nowrap !important;
+}
+
 .bulk-card-actions {
   display: grid !important;
-  grid-template-columns: minmax(110px, 0.85fr) minmax(110px, 1fr) !important;
-  gap: 8px !important;
+  grid-template-columns: minmax(96px, 0.9fr) minmax(96px, 1fr) !important;
+  gap: 7px !important;
   align-items: center !important;
 }
 
 .bulk-qty-box {
   width: 100% !important;
+  height: 31px !important;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) 30px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+
+.bulk-qty-box button {
+  font-size: 14px !important;
+}
+
+.bulk-qty-box input {
+  min-width: 0 !important;
+  padding: 0 3px !important;
+  text-align: center !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
 }
 
 .bulk-add {
   width: 100% !important;
   min-width: 0 !important;
+  min-height: 31px !important;
+  padding: 5px 7px !important;
   white-space: nowrap !important;
+  font-size: 11px !important;
 }
 
-/* 4) Məhsul kartında endirim faizi şəklin üstünü örtməsin */
-.bulk-product-card {
+/* ==================== SEÇİLMİŞ MƏHSUL - DESKTOP ==================== */
+
+.bulk-selected-list {
+  gap: 9px !important;
+}
+
+.bulk-selected-row {
   position: relative !important;
-  overflow: hidden !important;
+  min-width: 0 !important;
+  border-radius: 14px !important;
+  padding: 9px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
 }
 
-.bulk-product-img {
-  overflow: hidden !important;
-}
-
-.bulk-discount-badge {
-  position: absolute !important;
-  top: 10px !important;
-  right: 10px !important;
-  left: auto !important;
-  z-index: 12 !important;
-}
-
-/* Şəkil kartdan daşmasın */
-.bulk-product-img img {
-  object-fit: contain !important;
-  object-position: center !important;
-  padding: 8px !important;
-}
-
-/* 5) Seçilmiş məhsulda endirim faizi şəkilin yox, kartın sağ yuxarısında olsun */
 .bulk-selected-row.has-discount {
-  position: relative !important;
-  padding-top: 28px !important;
+  border-color: rgba(250, 204, 21, 0.45) !important;
+  background: linear-gradient(135deg, #ffffff, #fffbeb) !important;
+  padding-top: 9px !important;
 }
 
-.bulk-selected-img span {
-  position: absolute !important;
-  top: 8px !important;
-  right: 10px !important;
-  left: auto !important;
-  z-index: 20 !important;
-  border-radius: 999px !important;
-  padding: 5px 8px !important;
-  color: #78350f !important;
-  background: #facc15 !important;
-  font-size: 10px !important;
-  font-weight: 950 !important;
+.bulk-selected-main {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) !important;
+  gap: 8px !important;
+  align-items: center !important;
 }
 
-/* Seçilmiş məhsul şəkli təmiz qalsın */
 .bulk-selected-img {
+  width: 46px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
+  background: rgba(220, 252, 231, 0.95) !important;
 }
 
 .bulk-selected-img img {
+  width: 100% !important;
+  height: 100% !important;
   object-fit: contain !important;
   object-position: center !important;
   padding: 5px !important;
 }
 
-/* Desktop məhsul kartları daha stabil */
-@media (min-width: 881px) {
-  .bulk-product-card {
-    min-height: 292px !important;
-  }
-
-  .bulk-product-img {
-    height: 150px !important;
-    aspect-ratio: auto !important;
-  }
-
-  .bulk-product-img img {
-    max-width: 100% !important;
-    max-height: 100% !important;
-  }
-
-  .bulk-card-actions {
-    grid-template-columns: minmax(110px, 0.8fr) minmax(120px, 1fr) !important;
-  }
-
-  .bulk-add {
-    min-height: 34px !important;
-    font-size: 12px !important;
-    padding-inline: 8px !important;
-  }
-}
-
-/* Mobil kart düzəni */
-@media (max-width: 640px) {
-  .bulk-product-card {
-    grid-template-columns: 104px minmax(0, 1fr) !important;
-    align-items: center !important;
-  }
-
-  .bulk-card-actions {
-    grid-template-columns: minmax(96px, 0.8fr) minmax(92px, 1fr) !important;
-  }
-
-  .bulk-qty-box {
-    height: 34px !important;
-    grid-template-columns: 32px minmax(0, 1fr) 32px !important;
-  }
-
-  .bulk-add {
-    min-height: 34px !important;
-    font-size: 12px !important;
-    padding: 6px 8px !important;
-  }
-
-  .bulk-product-img {
-    width: 104px !important;
-    height: 112px !important;
-    min-height: 112px !important;
-  }
-
-  .bulk-product-title h3 {
-    padding-right: 42px !important;
-  }
-}
-
-
-
-/* ============================================================
-   TOPLU SİFARİŞ - ULTRA COMPACT FINAL FIX
-   Mobil/desktop daşma, seçilmiş məhsul badge və məhsul kartı balansı
-   ============================================================ */
-
-/* Köhnə seçilmiş məhsul şəkil üstü badge tam söndürülür */
 .bulk-selected-img span {
   display: none !important;
 }
 
-/* Yeni badge kartın sağ yuxarısında */
+.bulk-selected-main b {
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+.bulk-selected-main small {
+  margin-top: 2px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+
 .bulk-selected-discount-badge {
   position: absolute !important;
-  top: 8px !important;
-  right: 42px !important;
-  z-index: 20 !important;
-  border-radius: 999px !important;
+  top: 10px !important;
+  right: 48px !important;
+  z-index: 12 !important;
   padding: 4px 7px !important;
+  border-radius: 999px !important;
   color: #78350f !important;
   background: #facc15 !important;
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 950 !important;
-  box-shadow: 0 8px 18px rgba(250, 204, 21, 0.24) !important;
 }
 
-.bulk-selected-row.has-discount {
-  padding-top: 22px !important;
+.bulk-selected-actions {
+  display: grid !important;
+  grid-template-columns: 104px minmax(70px, 1fr) 26px !important;
+  gap: 7px !important;
+  align-items: center !important;
 }
 
-/* Desktop compact */
-@media (min-width: 881px) {
-  .bulk-product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 9px !important;
-  }
-
-  .bulk-product-card {
-    min-height: 248px !important;
-    border-radius: 16px !important;
-  }
-
-  .bulk-product-img {
-    height: 132px !important;
-    border-radius: 14px !important;
-    margin: 7px 7px 0 !important;
-  }
-
-  .bulk-product-body {
-    padding: 7px !important;
-  }
-
-  .bulk-product-title h3 {
-    font-size: 12px !important;
-    min-height: 25px !important;
-  }
-
-  .bulk-product-title span {
-    font-size: 9px !important;
-    padding: 3px 6px !important;
-  }
-
-  .bulk-price-row {
-    min-height: 28px !important;
-    margin: 4px 0 6px !important;
-  }
-
-  .bulk-price-row .price {
-    font-size: 15px !important;
-  }
-
-  .bulk-card-actions {
-    display: grid !important;
-    grid-template-columns: 105px minmax(90px, 1fr) !important;
-    gap: 6px !important;
-  }
-
-  .bulk-qty-box {
-    height: 30px !important;
-    grid-template-columns: 30px minmax(0, 1fr) 30px !important;
-  }
-
-  .bulk-qty-box button {
-    font-size: 14px !important;
-  }
-
-  .bulk-qty-box input {
-    font-size: 13px !important;
-    padding: 0 3px !important;
-  }
-
-  .bulk-add {
-    min-height: 30px !important;
-    font-size: 11px !important;
-    padding: 5px 6px !important;
-  }
-
-  .bulk-discount-badge {
-    top: 8px !important;
-    right: 8px !important;
-    font-size: 10px !important;
-    padding: 5px 7px !important;
-  }
-
-  .bulk-order-panel {
-    max-width: 390px !important;
-  }
-
-  .bulk-selected-row {
-    padding: 8px !important;
-    border-radius: 14px !important;
-  }
-
-  .bulk-selected-row.has-discount {
-    padding-top: 22px !important;
-  }
-
-  .bulk-selected-main {
-    grid-template-columns: 44px minmax(0, 1fr) !important;
-    gap: 8px !important;
-  }
-
-  .bulk-selected-img {
-    width: 44px !important;
-    height: 40px !important;
-    border-radius: 12px !important;
-  }
-
-  .bulk-selected-main b {
-    font-size: 12px !important;
-  }
-
-  .bulk-selected-main small {
-    font-size: 10px !important;
-  }
-
-  .bulk-selected-actions {
-    grid-template-columns: 104px 1fr 26px !important;
-    gap: 6px !important;
-  }
-
-  .bulk-qty-box.small {
-    width: 104px !important;
-    height: 28px !important;
-    grid-template-columns: 28px minmax(0, 1fr) 28px !important;
-  }
-
-  .bulk-selected-actions > b {
-    font-size: 12px !important;
-  }
-
-  .bulk-remove {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 15px !important;
-  }
+.bulk-qty-box.small {
+  width: 104px !important;
+  height: 29px !important;
+  grid-template-columns: 28px minmax(0, 1fr) 28px !important;
 }
 
-/* Mobil ultra compact: daşma olmasın */
+.bulk-selected-actions > b {
+  justify-self: end !important;
+  white-space: nowrap !important;
+  color: #047857 !important;
+  font-size: 12px !important;
+}
+
+.bulk-remove {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  font-size: 15px !important;
+  align-self: center !important;
+}
+
+/* ==================== MOBİL ==================== */
+
 @media (max-width: 640px) {
+  .bulk-product-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
   .bulk-product-card {
     display: grid !important;
-    grid-template-columns: 92px minmax(0, 1fr) !important;
-    gap: 8px !important;
+    grid-template-columns: 98px minmax(0, 1fr) !important;
+    gap: 9px !important;
     padding: 8px !important;
     min-height: 132px !important;
-    border-radius: 16px !important;
+    border-radius: 18px !important;
     align-items: center !important;
   }
 
   .bulk-product-img {
-    width: 92px !important;
-    height: 116px !important;
-    min-height: 116px !important;
+    width: 98px !important;
+    height: 114px !important;
+    min-height: 114px !important;
     margin: 0 !important;
-    border-radius: 14px !important;
+    border-radius: 15px !important;
   }
 
   .bulk-product-img img {
@@ -1408,13 +1034,14 @@
   }
 
   .bulk-product-title h3 {
+    min-height: auto !important;
     max-width: calc(100% - 38px) !important;
     font-size: 13px !important;
     line-height: 1.16 !important;
-    min-height: auto !important;
   }
 
   .bulk-product-title span {
+    position: absolute !important;
     top: 8px !important;
     right: 8px !important;
     font-size: 9px !important;
@@ -1422,32 +1049,26 @@
   }
 
   .bulk-price-row {
-    margin: 0 !important;
     min-height: 22px !important;
+    margin: 0 !important;
   }
 
   .bulk-price-row .price {
     font-size: 15px !important;
   }
 
+  .bulk-price-row em {
+    display: none !important;
+  }
+
   .bulk-card-actions {
-    display: grid !important;
-    grid-template-columns: minmax(84px, 0.85fr) minmax(78px, 1fr) !important;
+    grid-template-columns: minmax(84px, 0.86fr) minmax(82px, 1fr) !important;
     gap: 6px !important;
   }
 
   .bulk-qty-box {
     height: 32px !important;
     grid-template-columns: 28px minmax(0, 1fr) 28px !important;
-  }
-
-  .bulk-qty-box button {
-    font-size: 14px !important;
-  }
-
-  .bulk-qty-box input {
-    font-size: 12px !important;
-    padding: 0 2px !important;
   }
 
   .bulk-add {
@@ -1457,80 +1078,75 @@
   }
 
   .bulk-discount-badge {
-    top: 7px !important;
-    right: 7px !important;
+    top: 8px !important;
+    right: 8px !important;
     font-size: 10px !important;
     padding: 5px 7px !important;
   }
 
   .bulk-selected-row {
-    padding: 8px !important;
-    border-radius: 14px !important;
-  }
-
-  .bulk-selected-row.has-discount {
-    padding-top: 22px !important;
+    padding: 11px !important;
+    border-radius: 16px !important;
+    gap: 10px !important;
   }
 
   .bulk-selected-main {
-    grid-template-columns: 46px minmax(0, 1fr) !important;
-    gap: 8px !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    gap: 10px !important;
   }
 
   .bulk-selected-img {
-    width: 46px !important;
-    height: 42px !important;
-    border-radius: 12px !important;
-  }
-
-  .bulk-selected-discount-badge {
-    top: 7px !important;
-    right: 42px !important;
-    font-size: 9px !important;
-    padding: 4px 6px !important;
+    width: 58px !important;
+    height: 52px !important;
+    border-radius: 14px !important;
   }
 
   .bulk-selected-main b {
-    font-size: 12px !important;
+    font-size: 14px !important;
   }
 
   .bulk-selected-main small {
-    font-size: 10px !important;
-  }
-
-  .bulk-selected-actions {
-    grid-template-columns: 100px 1fr 26px !important;
-    gap: 6px !important;
-  }
-
-  .bulk-qty-box.small {
-    width: 100px !important;
-    height: 28px !important;
-    grid-template-columns: 28px minmax(0, 1fr) 28px !important;
-  }
-
-  .bulk-selected-actions > b {
     font-size: 12px !important;
   }
 
+  .bulk-selected-discount-badge {
+    top: 20px !important;
+    right: 98px !important;
+    font-size: 10px !important;
+    padding: 5px 8px !important;
+  }
+
+  .bulk-selected-actions {
+    grid-template-columns: 120px minmax(80px, 1fr) 34px !important;
+    gap: 9px !important;
+  }
+
+  .bulk-qty-box.small {
+    width: 120px !important;
+    height: 34px !important;
+    grid-template-columns: 34px minmax(0, 1fr) 34px !important;
+  }
+
+  .bulk-selected-actions > b {
+    font-size: 14px !important;
+  }
+
   .bulk-remove {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 15px !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 18px !important;
   }
 }
 
-/* Çox dar telefonlar üçün */
 @media (max-width: 380px) {
   .bulk-product-card {
-    grid-template-columns: 84px minmax(0, 1fr) !important;
+    grid-template-columns: 88px minmax(0, 1fr) !important;
     gap: 7px !important;
   }
 
   .bulk-product-img {
-    width: 84px !important;
+    width: 88px !important;
     height: 106px !important;
-    min-height: 106px !important;
   }
 
   .bulk-card-actions {
@@ -1544,67 +1160,8 @@
   .bulk-add {
     font-size: 10px !important;
   }
-}
-
-
-
-/* SEÇİLMİŞ MƏHSUL - SƏLİQƏLİ HORIZONTAL FIX */
-.bulk-selected-row {
-  grid-template-columns: minmax(0, 1fr) auto auto !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 10px 12px !important;
-}
-
-.bulk-selected-row.has-discount {
-  padding-top: 10px !important;
-}
-
-.bulk-selected-main {
-  grid-template-columns: 48px minmax(0, 1fr) !important;
-  align-items: center !important;
-}
-
-.bulk-selected-actions {
-  display: contents !important;
-}
-
-.bulk-selected-actions .bulk-qty-box {
-  width: 108px !important;
-  justify-self: start !important;
-}
-
-.bulk-selected-actions > b {
-  justify-self: end !important;
-  align-self: center !important;
-  white-space: nowrap !important;
-}
-
-.bulk-remove {
-  align-self: center !important;
-}
-
-.bulk-selected-discount-badge {
-  top: 8px !important;
-  right: 48px !important;
-}
-
-@media (max-width: 640px) {
-  .bulk-selected-row {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
 
   .bulk-selected-actions {
-    display: grid !important;
-    grid-template-columns: 108px 1fr 28px !important;
-    align-items: center !important;
-  }
-
-  .bulk-selected-actions > b {
-    justify-self: end !important;
-  }
-
-  .bulk-selected-discount-badge {
-    right: 42px !important;
+    grid-template-columns: 100px minmax(70px, 1fr) 30px !important;
   }
 }
