@@ -1165,3 +1165,94 @@
     grid-template-columns: 100px minmax(70px, 1fr) 30px !important;
   }
 }
+
+
+/*=============================================================================================================================*/
+/* DESKTOP PRODUCT CARD POLISH */
+@media (min-width: 881px) {
+  .bulk-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+
+  .bulk-product-card {
+    height: 254px !important;
+    display: grid !important;
+    grid-template-rows: 140px auto !important;
+    padding: 7px !important;
+  }
+
+  .bulk-product-img {
+    height: 140px !important;
+    margin: 0 !important;
+    border-radius: 15px !important;
+  }
+
+  .bulk-product-body {
+    padding: 8px 2px 0 !important;
+    display: grid !important;
+    grid-template-rows: 34px 38px 34px !important;
+    gap: 4px !important;
+  }
+
+  .bulk-product-title {
+    align-items: flex-start !important;
+  }
+
+  .bulk-product-title h3 {
+    font-size: 13px !important;
+    line-height: 1.15 !important;
+    min-height: 30px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .bulk-product-title span {
+    margin-top: 0 !important;
+  }
+
+  .bulk-price-row {
+    min-height: 34px !important;
+    margin: 0 !important;
+    align-items: end !important;
+  }
+
+  .bulk-price-row div {
+    gap: 0 !important;
+  }
+
+  .bulk-price-row .old-price {
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+  }
+
+  .bulk-price-row .price {
+    font-size: 15px !important;
+    line-height: 1.15 !important;
+  }
+
+  .bulk-price-row em {
+    align-self: center !important;
+    font-size: 10px !important;
+    padding: 4px 7px !important;
+  }
+
+  .bulk-card-actions {
+    grid-template-columns: 100px 1fr !important;
+    gap: 7px !important;
+  }
+
+  .bulk-qty-box,
+  .bulk-add {
+    height: 31px !important;
+    min-height: 31px !important;
+  }
+
+  .bulk-add {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+  }
+}
