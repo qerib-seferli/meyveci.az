@@ -958,7 +958,7 @@
 .bulk-selected-discount-badge {
   position: absolute !important;
   top: 10px !important;
-  right: 48px !important;
+  right: 28px !important;                /* ENDİRİM FAİZİ */
   z-index: 12 !important;
   padding: 4px 7px !important;
   border-radius: 999px !important;
@@ -1111,7 +1111,7 @@
 
   .bulk-selected-discount-badge {
     top: 12px !important;
-    right: 32px !important;
+    right: 22px !important;               /* ENDİRİM FAİZİ */
     font-size: 10px !important;
     padding: 5px 8px !important;
   }
