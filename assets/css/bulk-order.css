@@ -1056,3 +1056,163 @@
     font-size: 14px !important;
   }
 }
+
+
+
+/* ============================================================
+   TOPLU SİFARİŞ - FINAL PRODUCT/CATEGORY ALIGN FIX
+   ============================================================ */
+
+/* 1) Kateqoriya şəkilləri tam sığsın */
+.bulk-category-chip img {
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 3px !important;
+  background: rgba(220, 252, 231, 0.95) !important;
+}
+
+/* 2) Filtri təmizlə sağda dayansın */
+.bulk-products-area > .section-head {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+#bulkClearFilters {
+  margin-left: auto !important;
+  white-space: nowrap !important;
+}
+
+/* 3) Məhsul kartında - 0 + və əlavə et yan-yana */
+.bulk-card-actions {
+  display: grid !important;
+  grid-template-columns: minmax(110px, 0.85fr) minmax(110px, 1fr) !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.bulk-qty-box {
+  width: 100% !important;
+}
+
+.bulk-add {
+  width: 100% !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* 4) Məhsul kartında endirim faizi şəklin üstünü örtməsin */
+.bulk-product-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.bulk-product-img {
+  overflow: hidden !important;
+}
+
+.bulk-discount-badge {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  left: auto !important;
+  z-index: 12 !important;
+}
+
+/* Şəkil kartdan daşmasın */
+.bulk-product-img img {
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 8px !important;
+}
+
+/* 5) Seçilmiş məhsulda endirim faizi şəkilin yox, kartın sağ yuxarısında olsun */
+.bulk-selected-row.has-discount {
+  position: relative !important;
+  padding-top: 28px !important;
+}
+
+.bulk-selected-img span {
+  position: absolute !important;
+  top: 8px !important;
+  right: 10px !important;
+  left: auto !important;
+  z-index: 20 !important;
+  border-radius: 999px !important;
+  padding: 5px 8px !important;
+  color: #78350f !important;
+  background: #facc15 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+}
+
+/* Seçilmiş məhsul şəkli təmiz qalsın */
+.bulk-selected-img {
+  overflow: hidden !important;
+}
+
+.bulk-selected-img img {
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 5px !important;
+}
+
+/* Desktop məhsul kartları daha stabil */
+@media (min-width: 881px) {
+  .bulk-product-card {
+    min-height: 292px !important;
+  }
+
+  .bulk-product-img {
+    height: 150px !important;
+    aspect-ratio: auto !important;
+  }
+
+  .bulk-product-img img {
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+
+  .bulk-card-actions {
+    grid-template-columns: minmax(110px, 0.8fr) minmax(120px, 1fr) !important;
+  }
+
+  .bulk-add {
+    min-height: 34px !important;
+    font-size: 12px !important;
+    padding-inline: 8px !important;
+  }
+}
+
+/* Mobil kart düzəni */
+@media (max-width: 640px) {
+  .bulk-product-card {
+    grid-template-columns: 104px minmax(0, 1fr) !important;
+    align-items: center !important;
+  }
+
+  .bulk-card-actions {
+    grid-template-columns: minmax(96px, 0.8fr) minmax(92px, 1fr) !important;
+  }
+
+  .bulk-qty-box {
+    height: 34px !important;
+    grid-template-columns: 32px minmax(0, 1fr) 32px !important;
+  }
+
+  .bulk-add {
+    min-height: 34px !important;
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+
+  .bulk-product-img {
+    width: 104px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+  }
+
+  .bulk-product-title h3 {
+    padding-right: 42px !important;
+  }
+}
