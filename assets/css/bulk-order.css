@@ -1168,99 +1168,119 @@
 
 
 /*=============================================================================================================================*/
-/* DESKTOP PRODUCT CARD SAFE FIX */
+/* DESKTOP PRODUCT CARD FINAL 4 COLUMN FIX */
 @media (min-width: 881px) {
   .bulk-product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 14px !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: start !important;
   }
 
   .bulk-product-card {
     height: auto !important;
     min-height: 0 !important;
-    padding: 10px !important;
+    padding: 9px !important;
     border-radius: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .bulk-product-img {
-    height: 150px !important;
-    margin: 0 !important;
-    border-radius: 16px !important;
-  }
-
-  .bulk-product-body {
-    padding: 10px 0 0 !important;
-    display: block !important;
-  }
-
-  .bulk-product-title {
-    min-height: 32px !important;
-  }
-
-  .bulk-product-title h3 {
-    font-size: 13px !important;
-    line-height: 1.2 !important;
-    min-height: 0 !important;
-  }
-
-  .bulk-price-row {
-    min-height: 34px !important;
-    margin: 6px 0 8px !important;
-  }
-
-  .bulk-card-actions {
-    display: grid !important;
-    grid-template-columns: 104px minmax(100px, 1fr) !important;
-    gap: 8px !important;
-  }
-
-  .bulk-qty-box {
-    height: 32px !important;
-    grid-template-columns: 30px minmax(0, 1fr) 30px !important;
-  }
-
-  .bulk-add {
-    height: 32px !important;
-    min-height: 32px !important;
-    font-size: 11px !important;
-    padding: 4px 8px !important;
-  }
-}
-
-/* DESKTOP PRODUCT IMAGE FINAL FIX */
-@media (min-width: 881px) {
-  .bulk-product-img {
-    height: 148px !important;
+    width: 100% !important;
+    height: 128px !important;
     margin: 0 !important;
     border-radius: 16px !important;
     overflow: hidden !important;
+    display: grid !important;
+    place-items: center !important;
     background: linear-gradient(135deg, #ecfccb, #dcfce7) !important;
   }
 
   .bulk-product-img img {
     width: 100% !important;
     height: 100% !important;
-    max-width: 96% !important;
-    max-height: 96% !important;
+    max-width: 90% !important;
+    max-height: 90% !important;
     object-fit: contain !important;
-    object-position: center center !important;
-    padding: 8px !important;
+    object-position: center !important;
+    padding: 6px !important;
     margin: auto !important;
     display: block !important;
   }
 
-  .bulk-product-card {
+  .bulk-product-body {
+    flex: 1 !important;
+    padding: 9px 0 0 !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
-  .bulk-product-body {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
+  .bulk-product-title {
+    min-height: 30px !important;
+  }
+
+  .bulk-product-title h3 {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    min-height: 0 !important;
+  }
+
+  .bulk-product-title span {
+    font-size: 9px !important;
+    padding: 3px 6px !important;
+  }
+
+  .bulk-price-row {
+    min-height: 32px !important;
+    margin: 5px 0 7px !important;
+  }
+
+  .bulk-price-row .price {
+    font-size: 14px !important;
+  }
+
+  .bulk-price-row .old-price {
+    font-size: 10px !important;
+  }
+
+  .bulk-price-row em {
+    font-size: 9px !important;
+    padding: 4px 6px !important;
   }
 
   .bulk-card-actions {
     margin-top: auto !important;
+    display: grid !important;
+    grid-template-columns: 88px minmax(78px, 1fr) !important;
+    gap: 7px !important;
+  }
+
+  .bulk-qty-box {
+    height: 31px !important;
+    grid-template-columns: 28px minmax(0, 1fr) 28px !important;
+  }
+
+  .bulk-qty-box button {
+    font-size: 14px !important;
+  }
+
+  .bulk-qty-box input {
+    font-size: 12px !important;
+    padding: 0 2px !important;
+  }
+
+  .bulk-add {
+    height: 31px !important;
+    min-height: 31px !important;
+    font-size: 10.5px !important;
+    padding: 4px 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .bulk-discount-badge {
+    top: 8px !important;
+    right: 8px !important;
+    font-size: 9px !important;
+    padding: 5px 7px !important;
   }
 }
