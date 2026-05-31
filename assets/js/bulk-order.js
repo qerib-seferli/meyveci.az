@@ -183,8 +183,14 @@ function renderCategories() {
     button.addEventListener('click', () => {
       state.category = button.dataset.id || 'all';
       state.visible = 24;
+    
       renderCategories();
       renderProducts();
+    
+      document.querySelector('#bulkProducts')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     });
   });
 }
@@ -1003,9 +1009,11 @@ function enableBulkCategoryDrag() {
   let isDown = false;
   let startX = 0;
   let scrollLeft = 0;
+  let moved = false;
 
   row.addEventListener('mousedown', (event) => {
     isDown = true;
+    moved = false;
     row.classList.add('dragging');
     startX = event.pageX - row.offsetLeft;
     scrollLeft = row.scrollLeft;
@@ -1018,15 +1026,30 @@ function enableBulkCategoryDrag() {
 
   row.addEventListener('mouseup', () => {
     isDown = false;
-    row.classList.remove('dragging');
+    setTimeout(() => {
+      row.classList.remove('dragging');
+    }, 30);
   });
 
   row.addEventListener('mousemove', (event) => {
     if (!isDown) return;
-    event.preventDefault();
 
     const x = event.pageX - row.offsetLeft;
     const walk = (x - startX) * 1.35;
-    row.scrollLeft = scrollLeft - walk;
+
+    if (Math.abs(walk) > 6) moved = true;
+
+    if (moved) {
+      event.preventDefault();
+      row.scrollLeft = scrollLeft - walk;
+    }
   });
+
+  row.addEventListener('click', (event) => {
+    if (!moved) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    moved = false;
+  }, true);
 }
