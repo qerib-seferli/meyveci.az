@@ -318,10 +318,10 @@ function renderSelected() {
 
       return `
         <div class="bulk-selected-row ${hasDiscount ? 'has-discount' : ''}">
+          ${hasDiscount ? `<span class="bulk-selected-discount-badge">-${discount}%</span>` : ''}
           <div class="bulk-selected-main">
             <div class="bulk-selected-img">
               <img src="${product.image_url || PLACEHOLDER}" alt="${safeText(product.name)}">
-              ${hasDiscount ? `<span>-${discount}%</span>` : ''}
             </div>
 
             <div>
