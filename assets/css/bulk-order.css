@@ -1226,3 +1226,41 @@
     padding: 4px 8px !important;
   }
 }
+
+/* DESKTOP PRODUCT IMAGE FINAL FIX */
+@media (min-width: 881px) {
+  .bulk-product-img {
+    height: 148px !important;
+    margin: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background: linear-gradient(135deg, #ecfccb, #dcfce7) !important;
+  }
+
+  .bulk-product-img img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 96% !important;
+    max-height: 96% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    padding: 8px !important;
+    margin: auto !important;
+    display: block !important;
+  }
+
+  .bulk-product-card {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .bulk-product-body {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .bulk-card-actions {
+    margin-top: auto !important;
+  }
+}
