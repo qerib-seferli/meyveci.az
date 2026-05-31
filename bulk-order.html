@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="description" content="Meyvəçi.az toplu sifariş səhifəsi. Restoran, hotel və mağazalar üçün sürətli məhsul seçimi.">
+
+  <link rel="icon" href="./assets/img/logo/Cilek-logo.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/bulk-order.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <title>Toplu sifariş | Meyvəçi.az</title>
+</head>
+
+<body data-page="bulk-order">
+  <main class="app-shell bulk-shell">
+    <section class="bulk-hero">
+      <div class="bulk-hero-text">
+        <span class="bulk-eyebrow">Restoran • Hotel • Mağaza</span>
+        <h1>Toplu sifariş</h1>
+        <p>
+          Məhsulları kataloq üzrə seçin, miqdarı artırıb-azaldın, endirimləri görün,
+          çatdırılma və yekun məbləği bir yerdə hesablayın.
+        </p>
+
+        <div class="bulk-hero-actions">
+          <a class="btn btn-primary" href="#bulkProducts">Məhsul seç</a>
+          <a class="btn btn-soft" href="#bulkCheckoutCard">Sifarişi tamamla</a>
+        </div>
+      </div>
+
+      <div class="bulk-hero-img">
+        <img src="./assets/img/fotolar/Toplu-sifaris.png" alt="Toplu sifariş">
+      </div>
+    </section>
+
+    <section class="bulk-search-card card">
+      <div class="bulk-search-top">
+        <div>
+          <b>Kataloqdan sürətli seçim</b>
+          <p class="muted">Kateqoriyanı seçin və məhsul adını yazaraq tez tapın.</p>
+        </div>
+
+        <div class="bulk-search-input">
+          <input id="bulkSearchInput" type="search" placeholder="Məhsul axtar...">
+        </div>
+      </div>
+
+      <div id="bulkCategoryChips" class="bulk-category-row"></div>
+    </section>
+
+    <section class="bulk-layout">
+      <div class="bulk-products-area">
+        <div class="section-head">
+          <h2>Məhsullar</h2>
+          <button id="bulkClearFilters" class="btn btn-soft" type="button">Filtri təmizlə</button>
+        </div>
+
+        <div id="bulkProducts" class="bulk-product-grid"></div>
+
+        <button id="bulkLoadMore" class="btn btn-soft bulk-load-more" type="button">
+          Daha çox göstər
+        </button>
+      </div>
+
+      <aside class="bulk-order-panel card">
+        <div class="bulk-panel-head">
+          <div>
+            <span class="bulk-panel-mini">Toplu sifariş forması</span>
+            <h2>Seçilmiş məhsullar</h2>
+          </div>
+          <b id="bulkSelectedCount">0</b>
+        </div>
+
+        <div id="bulkSelectedList" class="bulk-selected-list">
+          <div class="bulk-empty">
+            <b>Hələ məhsul seçilməyib</b>
+            <p class="muted">Məhsul kartındakı + düyməsi ilə toplu siyahıya əlavə edin.</p>
+          </div>
+        </div>
+
+        <div class="bulk-summary-mini">
+          <div><span>Məhsullar</span><b id="bulkProductsTotal">0 AZN</b></div>
+          <div><span>Çatdırılma</span><b id="bulkDeliveryMini">0 AZN</b></div>
+          <div><span>Bonus</span><b id="bulkBonusMini">0 AZN</b></div>
+          <div class="bulk-summary-total"><span>Ödəniləcək</span><b id="bulkPayableMini">0 AZN</b></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="bulkCheckoutCard" class="card checkout-card bulk-checkout-card">
+      <div class="section-head">
+        <div>
+          <h2>Sifarişi tamamla</h2>
+          <p class="muted">Məlumatları yoxlayın, lokasiyanı götürün və ödənişə keçin.</p>
+        </div>
+      </div>
+
+      <button id="bulkCheckoutToggle" class="checkout-toggle personal-toggle" type="button">
+        <span>
+          <b>Şəxsi məlumatlar və ünvan</b>
+          <small>Ad, telefon və ünvanı dəyişmək üçün aç</small>
+        </span>
+        <i>⌄</i>
+      </button>
+
+      <form id="bulkCheckoutForm" class="form-grid checkout-compact">
+        <div id="bulkPersonalFields" class="personal-fields checkout-collapsed full">
+          <input name="full_name" placeholder="Ad Soyad" required>
+          <input name="phone" placeholder="Telefon" required>
+
+          <select name="city_region" required>
+            <option value="" disabled selected>Şəhər / rayon seçin</option>
+          </select>
+
+          <input name="address" placeholder="Ünvan" required>
+          <input name="apartment" placeholder="Bina, blok, mənzil">
+          <input name="door_code" placeholder="Qapı kodu">
+
+          <input name="lat" type="hidden">
+          <input name="lng" type="hidden">
+
+          <div class="location-action-box">
+            <button id="bulkGetLocation" class="btn btn-soft" type="button">
+              📍 Olduğum yerə gətir
+            </button>
+            <span id="bulkLocationText">Lokasiya seçilməyib</span>
+          </div>
+        </div>
+
+        <div class="payment-secure-box full">
+          <div class="payment-secure-head">
+            <div>
+              <b>Online ödəniş</b>
+              <p>Təhlükəsiz Kapital Bank ödəniş sistemi</p>
+            </div>
+
+            <span class="secure-pill">SSL / 3D Secure</span>
+          </div>
+
+          <input type="hidden" name="payment_method" value="online_payment">
+        </div>
+
+        <div id="bulkBonusBox" class="bonus-box full" hidden>
+          <div>
+            <b>🎁 Bonus balansı</b>
+            <p id="bulkBonusBalanceText">Bonus yoxlanılır...</p>
+          </div>
+
+          <label class="bonus-use-row">
+            <input id="bulkUseBonus" name="use_bonus" type="checkbox">
+            <span>Bonusdan istifadə et</span>
+          </label>
+
+          <input id="bulkBonusAmountInput" name="bonus_used" type="number" min="0" step="0.01" placeholder="İstifadə ediləcək bonus məbləği">
+          <small id="bulkBonusHelpText" class="muted">Bonus məbləği sifariş məbləğindən çox ola bilməz.</small>
+        </div>
+
+        <div id="bulkDeliveryFeeBox" class="delivery-fee-box full">
+          <div>
+            <b>🚚 Çatdırılma</b>
+            <p id="bulkDeliveryFeeText">Şəhər/rayon və məsafəyə görə hesablanacaq</p>
+          </div>
+          <strong id="bulkDeliveryFeeAmount">0 AZN</strong>
+        </div>
+
+        <div id="bulkCartSummaryBox" class="cart-summary-box full">
+          <div><span>Məhsullar</span><b id="bulkSummaryProducts">0 AZN</b></div>
+          <div><span>Çatdırılma</span><b id="bulkSummaryDelivery">0 AZN</b></div>
+          <div><span>Bonus</span><b id="bulkSummaryBonus">0 AZN</b></div>
+          <div class="summary-total"><span>Ödəniləcək</span><b id="bulkSummaryPayable">0 AZN</b></div>
+        </div>
+
+        <textarea class="full" name="note" placeholder="Toplu sifariş qeydi: restoran adı, qəbul saatı, əlavə istək və s."></textarea>
+
+        <button id="bulkSubmitBtn" class="btn btn-primary full" type="submit">
+          Toplu sifarişi tamamla
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="./assets/js/bulk-order.js"></script>
+  <script type="module" src="./assets/js/push-notifications.js"></script>
+</body>
+</html>
