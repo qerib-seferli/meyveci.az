@@ -803,7 +803,7 @@ async function checkoutBulkOrder(event) {
     const cartRows = selectedItems.map(({ product, quantity }) => ({
       user_id: activeUser.id,
       product_id: product.id,
-      quantity: Number(quantity || 0),
+      quantity: Math.max(1, Math.round(Number(quantity || 0))),
     }));
 
     const cartInsert = await supabase
@@ -914,22 +914,11 @@ function getDiscount(price, oldPrice) {
 }
 
 function getQtyStep(product) {
-  const unit = String(product?.unit || '').toLowerCase();
-
-  if (
-    unit.includes('kq') ||
-    unit.includes('kg') ||
-    unit.includes('qram') ||
-    unit.includes('qr')
-  ) {
-    return 0.5;
-  }
-
   return 1;
 }
 
 function roundQty(value) {
-  return Math.round(Number(value || 0) * 100) / 100;
+  return Math.max(0, Math.round(Number(value || 0)));
 }
 
 function validCheckoutPoint(lat, lng) {
