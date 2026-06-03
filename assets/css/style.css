@@ -7045,6 +7045,83 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 /*=============================================================================================================*/
+/* TOPLU SİFARİŞ KEÇİD BUTONLARI */
+.bulk-home-cta,
+.cart-bulk-switch {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(250, 204, 21, 0.22), transparent 32%),
+    linear-gradient(135deg, rgba(255,255,255,.94), rgba(236,253,245,.95));
+  box-shadow: 0 14px 34px rgba(15, 122, 55, 0.1);
+}
+
+.bulk-home-cta span {
+  color: #047857;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.bulk-home-cta h3,
+.cart-bulk-switch b {
+  margin: 3px 0;
+  color: #064e3b;
+}
+
+.bulk-home-cta p,
+.cart-bulk-switch span {
+  margin: 0;
+  color: #64756b;
+  font-size: 13px;
+}
+
+.catalog-bulk-order-link {
+  margin: 8px 10px 10px;
+  padding: 12px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #064e3b;
+  background: linear-gradient(135deg, #ecfccb, #dcfce7);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  font-weight: 900;
+}
+
+.catalog-bulk-order-link small {
+  display: block;
+  margin-top: 2px;
+  color: #047857;
+  font-size: 11px;
+}
+
+.bulk-menu-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .bulk-home-cta,
+  .cart-bulk-switch {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bulk-home-cta .btn,
+  .cart-bulk-switch .btn {
+    width: 100%;
+  }
+}
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 /*=============================================================================================================*/
