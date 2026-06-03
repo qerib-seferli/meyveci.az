@@ -794,6 +794,16 @@ async function initCatalogMegaMenu() {
       <span class="discount-head-percent">${maxDiscount || 0}%</span>
     </button>
 
+
+    <a class="catalog-bulk-order-link" href="${root}bulk-order.html">
+      <span class="bulk-menu-icon">🏪</span>
+      <span>
+        <b>Toplu sifariş</b>
+        <small>Restoran, hotel və mağazalar üçün</small>
+      </span>
+    </a>
+
+
     ${cats.map((cat, index) => `
       <button class="catalog-left-item ${index === 0 ? 'active' : ''}" type="button" data-id="${cat.id}">
         <img src="${cat.image_url || `${root}assets/img/logo/Cilek-logo.png`}" alt="${cat.name}">
