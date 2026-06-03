@@ -7045,131 +7045,34 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 /*=============================================================================================================*/
-/* TOPLU SİFARİŞ KEÇİDLƏRİ - PREMIUM PRO UX */
-.bulk-home-cta,
-.cart-bulk-switch {
-  position: relative;
-  overflow: hidden;
-  margin: 16px 0;
-  padding: 18px;
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  border-radius: 26px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 16px;
-  background:
-    radial-gradient(circle at 8% 10%, rgba(250, 204, 21, 0.32), transparent 28%),
-    radial-gradient(circle at 96% 0%, rgba(14, 165, 233, 0.18), transparent 30%),
-    linear-gradient(135deg, rgba(255,255,255,.96), rgba(220,252,231,.94));
-  box-shadow:
-    0 18px 42px rgba(15, 122, 55, 0.13),
-    inset 0 0 0 1px rgba(255,255,255,.7);
-}
-
-.bulk-home-cta::after,
-.cart-bulk-switch::after {
-  content: "📦";
-  position: absolute;
-  right: 18px;
-  top: -18px;
-  font-size: 86px;
-  opacity: 0.08;
-  transform: rotate(-12deg);
-}
-
-.bulk-home-cta span {
-  display: inline-flex;
-  width: fit-content;
-  margin-bottom: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: #047857;
-  background: rgba(220, 252, 231, 0.88);
-  font-size: 11px;
-  font-weight: 950;
-}
-
-.bulk-home-cta h3,
-.cart-bulk-switch b {
-  display: block;
-  margin: 0;
-  color: #064e3b;
-  font-size: clamp(20px, 3vw, 30px);
-  line-height: 1.16;
-  font-weight: 950;
-  letter-spacing: -0.03em;
-}
-
-.bulk-home-cta p,
-.cart-bulk-switch span {
-  display: block;
-  margin: 8px 0 0;
-  color: #64756b;
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.bulk-home-cta .btn,
-.cart-bulk-switch .btn {
-  position: relative;
-  z-index: 2;
-  min-width: 190px;
-  min-height: 46px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-/* KATALOQ MENYUSUNDA TOPLU SİFARİŞ - 3D CANLI KART */
+/* KATALOQ MENYUSUNDA TOPLU SİFARİŞ - ENDİRİM KARTI KİMİ */
 .catalog-bulk-order-link {
   position: relative;
   overflow: hidden;
-  margin: 10px 0 12px;
-  padding: 18px 18px;
-  min-height: 112px;
+  margin: 12px 0 18px;
+  padding: 18px 22px;
+  min-height: 118px;
+  width: 100%;
   border-radius: 0;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   color: #ffffff;
-  background:
-    radial-gradient(circle at 12% 18%, rgba(255,255,255,.36), transparent 26%),
-    linear-gradient(135deg, #10b981 0%, #22c55e 42%, #facc15 100%);
+  background: linear-gradient(135deg, #10b981 0%, #22c55e 48%, #facc15 100%);
   border: 0;
-  box-shadow:
-    0 18px 36px rgba(22, 163, 74, 0.28),
-    inset 0 0 0 1px rgba(255,255,255,.32);
-  font-weight: 950;
-  transform: translateZ(0);
-}
-
-.catalog-bulk-order-link::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(120deg, transparent 0%, rgba(255,255,255,.36) 42%, transparent 70%);
-  transform: translateX(-120%);
-  transition: transform .65s ease;
-}
-
-.catalog-bulk-order-link:hover::before {
-  transform: translateX(120%);
+  box-shadow: 0 18px 36px rgba(22, 163, 74, 0.22);
+  font-weight: 900;
 }
 
 .catalog-bulk-order-link::after {
   content: "TOPLU";
   position: absolute;
-  right: 14px;
-  bottom: 10px;
-  color: rgba(255,255,255,.2);
-  font-size: 42px;
+  right: 18px;
+  bottom: -8px;
+  color: rgba(255,255,255,.18);
+  font-size: 58px;
   font-weight: 950;
-  letter-spacing: -0.06em;
-}
-
-.catalog-bulk-order-link:hover {
-  transform: translateY(-2px) scale(1.01);
+  letter-spacing: -0.08em;
 }
 
 .catalog-bulk-order-link .bulk-menu-icon {
@@ -7181,86 +7084,81 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   display: grid;
   place-items: center;
   color: #047857;
-  background: rgba(255,255,255,.94);
-  box-shadow: 0 12px 24px rgba(4, 120, 87, 0.18);
-  font-size: 27px;
+  background: rgba(255,255,255,.95);
+  font-size: 25px;
 }
 
 .catalog-bulk-order-link span:not(.bulk-menu-icon) {
   position: relative;
   z-index: 2;
-  display: block;
 }
 
 .catalog-bulk-order-link b {
   display: block;
   color: #ffffff;
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1.05;
-  text-shadow: 0 3px 12px rgba(4, 120, 87, 0.24);
 }
 
 .catalog-bulk-order-link small {
   display: block;
-  margin-top: 5px;
-  color: rgba(255,255,255,.9);
-  font-size: 13px;
+  margin-top: 6px;
+  color: rgba(255,255,255,.92);
+  font-size: 14px;
   line-height: 1.25;
 }
 
-/* MOBİL BALANS */
+/* MOBİLDƏ DAHA COMPACT */
 @media (max-width: 640px) {
   .bulk-home-cta,
   .cart-bulk-switch {
-    padding: 14px;
-    border-radius: 22px;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .bulk-home-cta::after,
-  .cart-bulk-switch::after {
-    font-size: 64px;
-    right: 10px;
-    top: -12px;
+    padding: 12px 13px;
+    border-radius: 18px;
+    gap: 10px;
   }
 
   .bulk-home-cta h3,
   .cart-bulk-switch b {
-    font-size: 20px;
+    font-size: 17px;
+    line-height: 1.2;
   }
 
   .bulk-home-cta p,
   .cart-bulk-switch span {
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.35;
   }
 
   .bulk-home-cta .btn,
   .cart-bulk-switch .btn {
-    width: 100%;
-    min-height: 42px;
+    min-height: 38px;
+    font-size: 12px;
   }
 
   .catalog-bulk-order-link {
-    margin: 10px 0 12px;
-    padding: 15px;
-    min-height: 92px;
-    border-radius: 0;
+    min-height: 96px;
+    padding: 14px 16px;
+    gap: 12px;
   }
 
   .catalog-bulk-order-link .bulk-menu-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
-    font-size: 23px;
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+    font-size: 21px;
   }
 
   .catalog-bulk-order-link b {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .catalog-bulk-order-link small {
     font-size: 12px;
+  }
+
+  .catalog-bulk-order-link::after {
+    font-size: 46px;
+    right: 12px;
   }
 }
 /*=============================================================================================================*/
