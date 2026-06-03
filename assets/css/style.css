@@ -7045,170 +7045,130 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 /*=============================================================================================================*/
-/* ==========================================================================
-   TOPLU SİFARİŞ KEÇİD BUTONLARI - PRO COMPACT UX
-   ========================================================================== */
+/* TOPLU SİFARİŞ KEÇİD BUTONLARI - CLEAN PREMIUM */
 .bulk-home-cta,
 .cart-bulk-switch {
-  margin: 10px 0;
-  padding: 10px 14px;
-  border: 1px solid rgba(34, 197, 94, 0.15);
-  border-radius: 12px; /* Daha modern və kompakt künclər */
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  background: linear-gradient(135deg, #ffffff, #f0fdf4);
-  box-shadow: 0 4px 12px rgba(15, 122, 55, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s ease-in-out;
-}
-
-/* Hover effekti ilə kliklənə bilmə hissi (UX) */
-.bulk-home-cta:hover,
-.cart-bulk-switch:hover {
-  border-color: rgba(34, 197, 94, 0.3);
-  box-shadow: 0 6px 16px rgba(15, 122, 55, 0.07);
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(236,253,245,.96));
+  box-shadow: 0 12px 28px rgba(15, 122, 55, 0.09);
 }
 
 .bulk-home-cta span {
   display: inline-flex;
-  margin-bottom: 2px;
-  padding: 2px 6px;
-  border-radius: 6px; /* Badges üçün daha pro görünüş */
-  color: #166534;
-  background: #dcfce7;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #047857;
+  background: rgba(220, 252, 231, 0.92);
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .bulk-home-cta h3,
 .cart-bulk-switch b {
   margin: 0;
-  color: #14532d;
-  font-size: 15px; /* Daha kompakt */
-  line-height: 1.2;
-  font-weight: 700;
+  color: #064e3b;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 950;
 }
 
 .bulk-home-cta p,
 .cart-bulk-switch span {
-  margin: 3px 0 0;
-  color: #4b5563; /* Daha oxunqlu neytral rəng */
-  font-size: 12px;
-  line-height: 1.3;
-  font-weight: 400;
+  margin: 5px 0 0;
+  color: #64756b;
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
 .bulk-home-cta .btn,
 .cart-bulk-switch .btn {
-  min-width: 130px; /* Gereksiz böyüklük azaldıldı */
-  height: 34px;
+  min-width: 160px;
+  min-height: 38px;
   font-size: 12px;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.1s ease;
 }
 
-.bulk-home-cta .btn:active,
-.cart-bulk-switch .btn:active {
-  transform: scale(0.97); /* Klikləmə hissi */
-}
-
-/* ==========================================================================
-   KATALOQ MENYUSU - TOPLU SİFARİŞ
-   ========================================================================== */
+/* KATALOQ MENYUSU - TOPLU SİFARİŞ */
 .catalog-bulk-order-link {
-  margin: 6px 8px;
-  padding: 8px 12px;
-  border-radius: 10px;
+  margin: 8px 10px 10px;
+  padding: 11px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #14532d;
-  background: linear-gradient(135deg, #fbfdf7, #f0fdf4);
-  border: 1px solid rgba(34, 197, 94, 0.15);
-  box-shadow: 0 2px 6px rgba(15, 122, 55, 0.03);
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-
-.catalog-bulk-order-link:hover {
+  color: #064e3b;
   background: linear-gradient(135deg, #f7fee7, #dcfce7);
+  border: 1px solid rgba(34, 197, 94, 0.24);
+  box-shadow: 0 10px 22px rgba(15, 122, 55, 0.08);
+  font-weight: 900;
 }
 
 .catalog-bulk-order-link b {
-  font-size: 13.5px;
-  line-height: 1.2;
-  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.15;
 }
 
 .catalog-bulk-order-link small {
   display: block;
-  margin-top: 1px;
-  color: #166534;
+  margin-top: 2px;
+  color: #047857;
   font-size: 10.5px;
-  font-weight: 400;
+  line-height: 1.25;
 }
 
 .bulk-menu-icon {
-  width: 28px; /* Daha kompakt icon sahəsi */
-  height: 28px;
-  flex: 0 0 28px;
-  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 13px;
   display: grid;
   place-items: center;
   background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.04);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 18px rgba(15, 122, 55, 0.08);
 }
 
-/* ==========================================================================
-   MOBİL COMPACT UX OPTİMİZASİYASI (max-width: 640px)
-   ========================================================================== */
+/* MOBİL COMPACT */
 @media (max-width: 640px) {
   .bulk-home-cta,
   .cart-bulk-switch {
-    padding: 10px;
-    border-radius: 10px;
-    flex-direction: row; /* Mobildə alt-alta salıb yer itirmirik, yan-yana saxlayırıq */
-    align-items: center;
-    gap: 12px;
+    padding: 12px;
+    border-radius: 18px;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  /* Əgər mütləq alt-alta düşməsini istədiyiniz çox uzun mətn yoxdursa, row qalması UX üçün super compactdır */
   .bulk-home-cta h3,
   .cart-bulk-switch b {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .bulk-home-cta p,
   .cart-bulk-switch span {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .bulk-home-cta .btn,
   .cart-bulk-switch .btn {
-    min-width: auto;
-    width: auto;
-    height: 32px;
-    padding: 0 10px;
-    font-size: 11px;
+    width: 100%;
+    min-height: 38px;
   }
 
   .catalog-bulk-order-link {
-    margin: 4px 6px;
-    padding: 8px;
-    border-radius: 8px;
+    margin: 8px 8px 10px;
+    padding: 10px;
+    border-radius: 15px;
   }
 
   .catalog-bulk-order-link b {
-    font-size: 12.5px;
+    font-size: 14px;
   }
 
   .catalog-bulk-order-link small {
@@ -7216,9 +7176,9 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   }
 
   .bulk-menu-icon {
-    width: 26px;
-    height: 26px;
-    flex-basis: 26px;
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
   }
 }
 /*=============================================================================================================*/
