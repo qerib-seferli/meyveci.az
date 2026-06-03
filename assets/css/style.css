@@ -7045,120 +7045,140 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 /*=============================================================================================================*/
-/* KATALOQ MENYUSUNDA TOPLU SİFARİŞ - ENDİRİM KARTI KİMİ */
-.catalog-bulk-order-link {
-  position: relative;
-  overflow: hidden;
-  margin: 12px 0 18px;
-  padding: 18px 22px;
-  min-height: 118px;
-  width: 100%;
-  border-radius: 0;
+/* TOPLU SİFARİŞ KEÇİD BUTONLARI - CLEAN PREMIUM */
+.bulk-home-cta,
+.cart-bulk-switch {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: #ffffff;
-  background: linear-gradient(135deg, #10b981 0%, #22c55e 48%, #facc15 100%);
-  border: 0;
-  box-shadow: 0 18px 36px rgba(22, 163, 74, 0.22);
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(236,253,245,.96));
+  box-shadow: 0 12px 28px rgba(15, 122, 55, 0.09);
+}
+
+.bulk-home-cta span {
+  display: inline-flex;
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #047857;
+  background: rgba(220, 252, 231, 0.92);
+  font-size: 11px;
   font-weight: 900;
 }
 
-.catalog-bulk-order-link::after {
-  content: "TOPLU";
-  position: absolute;
-  right: 18px;
-  bottom: -8px;
-  color: rgba(255,255,255,.18);
-  font-size: 58px;
+.bulk-home-cta h3,
+.cart-bulk-switch b {
+  margin: 0;
+  color: #064e3b;
+  font-size: 18px;
+  line-height: 1.25;
   font-weight: 950;
-  letter-spacing: -0.08em;
 }
 
-.catalog-bulk-order-link .bulk-menu-icon {
-  position: relative;
-  z-index: 2;
-  width: 54px;
-  height: 54px;
-  border-radius: 18px;
-  display: grid;
-  place-items: center;
-  color: #047857;
-  background: rgba(255,255,255,.95);
-  font-size: 25px;
+.bulk-home-cta p,
+.cart-bulk-switch span {
+  margin: 5px 0 0;
+  color: #64756b;
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 
-.catalog-bulk-order-link span:not(.bulk-menu-icon) {
-  position: relative;
-  z-index: 2;
+.bulk-home-cta .btn,
+.cart-bulk-switch .btn {
+  min-width: 160px;
+  min-height: 38px;
+  font-size: 12px;
+}
+
+/* KATALOQ MENYUSU - TOPLU SİFARİŞ */
+.catalog-bulk-order-link {
+  margin: 8px 10px 10px;
+  padding: 11px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #064e3b;
+  background: linear-gradient(135deg, #f7fee7, #dcfce7);
+  border: 1px solid rgba(34, 197, 94, 0.24);
+  box-shadow: 0 10px 22px rgba(15, 122, 55, 0.08);
+  font-weight: 900;
 }
 
 .catalog-bulk-order-link b {
-  display: block;
-  color: #ffffff;
-  font-size: 28px;
-  line-height: 1.05;
+  font-size: 15px;
+  line-height: 1.15;
 }
 
 .catalog-bulk-order-link small {
   display: block;
-  margin-top: 6px;
-  color: rgba(255,255,255,.92);
-  font-size: 14px;
+  margin-top: 2px;
+  color: #047857;
+  font-size: 10.5px;
   line-height: 1.25;
 }
 
-/* MOBİLDƏ DAHA COMPACT */
+.bulk-menu-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 122, 55, 0.08);
+}
+
+/* MOBİL COMPACT */
 @media (max-width: 640px) {
   .bulk-home-cta,
   .cart-bulk-switch {
-    padding: 12px 13px;
+    padding: 12px;
     border-radius: 18px;
+    align-items: stretch;
+    flex-direction: column;
     gap: 10px;
   }
 
   .bulk-home-cta h3,
   .cart-bulk-switch b {
-    font-size: 17px;
-    line-height: 1.2;
+    font-size: 16px;
   }
 
   .bulk-home-cta p,
   .cart-bulk-switch span {
     font-size: 12px;
-    line-height: 1.35;
   }
 
   .bulk-home-cta .btn,
   .cart-bulk-switch .btn {
+    width: 100%;
     min-height: 38px;
-    font-size: 12px;
   }
 
   .catalog-bulk-order-link {
-    min-height: 96px;
-    padding: 14px 16px;
-    gap: 12px;
-  }
-
-  .catalog-bulk-order-link .bulk-menu-icon {
-    width: 44px;
-    height: 44px;
+    margin: 8px 8px 10px;
+    padding: 10px;
     border-radius: 15px;
-    font-size: 21px;
   }
 
   .catalog-bulk-order-link b {
-    font-size: 22px;
+    font-size: 14px;
   }
 
   .catalog-bulk-order-link small {
-    font-size: 12px;
+    font-size: 10px;
   }
 
-  .catalog-bulk-order-link::after {
-    font-size: 46px;
-    right: 12px;
+  .bulk-menu-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
   }
 }
 /*=============================================================================================================*/
