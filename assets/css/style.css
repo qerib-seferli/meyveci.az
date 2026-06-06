@@ -7183,6 +7183,157 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   }
 }
 /*=============================================================================================================*/
+/* ============================================================
+   MEYVƏÇİ.AZ - PHONE OTP AUTH UI
+   ============================================================ */
+
+.auth-shell {
+  min-height: calc(100dvh - var(--topbar-height));
+  display: grid;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(500px, 100%);
+  margin: auto;
+  padding: 22px;
+}
+
+.auth-brand-head {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-brand-head img {
+  width: 142px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.auth-brand-head h1 {
+  margin: 0;
+  font-size: clamp(27px, 5vw, 38px);
+  line-height: 1.05;
+}
+
+.auth-brand-head p {
+  margin: 0;
+  max-width: 360px;
+  line-height: 1.45;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 6px;
+  margin: 14px 0 16px;
+  border-radius: 999px;
+  background: rgba(220, 252, 231, 0.72);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+.auth-tab {
+  border: 0;
+  min-height: 42px;
+  border-radius: 999px;
+  background: transparent;
+  color: #047857;
+  font-weight: 950;
+}
+
+.auth-tab.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--green), var(--green-dark));
+  box-shadow: 0 12px 24px rgba(22, 163, 74, 0.22);
+}
+
+.auth-panel {
+  display: none;
+  gap: 12px;
+}
+
+.auth-panel.active {
+  display: grid;
+}
+
+.auth-label {
+  color: #064e3b;
+  font-weight: 950;
+}
+
+.phone-input-row {
+  display: grid;
+  grid-template-columns: 185px 1fr;
+  gap: 8px;
+}
+
+.phone-input-row select,
+.phone-input-row input,
+.auth-panel input {
+  min-height: 48px;
+  border-radius: 18px;
+}
+
+.auth-help {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.auth-link,
+.auth-bottom-links a {
+  color: #047857;
+  font-weight: 900;
+  text-align: center;
+}
+
+.auth-bottom-links {
+  display: grid;
+  place-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(34, 197, 94, 0.14);
+}
+
+.otp-panel input {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 950;
+  letter-spacing: 8px;
+}
+
+@media (max-width: 640px) {
+  .auth-card {
+    padding: 16px;
+    border-radius: 24px;
+  }
+
+  .auth-brand-head img {
+    width: 120px;
+    height: 54px;
+  }
+
+  .phone-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-tabs {
+    border-radius: 20px;
+  }
+
+  .auth-tab {
+    min-height: 38px;
+    font-size: 13px;
+  }
+
+  .otp-panel input {
+    font-size: 21px;
+    letter-spacing: 6px;
+  }
+}
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 
