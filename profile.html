@@ -20,9 +20,9 @@
       </div>
 
       <form id="profileForm" class="form-grid">
-        <input name="first_name" placeholder="Ad">
-        <input name="last_name" placeholder="Soyad">
-        <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+994 50 545 90 85">
+        <input name="first_name" placeholder="Ad" required>
+        <input name="last_name" placeholder="Soyad" required>
+        <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+994 50 000 00 00" required>
         
         <label class="avatar-upload-field">
           <input id="avatarFile" type="file" accept="image/*">
@@ -34,7 +34,7 @@
           <option value="" disabled selected>Şəhər / rayon seçin</option>
         </select>
         
-        <input name="address_line" placeholder="Ev ünvanı">
+        <input name="address_line" placeholder="Ev ünvanı" required>
         <input name="apartment" placeholder="Bina, blok, mənzil">
         <input name="door_code" placeholder="Qapı kodu">
         
