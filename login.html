@@ -11,16 +11,89 @@
   <title>Daxil ol | Meyvəçi.az</title>
 </head>
 <body data-page="login">
-  <main class="app-shell">
-    <section class="card" style="max-width: 480px; margin: auto;">
-      <h1>Daxil ol</h1>
-      <form id="loginForm" class="grid">
-        <input name="email" type="email" placeholder="Email" required>
-        <input name="password" type="password" placeholder="Şifrə" required>
-        <button class="btn btn-primary">Daxil ol</button>
-        <a href="register.html">Hesab yarat</a>
-        <a href="forgot-password.html">Şifrəni unutdum</a>
+  <main class="app-shell auth-shell">
+    <section class="card auth-card">
+      <div class="auth-brand-head">
+        <img src="./assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
+        <h1>Daxil ol</h1>
+        <p class="muted">Telefon nömrəsi və ya email ilə hesabınıza daxil olun.</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" type="button" data-auth-tab="phone">📱 Nömrə ilə</button>
+        <button class="auth-tab" type="button" data-auth-tab="email">✉️ Email ilə</button>
+      </div>
+
+      <form id="phoneLoginForm" class="auth-panel active">
+        <label class="auth-label">Telefon nömrəsi</label>
+
+        <div class="phone-input-row">
+          <select id="phoneCountry" name="country_code" aria-label="Ölkə kodu">
+            <option value="+994" selected>🇦🇿 Azərbaycan +994</option>
+
+            <!-- Lazım olanda aşağıdakı ölkələri açarsan -->
+            <!-- <option value="+90">🇹🇷 Türkiyə +90</option> -->
+            <!-- <option value="+7">🇷🇺 Rusiya +7</option> -->
+            <!-- <option value="+995">🇬🇪 Gürcüstan +995</option> -->
+            <!-- <option value="+1">🇺🇸 ABŞ +1</option> -->
+            <!-- <option value="+44">🇬🇧 Böyük Britaniya +44</option> -->
+            <!-- <option value="+49">🇩🇪 Almaniya +49</option> -->
+            <!-- <option value="+33">🇫🇷 Fransa +33</option> -->
+          </select>
+
+          <input
+            id="phoneNumberInput"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            placeholder="50 545 90 85"
+            required
+          >
+        </div>
+
+        <small class="auth-help">
+          Standart olaraq Azərbaycan +994 seçilib. Məsələn: 0505459085 və ya 505459085 yaza bilərsiniz.
+        </small>
+
+        <button id="sendOtpBtn" class="btn btn-primary full" type="submit">
+          SMS kod göndər
+        </button>
       </form>
+
+      <form id="otpVerifyForm" class="auth-panel otp-panel" hidden>
+        <label class="auth-label">SMS təsdiq kodu</label>
+
+        <input
+          id="otpCodeInput"
+          name="code"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          placeholder="6 rəqəmli kod"
+          required
+        >
+
+        <button id="verifyOtpBtn" class="btn btn-primary full" type="submit">
+          Kodu təsdiqlə
+        </button>
+
+        <button id="changePhoneBtn" class="btn btn-soft full" type="button">
+          Nömrəni dəyiş
+        </button>
+      </form>
+
+      <form id="loginForm" class="auth-panel">
+        <input name="email" type="email" placeholder="Email" autocomplete="email">
+        <input name="password" type="password" placeholder="Şifrə" autocomplete="current-password">
+        <button class="btn btn-primary full" type="submit">Email ilə daxil ol</button>
+        <a class="auth-link" href="forgot-password.html">Şifrəni unutdum</a>
+      </form>
+
+      <div class="auth-bottom-links">
+        <a href="register.html">Email ilə hesab yarat</a>
+      </div>
     </section>
   </main>
 
