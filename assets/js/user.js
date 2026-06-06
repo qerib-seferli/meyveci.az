@@ -1709,6 +1709,27 @@ async function initProfile() {
 
     const data = formData(event.target);
 
+    const requiredFields = [
+      ['first_name', 'Adınızı yazın'],
+      ['last_name', 'Soyadınızı yazın'],
+      ['phone', 'Telefon nömrənizi yazın'],
+      ['city_region', 'Şəhər/rayon seçin'],
+      ['address_line', 'Ev ünvanınızı yazın'],
+    ];
+    
+    for (const [field, message] of requiredFields) {
+      if (!String(data[field] || '').trim()) {
+        event.target[field]?.focus();
+        return toast(message);
+      }
+    }
+    
+    if (!data.lat || !data.lng || Number(data.lat) === 0 || Number(data.lng) === 0) {
+      toast('Zəhmət olmasa konumunuzu təyin edin');
+      $('#getProfileLocation')?.focus();
+      return;
+    }
+
     try {
       let avatarUrl = activeProfile.avatar_url;
 
