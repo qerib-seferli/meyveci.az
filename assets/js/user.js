@@ -1699,7 +1699,7 @@ async function initProfile() {
   
   $('#getProfileLocation')?.addEventListener('click', getProfileLocation);
 
-  $('#profileEmail').textContent = activeProfile.email || '';
+  $('#profileEmail').textContent = activeProfile.email || activeProfile.phone || 'Telefon ilə giriş';
   $('#profileRole').textContent = activeProfile.role || 'user';
 
   if (activeProfile.avatar_url) $('#avatarPreview').src = activeProfile.avatar_url;
@@ -1721,7 +1721,7 @@ async function initProfile() {
         .update({
           first_name: data.first_name,
           last_name: data.last_name,
-          phone: data.phone,
+          phone: normalizeProfilePhone(data.phone),
           city_region: data.city_region,
           address_line: data.address_line,
           apartment: data.apartment,
@@ -1775,6 +1775,35 @@ async function getProfileLocation() {
   button.disabled = false;
   button.textContent = '📍 Konumu təyin et';
 }
+
+
+function normalizeProfilePhone(value) {
+  let raw = String(value || '').trim();
+
+  if (!raw) return '';
+
+  raw = raw
+    .replaceAll(' ', '')
+    .replaceAll('-', '')
+    .replaceAll('(', '')
+    .replaceAll(')', '');
+
+  if (raw.startsWith('+')) {
+    return `+${raw.replace(/\D/g, '')}`;
+  }
+
+  raw = raw.replace(/\D/g, '');
+
+  if (raw.startsWith('994')) raw = raw.slice(3);
+  if (raw.startsWith('0')) raw = raw.slice(1);
+
+  if (/^(50|51|55|70|77|99|10|60)\d{7}$/.test(raw)) {
+    return `+994${raw}`;
+  }
+
+  return value;
+}
+
 
 function updateProfileLocationText() {
   const form = $('#profileForm');
