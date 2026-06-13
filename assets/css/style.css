@@ -7347,10 +7347,10 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   position: fixed !important;
 
   /* Üstdən məsafə */
-  top: 120px !important;
+  top: 80px !important;
 
   /* Altdan məsafə */
-  bottom: 92px !important;
+  bottom: 80px !important;
 
   z-index: 35;
 
