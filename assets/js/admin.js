@@ -3221,6 +3221,11 @@ async function content() {
   $('#newBanner')?.addEventListener('click', () => resetForm('bannerForm'));
   $('#newNews')?.addEventListener('click', () => resetForm('newsForm'));
   $('#newPartner')?.addEventListener('click', () => resetForm('partnerForm'));
+
+    await loadSideAds();
+
+  $('#sideAdForm')?.addEventListener('submit', saveSideAd);
+  $('#newSideAd')?.addEventListener('click', () => resetForm('sideAdForm'));
 }
 
 async function loadContent(table) {
@@ -3296,6 +3301,181 @@ async function loadContent(table) {
   
   $$('.toggle-active').forEach((input) => input.addEventListener('change', toggleActive));
 }
+
+
+    async function loadSideAds() {
+      const list = $('#sideAdsList');
+      if (!list) return;
+    
+      const { data, error } = await supabase
+        .from('site_side_ads')
+        .select('*')
+        .order('position', { ascending: true })
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(100);
+    
+      if (error) {
+        list.innerHTML = `<span class="muted">${esc(error.message)}</span>`;
+        return;
+      }
+    
+      list.innerHTML = (data || []).map((item) => `
+        <div class="compact-row">
+          <div class="pro-cell-main">
+            <img class="admin-product-img" src="${item.image_url || PLACEHOLDER}" alt="${esc(item.title || 'Yan reklam')}">
+            <span>
+              <b>${esc(item.title || 'Yan reklam')}</b>
+              <small>
+                ${item.position === 'left' ? 'Sol tərəf' : 'Sağ tərəf'}
+                ${item.sponsor_name ? ` • ${esc(item.sponsor_name)}` : ''}
+              </small>
+              <small>${esc(item.link_url || 'Link yoxdur')}</small>
+            </span>
+          </div>
+    
+          <div class="action-row">
+            ${activeSwitch(item.id, item.is_active, 'toggle-side-ad-active', 'site_side_ads')}
+    
+            <button class="btn btn-soft btn-mini view-side-ad" data-row="${rowAttr(item)}">
+              Bax
+            </button>
+    
+            <button class="btn btn-soft btn-mini edit-side-ad" data-row="${rowAttr(item)}">
+              Redaktə
+            </button>
+    
+            <button class="btn btn-danger btn-mini del-side-ad" data-id="${item.id}">
+              Sil
+            </button>
+          </div>
+        </div>
+      `).join('') || '<span class="muted">Yan reklam yoxdur.</span>';
+    
+      $$('.toggle-side-ad-active').forEach((input) => input.addEventListener('change', toggleActive));
+    
+      $$('.edit-side-ad').forEach((button) => {
+        button.addEventListener('click', () => {
+          const row = JSON.parse(button.dataset.row);
+          fillForm('sideAdForm', {
+            ...row,
+            starts_at: toDatetimeLocal(row.starts_at),
+            ends_at: toDatetimeLocal(row.ends_at),
+          });
+        });
+      });
+    
+      $$('.view-side-ad').forEach((button) => {
+        button.addEventListener('click', () => {
+          const item = JSON.parse(button.dataset.row);
+    
+          openAdminModal(item.title || 'Yan reklam', `
+            <img class="admin-content-preview-img" src="${item.image_url || PLACEHOLDER}" alt="${esc(item.title || 'Yan reklam')}">
+    
+            <div class="admin-detail-grid">
+              <div class="admin-detail-box">
+                <b>Mövqe</b>
+                <span>${item.position === 'left' ? 'Sol tərəf' : 'Sağ tərəf'}</span>
+              </div>
+    
+              <div class="admin-detail-box">
+                <b>Sponsor</b>
+                <span>${esc(item.sponsor_name || '—')}</span>
+              </div>
+    
+              <div class="admin-detail-box admin-detail-full">
+                <b>Link</b>
+                <span>${esc(item.link_url || '—')}</span>
+              </div>
+    
+              <div class="admin-detail-box">
+                <b>Status</b>
+                <span>${item.is_active ? 'Aktiv' : 'Passiv'}</span>
+              </div>
+    
+              <div class="admin-detail-box">
+                <b>Tarix</b>
+                <span>${formatDate(item.starts_at)} → ${formatDate(item.ends_at)}</span>
+              </div>
+            </div>
+          `);
+        });
+      });
+    
+      $$('.del-side-ad').forEach((button) => {
+        button.addEventListener('click', async () => {
+          if (!confirm('Yan reklam silinsin?')) return;
+    
+          const { error } = await supabase
+            .from('site_side_ads')
+            .delete()
+            .eq('id', button.dataset.id);
+    
+          toast(error ? error.message : 'Yan reklam silindi');
+          loadSideAds();
+        });
+      });
+    }
+    
+    async function saveSideAd(event) {
+      event.preventDefault();
+    
+      const data = formData(event.target);
+      const file = event.target.querySelector('input[type="file"]')?.files?.[0];
+    
+      try {
+        let imageUrl = data.image_url || null;
+    
+        if (file) {
+          imageUrl = await uploadFile('products', file, 'side-ads');
+        }
+    
+        if (!imageUrl) {
+          toast('Şəkil seçin və ya şəkil linki yazın');
+          return;
+        }
+    
+        const row = {
+          title: data.title || null,
+          sponsor_name: data.sponsor_name || null,
+          position: data.position || 'left',
+          image_url: imageUrl,
+          link_url: data.link_url || null,
+          sort_order: Number(data.sort_order || 0),
+          starts_at: data.starts_at ? new Date(data.starts_at).toISOString() : null,
+          ends_at: data.ends_at ? new Date(data.ends_at).toISOString() : null,
+          is_active: data.is_active === 'on',
+          updated_at: new Date().toISOString(),
+        };
+    
+        const response = data.id
+          ? await supabase.from('site_side_ads').update(row).eq('id', data.id)
+          : await supabase.from('site_side_ads').insert(row);
+    
+        toast(response.error ? response.error.message : 'Yan reklam saxlanıldı');
+    
+        if (!response.error) {
+          event.target.reset();
+          event.target.is_active.checked = true;
+          loadSideAds();
+        }
+      } catch (error) {
+        toast(error.message);
+      }
+    }
+    
+    function toDatetimeLocal(value) {
+      if (!value) return '';
+    
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+    
+      const offset = date.getTimezoneOffset();
+      const local = new Date(date.getTime() - offset * 60000);
+    
+      return local.toISOString().slice(0, 16);
+    }
+
 
 async function saveContent(event, table, bucket) {
   event.preventDefault();
