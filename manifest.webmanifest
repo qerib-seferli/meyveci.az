@@ -1,26 +1,42 @@
 {
+  "id": "/",
   "name": "Meyvəçi.az",
   "short_name": "Meyvəçi",
   "description": "Meyvəçi.az - təzə meyvə, tərəvəz və market məhsulları qapına qədər.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#16a34a",
   "orientation": "portrait-primary",
   "lang": "az",
+  "categories": ["shopping", "food", "lifestyle"],
   "icons": [
     {
-      "src": "./assets/img/logo/pwa-icon-192.png",
+      "src": "/assets/img/logo/pwa-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "./assets/img/logo/pwa-icon-512.png",
+      "src": "/assets/img/logo/pwa-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/img/fotolar/Endirim-karti.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/assets/img/fotolar/Toplu-sifaris.png",
+      "sizes": "540x960",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
