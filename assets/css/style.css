@@ -7337,8 +7337,13 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 /*=============================================================================================================*/
 /* ============================================================
    MEYVƏÇİ.AZ - DESKTOP YAN REKLAM BANNERLƏRİ FINAL
-   Ölçü: 160x620 px
+   Sənin hazır ölçün: 170x650 px
    Hover: şüşə/parıltı effekti
+   Qeyd:
+   - EN dəyişmək üçün width dəyərini artır/azalt
+   - UZUNLUQ dəyişmək üçün height dəyərini artır/azalt
+   - Yuxarıdan məsafə üçün top dəyərini artır/azalt
+   - Soldan/sağdan məsafə üçün left/right dəyərini artır/azalt
    ============================================================ */
 
 .site-side-ads {
@@ -7347,10 +7352,15 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 
 .site-side-ad {
   position: fixed;
+
+  /* Header-in altından başlama məsafəsi */
   top: 122px;
+
   z-index: 35;
+
   width: 170px;          /* EN */
   height: 650px;         /* UZUNLUQ */
+
   overflow: hidden;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.94);
@@ -7363,11 +7373,11 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 .site-side-ad-left {
-  left: 12px;         /* soldan məsafə */
+  left: 12px;            /* soldan məsafə */
 }
 
 .site-side-ad-right {
-  right: 12px;      /* sağdan məsafə */
+  right: 12px;           /* sağdan məsafə */
 }
 
 .site-side-ad img {
@@ -7376,6 +7386,7 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   object-fit: cover;
 }
 
+/* Şüşə/parıltı xətti */
 .site-side-ad::before {
   content: "";
   position: absolute;
@@ -7394,6 +7405,7 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   pointer-events: none;
 }
 
+/* Yüngül şüşə qat */
 .site-side-ad::after {
   content: "";
   position: absolute;
@@ -7419,6 +7431,7 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   animation: sideAdGlassShine 0.9s ease forwards;
 }
 
+/* Aşağıdakı Reklam yazısı */
 .site-side-ad span {
   position: absolute;
   left: 50%;
@@ -7444,13 +7457,14 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   }
 }
 
-/* Yalnız geniş desktop ekranlarda */
+/* Yalnız geniş desktop ekranlarda görünür */
 @media (min-width: 1640px) {
   .site-side-ads {
     display: block;
   }
 }
 
+/* 1640px-dən aşağı gizlənir */
 @media (max-width: 1639px) {
   .site-side-ads,
   .site-side-ad {
