@@ -27,6 +27,7 @@ const bottomNav = [
 
 export async function initLayout() {
   renderTopbar();
+  renderSideAds();
   renderBottomNav();
   renderSiteFooter();
   await hydrateUserArea();
@@ -362,6 +363,80 @@ function openNotificationModal(title, body, dateText = '') {
   $('#notifyModalDate').textContent = dateText || '';
   modal.classList.add('show');
 }
+
+
+    async function renderSideAds() {
+      if (
+        location.pathname.includes('/admin/') ||
+        location.pathname.includes('/courier/') ||
+        location.pathname.includes('/warehouse/')
+      ) return;
+    
+      if (document.querySelector('.site-side-ads')) return;
+    
+      try {
+        const now = new Date();
+    
+        const { data, error } = await supabase
+          .from('site_side_ads')
+          .select('id,title,sponsor_name,position,image_url,link_url,sort_order,starts_at,ends_at,is_active')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(20);
+    
+        if (error || !data?.length) return;
+    
+        const activeAds = (data || []).filter((ad) => {
+          const startsOk = !ad.starts_at || new Date(ad.starts_at) <= now;
+          const endsOk = !ad.ends_at || new Date(ad.ends_at) >= now;
+          return startsOk && endsOk && ad.image_url;
+        });
+    
+        const leftAd = activeAds.find((ad) => ad.position === 'left');
+        const rightAd = activeAds.find((ad) => ad.position === 'right');
+    
+        if (!leftAd && !rightAd) return;
+    
+        const wrap = document.createElement('div');
+        wrap.className = 'site-side-ads';
+        wrap.innerHTML = `
+          ${sideAdHtml(leftAd, 'left')}
+          ${sideAdHtml(rightAd, 'right')}
+        `;
+    
+        document.body.appendChild(wrap);
+      } catch (error) {
+        console.warn('Yan reklamlar yüklənmədi:', error.message);
+      }
+    }
+    
+    function sideAdHtml(ad, side) {
+      if (!ad) return '';
+    
+      const title = escapeAttr(ad.title || ad.sponsor_name || 'Reklam');
+      const image = escapeAttr(ad.image_url || '');
+      const link = escapeAttr(ad.link_url || '');
+    
+      const content = `
+        <img src="${image}" alt="${title}" loading="lazy">
+        <span>Reklam</span>
+      `;
+    
+      if (link) {
+        return `
+          <a class="site-side-ad site-side-ad-${side}" href="${link}" target="_blank" rel="noopener sponsored" title="${title}">
+            ${content}
+          </a>
+        `;
+      }
+    
+      return `
+        <div class="site-side-ad site-side-ad-${side}" title="${title}">
+          ${content}
+        </div>
+      `;
+    }
 
 
 function renderSiteFooter() {
