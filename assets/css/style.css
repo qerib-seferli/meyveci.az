@@ -7349,8 +7349,8 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   position: fixed;
   top: 122px;
   z-index: 35;
-  width: 160px;
-  height: 620px;
+  width: 180px;          /* EN */
+  height: 700px;         /* UZUNLUQ */
   overflow: hidden;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.94);
@@ -7363,11 +7363,11 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 
 .site-side-ad-left {
-  left: 24px;
+  left: 12px;         /* soldan məsafə */
 }
 
 .site-side-ad-right {
-  right: 24px;
+  right: 12px;      /* sağdan məsafə */
 }
 
 .site-side-ad img {
