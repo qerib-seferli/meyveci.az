@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "az.meyveci.app",
+    "sha256_cert_fingerprints": [
+      "DF:A9:95:8C:6A:84:96:95:63:85:D9:D2:2B:69:3E:02:CA:2A:E4:66:BD:D9:B7:15:30:CD:25:11:8C:43:67:08"
+    ]
+  }
+}]
