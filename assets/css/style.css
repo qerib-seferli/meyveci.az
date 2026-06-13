@@ -7354,7 +7354,7 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   position: fixed;
 
   /* Header-in altından başlama məsafəsi */
-  top: 70px;
+  top: 50px;
 
   z-index: 35;
 
