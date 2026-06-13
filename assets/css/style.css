@@ -7336,9 +7336,9 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 }
 /*=============================================================================================================*/
 /* ============================================================
-   MEYVƏÇİ.AZ - DESKTOP YAN REKLAM BANNERLƏRİ V2
-   Ölçü: 150x620 px
-   Böyük ekranlarda görünür, hover zamanı şüşə/parıltı effekti verir.
+   MEYVƏÇİ.AZ - DESKTOP YAN REKLAM BANNERLƏRİ FINAL
+   Ölçü: 160x620 px
+   Hover: şüşə/parıltı effekti
    ============================================================ */
 
 .site-side-ads {
@@ -7347,19 +7347,33 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 
 .site-side-ad {
   position: fixed;
-  top: 126px;
+  top: 122px;
   z-index: 35;
-  width: 130px;
-  height: 580px;
+  width: 160px;
+  height: 620px;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(34, 197, 94, 0.24);
   box-shadow:
-    0 22px 52px rgba(15, 122, 55, 0.18),
+    0 24px 58px rgba(15, 122, 55, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.82) inset;
   backdrop-filter: blur(16px);
   transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.site-side-ad-left {
+  left: 24px;
+}
+
+.site-side-ad-right {
+  right: 24px;
+}
+
+.site-side-ad img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .site-side-ad::before {
@@ -7367,17 +7381,16 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   position: absolute;
   inset: 0;
   z-index: 2;
-  background:
-    linear-gradient(
-      120deg,
-      transparent 0%,
-      transparent 34%,
-      rgba(255, 255, 255, 0.72) 45%,
-      rgba(255, 255, 255, 0.18) 54%,
-      transparent 66%,
-      transparent 100%
-    );
-  transform: translateX(-140%) skewX(-16deg);
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 34%,
+    rgba(255, 255, 255, 0.72) 45%,
+    rgba(255, 255, 255, 0.18) 54%,
+    transparent 66%,
+    transparent 100%
+  );
+  transform: translateX(-145%) skewX(-16deg);
   pointer-events: none;
 }
 
@@ -7397,8 +7410,8 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   transform: translateY(-4px) scale(1.015);
   filter: saturate(1.08);
   box-shadow:
-    0 30px 70px rgba(15, 122, 55, 0.25),
-    0 0 24px rgba(34, 197, 94, 0.28),
+    0 32px 76px rgba(15, 122, 55, 0.26),
+    0 0 26px rgba(34, 197, 94, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
@@ -7406,47 +7419,32 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
   animation: sideAdGlassShine 0.9s ease forwards;
 }
 
-.site-side-ad-left {
-  left: 16px;
-}
-
-.site-side-ad-right {
-  right: 16px;
-}
-
-.site-side-ad img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .site-side-ad span {
   position: absolute;
   left: 50%;
-  bottom: 9px;
+  bottom: 10px;
   z-index: 3;
   transform: translateX(-50%);
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 5px 11px;
   color: rgba(6, 95, 70, 0.82);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.88);
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.02em;
   box-shadow: 0 8px 18px rgba(15, 122, 55, 0.12);
 }
 
 @keyframes sideAdGlassShine {
   from {
-    transform: translateX(-140%) skewX(-16deg);
+    transform: translateX(-145%) skewX(-16deg);
   }
 
   to {
-    transform: translateX(140%) skewX(-16deg);
+    transform: translateX(145%) skewX(-16deg);
   }
 }
 
-/* 1640px-dən aşağı gizlədirik ki, saytın üstünə minməsin */
+/* Yalnız geniş desktop ekranlarda */
 @media (min-width: 1640px) {
   .site-side-ads {
     display: block;
