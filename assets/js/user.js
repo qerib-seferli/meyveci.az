@@ -18,6 +18,12 @@ import {
   statusAz,
   askLocation,
   updateMyPresence,
+  defaultQty,
+  normalizeQty,
+  qtyStep,
+  minQty,
+  roundQty,
+  formatQty,
 } from './core.js';
 
 import { initLayout } from './layout.js';
@@ -249,22 +255,41 @@ async function initFavorites() {
   });
 }
 
-async function addCart(productId) {
-  const activeUser = await requireAuth();
 
-  const { data } = await supabase
-    .from('cart_items')
-    .select('id,quantity')
-    .eq('user_id', activeUser.id)
-    .eq('product_id', productId)
-    .maybeSingle();
 
-  const response = data
-    ? await supabase.from('cart_items').update({ quantity: data.quantity + 1 }).eq('id', data.id)
-    : await supabase.from('cart_items').insert({ user_id: activeUser.id, product_id: productId, quantity: 1 });
+    async function addCart(productId) {
+      const activeUser = await requireAuth();
+    
+      const { data: product } = await supabase
+        .from('products')
+        .select('id,unit')
+        .eq('id', productId)
+        .maybeSingle();
+    
+      const { data } = await supabase
+        .from('cart_items')
+        .select('id,quantity')
+        .eq('user_id', activeUser.id)
+        .eq('product_id', productId)
+        .maybeSingle();
+    
+      const addQty = defaultQty(product);
+      const nextQty = data
+        ? normalizeQty(product, Number(data.quantity || 0) + addQty)
+        : addQty;
+    
+      const response = data
+        ? await supabase.from('cart_items').update({ quantity: nextQty }).eq('id', data.id)
+        : await supabase.from('cart_items').insert({
+            user_id: activeUser.id,
+            product_id: productId,
+            quantity: nextQty,
+          });
+    
+      toast(response.error ? response.error.message : 'Səbətə əlavə olundu');
+    }
 
-  toast(response.error ? response.error.message : 'Səbətə əlavə olundu');
-}
+
 
 async function initCart() {
   await fillCheckoutFromProfile();
@@ -364,7 +389,7 @@ async function renderCart() {
               ${hasDiscount ? `<span class="cart-old-price">${money(product.old_price)}</span>` : ''}
               <span class="cart-new-price">${money(product.price)}</span>
               <span class="cart-dot">×</span>
-              <span>${item.quantity} ${product.unit || 'ədəd'}</span>
+              <span>${formatQty(item.quantity)} ${product.unit || 'ədəd'}</span>
             </small>
 
             <small class="cart-desc">
@@ -377,9 +402,22 @@ async function renderCart() {
           <div class="cart-line-total">${money(lineTotal)}</div>
 
           <div class="cart-qty-actions">
-            <button class="btn btn-soft qty" data-id="${item.id}" data-q="${item.quantity - 1}">−</button>
-            <b>${item.quantity}</b>
-            <button class="btn btn-soft qty" data-id="${item.id}" data-q="${item.quantity + 1}">+</button>
+          
+            ${(() => {
+              const step = qtyStep(product);
+              const min = minQty(product);
+              const currentQty = Number(item.quantity || 0);
+              const minusQty = roundQty(currentQty - step);
+              const nextMinus = minusQty < min ? 0 : minusQty;
+              const nextPlus = roundQty(currentQty + step);
+            
+              return `
+                <button class="btn btn-soft qty" data-id="${item.id}" data-q="${nextMinus}">−</button>
+                <b>${formatQty(currentQty)}</b>
+                <button class="btn btn-soft qty" data-id="${item.id}" data-q="${nextPlus}">+</button>
+              `;
+            })()}
+            
             <button class="btn btn-danger del" data-id="${item.id}">Sil</button>
           </div>
         </div>
@@ -403,15 +441,18 @@ async function renderCart() {
 
 
 
+    async function updateQty(id, quantity) {
+      const nextQty = roundQty(quantity);
+    
+      const response = nextQty <= 0
+        ? await supabase.from('cart_items').delete().eq('id', id)
+        : await supabase.from('cart_items').update({ quantity: nextQty }).eq('id', id);
+    
+      if (response.error) toast(response.error.message);
+      renderCart();
+    }
 
-async function updateQty(id, quantity) {
-  const response = quantity < 1
-    ? await supabase.from('cart_items').delete().eq('id', id)
-    : await supabase.from('cart_items').update({ quantity }).eq('id', id);
 
-  if (response.error) toast(response.error.message);
-  renderCart();
-}
 
 async function removeItem(id) {
   await supabase.from('cart_items').delete().eq('id', id);
