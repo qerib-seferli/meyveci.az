@@ -951,7 +951,10 @@ async function saveCategory(event) {
   const file = $('#catImage')?.files?.[0];
 
   try {
-    if (file) imageUrl = await uploadFile('products', file, 'categories');
+    if (file) {
+      const compressedFile = await compressProductImage(file, 80);
+      imageUrl = await uploadFile('products', compressedFile, 'categories');
+    }
 
     const row = {
       name: data.name,
@@ -1041,6 +1044,71 @@ function bindProductEvents() {
   }));
 }
 
+
+/*==================== YÜKLƏNƏN PRADUKT RƏSİMLƏRİ SIXIŞDIRILIR =======================*/
+    async function compressProductImage(file, maxSizeKB = 80) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+    
+        reader.onload = (e) => {
+          img.src = e.target.result;
+        };
+    
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+    
+          let width = img.width;
+          let height = img.height;
+    
+          const maxWidth = 900;
+          const maxHeight = 900;
+    
+          if (width > height && width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+    
+          canvas.width = width;
+          canvas.height = height;
+    
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+    
+          let quality = 0.82;
+          let blob = null;
+    
+          do {
+            blob = await new Promise((res) =>
+              canvas.toBlob(res, 'image/webp', quality)
+            );
+            quality -= 0.07;
+          } while (blob && blob.size / 1024 > maxSizeKB && quality > 0.28);
+    
+          if (!blob) {
+            reject(new Error('Şəkil sıxıla bilmədi'));
+            return;
+          }
+    
+          resolve(
+            new File(
+              [blob],
+              file.name.replace(/\.[^/.]+$/, '.webp'),
+              { type: 'image/webp' }
+            )
+          );
+        };
+    
+        img.onerror = () => reject(new Error('Şəkil oxunmadı'));
+        reader.onerror = () => reject(new Error('Fayl oxunmadı'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+
 async function saveProduct(event) {
   event.preventDefault();
 
@@ -1048,9 +1116,10 @@ async function saveProduct(event) {
 
   try {
     let imageUrl = data.image_url || null;
-    if ($('#productImage')?.files?.[0]) {
-      imageUrl = await uploadFile('products', $('#productImage').files[0], 'products');
-    }
+      if ($('#productImage')?.files?.[0]) {
+        const compressedFile = await compressProductImage($('#productImage').files[0], 80);
+        imageUrl = await uploadFile('products', compressedFile, 'products');
+      }
 
     const row = {
       category_id: data.category_id || null,
