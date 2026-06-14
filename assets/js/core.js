@@ -27,6 +27,54 @@ export function money(value) {
   return `${Number(value || 0).toFixed(2)} AZN`;
 }
 
+    // 1 kq deyil qramla sifariş etmək üçün funkusiya.
+    export function isWeightUnit(unitOrProduct = '') {
+      const unit = typeof unitOrProduct === 'object'
+        ? String(unitOrProduct.unit || '')
+        : String(unitOrProduct || '');
+    
+      const text = unit.toLowerCase().trim();
+    
+      return text === 'kg' || text === 'kq' || text.includes('kg') || text.includes('kq');
+    }
+    
+    export function qtyStep(productOrUnit = '') {
+      return isWeightUnit(productOrUnit) ? 0.05 : 1;
+    }
+    
+    export function minQty(productOrUnit = '') {
+      return isWeightUnit(productOrUnit) ? 0.1 : 1;
+    }
+    
+    export function defaultQty(productOrUnit = '') {
+      return isWeightUnit(productOrUnit) ? 0.1 : 1;
+    }
+    
+    export function roundQty(value) {
+      const number = Number(value || 0);
+      if (!Number.isFinite(number)) return 0;
+      return Math.round(number * 1000) / 1000;
+    }
+    
+    export function normalizeQty(productOrUnit, value) {
+      const number = roundQty(value);
+    
+      if (number <= 0) return 0;
+    
+      if (isWeightUnit(productOrUnit)) {
+        return Math.max(minQty(productOrUnit), number);
+      }
+    
+      return Math.max(1, Math.round(number));
+    }
+    
+    export function formatQty(value) {
+      const number = Number(value || 0);
+      if (Number.isInteger(number)) return String(number);
+      return number.toFixed(3).replace(/\.?0+$/, '');
+    }
+
+
 // Kiçik bildiriş/toast göstərir.
 export function toast(message) {
   message = friendlyError(message);
