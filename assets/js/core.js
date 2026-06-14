@@ -71,7 +71,7 @@ export function money(value) {
     export function formatQty(value) {
       const number = Number(value || 0);
       if (Number.isInteger(number)) return String(number);
-      return number.toFixed(3).replace(/\.?0+$/, '');
+      return number.toFixed(3); // 2 rəqəm görsənməyi üçün ; sil və . dən başla .replace(/\.?0+$/, '');
     }
 
 
