@@ -2061,7 +2061,7 @@ function renderPreparationPurchase(rows) {
 }
 
 
-
+/*========================================================= EXCEL EXPORT HAZIRLANMA MƏRKƏZİ ==========================================================*/
 
 async function exportPreparationExcel() {
   if (!window.ExcelJS) {
@@ -2251,10 +2251,10 @@ async function exportPreparationExcel() {
   preparationRowsCache.forEach((row) => {
     const r = summarySheet.addRow([
       row.product_name,
-      `${row.total_quantity} ${row.unit}`,
-      `${row.stock} ${row.unit}`,
-      row.need_quantity > 0 ? `${row.need_quantity} ${row.unit}` : 'Yetərlidir',
-      `${row.remain_quantity} ${row.unit}`,
+      qtyUnit(row.total_quantity, row.unit),
+      qtyUnit(row.stock, row.unit),
+      row.need_quantity > 0 ? qtyUnit(row.need_quantity, row.unit) : 'Yetərlidir',
+      qtyUnit(row.remain_quantity, row.unit),
     ]);
 
     styleBody(r);
@@ -2274,9 +2274,9 @@ async function exportPreparationExcel() {
   preparationPurchaseCache.forEach((row) => {
     const r = summarySheet.addRow([
       row.product_name,
-      `${row.total_quantity} ${row.unit}`,
-      `${row.stock} ${row.unit}`,
-      `${row.need_quantity} ${row.unit}`,
+      qtyUnit(row.total_quantity, row.unit),
+      qtyUnit(row.stock, row.unit),
+      qtyUnit(row.need_quantity, row.unit),
       'Satınalma lazımdır',
     ]);
 
@@ -2425,7 +2425,7 @@ async function exportPreparationExcel() {
       const qty = Number(item?.quantity || 0);
 
       const cell = summarySheet.getCell(rowNo, productStartCol + productIndex);
-      cell.value = qty > 0 ? `${qty} ${product.unit}` : '';
+      cell.value = qty > 0 ? qtyUnit(qty, product.unit) : '';
       cell.border = border;
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -2490,14 +2490,14 @@ async function exportPreparationExcel() {
     const productKey = product.product_id || product.product_name;
 
     const totalCell = summarySheet.getCell(totalRowNo, productStartCol + index);
-    totalCell.value = `${product.total_quantity} ${product.unit}`;
+    totalCell.value = qtyUnit(product.total_quantity, product.unit);
     totalCell.font = { bold: true, color: { argb: 'FF064E3B' } };
     totalCell.fill = headerFill;
     totalCell.border = border;
     totalCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
     const remainCell = summarySheet.getCell(remainRowNo, productStartCol + index);
-    remainCell.value = `${Math.max(Number(remainingStockMap.get(productKey) || 0), 0)} ${product.unit}`;
+    remainCell.value = qtyUnit(Math.max(Number(remainingStockMap.get(productKey) || 0), 0), product.unit);
     remainCell.font = { bold: true, color: { argb: 'FF064E3B' } };
     remainCell.fill = headerFill;
     remainCell.border = border;
@@ -2675,7 +2675,7 @@ async function exportPreparationExcel() {
     items.forEach((item) => {
       const r = ws.addRow([
         item.product_name,
-        `${item.quantity} ${item.unit}`,
+        qtyUnit(item.quantity, item.unit),
         money(item.unit_price),
         money(item.line_total),
         '',
@@ -2761,7 +2761,7 @@ async function exportPreparationExcel() {
 }
 
 
-
+/*==============================================================================================================================================*/
 
 
 function printPreparationCenter() {
