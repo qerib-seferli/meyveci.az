@@ -23,7 +23,7 @@ const state = {
   favorites: new Set(),
   category: 'all',
   query: '',
-  visible: 12,
+  visible: 15,
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -55,21 +55,21 @@ async function initHome() {
 function setupHomeEvents() {
   $('#homeSearchInput')?.addEventListener('input', (event) => {
     state.query = event.target.value.trim().toLowerCase();
-    state.visible = 12;
+    state.visible = 15;
     renderProducts();
   });
 
   $('#clearHomeFilters')?.addEventListener('click', () => {
     state.query = '';
     state.category = 'all';
-    state.visible = 12;
+    state.visible = 15;
     $('#homeSearchInput').value = '';
     renderCategoryChips();
     renderProducts();
   });
 
   $('#loadMore')?.addEventListener('click', () => {
-    state.visible += 12;
+    state.visible += 15;
     renderProducts();
   });
 
@@ -90,7 +90,7 @@ function setupHomeEvents() {
     if (!nearBottom) return;
   
     autoLoadBusy = true;
-    state.visible += 12;
+    state.visible += 15;
     renderProducts();
   
     setTimeout(() => {
@@ -136,7 +136,7 @@ function setupHomeEvents() {
       window.addEventListener('meyveciCatalogFilter', (event) => {
         state.category = event.detail.category || 'all';
         state.query = String(event.detail.query || '').toLowerCase();
-        state.visible = 12;
+        state.visible = 15;
     
         if ($('#homeSearchInput')) $('#homeSearchInput').value = state.query;
     
@@ -350,7 +350,7 @@ function renderCategoryChips() {
   $$('#homeCategoryChips .category-card').forEach((button) => {
     button.addEventListener('click', () => {
       state.category = button.dataset.id;
-      state.visible = 12;
+      state.visible = 15;
       renderCategoryChips();
       renderProducts();
     });
