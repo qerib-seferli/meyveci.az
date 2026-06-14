@@ -13,6 +13,8 @@ import {
   requireAuth,
   byId,
   formData,
+  defaultQty,
+  normalizeQty,
 } from './core.js';
 
 import { initLayout } from './layout.js';
@@ -458,25 +460,38 @@ function getDiscount(price, oldPrice) {
   return Math.round(((Number(oldPrice) - Number(price)) / Number(oldPrice)) * 100);
 }
 
-async function addCart(productId) {
-  const activeUser = await requireAuth();
-  if (!activeUser) return;
 
-  const { data } = await supabase
-    .from('cart_items')
-    .select('id,quantity')
-    .eq('user_id', activeUser.id)
-    .eq('product_id', productId)
-    .maybeSingle();
+      async function addCart(productId) {
+        const activeUser = await requireAuth();
+        if (!activeUser) return;
+      
+        const product = state.products.find((item) => item.id === productId);
+      
+        const { data } = await supabase
+          .from('cart_items')
+          .select('id,quantity')
+          .eq('user_id', activeUser.id)
+          .eq('product_id', productId)
+          .maybeSingle();
+      
+        const addQty = defaultQty(product);
+        const nextQty = data
+          ? normalizeQty(product, Number(data.quantity || 0) + addQty)
+          : addQty;
+      
+        const response = data
+          ? await supabase.from('cart_items').update({ quantity: nextQty }).eq('id', data.id)
+          : await supabase.from('cart_items').insert({
+              user_id: activeUser.id,
+              product_id: productId,
+              quantity: nextQty,
+            });
+      
+        if (response.error) return toast(response.error.message);
+      
+        toast('Səbətə əlavə olundu');
+      }
 
-  const response = data
-    ? await supabase.from('cart_items').update({ quantity: data.quantity + 1 }).eq('id', data.id)
-    : await supabase.from('cart_items').insert({ user_id: activeUser.id, product_id: productId, quantity: 1 });
-
-  if (response.error) return toast(response.error.message);
-
-  toast('Səbətə əlavə olundu');
-}
 
 async function toggleFavorite(productId, button) {
   const activeUser = await requireAuth();
