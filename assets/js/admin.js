@@ -150,6 +150,19 @@ function formatDate(value) {
   return value ? new Date(value).toLocaleString('az-AZ') : '—';
 }
 
+
+  function qtyAdmin(value) {
+    const number = Number(value || 0);
+    if (!Number.isFinite(number)) return '0';
+    if (Number.isInteger(number)) return String(number);
+    return number.toFixed(3);
+  }
+  
+  function qtyUnit(value, unit = '') {
+    return `${qtyAdmin(value)} ${esc(unit || 'ədəd')}`;
+  }
+
+
 function formatDuration(ms) {
   if (!ms || ms < 0) return 'yoxdur';
 
@@ -1490,7 +1503,7 @@ function bindOrderEvents() {
                       </div>
       
                       <strong>
-                        ${item.quantity} × ${money(item.unit_price)}
+                        ${qtyAdmin(item.quantity)} × ${money(item.unit_price)}
                         =
                         ${money(item.line_total)}
                       </strong>
@@ -1991,16 +2004,16 @@ function renderPreparationSummary(rows) {
         <b>${esc(row.product_name)}</b>
         <small class="muted">${formatDate(row.first_order_date)} tarixindən başlayır</small>
       </td>
-      <td><b>${row.total_quantity} ${esc(row.unit)}</b></td>
-      <td>${row.stock} ${esc(row.unit)}</td>
+      <td><b>${qtyUnit(row.total_quantity, row.unit)}</b></td>
+      <td>${qtyUnit(row.stock, row.unit)}</td>
       <td>
         ${
           row.need_quantity > 0
-            ? `<span class="prep-badge danger">Alınmalıdır: ${row.need_quantity} ${esc(row.unit)}</span>`
+            ? `<span class="prep-badge danger">Alınmalıdır: ${qtyUnit(row.need_quantity, row.unit)}</span>`
             : `<span class="prep-badge success">Yetərlidir</span>`
         }
       </td>
-      <td>${row.remain_quantity} ${esc(row.unit)}</td>
+      <td>${qtyUnit(row.remain_quantity, row.unit)}</td>
     </tr>
   `).join('') || '<tr><td colspan="5">Bu tarix aralığında hazırlanacaq məhsul yoxdur.</td></tr>';
 }
@@ -2011,11 +2024,11 @@ function renderPreparationDetails(rows) {
       <summary>
         <span>
           <b>${esc(row.product_name)}</b>
-          <small>${row.total_quantity} ${esc(row.unit)} ümumi sifariş</small>
+          <small>${qtyUnit(row.total_quantity, row.unit)} ümumi sifariş</small>
         </span>
         ${
           row.need_quantity > 0
-            ? `<em class="prep-badge danger">Çatışmır: ${row.need_quantity} ${esc(row.unit)}</em>`
+            ? `<em class="prep-badge danger">Çatışmır: ${qtyUnit(row.need_quantity, row.unit)}</em>`
             : `<em class="prep-badge success">Anbarda var</em>`
         }
       </summary>
@@ -2028,7 +2041,7 @@ function renderPreparationDetails(rows) {
               <small>${esc(customer.order_code)} • ${formatDate(customer.created_at)} • ${statusAz(customer.status)}</small>
               ${customer.phone ? `<small>📞 ${esc(customer.phone)}</small>` : ''}
             </div>
-            <strong>${customer.quantity} ${esc(customer.unit)}</strong>
+            <strong>${qtyUnit(customer.quantity, customer.unit)}</strong>
           </div>
         `).join('')}
       </div>
@@ -2040,9 +2053,9 @@ function renderPreparationPurchase(rows) {
   $('#prepPurchaseTable').innerHTML = rows.map((row) => `
     <tr>
       <td><b>${esc(row.product_name)}</b></td>
-      <td>${row.total_quantity} ${esc(row.unit)}</td>
-      <td>${row.stock} ${esc(row.unit)}</td>
-      <td><span class="prep-badge danger">${row.need_quantity} ${esc(row.unit)}</span></td>
+      <td>${qtyUnit(row.total_quantity, row.unit)}</td>
+      <td>${qtyUnit(row.stock, row.unit)}</td>
+      <td><span class="prep-badge danger">${qtyUnit(row.need_quantity, row.unit)}</span></td>
     </tr>
   `).join('') || '<tr><td colspan="4">Satınalma ehtiyacı yoxdur.</td></tr>';
 }
