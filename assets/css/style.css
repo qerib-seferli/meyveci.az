@@ -7354,8 +7354,8 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
 
   z-index: 35;
 
-  /* Reklamın eni */
-  width: 170px;
+  /* Reklamın eni 170 - 90% olanda*/  
+  width: 165px;
 
   /* Hündürlüyü avtomatik olsun ki, alt menyuya girməsin */
   height: auto !important;
