@@ -2264,10 +2264,6 @@ function paymentStatusAz(status) {
 }
 
 
-function formatQty(value) {
-  const number = Number(value || 0);
-  return Number.isInteger(number) ? number : number.toFixed(2).replace(/\.?0+$/, '');
-}
 
 function unitLabel(unit = '') {
   const text = String(unit || 'ədəd').trim();
