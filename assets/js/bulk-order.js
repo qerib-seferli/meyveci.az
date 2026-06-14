@@ -15,6 +15,10 @@ import {
   formData,
   PLACEHOLDER,
   askLocation,
+  normalizeQty,
+  qtyStep,
+  roundQty,
+  formatQty,
 } from './core.js';
 
 import { initLayout } from './layout.js';
@@ -284,7 +288,7 @@ function productCard(product) {
         <div class="bulk-card-actions">
           <div class="bulk-qty-box">
             <button class="bulk-minus" type="button" data-id="${product.id}">−</button>
-            <input class="bulk-card-qty-input" data-id="${product.id}" type="number" min="0" step="${getQtyStep(product)}" value="${qty || ''}" placeholder="0">
+            <input class="bulk-card-qty-input" data-id="${product.id}" type="number" min="0" step="${getQtyStep(product)}" value="${qty ? formatQty(qty) : ''}" placeholder="0">
             <button class="bulk-plus" type="button" data-id="${product.id}">+</button>
           </div>
 
@@ -337,7 +341,7 @@ function renderSelected() {
           <div class="bulk-selected-actions">
             <div class="bulk-qty-box small">
               <button type="button" data-id="${product.id}" class="bulk-panel-minus">−</button>
-              <input type="number" min="0" step="${getQtyStep(product)}" value="${quantity}" data-id="${product.id}" class="bulk-panel-input">
+              <input type="number" min="0" step="${getQtyStep(product)}" value="${formatQty(quantity)}" data-id="${product.id}" class="bulk-panel-input">
               <button type="button" data-id="${product.id}" class="bulk-panel-plus">+</button>
             </div>
 
@@ -392,7 +396,7 @@ function setProductQuantity(productId, quantity) {
   const product = findProduct(productId);
   if (!product) return;
 
-  const qty = Math.max(0, roundQty(quantity));
+  const qty = normalizeQty(product, quantity);
 
   if (qty <= 0) {
     state.selected.delete(productId);
@@ -786,11 +790,11 @@ async function checkoutBulkOrder(event) {
       if (clearRes.error) throw clearRes.error;
     }
 
-    const cartRows = selectedItems.map(({ product, quantity }) => ({
-      user_id: activeUser.id,
-      product_id: product.id,
-      quantity: Math.max(1, Math.round(Number(quantity || 0))),
-    }));
+      const cartRows = selectedItems.map(({ product, quantity }) => ({
+        user_id: activeUser.id,
+        product_id: product.id,
+        quantity: normalizeQty(product, quantity),
+      }));
 
     const cartInsert = await supabase
       .from('cart_items')
@@ -899,13 +903,11 @@ function getDiscount(price, oldPrice) {
   return Math.round(((Number(oldPrice) - Number(price)) / Number(oldPrice)) * 100);
 }
 
+
 function getQtyStep(product) {
-  return 1;
+  return qtyStep(product);
 }
 
-function roundQty(value) {
-  return Math.max(0, Math.round(Number(value || 0)));
-}
 
 function validCheckoutPoint(lat, lng) {
   const nLat = Number(lat);
