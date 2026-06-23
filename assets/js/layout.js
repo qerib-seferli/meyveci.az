@@ -489,7 +489,10 @@ function renderSiteFooter() {
           <a href="${root}payment-security.html">Ödəniş təhlükəsizliyi</a>
           <span>SSL Secure Checkout</span>
           <span>3D Secure dəstəyi</span>
-        </div>
+        </div>                
+      </div>
+
+
 
                <div class="footer-apps">
                   <a class="store-badge-img" href="${root}downloads/Meyveci.apk" download>
@@ -504,9 +507,8 @@ function renderSiteFooter() {
                     <img src="${root}downloads/Microsoft_Store.png" alt="Windows Store">
                   </a>
                 </div>
-                
-        </div>
 
+                
 
       <div class="footer-bottom">
         <span class="footer-copy-left">
