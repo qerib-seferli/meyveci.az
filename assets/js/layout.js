@@ -456,27 +456,29 @@ function renderSiteFooter() {
   footer.innerHTML = `
     <div class="site-footer-inner">
 
-          <div class="footer-apps">
-            <a class="store-badge-img" href="${root}downloads/Meyveci.apk" download>
-              <img src="${root}downloads/Play_Store.png" alt="Google Play">
-            </a>
-    
-            <button id="footerIOSInstallBtn" class="store-badge-img" type="button">
-              <img src="${root}downloads/iOS_App.png" alt="App Store">
-            </button>
-    
-            <a class="store-badge-img" href="${root}downloads/MeyveciSetup.exe" download>
-              <img src="${root}downloads/Microsoft_Store.png" alt="Windows Store">
-            </a>
-          </div>
 
-      
       <div class="footer-brand">
         <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
         <p>Meyvəçi.az — təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
         <small>“MAREHO” MMC • VÖEN: 3105652551</small>
       </div>
 
+
+                <div class="footer-apps">
+                  <a class="store-badge-img" href="${root}downloads/Meyveci.apk" download>
+                    <img src="${root}downloads/Play_Store.png" alt="Google Play">
+                  </a>
+          
+                  <button id="footerIOSInstallBtn" class="store-badge-img" type="button">
+                    <img src="${root}downloads/iOS_App.png" alt="App Store">
+                  </button>
+          
+                  <a class="store-badge-img" href="${root}downloads/MeyveciSetup.exe" download>
+                    <img src="${root}downloads/Microsoft_Store.png" alt="Windows Store">
+                  </a>
+                </div>
+
+          
       <div class="footer-grid">
         <div>
           <h4>Şirkət</h4>
