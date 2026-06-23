@@ -7653,6 +7653,50 @@ body[data-page="home"] .site-footer {
     font-size: 11px;
   }
 }
+
+
+
+/* Footer app hissəsini yığcam və ortalı edir */
+.site-footer .footer-brand {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 6px !important;
+  margin-bottom: 16px !important;
+}
+
+.site-footer .footer-brand img {
+  margin: 0 auto 2px !important;
+}
+
+.site-footer .footer-brand p {
+  margin: 0 !important;
+}
+
+.footer-app-title {
+  margin: 4px 0 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  text-align: center !important;
+}
+
+.footer-app-title b,
+.footer-app-title span {
+  display: block !important;
+  text-align: center !important;
+}
+
+.footer-brand .footer-apps {
+  margin: 4px auto 6px !important;
+}
+
+.site-footer .footer-brand small {
+  margin-top: 0 !important;
+  text-align: center !important;
+}
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 
