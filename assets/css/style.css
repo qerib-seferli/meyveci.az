@@ -7589,6 +7589,70 @@ body[data-page="home"] .site-footer {
   margin-top: 0 !important;
 }
 
+
+
+
+.footer-brand {
+  text-align: center;
+}
+
+.footer-brand img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-app-title {
+  margin: 10px auto 8px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+}
+
+.footer-app-title b {
+  color: #047857;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.footer-app-title span {
+  color: #ca8a04;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.footer-brand .footer-apps {
+  margin: 8px auto 12px;
+}
+
+.footer-brand small {
+  display: block;
+  margin-top: 4px;
+}
+
+@media (min-width: 900px) {
+  .footer-brand {
+    max-width: 720px;
+    margin: 0 auto 22px;
+  }
+
+  .footer-brand p {
+    margin-bottom: 4px;
+  }
+
+  .footer-brand .footer-apps {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-app-title b {
+    font-size: 15px;
+  }
+
+  .footer-app-title span {
+    font-size: 11px;
+  }
+}
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 
