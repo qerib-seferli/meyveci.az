@@ -439,6 +439,8 @@ function openNotificationModal(title, body, dateText = '') {
     }
 
 
+
+
 function renderSiteFooter() {
   if (document.querySelector('.site-footer')) return;
    if (
@@ -453,6 +455,22 @@ function renderSiteFooter() {
   footer.className = 'site-footer';
   footer.innerHTML = `
     <div class="site-footer-inner">
+
+          <div class="footer-apps">
+            <a class="store-badge-img" href="${root}downloads/Meyveci.apk" download>
+              <img src="${root}downloads/Play_Store.png" alt="Google Play">
+            </a>
+    
+            <button id="footerIOSInstallBtn" class="store-badge-img" type="button">
+              <img src="${root}downloads/iOS_App.png" alt="App Store">
+            </button>
+    
+            <a class="store-badge-img" href="${root}downloads/MeyveciSetup.exe" download>
+              <img src="${root}downloads/Microsoft_Store.png" alt="Windows Store">
+            </a>
+          </div>
+
+      
       <div class="footer-brand">
         <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
         <p>Meyvəçi.az — təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
@@ -518,7 +536,65 @@ function renderSiteFooter() {
   `;
 
   document.body.appendChild(footer);
+  initFooterAppButtons();
 }
+
+
+
+function initFooterAppButtons() {
+  const iosBtn = document.getElementById('footerIOSInstallBtn');
+  if (!iosBtn) return;
+
+  iosBtn.addEventListener('click', () => {
+    showFooterIOSInstallModal();
+  });
+}
+
+function showFooterIOSInstallModal() {
+  let modal = document.getElementById('footerIOSInstallModal');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'footerIOSInstallModal';
+    modal.className = 'modal-backdrop footer-ios-modal-backdrop';
+    modal.innerHTML = `
+      <div class="modal-card footer-ios-modal">
+        <div class="modal-head">
+          <b>iPhone üçün Meyvəçi tətbiqi</b>
+          <button id="footerIOSInstallClose" class="mini-x" type="button">×</button>
+        </div>
+
+        <div class="footer-ios-body">
+          <div class="footer-ios-logo">🍏</div>
+          <h3>iPhone-da tətbiq kimi istifadə et</h3>
+
+          <ol>
+            <li>Saytı <b>Safari</b> ilə aç.</li>
+            <li><b>Paylaş / Share</b> düyməsinə toxun.</li>
+            <li><b>Add to Home Screen</b> seç.</li>
+            <li><b>Əlavə et</b> düyməsinə vur.</li>
+          </ol>
+
+          <p>Meyvəçi ana ekranda ayrıca tətbiq kimi görünəcək.</p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('footerIOSInstallClose')?.addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.remove('show');
+    });
+  }
+
+  modal.classList.add('show');
+}
+
+
 
 
 function getRootPath() {
