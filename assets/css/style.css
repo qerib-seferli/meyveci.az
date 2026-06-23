@@ -7697,6 +7697,17 @@ body[data-page="home"] .site-footer {
   margin-top: 0 !important;
   text-align: center !important;
 }
+
+
+/* ⭐⭐⭐⭐⭐ 5000+ istifadəçi - İri görsənsin*/
+.footer-app-title span {
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  color: #d97706 !important;
+  text-shadow:
+    0 0 8px rgba(245, 158, 11, .25),
+    0 0 16px rgba(245, 158, 11, .15);
+}
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 
