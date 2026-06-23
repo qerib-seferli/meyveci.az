@@ -7573,6 +7573,22 @@ body[data-page="favorites"] .app-shell {
   }
 }
 
+
+
+/* Partnyorlar ilə app düymələri arası boşluğu azaldır */
+body[data-page="home"] section:has(#partnersGrid) {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+body[data-page="home"] #partnersGrid {
+  padding-bottom: 0 !important;
+}
+
+body[data-page="home"] .site-footer {
+  margin-top: 0 !important;
+}
+
 /*=============================================================================================================*/
 /*=============================================================================================================*/
 
