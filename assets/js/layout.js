@@ -458,11 +458,11 @@ function renderSiteFooter() {
 
       <div class="footer-brand">
         <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
-        <p>Meyvəçi.az — təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
+        <p>Təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
 
 
               <div class="footer-app-title">
-                <b>🍓 Meyvəçi tətbiqini yüklə</b>
+                <b>Meyvəçi tətbiqini yüklə</b>
                 <span>⭐⭐⭐⭐⭐ 5000+ istifadəçi</span>
               </div>
 
