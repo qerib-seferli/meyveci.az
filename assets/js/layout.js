@@ -489,7 +489,7 @@ function renderSiteFooter() {
           <h4>Müştəri xidməti</h4>
           <a href="${root}refund.html">Geri qaytarma siyasəti</a>
           <a href="https://wa.me/994993909595" target="_blank" rel="noopener">WhatsApp dəstək</a>
-          <a href="mailto:meyveci@proton.me">Email dəstək</a>
+          <a href="mailto:info@meyveci.az">Email dəstək</a>
         </div>
 
         <div>
