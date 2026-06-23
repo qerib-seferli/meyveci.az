@@ -439,9 +439,10 @@ function openNotificationModal(title, body, dateText = '') {
     }
 
 
+
 function renderSiteFooter() {
   if (document.querySelector('.site-footer')) return;
-   if (
+  if (
     location.pathname.includes('/admin/') ||
     location.pathname.includes('/courier/') ||
     location.pathname.includes('/warehouse/')
@@ -453,39 +454,76 @@ function renderSiteFooter() {
   footer.className = 'site-footer';
   footer.innerHTML = `
     <div class="site-footer-inner">
-      <div class="footer-brand">
-        <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
-        <p>Meyvəçi.az — təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
-        <small>“MAREHO” MMC • VÖEN: 3105652551</small>
+
+      <div class="footer-apps">
+        <div class="footer-apps-text">
+          <span>Program təminatı</span>
+          <h3>Meyvəçi tətbiqini yüklə</h3>
+          <p>Android, iPhone və Windows cihazlarında Meyvəçi.az-ı tətbiq kimi istifadə et.</p>
+        </div>
+
+        <div class="app-download-row">
+          <a class="store-badge store-google" href="${root}downloads/Meyveci.apk" download>
+            <span class="store-icon">▶</span>
+            <span>
+              <small>GET IT ON</small>
+              <b>Google Play</b>
+            </span>
+          </a>
+
+          <button id="footerIOSInstallBtn" class="store-badge store-apple" type="button">
+            <span class="store-icon"></span>
+            <span>
+              <small>Download on the</small>
+              <b>App Store</b>
+            </span>
+          </button>
+
+          <a class="store-badge store-windows" href="${root}downloads/MeyveciSetup.exe" download>
+            <span class="store-icon">⊞</span>
+            <span>
+              <small>Available on</small>
+              <b>Windows</b>
+            </span>
+          </a>
+        </div>
       </div>
 
-      <div class="footer-grid">
-        <div>
-          <h4>Şirkət</h4>
-          <a href="${root}index.html">Ana səhifə</a>
-          <a href="${root}faq.html">Tez-tez verilən suallar</a>
-          <a href="${root}delivery.html">Çatdırılma</a>
+      <div class="site-footer-main">
+        <div class="footer-brand">
+          <img src="${root}assets/img/logo/Meyveci-logo.png" alt="Meyvəçi.az">
+          <p>Meyvəçi.az — təzə məhsulların təhlükəsiz və rahat onlayn sifarişi.</p>
+          <small>“MAREHO” MMC • VÖEN: 3105652551</small>
         </div>
 
-        <div>
-          <h4>Müştəri xidməti</h4>
-          <a href="${root}refund.html">Geri qaytarma siyasəti</a>
-          <a href="https://wa.me/994993909595" target="_blank" rel="noopener">WhatsApp dəstək</a>
-          <a href="mailto:meyveci@proton.me">Email dəstək</a>
-        </div>
+        <div class="footer-grid">
+          <div>
+            <h4>Şirkət</h4>
+            <a href="${root}index.html">Ana səhifə</a>
+            <a href="${root}faq.html">Tez-tez verilən suallar</a>
+            <a href="${root}delivery.html">Çatdırılma</a>
+          </div>
 
-        <div>
-          <h4>Hüquqi</h4>
-          <a href="${root}privacy.html">Məxfilik siyasəti</a>
-          <a href="${root}terms.html">İstifadə şərtləri</a>
-          <a href="${root}security.html">Təhlükəsizlik</a>
-        </div>
+          <div>
+            <h4>Müştəri xidməti</h4>
+            <a href="${root}refund.html">Geri qaytarma siyasəti</a>
+            <a href="https://wa.me/994993909595" target="_blank" rel="noopener">WhatsApp dəstək</a>
+            <a href="mailto:meyveci@proton.me">Email dəstək</a>
+          </div>
 
-        <div>
-          <h4>Ödəniş və təhlükəsizlik</h4>
-          <a href="${root}payment-security.html">Ödəniş təhlükəsizliyi</a>
-          <span>SSL Secure Checkout</span>
-          <span>3D Secure dəstəyi</span>
+          <div>
+            <h4>Hüquqi</h4>
+            <a href="${root}privacy.html">Məxfilik siyasəti</a>
+            <a href="${root}terms.html">İstifadə şərtləri</a>
+            <a href="${root}security.html">Təhlükəsizlik</a>
+          </div>
+
+          <div>
+            <h4>Ödəniş və təhlükəsizlik</h4>
+            <a href="${root}payment-security.html">Ödəniş təhlükəsizliyi</a>
+            <span>SSL Secure Checkout</span>
+            <span>3D Secure dəstəyi</span>
+          </div>
         </div>
       </div>
 
@@ -494,31 +532,84 @@ function renderSiteFooter() {
           © 2026 Meyveci.az. Bütün hüquqlar qorunur.
           “MAREHO” MMC tərəfindən idarə olunur.
         </span>
-      
+
         <div class="footer-socials">
           <a href="https://instagram.com/meyveci.aze" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm0 2h10c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3zm10.5 1a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12 7a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6z"/>
-            </svg>
-      
             <span>@meyveci.aze</span>
           </a>
-      
+
           <a href="https://tiktok.com/@meyveci.aze" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 8.3a6.5 6.5 0 01-3.8-1.2v8.2a5.3 5.3 0 11-5.3-5.3c.3 0 .6 0 .9.1v2.7a2.7 2.7 0 10 1.8 2.5V2h2.6a3.9 3.9 0 003.8 3.8v2.5z"/>
-            </svg>
-      
             <span>@meyveci.aze</span>
           </a>
         </div>
       </div>
-      
     </div>
   `;
 
   document.body.appendChild(footer);
+  initFooterAppButtons();
 }
+
+
+
+
+function initFooterAppButtons() {
+  const iosBtn = document.getElementById('footerIOSInstallBtn');
+  if (!iosBtn) return;
+
+  iosBtn.addEventListener('click', () => {
+    showFooterIOSInstallModal();
+  });
+}
+
+function showFooterIOSInstallModal() {
+  let modal = document.getElementById('footerIOSInstallModal');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'footerIOSInstallModal';
+    modal.className = 'modal-backdrop footer-ios-modal-backdrop';
+    modal.innerHTML = `
+      <div class="modal-card footer-ios-modal">
+        <div class="modal-head">
+          <b>iPhone üçün Meyvəçi tətbiqi</b>
+          <button id="footerIOSInstallClose" class="mini-x" type="button">×</button>
+        </div>
+
+        <div class="footer-ios-body">
+          <div class="footer-ios-logo">🍏</div>
+
+          <h3>App Store olmadan iPhone-a əlavə et</h3>
+
+          <ol>
+            <li>Saytı <b>Safari</b> brauzerində aç.</li>
+            <li>Aşağıdakı <b>Paylaş / Share</b> düyməsinə toxun.</li>
+            <li><b>Add to Home Screen</b> seç.</li>
+            <li><b>Əlavə et</b> düyməsinə vur.</li>
+          </ol>
+
+          <p>
+            Bundan sonra Meyvəçi ana ekranda ayrıca tətbiq kimi görünəcək.
+          </p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('footerIOSInstallClose')?.addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.remove('show');
+    });
+  }
+
+  modal.classList.add('show');
+}
+
+
 
 
 function getRootPath() {
