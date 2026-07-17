@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Hesabın silinməsi — Meyvəçi</title>
+  <meta
+    name="description"
+    content="Meyvəçi hesabınızın və hesabla əlaqəli şəxsi məlumatların silinməsini tələb edin."
+  >
+
+  <link rel="icon" href="assets/img/logo/Cilek-logo.png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #16372b;
+      background:
+        radial-gradient(circle at top left, rgba(219, 0, 93, 0.08), transparent 34%),
+        linear-gradient(145deg, #f6fff8, #ecfff5);
+    }
+
+    .page-header {
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid rgba(22, 101, 52, 0.12);
+      box-shadow: 0 8px 24px rgba(22, 101, 52, 0.06);
+    }
+
+    .header-inner {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo {
+      width: 180px;
+      max-width: 55vw;
+      height: auto;
+      display: block;
+    }
+
+    .home-link {
+      color: #08783f;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 38px auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 101, 52, 0.12);
+      border-radius: 26px;
+      padding: clamp(24px, 5vw, 48px);
+      box-shadow: 0 22px 60px rgba(22, 101, 52, 0.10);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #e9fff1;
+      color: #08783f;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    h1 {
+      margin: 20px 0 12px;
+      font-size: clamp(30px, 6vw, 48px);
+      line-height: 1.1;
+      color: #075c35;
+    }
+
+    h2 {
+      margin-top: 34px;
+      font-size: 23px;
+      color: #075c35;
+    }
+
+    p,
+    li {
+      font-size: 17px;
+      line-height: 1.7;
+      color: #49635a;
+    }
+
+    ul,
+    ol {
+      padding-left: 24px;
+    }
+
+    .notice {
+      margin-top: 26px;
+      padding: 20px;
+      border-radius: 18px;
+      background: #fff9e8;
+      border: 1px solid #f4dda1;
+    }
+
+    .delete-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 58px;
+      margin-top: 18px;
+      padding: 14px 22px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #dc005d, #b8004d);
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: 0 12px 28px rgba(220, 0, 93, 0.22);
+    }
+
+    .delete-button:hover {
+      filter: brightness(0.96);
+    }
+
+    .contact-box {
+      margin-top: 26px;
+      padding: 20px;
+      border-radius: 18px;
+      background: #effff5;
+      border: 1px solid #c9efd8;
+    }
+
+    a {
+      color: #08783f;
+    }
+
+    footer {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto 36px;
+      text-align: center;
+      color: #6d8179;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .header-inner {
+        min-height: 70px;
+      }
+
+      .logo {
+        width: 145px;
+      }
+
+      .home-link {
+        font-size: 14px;
+      }
+
+      main {
+        margin-top: 22px;
+      }
+
+      .card {
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="page-header">
+    <div class="header-inner">
+      <a href="https://meyveci.az" aria-label="Meyvəçi ana səhifəsi">
+        <img
+          class="logo"
+          src="assets/img/logo/Meyveci-logo.png"
+          alt="Meyvəçi"
+        >
+      </a>
+
+      <a class="home-link" href="https://meyveci.az">
+        Ana səhifə
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <span class="badge">Hesab və məlumatların idarə edilməsi</span>
+
+      <h1>Meyvəçi hesabının silinməsi</h1>
+
+      <p>
+        Bu səhifə vasitəsilə Meyvəçi hesabınızın və hesabınızla əlaqəli
+        şəxsi məlumatların silinməsini tələb edə bilərsiniz.
+      </p>
+
+      <h2>Hesabın silinməsini necə tələb etmək olar?</h2>
+
+      <ol>
+        <li>Aşağıdakı “Hesabın silinməsini tələb et” düyməsinə toxunun.</li>
+        <li>
+          Meyvəçi hesabınızda istifadə etdiyiniz telefon nömrəsini və ya
+          e-poçt ünvanını məktubda qeyd edin.
+        </li>
+        <li>
+          Təhlükəsizlik məqsədilə hesabın sizə məxsus olduğunu təsdiqləməyiniz
+          tələb oluna bilər.
+        </li>
+        <li>
+          Sorğu yoxlanıldıqdan sonra hesabın silinməsi barədə sizə məlumat veriləcək.
+        </li>
+      </ol>
+
+      <a
+        class="delete-button"
+        href="mailto:info@meyveci.az?subject=Meyv%C9%99%C3%A7i%20hesab%C4%B1n%C4%B1n%20silinm%C9%99si%20t%C9%99l%C9%99bi&body=Salam.%0A%0AMeyv%C9%99%C3%A7i%20hesab%C4%B1m%C4%B1n%20v%C9%99%20hesabla%20%C9%99laq%C9%99li%20m%C9%99lumatlar%C4%B1m%C4%B1n%20silinm%C9%99sini%20t%C9%99l%C9%99b%20edir%C9%99m.%0A%0AHesabda%20istifad%C9%99%20etdiyim%20telefon%20n%C3%B6mr%C9%99si%20v%C9%99%20ya%20e-po%C3%A7t%3A%20"
+      >
+        Hesabın silinməsini tələb et
+      </a>
+
+      <h2>Silinəcək məlumatlar</h2>
+
+      <ul>
+        <li>İstifadəçi profili, ad və soyad məlumatları;</li>
+        <li>Telefon nömrəsi və e-poçt ünvanı;</li>
+        <li>Çatdırılma ünvanları və saxlanılmış yerləşmə məlumatları;</li>
+        <li>Sevimli məhsullar və tətbiq seçimləri;</li>
+        <li>Push bildiriş qeydiyyatı və cihazla əlaqəli tokenlər;</li>
+        <li>Bonus hesabı və hesabla əlaqəli digər şəxsi məlumatlar.</li>
+      </ul>
+
+      <h2>Saxlanıla bilən məlumatlar</h2>
+
+      <p>
+        Qanunvericilik, maliyyə uçotu, ödəniş mübahisələri, fırıldaqçılığın
+        qarşısının alınması və təhlükəsizlik tələbləri səbəbilə bəzi sifariş
+        və ödəniş qeydləri müəyyən müddət ərzində saxlanıla bilər.
+        Bu məlumatlar yalnız tələb olunan məqsədlər üçün istifadə edilir.
+      </p>
+
+      <div class="notice">
+        <strong>Qeyd:</strong>
+        Hesab silindikdən sonra bonuslar, saxlanılmış ünvanlar, sevimlilər və
+        digər hesab məlumatları geri qaytarılmaya bilər.
+      </div>
+
+      <div class="contact-box">
+        <strong>Əlaqə:</strong>
+        <a href="mailto:info@meyveci.az">info@meyveci.az</a>
+
+        <br><br>
+
+        Məxfilik siyasəti:
+        <a href="https://meyveci.az/privacy.html">
+          https://meyveci.az/privacy.html
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © Meyvəçi.az — Bütün hüquqlar qorunur.
+  </footer>
+</body>
+</html>
