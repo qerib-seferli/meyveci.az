@@ -8263,3 +8263,398 @@ body[data-page="home"] .site-footer {
 }
 /*=============================================================================================================*/
 /*=============================================================================================================*/
+
+/* ============================================================
+   PRODUCT.HTML — FINAL PRO DETAIL LAYOUT
+   Kateqoriya + vahid + stok eyni sətirdə.
+   Köhnə və yeni qiymət düzgün qiymət blokunda.
+   ============================================================ */
+
+/* Məhsul məlumat hissəsi */
+.product-detail-pro .product-detail-info {
+  min-width: 0 !important;
+  padding: 4px 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+/* Kateqoriya, vahid və stok eyni sətirdə */
+.detail-meta-line {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+
+  gap: 8px !important;
+  margin: 0 0 10px !important;
+}
+
+.detail-meta-line > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: fit-content !important;
+  min-height: 34px !important;
+
+  padding: 7px 12px !important;
+  border: 1px solid rgba(34, 197, 94, 0.14) !important;
+  border-radius: 999px !important;
+
+  color: #047857 !important;
+  background: rgba(220, 252, 231, 0.92) !important;
+
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+
+.detail-meta-line .detail-category {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 252, 231, 0.96),
+    rgba(236, 253, 245, 0.96)
+  ) !important;
+}
+
+.detail-meta-line .detail-unit {
+  min-width: 54px !important;
+}
+
+.detail-meta-line .detail-stock.in-stock {
+  color: #047857 !important;
+  background: #d9fbe7 !important;
+}
+
+.detail-meta-line .detail-stock.ask-stock {
+  color: #92400e !important;
+  background: #fef3c7 !important;
+  border-color: rgba(245, 158, 11, 0.24) !important;
+}
+
+/* Köhnə detail-unit-line artıq istifadə olunmur */
+.product-detail-pro .detail-unit-line {
+  display: none !important;
+}
+
+/* Məhsul adı */
+.product-detail-pro .product-detail-info h1 {
+  margin: 2px 0 18px !important;
+
+  font-size: clamp(38px, 4.5vw, 62px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.055em !important;
+
+  color: #071b10 !important;
+}
+
+/* Qiymət paneli */
+.product-detail-pro .detail-price-panel {
+  position: relative !important;
+
+  width: 100% !important;
+  height: auto !important;
+  min-height: 104px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 20px !important;
+
+  padding: 16px 94px 15px 18px !important;
+
+  overflow: hidden !important;
+  border-radius: 24px !important;
+
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
+/* Yeni və köhnə qiymətin yerləşdiyi sol blok */
+.detail-price-main {
+  min-width: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: max-content minmax(0, 1fr) !important;
+  grid-template-areas:
+    "old old"
+    "price price"
+    "label label" !important;
+
+  align-content: center !important;
+  justify-items: start !important;
+
+  gap: 2px !important;
+}
+
+/* Köhnə qiymət artıq absolute deyil */
+.product-detail-pro .detail-price-main .old-price {
+  position: relative !important;
+  inset: auto !important;
+
+  grid-area: old !important;
+
+  display: inline-block !important;
+
+  width: fit-content !important;
+  max-width: none !important;
+
+  margin: 0 0 1px !important;
+  padding: 0 !important;
+
+  color: #8b9290 !important;
+
+  font-size: 14px !important;
+  line-height: 1.1 !important;
+  font-weight: 750 !important;
+
+  text-decoration: line-through !important;
+  text-decoration-color: #ef4444 !important;
+  text-decoration-thickness: 2px !important;
+
+  white-space: nowrap !important;
+}
+
+/* Köhnə xüsusi qırmızı xətti ləğv edir */
+.product-detail-pro .detail-price-main .old-price::after {
+  display: none !important;
+  content: none !important;
+}
+
+.product-detail-pro .detail-price-main .price {
+  grid-area: price !important;
+
+  display: block !important;
+
+  margin: 0 !important;
+
+  color: #00865a !important;
+
+  font-size: clamp(38px, 4.8vw, 54px) !important;
+  line-height: 0.98 !important;
+  font-weight: 1000 !important;
+  letter-spacing: -0.045em !important;
+
+  white-space: nowrap !important;
+}
+
+.product-detail-pro .detail-price-main small {
+  grid-area: label !important;
+
+  display: block !important;
+
+  margin-top: 3px !important;
+
+  color: #e50063 !important;
+
+  font-size: 11px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+/* Endirim bayrağı sağ tərəfdə sabit qalır */
+.product-detail-pro .detail-price-panel .discount-flag {
+  position: absolute !important;
+
+  top: 0 !important;
+  right: 18px !important;
+  bottom: auto !important;
+  left: auto !important;
+
+  width: 66px !important;
+  min-width: 66px !important;
+  height: 88px !important;
+
+  margin: 0 !important;
+}
+
+/* Köhnə absolute qiymət qaydasını tam söndürür */
+.product-detail-pro .price-panel > .old-price {
+  position: static !important;
+  display: none !important;
+}
+
+/* Məhsul açıqlaması */
+.product-detail-pro .detail-desc {
+  margin: 18px 0 0 !important;
+
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+/* Düymələr */
+.product-detail-pro .detail-actions {
+  margin-top: 20px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+
+  gap: 12px !important;
+}
+
+.product-detail-pro .detail-actions .btn {
+  width: auto !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+
+  padding: 10px 20px !important;
+}
+
+/* ============================================================
+   PLANŞET VƏ TELEFON
+   ============================================================ */
+
+@media (max-width: 700px) {
+  .product-detail-pro {
+    padding: 12px !important;
+    gap: 12px !important;
+    border-radius: 25px !important;
+  }
+
+  .product-detail-pro .product-detail-info {
+    padding: 2px 1px 4px !important;
+  }
+
+  /* Meta məlumatları telefonda da eyni sətirdə saxlayır */
+  .detail-meta-line {
+    flex-wrap: nowrap !important;
+
+    gap: 6px !important;
+    margin: 0 0 9px !important;
+
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+
+  .detail-meta-line::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .detail-meta-line > span {
+    flex: 0 0 auto !important;
+
+    min-height: 31px !important;
+
+    padding: 6px 10px !important;
+
+    font-size: 11.5px !important;
+  }
+
+  .detail-meta-line .detail-unit {
+    min-width: 44px !important;
+  }
+
+  .product-detail-pro .product-detail-info h1 {
+    margin: 1px 0 12px !important;
+
+    font-size: 31px !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  /* Mobil qiymət paneli daha yığcam */
+  .product-detail-pro .detail-price-panel {
+    min-height: 88px !important;
+    height: auto !important;
+
+    padding: 12px 72px 11px 13px !important;
+
+    border-radius: 19px !important;
+  }
+
+  .product-detail-pro .detail-price-main .old-price {
+    font-size: 13px !important;
+    line-height: 1.1 !important;
+
+    margin-bottom: 2px !important;
+  }
+
+  .product-detail-pro .detail-price-main .price {
+    font-size: 30px !important;
+    line-height: 1 !important;
+  }
+
+  .product-detail-pro .detail-price-main small {
+    margin-top: 3px !important;
+    font-size: 10px !important;
+  }
+
+  .product-detail-pro .detail-price-panel .discount-flag {
+    right: 10px !important;
+
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 78px !important;
+  }
+
+  .product-detail-pro .detail-price-panel .discount-flag b {
+    font-size: 19px !important;
+  }
+
+  .product-detail-pro .detail-price-panel .discount-flag span {
+    font-size: 8px !important;
+  }
+
+  .product-detail-pro .detail-desc {
+    margin-top: 12px !important;
+
+    font-size: 13.5px !important;
+    line-height: 1.42 !important;
+  }
+
+  .product-detail-pro .detail-actions {
+    margin-top: 13px !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+
+    gap: 9px !important;
+  }
+
+  .product-detail-pro .detail-actions .btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+
+    font-size: 13px !important;
+  }
+}
+
+/* Çox dar telefon */
+@media (max-width: 380px) {
+  .detail-meta-line {
+    gap: 5px !important;
+  }
+
+  .detail-meta-line > span {
+    padding: 6px 8px !important;
+    font-size: 10.5px !important;
+  }
+
+  .product-detail-pro .product-detail-info h1 {
+    font-size: 28px !important;
+  }
+
+  .product-detail-pro .detail-price-panel {
+    min-height: 84px !important;
+    padding-left: 12px !important;
+    padding-right: 66px !important;
+  }
+
+  .product-detail-pro .detail-price-main .old-price {
+    font-size: 12px !important;
+  }
+
+  .product-detail-pro .detail-price-main .price {
+    font-size: 27px !important;
+  }
+
+  .product-detail-pro .detail-price-panel .discount-flag {
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 74px !important;
+  }
+}
