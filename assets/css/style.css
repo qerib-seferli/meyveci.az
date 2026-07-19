@@ -9011,3 +9011,156 @@ body[data-page="home"] .site-footer {
     font-size: 10.5px !important;
   }
 }
+
+
+/* ===========================================================================================================*/
+/* ===========================================================================================================*/
+/* ============================================================
+   PRODUCT DETAIL - PREMIUM GOLD DISCOUNT EFFECT
+   Yalnız endirimli məhsullar üçün
+   ============================================================ */
+
+.product-detail-pro.detail-discount {
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(255,230,120,.30),
+      transparent 28%),
+
+    radial-gradient(circle at bottom right,
+      rgba(255,215,0,.16),
+      transparent 35%),
+
+    linear-gradient(
+      135deg,
+      #fffef7 0%,
+      #fff9df 38%,
+      #fffdf4 100%
+    ) !important;
+
+  border: 1px solid rgba(233,179,8,.55) !important;
+
+  box-shadow:
+      0 14px 42px rgba(245,158,11,.12),
+      0 0 28px rgba(255,215,0,.12),
+      inset 0 0 0 1px rgba(255,255,255,.75) !important;
+}
+
+
+/* Şəkil hissəsi */
+
+.product-detail-pro.detail-discount .product-detail-image{
+
+  box-shadow:
+      0 0 0 1px rgba(255,220,40,.28),
+      0 12px 34px rgba(255,215,0,.14) !important;
+
+}
+
+
+/* Qiymət paneli */
+
+.product-detail-pro.detail-discount .detail-commerce-card{
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.98),
+      rgba(255,252,235,.96)
+    ) !important;
+
+  border:1px solid rgba(255,210,60,.36) !important;
+
+  box-shadow:
+      0 10px 28px rgba(255,215,0,.10),
+      inset 0 0 22px rgba(255,245,180,.28) !important;
+
+}
+
+
+/* Düymə */
+
+.product-detail-pro.detail-discount .btn-primary{
+
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #0f8a40
+    ) !important;
+
+  box-shadow:
+      0 10px 24px rgba(245,158,11,.18),
+      0 0 18px rgba(255,215,0,.18) !important;
+
+}
+
+
+/* Endirim badge */
+
+.product-detail-pro.detail-discount .detail-discount-chip{
+
+  background:
+      linear-gradient(
+        135deg,
+        #fde047,
+        #facc15,
+        #eab308
+      ) !important;
+
+  color:#6b3f00 !important;
+
+  border:1px solid rgba(180,120,0,.20);
+
+  box-shadow:
+      0 6px 18px rgba(234,179,8,.35);
+
+}
+
+
+/* Yumşaq hover */
+
+@media (hover:hover){
+
+.product-detail-pro.detail-discount:hover{
+
+    box-shadow:
+      0 18px 48px rgba(245,158,11,.18),
+      0 0 36px rgba(255,215,0,.18),
+      inset 0 0 0 1px rgba(255,255,255,.82) !important;
+
+    transform:translateY(-2px);
+
+}
+
+}
+
+/* ==============================MƏHSUL KARTLARININ ENDİRİMLİ OLANLARININ SARI RƏNGİ====================================*/
+.discount-product-card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 254, 240, 0.98),
+      rgba(255, 250, 214, 0.94)
+    ) !important;
+
+  border-color: rgba(245, 190, 20, 0.52) !important;
+
+  box-shadow:
+    0 12px 28px rgba(217, 150, 0, 0.12),
+    0 0 18px rgba(250, 204, 21, 0.10) !important;
+}
+
+.discount-product-card .product-media {
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.88),
+      rgba(255, 248, 190, 0.62)
+    ) !important;
+}
+
+.discount-product-card .price-panel {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(250, 204, 21, 0.42) !important;
+}
