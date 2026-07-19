@@ -8831,3 +8831,183 @@ body[data-page="home"] .site-footer {
     font-size: 31px !important;
   }
 }
+
+
+/* ============================================================
+   PRODUCT DETAIL — PRICE WIDTH + MOBILE SPECS + TITLE FIX
+   ============================================================ */
+
+/* Məhsul adı daha premium, bir az kiçik və daha az qalın */
+.product-detail-info h1 {
+  font-size: clamp(38px, 4.4vw, 60px) !important;
+  line-height: 1.02 !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.045em !important;
+}
+
+/* Desktopda qiymət hissəsinə kifayət qədər yer ayırır */
+.detail-commerce-card {
+  grid-template-columns:
+    minmax(330px, 1.08fr)
+    minmax(260px, 0.92fr) !important;
+}
+
+/* Köhnə pseudo ayırıcı xətti bağlayırıq */
+.detail-commerce-specs::before {
+  display: none !important;
+}
+
+/* Ayırıcı xətt artıq real sütunun sərhədidir */
+.detail-commerce-specs {
+  border-left: 1px solid rgba(107, 114, 128, 0.30) !important;
+}
+
+/* Uzun qiymətlər də öz sütununa rahat sığsın */
+.detail-commerce-price {
+  min-width: 0 !important;
+  padding: 19px 22px !important;
+}
+
+.detail-commerce-price > strong {
+  max-width: 100% !important;
+  font-size: clamp(36px, 3.7vw, 52px) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.055em !important;
+  white-space: nowrap !important;
+}
+
+/* Stok və vahid desktopda səliqəli qarşı-qarşıya */
+.detail-commerce-specs {
+  gap: 13px !important;
+  padding: 20px 22px 20px 28px !important;
+}
+
+.detail-stock-row,
+.detail-unit-row {
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.detail-stock-row > span,
+.detail-unit-row > span {
+  white-space: nowrap !important;
+}
+
+.detail-stock-row > b,
+.detail-unit-row > b {
+  min-width: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* ============================================================
+   TELEFON
+   ============================================================ */
+
+@media (max-width: 700px) {
+  .product-detail-info h1 {
+    margin-bottom: 12px !important;
+    font-size: 29px !important;
+    line-height: 1.05 !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  /* Qiymət və məlumat hissələri balanslı bölünür */
+  .detail-commerce-card {
+    grid-template-columns:
+      minmax(0, 1.08fr)
+      minmax(0, 0.92fr) !important;
+  }
+
+  .detail-commerce-price {
+    padding: 13px 10px 13px 12px !important;
+  }
+
+  .detail-commerce-price > strong {
+    font-size: clamp(24px, 7vw, 30px) !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  /* Telefonda:
+     Stok:  ● Stokda var
+     Vahid: kq
+     formasında qarşı-qarşıya qalır */
+  .detail-commerce-specs {
+    display: grid !important;
+    align-content: center !important;
+    gap: 9px !important;
+
+    padding: 12px 8px 12px 12px !important;
+
+    border-top: 0 !important;
+    border-left: 1px solid rgba(107, 114, 128, 0.28) !important;
+  }
+
+  .detail-stock-row,
+  .detail-unit-row {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    align-items: center !important;
+
+    gap: 4px !important;
+
+    font-size: 11.5px !important;
+    line-height: 1.15 !important;
+  }
+
+  .detail-stock-row > span,
+  .detail-unit-row > span {
+    white-space: nowrap !important;
+  }
+
+  .detail-stock-row > b,
+  .detail-unit-row > b {
+    display: inline-flex !important;
+    align-items: center !important;
+
+    min-width: 0 !important;
+
+    font-size: 11.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .detail-stock-row > b {
+    gap: 4px !important;
+  }
+
+  .detail-stock-row > b i {
+    width: 9px !important;
+    height: 9px !important;
+    flex: 0 0 9px !important;
+  }
+}
+
+/* Çox dar telefon */
+@media (max-width: 380px) {
+  .product-detail-info h1 {
+    font-size: 27px !important;
+  }
+
+  .detail-commerce-card {
+    grid-template-columns:
+      minmax(0, 1.02fr)
+      minmax(0, 0.98fr) !important;
+  }
+
+  .detail-commerce-price > strong {
+    font-size: 24px !important;
+  }
+
+  .detail-stock-row,
+  .detail-unit-row {
+    grid-template-columns: 39px minmax(0, 1fr) !important;
+    font-size: 10.5px !important;
+  }
+
+  .detail-stock-row > b,
+  .detail-unit-row > b {
+    font-size: 10.5px !important;
+  }
+}
