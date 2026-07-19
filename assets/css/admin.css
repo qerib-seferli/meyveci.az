@@ -2399,124 +2399,151 @@ th {
 
 
 /* ============================================================
-   ADMIN PANEL — FINAL IMAGE SYSTEM
+   ADMIN PANEL — REAL FINAL IMAGE FIX
+   Avatar və məhsul şəkilləri ayrı idarə olunur.
    ============================================================ */
 
-/* Admin cədvəllərindəki məhsul və istifadəçi şəkilləri */
-.admin-avatar,
-.admin-product-img {
-  flex: 0 0 auto !important;
+/* Kuryer, istifadəçi və profil avatarları kvadrat qalır */
+.admin-avatar {
   display: block !important;
+
   width: 46px !important;
   height: 46px !important;
-  overflow: hidden !important;
-  border-radius: 14px !important;
+  flex: 0 0 46px !important;
+
+  aspect-ratio: 1 / 1 !important;
+
   object-fit: cover !important;
   object-position: center center !important;
+
   padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 14px !important;
   background: #dcfce7 !important;
 }
 
-/* Admin daxilindəki geniş xəbər/banner/məzmun önizləməsi */
+/* Admin məhsul siyahısındakı real məhsul fotoları */
+.admin-product-img {
+  display: block !important;
+
+  width: 72px !important;
+  height: 54px !important;
+  flex: 0 0 72px !important;
+
+  aspect-ratio: 4 / 3 !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 13px !important;
+  background: #dcfce7 !important;
+}
+
+/* Admin cədvəllərində birbaşa istifadə edilən məhsul img-ləri */
+.pro-cell-main > img:not(.admin-avatar),
+.product-table img,
+.products-table img,
+.catalog-table img {
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  transform: none !important;
+}
+
+/* Admin məzmun önizləməsində şəkil bütöv görünsün */
 .admin-content-preview-img {
   display: block !important;
+
   width: 100% !important;
   height: auto !important;
-  max-height: min(460px, 58vh) !important;
+
+  max-width: 100% !important;
+  max-height: min(520px, 58vh) !important;
+
   object-fit: contain !important;
   object-position: center center !important;
-  padding: 8px !important;
+
+  padding: 0 !important;
   margin: 12px auto !important;
-  overflow: hidden !important;
+
+  transform: none !important;
+
   border-radius: 20px !important;
   background: #ffffff !important;
 }
 
-/* Profil şəkli */
+/* Admin profil detalı */
 .admin-detail-profile-img {
   display: block !important;
+
   width: 120px !important;
   height: 120px !important;
+
   aspect-ratio: 1 / 1 !important;
+
   object-fit: cover !important;
   object-position: center center !important;
-  overflow: hidden !important;
+
   padding: 0 !important;
+  transform: none !important;
 }
 
-/* Cədvəl hüceyrəsində şəkil mətn sahəsini sıxmasın */
-.pro-cell-main {
-  min-width: 0 !important;
-}
-
-.pro-cell-main > img {
-  flex: 0 0 auto !important;
-}
-
-/* Məhsul fotoları üçün alternativ admin sinifləri */
+/* Admin sifariş detalında sonradan istifadə edilən məhsul şəkilləri */
 .admin-order-product-img,
 .admin-catalog-product-img,
 .prep-product-img {
-  flex: 0 0 auto;
-  display: block;
-  width: 64px;
-  height: 48px;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-radius: 12px;
-  object-fit: cover;
-  object-position: center;
-  padding: 0;
-  background: #dcfce7;
-}
+  display: block !important;
 
-/* Şəkil konteyner daxilindədirsə */
-.admin-product-media,
-.admin-order-product-media {
-  position: relative;
-  width: 64px;
-  height: 48px;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-radius: 12px;
-  background: #dcfce7;
-}
+  width: 72px !important;
+  height: 54px !important;
+  flex: 0 0 72px !important;
 
-.admin-product-media img,
-.admin-order-product-media img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  aspect-ratio: 4 / 3 !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 13px !important;
+  background: #dcfce7 !important;
 }
 
 /* Telefon */
 @media (max-width: 720px) {
-  .admin-avatar,
-  .admin-product-img {
+  .admin-avatar {
     width: 40px !important;
     height: 40px !important;
+    flex-basis: 40px !important;
+
+    border-radius: 11px !important;
+  }
+
+  .admin-product-img,
+  .admin-order-product-img,
+  .admin-catalog-product-img,
+  .prep-product-img {
+    width: 64px !important;
+    height: 48px !important;
+    flex-basis: 64px !important;
+
     border-radius: 11px !important;
   }
 
   .admin-detail-profile-img {
     width: 96px !important;
     height: 96px !important;
+
     border-radius: 20px !important;
   }
 
-  .admin-order-product-img,
-  .admin-catalog-product-img,
-  .prep-product-img,
-  .admin-product-media,
-  .admin-order-product-media {
-    width: 56px !important;
-    height: 42px !important;
-  }
-
   .admin-content-preview-img {
-    max-height: 46vh !important;
-    padding: 5px !important;
+    max-height: 48vh !important;
   }
 }
