@@ -1290,127 +1290,168 @@
 /*============================================= RƏSİMLƏRİN DÜZGÜNLƏŞDİRİLMƏSİ =================================================*/
 
 /* ============================================================
-   TOPLU SİFARİŞ — FINAL 4:3 JPG IMAGE SYSTEM
-   Telefonla çəkilən real məhsul fotoları üçün.
+   TOPLU SİFARİŞ — REAL FINAL IMAGE FIX
+   Real bulk-order.js strukturlarına uyğun.
    ============================================================ */
 
-/* Hero şəklinin tam görünməsi məqsədilə contain saxlanılır */
-.bulk-hero-img {
-  overflow: hidden !important;
-}
-
-.bulk-hero-img img {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-height: 360px !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  padding: 12px !important;
-}
-
-/* Kateqoriya ikonları kəsilməsin */
+/* Kateqoriya şəkilləri ikon olduğu üçün contain */
 .bulk-category-chip img {
-  display: block !important;
   width: 34px !important;
   height: 34px !important;
   flex: 0 0 34px !important;
+
   object-fit: contain !important;
-  object-position: center !important;
+  object-position: center center !important;
+
   padding: 3px !important;
+  margin: 0 !important;
+
+  transform: none !important;
+
   border-radius: 10px !important;
-  background: rgba(220, 252, 231, 0.95) !important;
+  background: rgba(220,252,231,.95) !important;
 }
 
 /* ============================================================
-   ƏSAS TOPLU SİFARİŞ MƏHSUL FOTOSU
+   ƏSAS TOPLU SİFARİŞ MƏHSUL ŞƏKLİ
    ============================================================ */
 
 .bulk-product-img {
   position: relative !important;
+
   width: 100% !important;
+
   height: auto !important;
-  aspect-ratio: 4 / 3 !important;
   min-height: 0 !important;
+  max-height: none !important;
+
+  aspect-ratio: 4 / 3 !important;
+
+  display: block !important;
   overflow: hidden !important;
-  display: block !important;
+
+  margin: 0 !important;
   border-radius: 16px !important;
+
   background:
-    linear-gradient(135deg, rgba(236,252,203,.84), rgba(220,252,231,.9)) !important;
-  isolation: isolate;
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,.66),
+      transparent 64%
+    ),
+    linear-gradient(
+      135deg,
+      #ecfccb,
+      #dcfce7
+    ) !important;
 }
 
-.bulk-product-img::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(circle at center, rgba(255,255,255,.58), transparent 64%);
-  pointer-events: none;
-}
+.bulk-product-img > img {
+  position: absolute !important;
+  inset: 0 !important;
 
-.bulk-product-img img {
-  position: relative !important;
-  z-index: 1;
   display: block !important;
+
   width: 100% !important;
   height: 100% !important;
+
+  min-width: 100% !important;
+  min-height: 100% !important;
+
   max-width: none !important;
   max-height: none !important;
+
   object-fit: cover !important;
   object-position: center center !important;
+
   padding: 0 !important;
   margin: 0 !important;
+
+  transform: none !important;
+
   border-radius: inherit !important;
 }
 
-/* Desktop 4 sütun quruluşunda da şəkil 4:3 qalır */
-@media (min-width: 881px) {
-  .bulk-product-img {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 4 / 3 !important;
-    margin: 0 !important;
-  }
-
-  .bulk-product-img img {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    object-fit: cover !important;
-    padding: 0 !important;
-  }
-}
-
 /* ============================================================
-   SEÇİLMİŞ MƏHSULLAR PANELİ
+   SEÇİLMİŞ MƏHSUL ŞƏKLİ
    ============================================================ */
 
 .bulk-selected-img {
   position: relative !important;
+
   width: 56px !important;
   height: 42px !important;
+  flex: 0 0 56px !important;
+
   aspect-ratio: 4 / 3 !important;
+
+  display: block !important;
   overflow: hidden !important;
+
   border-radius: 11px !important;
-  background: rgba(220, 252, 231, 0.95) !important;
+  background: rgba(220,252,231,.95) !important;
 }
 
-.bulk-selected-img img {
+.bulk-selected-img > img {
+  position: absolute !important;
+  inset: 0 !important;
+
   display: block !important;
+
   width: 100% !important;
   height: 100% !important;
+
+  min-width: 100% !important;
+  min-height: 100% !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
   object-fit: cover !important;
   object-position: center center !important;
+
   padding: 0 !important;
   margin: 0 !important;
+
+  transform: none !important;
+
+  border-radius: inherit !important;
+}
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+
+@media (min-width: 881px) {
+  .bulk-product-img {
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    aspect-ratio: 4 / 3 !important;
+
+    margin: 0 !important;
+  }
+
+  .bulk-product-img > img {
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
 
 /* ============================================================
    TELEFON
-   Kart üfüqi qalır, şəkil isə düzgün 4:3 görünür.
+   Üfüqi kart daxilində şəkil 4:3 qalır.
    ============================================================ */
 
 @media (max-width: 640px) {
@@ -1428,15 +1469,32 @@
   .bulk-product-img {
     width: 112px !important;
     height: 84px !important;
+
     min-height: 84px !important;
+    max-height: 84px !important;
+
     aspect-ratio: 4 / 3 !important;
+
     margin: 0 !important;
     align-self: center !important;
+
+    border-radius: 14px !important;
+  }
+
+  .bulk-product-img > img {
+    width: 100% !important;
+    height: 100% !important;
+
+    object-fit: cover !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .bulk-selected-img {
     width: 64px !important;
     height: 48px !important;
+    flex-basis: 64px !important;
   }
 }
 
@@ -1448,11 +1506,14 @@
   .bulk-product-img {
     width: 96px !important;
     height: 72px !important;
+
     min-height: 72px !important;
+    max-height: 72px !important;
   }
 
   .bulk-selected-img {
     width: 56px !important;
     height: 42px !important;
+    flex-basis: 56px !important;
   }
 }
