@@ -9140,27 +9140,28 @@ body[data-page="home"] .site-footer {
   background:
     linear-gradient(
       180deg,
-      rgba(255, 254, 240, 0.98),
-      rgba(255, 250, 214, 0.94)
+      rgba(255, 248, 195, 0.98) 0%,
+      rgba(255, 236, 120, 0.94) 100%
     ) !important;
 
-  border-color: rgba(245, 190, 20, 0.52) !important;
+  border: 1px solid rgba(234, 179, 8, 0.60) !important;
 
   box-shadow:
-    0 12px 28px rgba(217, 150, 0, 0.12),
-    0 0 18px rgba(250, 204, 21, 0.10) !important;
+    0 14px 30px rgba(217, 150, 0, 0.14),
+    0 0 22px rgba(250, 204, 21, 0.12) !important;
 }
 
 .discount-product-card .product-media {
   background:
     radial-gradient(
       circle at center,
-      rgba(255, 255, 255, 0.88),
-      rgba(255, 248, 190, 0.62)
+      rgba(255, 255, 255, 0.90),
+      rgba(255, 239, 145, 0.82)
     ) !important;
 }
 
 .discount-product-card .price-panel {
-  background: rgba(255, 255, 255, 0.88) !important;
-  border-color: rgba(250, 204, 21, 0.42) !important;
+  background: rgba(255, 252, 238, 0.94) !important;
+
+  border: 1px solid rgba(250, 204, 21, 0.45) !important;
 }
