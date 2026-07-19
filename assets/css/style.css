@@ -9438,3 +9438,125 @@ body[data-page="home"] .site-footer {
     border-radius: 22px !important;
   }
 }
+
+/* ============================================================
+   ENDİRİMSİZ KART — DAHA AYDIN PREMIUM GREEN
+   ============================================================ */
+
+.fresh-product-card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(250, 255, 252, 1) 0%,
+      rgba(226, 250, 236, 0.98) 100%
+    ) !important;
+
+  border: 1px solid rgba(34, 197, 94, 0.34) !important;
+
+  box-shadow:
+    0 14px 30px rgba(15, 122, 55, 0.12),
+    0 0 18px rgba(34, 197, 94, 0.08) !important;
+}
+
+/* Daha görünən yaşıl üst xətt */
+.fresh-product-card::after {
+  left: 16px !important;
+  right: 16px !important;
+  height: 4px !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(34, 197, 94, 0.95) 25%,
+      rgba(16, 185, 129, 1) 50%,
+      rgba(34, 197, 94, 0.95) 75%,
+      transparent 100%
+    ) !important;
+
+  box-shadow:
+    0 0 12px rgba(34, 197, 94, 0.38) !important;
+}
+
+/* Şəkil sahəsi daha canlı yaşıl işıqlı */
+.fresh-product-card .product-media {
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(220, 252, 231, 0.90) 68%,
+      rgba(187, 247, 208, 0.72) 100%
+    ) !important;
+
+  border: 1px solid rgba(34, 197, 94, 0.20) !important;
+
+  box-shadow:
+    inset 0 0 24px rgba(34, 197, 94, 0.10),
+    0 8px 18px rgba(15, 122, 55, 0.08) !important;
+}
+
+/* Qiymət paneli daha seçilən */
+.fresh-product-card .price-panel {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1),
+      rgba(240, 253, 244, 0.98)
+    ) !important;
+
+  border: 1px solid rgba(34, 197, 94, 0.22) !important;
+
+  box-shadow:
+    0 8px 20px rgba(15, 122, 55, 0.09),
+    inset 0 0 16px rgba(34, 197, 94, 0.05) !important;
+}
+
+/* Qiyməti bir az daha premium yaşıl */
+.fresh-product-card .price {
+  color: #047857 !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.7) !important;
+}
+
+/* Səbət düyməsi daha canlı */
+.fresh-product-card .cart-btn {
+  background:
+    linear-gradient(
+      135deg,
+      #22c55e 0%,
+      #16a34a 48%,
+      #047857 100%
+    ) !important;
+
+  box-shadow:
+    0 10px 22px rgba(4, 120, 87, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Hover */
+@media (hover: hover) and (pointer: fine) {
+  .fresh-product-card:hover {
+    border-color: rgba(34, 197, 94, 0.52) !important;
+
+    box-shadow:
+      0 20px 40px rgba(15, 122, 55, 0.18),
+      0 0 24px rgba(34, 197, 94, 0.12) !important;
+  }
+}
+
+/* Telefon */
+@media (max-width: 640px) {
+  .fresh-product-card {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(250, 255, 252, 1),
+        rgba(226, 250, 236, 0.98)
+      ) !important;
+  }
+
+  .fresh-product-card::after {
+    height: 3px !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+}
