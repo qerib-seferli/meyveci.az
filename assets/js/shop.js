@@ -563,29 +563,44 @@ async function initProduct() {
         <div class="quality-badge detail-quality-badge">🛡️ KEYFİYYƏT ZƏMANƏTİ</div>
       </div>
 
-      <div class="product-detail-info">
-        <span class="unit-badge">${product.categories?.name || 'Məhsul'}</span>
-        <h1>${product.name}</h1>
 
-        <div class="detail-unit-line">
-          <span>${product.unit || 'ədəd'}</span>
-          <b>${product.stock_quantity > 0 ? 'Stokda var' : 'Stok soruşulsun'}</b>
-        </div>
 
-        <div class="price-panel detail-price-panel">
-          <div>
-            <span class="price">${money(product.price)}</span>
-            <small>Meyvəçi qiyməti</small>
+        <div class="product-detail-info">
+        
+          <div class="detail-meta-line">
+            <span class="detail-category">
+              ${product.categories?.name || 'Məhsul'}
+            </span>
+        
+            <span class="detail-unit">
+              ${product.unit || 'ədəd'}
+            </span>
+        
+            <span class="detail-stock ${product.stock_quantity > 0 ? 'in-stock' : 'ask-stock'}">
+              ${product.stock_quantity > 0 ? 'Stokda var' : 'Stok soruşulsun'}
+            </span>
+          </div>
+        
+          <h1>${product.name}</h1>
+        
+          <div class="price-panel detail-price-panel">
+            <div class="detail-price-main">
+              ${hasDiscount ? `
+                <span class="old-price">${money(product.old_price)}</span>
+              ` : ''}
+        
+              <span class="price">${money(product.price)}</span>
+              <small>Meyvəçi qiyməti</small>
+            </div>
+        
+            ${hasDiscount ? `
+              <div class="discount-flag">
+                <b>${discount}%</b>
+                <span>ENDİRİM</span>
+              </div>
+            ` : ''}
           </div>
 
-          ${hasDiscount ? `
-            <div class="discount-flag">
-              <b>${discount}%</b>
-              <span>ENDİRİM</span>
-            </div>
-            <span class="old-price">${money(product.old_price)}</span>
-          ` : ''}
-        </div>
 
         <p class="detail-desc">🌿 ${product.description || product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
 
