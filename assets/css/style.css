@@ -7715,367 +7715,551 @@ body[data-page="home"] .site-footer {
 /*================================= BÜTÜN RƏSİMLƏRİN DÜZGÜNLƏŞDİRİLMƏSİ =======================================*/
 
 /* ============================================================
-   MEYVƏÇİ.AZ — FINAL UNIVERSAL IMAGE SYSTEM
-   Məhsul, kateqoriya, səbət, profil, xəbər, banner və partnyor
-   şəkillərinin bütün ekranlarda vahid görünüş sistemi.
+   MEYVƏÇİ.AZ — REAL FINAL IMAGE FIX
+   Mövcud shop.js və user.js strukturlarına uyğun hazırlanıb.
+   Məhsul fotolarının əsas standartı: 4:3 JPG + cover.
    ============================================================ */
-
-/* Şəkillər heç vaxt parent elementdən daşmasın */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Şəkil qutularındakı img elementləri toxunma zamanı seçilməsin */
-.product-card img,
-.product-detail-image img,
-.preview-img,
-.category-card img,
-.home-main-news img,
-.home-mini-news img,
-.home-banner-card img,
-.home-partner-card img {
-  user-select: none;
-  -webkit-user-drag: none;
-}
 
 /* ============================================================
-   1. ƏSAS MƏHSUL KARTLARI
-   Telefonla çəkilən üfüqi 4:3 JPG fotolar üçün.
+   1. MƏHSUL KARTLARI
+   Real struktur:
+   .product-card
+     .product-media
+       .pic
+         img
    ============================================================ */
 
-.product-card .pic {
+.product-card .product-media {
   position: relative !important;
   width: 100% !important;
-  aspect-ratio: 4 / 3 !important;
+
+  height: auto !important;
   min-height: 0 !important;
+  max-height: none !important;
+
+  aspect-ratio: 4 / 3 !important;
+
   overflow: hidden !important;
+  border-radius: 21px !important;
+
   display: block !important;
-  border-radius: 19px !important;
+
   background:
-    linear-gradient(135deg, rgba(236, 252, 203, 0.86), rgba(220, 252, 231, 0.92)) !important;
-  isolation: isolate;
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.72),
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      #ecfccb,
+      #dcfce7
+    ) !important;
 }
 
-/* Yumşaq fon — şəkil yüklənmədən əvvəl də qutu səliqəli qalır */
-.product-card .pic::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+/* Endirimli kartın şəkil fonu */
+.discount-product-card .product-media {
   background:
-    radial-gradient(circle at 50% 42%, rgba(255,255,255,.72), transparent 58%),
-    linear-gradient(135deg, rgba(236,252,203,.78), rgba(220,252,231,.78));
-  pointer-events: none;
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(255, 255, 255, 0.68),
+      rgba(255, 247, 168, 0.42) 64%,
+      rgba(255, 216, 23, 0.34)
+    ) !important;
 }
 
-.product-card .pic img {
-  position: relative !important;
-  z-index: 1;
-  display: block !important;
+/* Şəkli saxlayan real .pic elementi */
+.product-card .product-media > .pic,
+.product-card .product-media .pic {
+  position: absolute !important;
+  inset: 0 !important;
+
   width: 100% !important;
   height: 100% !important;
-  max-width: none !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  padding: 0 !important;
-  margin: 0 !important;
+
+  min-height: 0 !important;
+  max-height: none !important;
+
+  aspect-ratio: auto !important;
+
+  display: block !important;
+  overflow: hidden !important;
+
   border-radius: inherit !important;
-  transform: translateZ(0);
+  background: transparent !important;
 }
 
-/* Hover zamanı çox böyüməsin */
+/* Real məhsul şəkli */
+.product-card .product-media > .pic > img,
+.product-card .product-media .pic img {
+  position: absolute !important;
+  inset: 0 !important;
+
+  display: block !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  min-width: 100% !important;
+  min-height: 100% !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: inherit !important;
+
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Hover yalnız desktop maus cihazlarında işləsin */
 @media (hover: hover) and (pointer: fine) {
-  .product-card .pic img {
-    transition: transform 0.35s ease;
+  .product-card .product-media .pic img {
+    transition: transform 0.28s ease !important;
   }
 
-  .product-card:hover .pic img {
-    transform: scale(1.025);
+  .product-card:hover .product-media .pic img {
+    transform: scale(1.025) !important;
   }
 }
 
 /* ============================================================
    2. MƏHSUL DETAL SƏHİFƏSİ
-   Böyük foto da 4:3 görünüşdə olur.
+   Real struktur:
+   .product-detail-pro
+     .product-detail-image
+       img
    ============================================================ */
 
-.product-detail-image {
+.product-detail-pro .product-detail-image {
   position: relative !important;
+
   width: 100% !important;
+
+  height: auto !important;
   min-height: 0 !important;
+  max-height: none !important;
+
   aspect-ratio: 4 / 3 !important;
-  overflow: hidden !important;
+
   display: block !important;
-  border-radius: 28px !important;
+  overflow: hidden !important;
+
+  border-radius: 30px !important;
+
   background:
-    radial-gradient(circle at center, rgba(255,255,255,.9), rgba(220,252,231,.76)) !important;
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,.88),
+      rgba(220,252,231,.76)
+    ) !important;
 }
 
-.product-detail-image img {
+.product-detail-pro .product-detail-image > img {
+  position: absolute !important;
+  inset: 0 !important;
+
   display: block !important;
+
   width: 100% !important;
   height: 100% !important;
+
+  min-width: 100% !important;
+  min-height: 100% !important;
+
   max-width: none !important;
   max-height: none !important;
+
   object-fit: cover !important;
   object-position: center center !important;
+
   padding: 0 !important;
   margin: 0 !important;
-  border-radius: inherit !important;
+
+  transform: none !important;
   filter: none !important;
+
+  border-radius: inherit !important;
 }
 
 /* ============================================================
-   3. SƏBƏT, SEVİMLİLƏR, SİFARİŞ VƏ KİÇİK ÖNİZLƏMƏLƏR
+   3. SƏBƏT ŞƏKİLLƏRİ
+   Real struktur:
+   .cart-img-wrap
+     img.preview-img
    ============================================================ */
 
-.preview-img {
-  flex: 0 0 auto !important;
-  width: 64px !important;
-  height: 48px !important;
+.cart-img-wrap {
+  position: relative !important;
+
+  width: 88px !important;
+  height: 66px !important;
+  flex: 0 0 88px !important;
+
   aspect-ratio: 4 / 3 !important;
-  display: block !important;
+
   overflow: hidden !important;
-  border-radius: 13px !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  padding: 0 !important;
-  background: rgba(220, 252, 231, 0.9) !important;
+  display: block !important;
+
+  border-radius: 16px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(236,252,203,.9),
+      rgba(220,252,231,.94)
+    ) !important;
 }
 
-/* Eyni məqsədlə istifadə edilə bilən alternativ siniflər */
-.cart-item-img,
-.favorite-item-img,
-.order-item-img,
-.message-product-img {
-  flex: 0 0 auto;
-  width: 64px;
-  height: 48px;
-  aspect-ratio: 4 / 3;
-  border-radius: 13px;
-  overflow: hidden;
-  object-fit: cover;
-  object-position: center;
-  background: rgba(220, 252, 231, 0.9);
+.cart-discount-row .cart-img-wrap {
+  background: rgba(255, 255, 255, 0.76) !important;
+}
+
+.cart-img-wrap > .preview-img,
+.cart-img-wrap .preview-img {
+  position: absolute !important;
+  inset: 0 !important;
+
+  display: block !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  min-width: 100% !important;
+  min-height: 100% !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  transform: none !important;
+
+  border-radius: inherit !important;
+  background: transparent !important;
+}
+
+/* Endirim faizi şəkildən daşmadan görünür */
+.cart-mini-discount {
+  right: 3px !important;
+  bottom: 3px !important;
 }
 
 /* ============================================================
-   4. KATEQORİYA ŞƏKİLLƏRİ
-   Kateqoriya ikonları kəsilməməlidir.
+   4. ÜMUMİ KİÇİK MƏHSUL ŞƏKİLLƏRİ
+   Mesaj modalı, sifariş detalları və kompakt siyahılar.
+   ============================================================ */
+
+.compact-row > .preview-img,
+.order-product-row .preview-img,
+.order-item-row .preview-img,
+.thread-order-item .preview-img,
+.thread-order-product .preview-img,
+.modal-card .preview-img {
+  flex: 0 0 auto !important;
+
+  width: 64px !important;
+  height: 48px !important;
+
+  aspect-ratio: 4 / 3 !important;
+
+  display: block !important;
+  overflow: hidden !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 13px !important;
+  background: rgba(220,252,231,.9) !important;
+}
+
+/* Mesajdakı sifariş məhsulları modalında görünən şəkillər */
+.modal-card .compact-row img,
+.order-items-modal .compact-row img,
+.thread-order-items-modal .compact-row img,
+.order-products-modal .compact-row img {
+  width: 64px !important;
+  height: 48px !important;
+
+  flex: 0 0 64px !important;
+
+  aspect-ratio: 4 / 3 !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 13px !important;
+  background: rgba(220,252,231,.9) !important;
+}
+
+/* ============================================================
+   5. KATEQORİYA ŞƏKİLLƏRİ
+   Bunlar foto deyil, ikon/PNG olduğu üçün contain qalır.
    ============================================================ */
 
 .category-card img,
-.category-img,
 .category-image,
-.chip img,
-.category-chip img {
-  display: block;
-  width: 100%;
-  height: 100%;
+.category-img,
+.catalog-category img,
+.catalog-category-card img,
+.chip img {
   object-fit: contain !important;
-  object-position: center !important;
-  padding: 5px;
-  background: rgba(236, 253, 245, 0.9);
+  object-position: center center !important;
+
+  padding: 4px !important;
+  transform: none !important;
+
+  background: transparent !important;
 }
 
 /* ============================================================
-   5. PROFİL VƏ İSTİFADƏÇİ ŞƏKİLLƏRİ
+   6. PROFİL VƏ AVATAR ŞƏKİLLƏRİ
    ============================================================ */
 
 .profile-avatar-big,
 .customer-avatar,
+.thread-mini-avatar img,
 .user-avatar,
 .avatar-img {
   object-fit: cover !important;
   object-position: center center !important;
-  overflow: hidden;
-  background: #ffffff;
-}
 
-/* Avatar img element deyil, içində img varsa */
-.profile-avatar-wrap,
-.customer-avatar-wrap,
-.user-avatar-wrap {
-  overflow: hidden;
-}
-
-.profile-avatar-wrap img,
-.customer-avatar-wrap img,
-.user-avatar-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  padding: 0 !important;
+  transform: none !important;
 }
 
 /* ============================================================
-   6. XƏBƏR KARTLARI
-   Xəbər kartında boş sahə qalmasın.
+   7. XƏBƏR ŞƏKİLLƏRİ
+   Kartda cover, modalda contain.
    ============================================================ */
 
 .home-main-news,
-.home-mini-news {
-  position: relative;
+.home-mini-news,
+.news-card,
+.news-slide {
   overflow: hidden !important;
-  background: #ecfdf5;
 }
 
-.home-main-news img,
-.home-mini-news img {
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
+.home-main-news > img,
+.home-mini-news > img,
+.news-card > img,
+.news-slide > img {
   width: 100% !important;
   height: 100% !important;
-  min-height: 0 !important;
-  max-height: none !important;
+
   object-fit: cover !important;
   object-position: center center !important;
+
   padding: 0 !important;
   margin: 0 !important;
+
+  transform: none !important;
 }
 
-/* Xəbər modalında foto tam görünsün */
-.news-modal-card img {
+.news-modal-card > img {
   display: block !important;
+
   width: 100% !important;
   height: auto !important;
-  max-height: min(460px, 55vh) !important;
+
+  max-height: min(520px, 58vh) !important;
+
   object-fit: contain !important;
-  object-position: center !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
   margin: 14px auto !important;
+
   border-radius: 18px !important;
-  background: #f8fafc;
+  background: #f8fafc !important;
 }
 
 /* ============================================================
-   7. BANNER ŞƏKİLLƏRİ
-   Hazırlanmış bannerin yazıları və kənarları kəsilməsin.
+   8. BANNER VƏ PARTNYOR LOQOLARI
+   Hazır dizayn və yazılar kəsilməsin.
    ============================================================ */
-
-.home-banner-card {
-  min-width: 0;
-  overflow: visible;
-}
 
 .home-banner-card img,
-.banner-slide img,
-.banner-card img {
+.banner-card img,
+.banner-slide img {
   display: block !important;
+
   width: 100% !important;
   height: auto !important;
-  aspect-ratio: 2 / 1 !important;
+
   object-fit: contain !important;
   object-position: center center !important;
+
   padding: 0 !important;
   margin: 0 !important;
-  background: #ffffff !important;
+
+  transform: none !important;
 }
 
-/* ============================================================
-   8. PARTNYOR LOQOLARI
-   Loqolar heç vaxt kəsilməsin və dartılmasın.
-   ============================================================ */
-
-.home-partner-card {
-  min-width: 0;
-}
-
-.home-partner-card img {
+.home-partner-card img,
+.partner-card img {
   display: block !important;
+
   width: 100% !important;
-  height: 125px !important;
+  height: 120px !important;
+
   object-fit: contain !important;
   object-position: center center !important;
+
   padding: 12px !important;
+  margin: 0 !important;
+
+  transform: none !important;
   background: #ffffff !important;
 }
 
 /* ============================================================
-   9. LOQO, STATUS VƏ XƏRİTƏ İKONLARI
-   ============================================================ */
-
-.brand img,
-.home-logo,
-.loader-box img,
-.track-icons img,
-.status-pill img,
-.map-marker img {
-  object-fit: contain !important;
-  object-position: center !important;
-}
-
-/* ============================================================
-   10. PLANŞET
-   ============================================================ */
-
-@media (max-width: 980px) {
-  .product-card .pic,
-  .product-detail-image {
-    aspect-ratio: 4 / 3 !important;
-  }
-
-  .home-partner-card img {
-    height: 110px !important;
-  }
-}
-
-/* ============================================================
-   11. TELEFON
+   9. TELEFON
+   Əvvəlki contain, padding və scale qaydalarını tam üstələyir.
    ============================================================ */
 
 @media (max-width: 640px) {
-  /* Əvvəlki bütün 1/0.88 və 1/0.95 qaydalarını ləğv edir */
-  .product-card .pic {
+  .product-card .product-media {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    aspect-ratio: 4 / 3 !important;
+
+    border-radius: 18px !important;
+  }
+
+  .product-card .product-media .pic img,
+  .discount-product-card .product-media .pic img {
+    width: 100% !important;
+    height: 100% !important;
+
+    min-width: 100% !important;
+    min-height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+    object-position: center center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .product-detail-pro .product-detail-image {
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    aspect-ratio: 4 / 3 !important;
+
+    border-radius: 22px !important;
+  }
+
+  .product-detail-pro .product-detail-image > img {
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+    object-position: center center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .cart-img-wrap {
+    width: 96px !important;
+    height: 72px !important;
+    flex: 0 0 96px !important;
+
     aspect-ratio: 4 / 3 !important;
     border-radius: 15px !important;
   }
 
-  .product-detail-image {
-    aspect-ratio: 4 / 3 !important;
-    min-height: 0 !important;
-    border-radius: 20px !important;
+  .cart-img-wrap .preview-img {
+    padding: 0 !important;
+    object-fit: cover !important;
   }
 
-  .product-detail-image img {
-    max-height: none !important;
-  }
-
-  .preview-img,
-  .cart-item-img,
-  .favorite-item-img,
-  .order-item-img,
-  .message-product-img {
+  .modal-card .compact-row img,
+  .order-items-modal .compact-row img,
+  .thread-order-items-modal .compact-row img,
+  .order-products-modal .compact-row img {
     width: 58px !important;
     height: 44px !important;
-    border-radius: 11px !important;
+    flex-basis: 58px !important;
   }
 
-  .home-partner-card img {
-    height: 96px !important;
+  .home-partner-card img,
+  .partner-card img {
+    height: 94px !important;
     padding: 9px !important;
   }
-
-  .news-modal-card img {
-    max-height: 44vh !important;
-  }
 }
 
-/* Çox dar telefonlar */
-@media (max-width: 380px) {
-  .product-card .pic {
-    border-radius: 13px !important;
+/* Çox dar telefon */
+@media (max-width: 420px) {
+  .product-card .product-media {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    aspect-ratio: 4 / 3 !important;
   }
 
-  .preview-img,
-  .cart-item-img,
-  .favorite-item-img,
-  .order-item-img {
-    width: 52px !important;
-    height: 39px !important;
+  .product-card .product-media .pic img {
+    max-height: none !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .product-detail-pro .product-detail-image {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    aspect-ratio: 4 / 3 !important;
+  }
+
+  .product-detail-pro .product-detail-image img {
+    max-height: none !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .cart-img-wrap {
+    width: 88px !important;
+    height: 66px !important;
+    flex-basis: 88px !important;
   }
 }
-
 /*=============================================================================================================*/
 /*=============================================================================================================*/
