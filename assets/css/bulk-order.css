@@ -1517,3 +1517,334 @@
     flex-basis: 56px !important;
   }
 }
+
+/*=============================================================================================================================*/
+/*================================= TOPLU SİFARİŞ — MOBİL 3 SÜTUN + SEÇİLMİŞ MƏHSUL PRO FIX ===================================*/
+
+/* ============================================================
+   DESKTOP — SEÇİLMİŞ MƏHSULDA ŞƏKİL VƏ MƏTN MƏSAFƏSİ
+   ============================================================ */
+
+@media (min-width: 881px) {
+  .bulk-selected-row {
+    padding: 12px !important;
+    gap: 11px !important;
+  }
+
+  .bulk-selected-main {
+    display: grid !important;
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    min-width: 0 !important;
+  }
+
+  .bulk-selected-img {
+    width: 62px !important;
+    height: 47px !important;
+    flex: 0 0 62px !important;
+    border-radius: 12px !important;
+    align-self: center !important;
+  }
+
+  .bulk-selected-img img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    padding: 0 !important;
+  }
+
+  /* Şəkildən sonrakı məhsul məlumatı */
+  .bulk-selected-main > :not(.bulk-selected-img) {
+    min-width: 0 !important;
+  }
+
+  .bulk-selected-main b {
+    display: block !important;
+    margin: 0 0 4px !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .bulk-selected-main small {
+    margin-top: 0 !important;
+    gap: 5px !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Endirim badge-i məhsul adına girməsin */
+  .bulk-selected-row.has-discount .bulk-selected-main {
+    padding-right: 48px !important;
+  }
+
+  .bulk-selected-discount-badge {
+    top: 12px !important;
+    right: 12px !important;
+  }
+}
+
+/* ============================================================
+   MOBİL — MƏHSULLAR 3 SÜTUN
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .bulk-products-area {
+    min-width: 0 !important;
+  }
+
+  .bulk-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+  }
+
+  /* Üfüqi sətir görünüşünü ləğv edir */
+  .bulk-product-card {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    gap: 0 !important;
+    padding: 6px !important;
+
+    border-radius: 15px !important;
+    overflow: hidden !important;
+
+    box-shadow: 0 7px 18px rgba(15, 122, 55, 0.09) !important;
+  }
+
+  .bulk-product-card:hover,
+  .bulk-product-card.selected {
+    transform: none !important;
+  }
+
+  /* Məhsul şəkli */
+  .bulk-product-img {
+    position: relative !important;
+
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    aspect-ratio: 4 / 3 !important;
+
+    margin: 0 !important;
+    border-radius: 11px !important;
+    overflow: hidden !important;
+  }
+
+  .bulk-product-img > img {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    min-width: 100% !important;
+    min-height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+    object-position: center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Endirim badge-i */
+  .bulk-discount-badge {
+    top: 4px !important;
+    right: 4px !important;
+    left: auto !important;
+
+    padding: 3px 5px !important;
+    border-radius: 999px !important;
+
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+
+  /* Kartın mətn hissəsi */
+  .bulk-product-body {
+    flex: 1 !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    gap: 4px !important;
+    padding: 6px 1px 1px !important;
+  }
+
+  .bulk-product-title {
+    position: relative !important;
+    display: block !important;
+    min-width: 0 !important;
+    min-height: 31px !important;
+  }
+
+  .bulk-product-title h3 {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+
+    min-height: 29px !important;
+    max-height: 29px !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding-right: 0 !important;
+
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+
+    font-size: 10.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Vahid badge-i adın üstünə çıxmasın */
+  .bulk-product-title span {
+    position: static !important;
+    display: inline-flex !important;
+
+    width: fit-content !important;
+    margin-top: 3px !important;
+    padding: 2px 5px !important;
+
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+
+  /* Qiymət */
+  .bulk-price-row {
+    min-height: 31px !important;
+    margin: 2px 0 3px !important;
+
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-start !important;
+  }
+
+  .bulk-price-row > div {
+    min-width: 0 !important;
+  }
+
+  .bulk-price-row .price {
+    display: block !important;
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  .bulk-price-row .old-price {
+    display: block !important;
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+  }
+
+  .bulk-price-row em {
+    display: none !important;
+  }
+
+  /* Miqdar və əlavə et düymələri alt-alta */
+  .bulk-card-actions {
+    margin-top: auto !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 5px !important;
+  }
+
+  .bulk-qty-box {
+    width: 100% !important;
+    height: 28px !important;
+
+    grid-template-columns: 25px minmax(0, 1fr) 25px !important;
+
+    border-radius: 999px !important;
+  }
+
+  .bulk-qty-box button {
+    padding: 0 !important;
+    font-size: 12px !important;
+  }
+
+  .bulk-qty-box input {
+    min-width: 0 !important;
+    padding: 0 1px !important;
+
+    font-size: 10px !important;
+    text-align: center !important;
+  }
+
+  .bulk-add {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 28px !important;
+    height: 28px !important;
+
+    padding: 4px 3px !important;
+    border-radius: 999px !important;
+
+    font-size: 8.5px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* ============================================================
+   ÇOX DAR TELEFONLAR
+   3 sütun saxlanılır, ölçülər bir az daha yığcam olur.
+   ============================================================ */
+
+@media (max-width: 380px) {
+  .bulk-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .bulk-product-card {
+    grid-template-columns: none !important;
+    padding: 5px !important;
+    border-radius: 13px !important;
+  }
+
+  .bulk-product-img {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: 4 / 3 !important;
+  }
+
+  .bulk-product-title h3 {
+    font-size: 9.5px !important;
+  }
+
+  .bulk-price-row .price {
+    font-size: 11px !important;
+  }
+
+  .bulk-qty-box {
+    height: 26px !important;
+    grid-template-columns: 22px minmax(0, 1fr) 22px !important;
+  }
+
+  .bulk-add {
+    min-height: 26px !important;
+    height: 26px !important;
+    font-size: 7.5px !important;
+  }
+}
