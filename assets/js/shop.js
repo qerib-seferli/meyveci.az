@@ -567,48 +567,68 @@ async function initProduct() {
 
         <div class="product-detail-info">
         
-          <div class="detail-meta-line">
-            <span class="detail-category">
-              ${product.categories?.name || 'Məhsul'}
-            </span>
-        
-            <span class="detail-unit">
-              ${product.unit || 'ədəd'}
-            </span>
-        
-            <span class="detail-stock ${product.stock_quantity > 0 ? 'in-stock' : 'ask-stock'}">
-              ${product.stock_quantity > 0 ? 'Stokda var' : 'Stok soruşulsun'}
-            </span>
-          </div>
+          <a
+            class="detail-category-link"
+            href="index.html?category=${product.category_id || ''}"
+          >
+            <span>${product.categories?.name || 'Məhsullar'}</span>
+            <b>›</b>
+          </a>
         
           <h1>${product.name}</h1>
         
-          <div class="price-panel detail-price-panel">
-            <div class="detail-price-main">
+          <div class="detail-commerce-card">
+        
+            <div class="detail-commerce-price">
               ${hasDiscount ? `
-                <span class="old-price">${money(product.old_price)}</span>
+                <div class="detail-old-price-line">
+                  <span class="detail-old-price">${money(product.old_price)}</span>
+                  <span class="detail-discount-chip">-${discount}%</span>
+                </div>
               ` : ''}
         
-              <span class="price">${money(product.price)}</span>
-              <small>Meyvəçi qiyməti</small>
+              <strong>${money(product.price)}</strong>
+        
+              <small>
+                ${product.unit === 'kq' ? '1 kq üçün qiymət' : 'Vahid üçün qiymət'}
+              </small>
             </div>
         
-            ${hasDiscount ? `
-              <div class="discount-flag">
-                <b>${discount}%</b>
-                <span>ENDİRİM</span>
+            <div class="detail-commerce-specs">
+              <div class="detail-stock-row">
+                <span>Stok:</span>
+        
+                <b class="${Number(product.stock_quantity || 0) > 0 ? 'available' : 'unavailable'}">
+                  <i></i>
+                  ${Number(product.stock_quantity || 0) > 0
+                    ? 'Stokda var'
+                    : 'Stok soruşulsun'}
+                </b>
               </div>
-            ` : ''}
+        
+              <div class="detail-unit-row">
+                <span>Vahid:</span>
+                <b>${product.unit || 'ədəd'}</b>
+              </div>
+            </div>
+        
           </div>
-
-
-        <p class="detail-desc">🌿 ${product.description || product.short_description || 'Təzə və keyfiyyətli məhsul.'}</p>
-
-        <div class="detail-actions">
-          <button id="addCartDetail" class="btn btn-primary">🛒 Səbətə əlavə et</button>
-          <button id="addFavDetail" class="btn btn-soft">♥ Sevimlilərə əlavə et</button>
+        
+          <p class="detail-desc">
+            🌿 ${product.description || product.short_description || 'Təzə və keyfiyyətli məhsul.'}
+          </p>
+        
+          <div class="detail-actions">
+            <button id="addCartDetail" class="btn btn-primary">
+              🛒 Səbətə əlavə et
+            </button>
+        
+            <button id="addFavDetail" class="btn btn-soft">
+              ♥ Sevimlilərə əlavə et
+            </button>
+          </div>
+        
         </div>
-      </div>
     </div>
   `;
 
