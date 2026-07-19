@@ -2557,3 +2557,118 @@
   }
 }
 
+/* ============================================================
+   SEÇİLMİŞ MƏHSULLAR — COMPACT SCROLL PANEL
+   Çox məhsul seçildikdə səhifə uzanmasın.
+   ============================================================ */
+
+.bulk-selected-list {
+  max-height: min(46vh, 430px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  align-content: start !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(22, 163, 74, 0.45) transparent;
+}
+
+.bulk-selected-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bulk-selected-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bulk-selected-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.38);
+}
+
+/* Kartları bir az daha yığcam edir */
+.bulk-selected-row,
+.bulk-selected-row.has-discount {
+  min-height: 100px !important;
+  padding: 10px !important;
+  gap: 8px !important;
+}
+
+.bulk-selected-main {
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+.bulk-selected-img {
+  width: 58px !important;
+  height: 44px !important;
+  min-width: 58px !important;
+}
+
+.bulk-selected-actions {
+  grid-template-columns: 112px minmax(70px, 1fr) 32px !important;
+  gap: 8px !important;
+}
+
+.bulk-qty-box.small {
+  width: 112px !important;
+  height: 32px !important;
+  grid-template-columns: 32px minmax(0, 1fr) 32px !important;
+}
+
+.bulk-remove {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+/* Yekun hissə scroll olmur, həmişə aşağıda görünür */
+.bulk-summary-mini {
+  position: relative;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+/* Telefon */
+@media (max-width: 640px) {
+  .bulk-selected-list {
+    max-height: 390px !important;
+    overflow-y: auto !important;
+    padding-right: 5px !important;
+  }
+
+  .bulk-selected-row,
+  .bulk-selected-row.has-discount {
+    min-height: 105px !important;
+    padding: 10px !important;
+  }
+
+  .bulk-selected-main {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    gap: 9px !important;
+  }
+
+  .bulk-selected-img {
+    width: 56px !important;
+    height: 42px !important;
+    min-width: 56px !important;
+  }
+
+  .bulk-selected-main b {
+    font-size: 13px !important;
+  }
+
+  .bulk-selected-main small {
+    font-size: 11px !important;
+  }
+
+  .bulk-selected-actions {
+    grid-template-columns: 108px minmax(60px, 1fr) 32px !important;
+    gap: 7px !important;
+  }
+
+  .bulk-qty-box.small {
+    width: 108px !important;
+    height: 32px !important;
+    grid-template-columns: 32px minmax(0, 1fr) 32px !important;
+  }
+}
