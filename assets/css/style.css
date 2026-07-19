@@ -9141,7 +9141,7 @@ body[data-page="home"] .site-footer {
     linear-gradient(
       180deg,
       rgba(255, 248, 195, 0.98) 0%,
-      rgba(255, 236, 120, 0.94) 100%
+      rgba(250, 204, 21, 0.95) 100%  /* SARI Bir az daha tünd */ 
     ) !important;
 
   border: 1px solid rgba(234, 179, 8, 0.60) !important;
