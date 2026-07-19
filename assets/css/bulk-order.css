@@ -1848,3 +1848,340 @@
     font-size: 7.5px !important;
   }
 }
+
+/* ============================================================
+   1. ENDİRİMLİ MƏHSUL KARTI
+   Kartın içində .bulk-discount-badge varsa avtomatik işləyir.
+   ============================================================ */
+
+.bulk-product-card:has(.bulk-discount-badge) {
+  position: relative !important;
+
+  border-color: rgba(250, 204, 21, 0.95) !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 12%,
+      rgba(255, 255, 255, 0.95),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      #fffbd1 0%,
+      #fff6a8 48%,
+      #fff1a0 100%
+    ) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.30),
+    0 0 18px rgba(250, 204, 21, 0.28),
+    0 12px 28px rgba(217, 150, 0, 0.14) !important;
+}
+
+/* Endirimli kart ətrafında yumşaq neon işıq */
+.bulk-product-card:has(.bulk-discount-badge)::before {
+  content: "" !important;
+
+  position: absolute !important;
+  inset: -1px !important;
+  z-index: 0 !important;
+
+  border-radius: inherit !important;
+  pointer-events: none !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 215, 0, 0.55),
+    inset 0 0 18px rgba(250, 204, 21, 0.16) !important;
+}
+
+/* Kartın bütün real məzmunu neon qatının üstündə qalsın */
+.bulk-product-card:has(.bulk-discount-badge) > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Endirimli məhsulun şəkil bloku */
+.bulk-product-card:has(.bulk-discount-badge) .bulk-product-img {
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 248, 186, 0.78)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(250, 204, 21, 0.34),
+    0 7px 18px rgba(217, 150, 0, 0.12) !important;
+}
+
+/* Endirim faizi daha canlı görünsün */
+.bulk-discount-badge {
+  color: #713f12 !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fde047,
+      #facc15
+    ) !important;
+
+  border: 1px solid rgba(180, 83, 9, 0.18) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(250, 204, 21, 0.18),
+    0 7px 16px rgba(217, 119, 6, 0.22) !important;
+}
+
+/* Endirimli kartın yeni qiyməti */
+.bulk-product-card:has(.bulk-discount-badge) .bulk-price-row .price {
+  color: #047857 !important;
+  font-weight: 950 !important;
+}
+
+/* Endirimli kartın Əlavə et düyməsi */
+.bulk-product-card:has(.bulk-discount-badge) .bulk-add {
+  color: #ffffff !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e50063,
+      #be004b
+    ) !important;
+
+  box-shadow:
+    0 8px 18px rgba(190, 0, 75, 0.20) !important;
+}
+
+/* ============================================================
+   2. SEÇİLMİŞ ENDİRİMLİ MƏHSUL KARTI
+   ============================================================ */
+
+.bulk-selected-row.has-discount {
+  position: relative !important;
+  overflow: hidden !important;
+
+  border-color: rgba(250, 204, 21, 0.88) !important;
+
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      rgba(255, 255, 255, 0.96),
+      transparent 42%
+    ),
+    linear-gradient(
+      135deg,
+      #fffef2 0%,
+      #fff8c7 55%,
+      #fff2a8 100%
+    ) !important;
+
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.20),
+    0 0 20px rgba(250, 204, 21, 0.20),
+    0 11px 26px rgba(180, 83, 9, 0.10) !important;
+}
+
+/* Seçilmiş endirimli məhsulda daxili neon */
+.bulk-selected-row.has-discount::before {
+  content: "" !important;
+
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+
+  pointer-events: none !important;
+  border-radius: inherit !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 215, 0, 0.34),
+    inset 0 0 20px rgba(250, 204, 21, 0.10) !important;
+}
+
+.bulk-selected-row.has-discount > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Seçilmiş məhsulun şəkli */
+.bulk-selected-row.has-discount .bulk-selected-img {
+  background: #ffffff !important;
+
+  box-shadow:
+    0 0 0 2px rgba(250, 204, 21, 0.32),
+    0 7px 16px rgba(180, 83, 9, 0.12) !important;
+}
+
+/* Seçilmiş məhsulda endirim faizi */
+.bulk-selected-discount-badge {
+  color: #713f12 !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fde047,
+      #facc15
+    ) !important;
+
+  border: 1px solid rgba(180, 83, 9, 0.16) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(250, 204, 21, 0.15),
+    0 7px 14px rgba(217, 119, 6, 0.18) !important;
+}
+
+/* Endirimli seçilmiş məhsulun ümumi qiyməti */
+.bulk-selected-row.has-discount .bulk-selected-actions > b {
+  color: #047857 !important;
+  font-weight: 950 !important;
+}
+
+/* ============================================================
+   3. MOBİL — AD, VAHİD VƏ QİYMƏT ARASINDAKI BOŞLUQLARI AZALT
+   ============================================================ */
+
+@media (max-width: 640px) {
+  /* Kart məzmunu artıq boşluq yaratmasın */
+  .bulk-product-body {
+    flex: 0 0 auto !important;
+
+    display: grid !important;
+    grid-template-rows: auto auto auto !important;
+    align-content: start !important;
+
+    gap: 4px !important;
+    padding: 6px 1px 1px !important;
+  }
+
+  /* Məhsul adı və ölçü vahidi bir blok kimi */
+  .bulk-product-title {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-content: start !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+
+    gap: 3px !important;
+    margin: 0 !important;
+  }
+
+  .bulk-product-title h3 {
+    min-height: 0 !important;
+    max-height: 28px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 10.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* kq / ədəd badge-i ada yaxınlaşır */
+  .bulk-product-title span {
+    position: static !important;
+
+    width: fit-content !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 2px 5px !important;
+
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+
+  /* Köhnə və yeni qiymət vahid badge-dən dərhal sonra gəlir */
+  .bulk-price-row {
+    min-height: 0 !important;
+    height: auto !important;
+
+    margin: 2px 0 1px !important;
+    padding: 0 !important;
+
+    display: block !important;
+  }
+
+  .bulk-price-row > div {
+    display: grid !important;
+    align-content: start !important;
+    justify-items: start !important;
+
+    gap: 1px !important;
+    min-width: 0 !important;
+  }
+
+  .bulk-price-row .old-price {
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 8px !important;
+    line-height: 1.05 !important;
+  }
+
+  .bulk-price-row .price {
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Əvvəlki margin-top:auto böyük boşluq yaradırdı */
+  .bulk-card-actions {
+    margin-top: 3px !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+
+    gap: 5px !important;
+  }
+
+  /* Endirimli kart mobil görünüşdə bir az daha parlaq */
+  .bulk-product-card:has(.bulk-discount-badge) {
+    box-shadow:
+      0 0 0 1px rgba(250, 204, 21, 0.38),
+      0 0 14px rgba(250, 204, 21, 0.26),
+      0 8px 18px rgba(180, 83, 9, 0.10) !important;
+  }
+
+  /* Seçilmiş məhsulda endirim faizi ada toxunmasın */
+  .bulk-selected-row.has-discount .bulk-selected-main {
+    padding-right: 50px !important;
+  }
+}
+
+/* Çox dar telefon */
+@media (max-width: 380px) {
+  .bulk-product-body {
+    gap: 3px !important;
+    padding-top: 5px !important;
+  }
+
+  .bulk-product-title {
+    gap: 2px !important;
+  }
+
+  .bulk-product-title h3 {
+    font-size: 9.5px !important;
+    max-height: 26px !important;
+  }
+
+  .bulk-product-title span {
+    font-size: 7.5px !important;
+  }
+
+  .bulk-price-row {
+    margin-top: 1px !important;
+  }
+
+  .bulk-price-row .price {
+    font-size: 11px !important;
+  }
+}
