@@ -261,72 +261,63 @@
 /*============================================= RƏSİMLƏRİN DÜZGÜNLƏŞDİRİLMƏSİ =================================================*/
 
 /* ============================================================
-   KURYER PANELİ — FINAL IMAGE SYSTEM
+   KURYER PANELİ — REAL FINAL IMAGE FIX
    ============================================================ */
 
-.pro-courier-card img {
-  max-width: 100%;
-}
-
 /* Müştəri avatarı */
-.pro-courier-card .customer-avatar,
-.courier-customer-box .customer-avatar {
-  flex: 0 0 auto !important;
+.courier-customer-box .customer-avatar,
+.pro-courier-card .customer-avatar {
   display: block !important;
-  width: 54px !important;
-  height: 54px !important;
+
+  width: 52px !important;
+  height: 52px !important;
+  flex: 0 0 52px !important;
+
   aspect-ratio: 1 / 1 !important;
-  border-radius: 50% !important;
-  overflow: hidden !important;
+
   object-fit: cover !important;
   object-position: center center !important;
+
   padding: 0 !important;
+  margin: 0 !important;
+
+  transform: none !important;
+
+  border-radius: 50% !important;
   background: #ffffff !important;
 }
 
-/* Sonradan məhsul şəkli əlavə olunsa hazır sistem */
+/* Gələcəkdə məhsul fotosu göstərilən halda hazır qayda */
 .courier-product-img {
-  flex: 0 0 auto;
-  display: block;
-  width: 64px;
-  height: 48px;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-radius: 12px;
-  object-fit: cover;
-  object-position: center;
-  padding: 0;
-  background: rgba(220, 252, 231, 0.9);
-}
+  display: block !important;
 
-.courier-product-media {
-  flex: 0 0 auto;
-  width: 64px;
-  height: 48px;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-radius: 12px;
-  background: rgba(220, 252, 231, 0.9);
-}
+  width: 64px !important;
+  height: 48px !important;
+  flex: 0 0 64px !important;
 
-.courier-product-media img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  aspect-ratio: 4 / 3 !important;
+
+  object-fit: cover !important;
+  object-position: center center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 12px !important;
+  background: rgba(220,252,231,.9) !important;
 }
 
 @media (max-width: 640px) {
-  .pro-courier-card .customer-avatar,
-  .courier-customer-box .customer-avatar {
-    width: 48px !important;
-    height: 48px !important;
+  .courier-customer-box .customer-avatar,
+  .pro-courier-card .customer-avatar {
+    width: 46px !important;
+    height: 46px !important;
+    flex-basis: 46px !important;
   }
 
-  .courier-product-img,
-  .courier-product-media {
-    width: 56px;
-    height: 42px;
+  .courier-product-img {
+    width: 56px !important;
+    height: 42px !important;
+    flex-basis: 56px !important;
   }
 }
