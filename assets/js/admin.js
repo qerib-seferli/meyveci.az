@@ -239,6 +239,7 @@ function fullName(profile = {}) {
       user: 'Müştəri',
       courier: 'Kuryer',
       warehouse: 'Anbardar',
+      editor: 'Redaktor',
       admin: 'Admin',
     };
   
