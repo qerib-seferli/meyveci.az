@@ -3171,8 +3171,30 @@ async function loadUsers() {
                 Admin
               </option>
             </select>
-          
-            ${user.role === 'editor' ? `
+          </div>
+        </td>
+        <td>
+          ${
+            user.email === masterEmail && adminProfile?.email !== masterEmail
+              ? '<span class="mini-badge mini-yellow">Əsas admin qorunur</span>'
+              : activeSwitch(user.id, user.is_active !== false, 'toggle-user-active', 'profiles')
+          }
+        </td>
+        <td>
+          ${isReallyOnline(user)
+            ? '<span class="mini-badge mini-green"><span class="admin-online-dot online"></span>Online</span>'
+            : '<span class="mini-badge mini-red"><span class="admin-online-dot offline"></span>Offline</span>'
+          }
+        </td>
+        <td>${orderCount.get(user.id) || 0}</td>
+        <td>${formatDate(user.created_at)}</td>
+        <td>
+          <button class="btn btn-soft btn-mini view-user" data-row="${rowAttr(user)}">Detallar</button>
+        </td>
+      </tr>
+
+
+                  ${user.role === 'editor' ? `
               <div class="editor-permissions-card" data-editor-user="${user.id}">
                 <b>Redaktor icazələri</b>
           
@@ -3235,32 +3257,13 @@ async function loadUsers() {
                 </button>
               </div>
             ` : ''}
-          </div>
-        </td>
-        <td>
-          ${
-            user.email === masterEmail && adminProfile?.email !== masterEmail
-              ? '<span class="mini-badge mini-yellow">Əsas admin qorunur</span>'
-              : activeSwitch(user.id, user.is_active !== false, 'toggle-user-active', 'profiles')
-          }
-        </td>
-        <td>
-          ${isReallyOnline(user)
-            ? '<span class="mini-badge mini-green"><span class="admin-online-dot online"></span>Online</span>'
-            : '<span class="mini-badge mini-red"><span class="admin-online-dot offline"></span>Offline</span>'
-          }
-        </td>
-        <td>${orderCount.get(user.id) || 0}</td>
-        <td>${formatDate(user.created_at)}</td>
-        <td>
-          <button class="btn btn-soft btn-mini view-user" data-row="${rowAttr(user)}">Detallar</button>
-        </td>
-      </tr>
-    `;
-  }).join('') || '<tr><td colspan="8">İstifadəçi yoxdur.</td></tr>';
 
-  bindUserEvents();
-}
+            
+          `;
+        }).join('') || '<tr><td colspan="8">İstifadəçi yoxdur.</td></tr>';
+      
+        bindUserEvents();
+      }
 
 function bindUserEvents() {
   $$('.role').forEach((select) => {
