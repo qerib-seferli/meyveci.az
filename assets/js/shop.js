@@ -19,6 +19,13 @@ import {
 
 import { initLayout } from './layout.js';
 
+import {
+  getEditorPermissions,
+  openProductImageEditor,
+} from './editor.js';
+
+let editorPermissions = null;
+
 const state = {
   categories: [],
   products: [],
@@ -33,9 +40,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const page = document.body.dataset.page;
 
-  if (page === 'home') initHome();
-  if (page === 'product') initProduct();
+  if (page === 'home' || page === 'product') {
+    editorPermissions = await getEditorPermissions();
+  }
+
+  if (page === 'home') {
+    await initHome();
+  }
+
+  if (page === 'product') {
+    await initProduct();
+  }
 });
+
+
 
 async function initHome() {
   await loadHomeData();
@@ -393,11 +411,53 @@ function renderProducts() {
   $$('.fav-btn').forEach((button) => {
     button.addEventListener('click', () => toggleFavorite(button.dataset.id, button));
   });
-
+  
+    bindEditorProductImageButtons(container);
+  
   const loadMoreButton = $('#loadMore');
   if (loadMoreButton) loadMoreButton.style.display = rows.length > visibleRows.length ? 'inline-flex' : 'none';
 }
 
+
+function bindEditorProductImageButtons(root = document) {
+  if (!editorPermissions?.canEditProductImage) {
+    return;
+  }
+
+  $$('.editor-product-image-btn', root).forEach((button) => {
+    button.addEventListener('click', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const productId = button.dataset.id;
+
+      const product =
+        state.products.find((item) => item.id === productId) ||
+        null;
+
+      await openProductImageEditor({
+        productId,
+        productName:
+          product?.name ||
+          button.dataset.name ||
+          'Məhsul',
+
+        currentImageUrl:
+          product?.image_url ||
+          button.dataset.currentImage ||
+          '',
+
+        onUpdated: (newImageUrl) => {
+          if (product) {
+            product.image_url = newImageUrl;
+          }
+
+          button.dataset.currentImage = newImageUrl;
+        },
+      });
+    });
+  });
+}
 
 
 function productCard(product) {
@@ -414,10 +474,37 @@ function productCard(product) {
           <b>${rating > 0 ? rating : '5.0'}</b>
         </div>
 
-        <button class="fav-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}" title="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}" aria-label="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}">♥</button>
-
-        <a href="product.html?id=${product.id}" class="pic">
-          <img loading="lazy" src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+        <button
+        class="fav-btn ${isFavorite ? 'active' : ''}"
+        data-id="${product.id}"
+        title="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}"
+        aria-label="${isFavorite ? 'Sevimlilərdən çıxart' : 'Sevimlilərə əlavə et'}"
+      >
+        ♥
+      </button>
+      
+      ${editorPermissions?.canEditProductImage ? `
+        <button
+          class="editor-product-image-btn"
+          type="button"
+          data-id="${product.id}"
+          data-name="${escapeAttr(product.name || 'Məhsul')}"
+          data-current-image="${escapeAttr(product.image_url || '')}"
+          title="Məhsul şəklini dəyiş"
+          aria-label="Məhsul şəklini dəyiş"
+        >
+          📸
+        </button>
+      ` : ''}
+      
+      <a href="product.html?id=${product.id}" class="pic">
+        
+            <img
+              loading="lazy"
+              src="${product.image_url || PLACEHOLDER}"
+              alt="${product.name}"
+              data-product-image-id="${product.id}"
+            >
         </a>
 
         <div class="fresh-badge">🌿 TƏZƏ MƏHSUL</div>
@@ -555,10 +642,34 @@ async function initProduct() {
 
   detail.innerHTML = `
     <div class="product-detail-pro ${hasDiscount ? 'detail-discount' : 'detail-fresh'}">
+    
       <div class="product-detail-image">
-        <div class="rating-pill detail-rating">⭐ <b>${rating > 0 ? rating : '5.0'}</b></div>
+        <div class="rating-pill detail-rating">
+          ⭐ <b>${rating > 0 ? rating : '5.0'}</b>
+        </div>
+      
+        ${editorPermissions?.canEditProductImage ? `
+          <button
+            class="editor-product-image-btn editor-detail-image-btn"
+            type="button"
+            data-id="${product.id}"
+            data-name="${escapeAttr(product.name || 'Məhsul')}"
+            data-current-image="${escapeAttr(product.image_url || '')}"
+            title="Məhsul şəklini dəyiş"
+            aria-label="Məhsul şəklini dəyiş"
+          >
+            📸
+          </button>
+        ` : ''}
+        
         ${hasDiscount ? `<span class="discount-leaf">-${discount}%</span>` : ''}
-        <img src="${product.image_url || PLACEHOLDER}" alt="${product.name}">
+        
+        <img
+          src="${product.image_url || PLACEHOLDER}"
+          alt="${product.name}"
+          data-product-image-id="${product.id}"
+        >
+
         <div class="fresh-badge detail-fresh-badge">🌿 TƏZƏ MƏHSUL</div>
         <div class="quality-badge detail-quality-badge">🛡️ KEYFİYYƏT ZƏMANƏTİ</div>
       </div>
@@ -633,7 +744,16 @@ async function initProduct() {
   `;
 
   $('#addCartDetail').addEventListener('click', () => addCart(product.id));
-  $('#addFavDetail').addEventListener('click', () => toggleFavorite(product.id, $('#addFavDetail')));
+  
+  $('#addFavDetail').addEventListener('click', () => {
+    toggleFavorite(
+      product.id,
+      $('#addFavDetail')
+    );
+  });
+  
+  bindEditorProductImageButtons(detail);
+  
   await renderRelatedProducts(product);
 }
 
@@ -661,6 +781,10 @@ async function renderRelatedProducts(product) {
 
   $$('.related-products .add-cart').forEach((button) => button.addEventListener('click', () => addCart(button.dataset.id)));
   $$('.related-products .fav-btn').forEach((button) => button.addEventListener('click', () => toggleFavorite(button.dataset.id, button)));
+
+    bindEditorProductImageButtons(
+    detail.querySelector('.related-products')
+  );
 }
 
 function prepareMarquee(selector, direction) {
