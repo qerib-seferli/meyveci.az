@@ -3204,7 +3204,7 @@ async function loadUsers() {
                   <b>Redaktor icazələri</b>
   
                   <small>
-                    ${esc(fullName)} üçün aktiv redaktə hüquqları
+                    ${esc(fullName)} üçün redaktə hüquqları
                   </small>
                 </div>
   
