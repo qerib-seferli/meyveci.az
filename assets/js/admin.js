@@ -3145,12 +3145,96 @@ async function loadUsers() {
         <td>
           <div class="role-manager-cell">
             ${roleBadge(user.role)}
-            <select class="role role-select-pro" data-id="${user.id}" ${user.email === masterEmail && adminProfile?.email !== masterEmail ? 'disabled' : ''}>
-            <option value="user" ${user.role === 'user' ? 'selected' : ''}>Müştəri</option>
-            <option value="courier" ${user.role === 'courier' ? 'selected' : ''}>Kuryer</option>
-            <option value="warehouse" ${user.role === 'warehouse' ? 'selected' : ''}>Anbardar</option>
-            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+          
+            <select
+              class="role role-select-pro"
+              data-id="${user.id}"
+              ${user.email === masterEmail && adminProfile?.email !== masterEmail ? 'disabled' : ''}
+            >
+              <option value="user" ${user.role === 'user' ? 'selected' : ''}>
+                Müştəri
+              </option>
+          
+              <option value="courier" ${user.role === 'courier' ? 'selected' : ''}>
+                Kuryer
+              </option>
+          
+              <option value="warehouse" ${user.role === 'warehouse' ? 'selected' : ''}>
+                Anbardar
+              </option>
+          
+              <option value="editor" ${user.role === 'editor' ? 'selected' : ''}>
+                Redaktor
+              </option>
+          
+              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>
+                Admin
+              </option>
             </select>
+          
+            ${user.role === 'editor' ? `
+              <div class="editor-permissions-card" data-editor-user="${user.id}">
+                <b>Redaktor icazələri</b>
+          
+                <label>
+                  <input
+                    type="checkbox"
+                    class="editor-permission"
+                    data-field="editor_can_edit_product_image"
+                    ${user.editor_can_edit_product_image === true ? 'checked' : ''}
+                  >
+                  <span>📸 Məhsul şəkli dəyişə bilər</span>
+                </label>
+          
+                <label>
+                  <input
+                    type="checkbox"
+                    class="editor-permission"
+                    data-field="editor_can_edit_product_name"
+                    ${user.editor_can_edit_product_name === true ? 'checked' : ''}
+                  >
+                  <span>✏️ Məhsul adını dəyişə bilər</span>
+                </label>
+          
+                <label>
+                  <input
+                    type="checkbox"
+                    class="editor-permission"
+                    data-field="editor_can_edit_product_description"
+                    ${user.editor_can_edit_product_description === true ? 'checked' : ''}
+                  >
+                  <span>📝 Məhsul açıqlamasını dəyişə bilər</span>
+                </label>
+          
+                <label>
+                  <input
+                    type="checkbox"
+                    class="editor-permission"
+                    data-field="editor_can_edit_banner"
+                    ${user.editor_can_edit_banner === true ? 'checked' : ''}
+                  >
+                  <span>🎨 Banner dəyişə bilər</span>
+                </label>
+          
+                <label>
+                  <input
+                    type="checkbox"
+                    class="editor-permission"
+                    data-field="editor_can_edit_news"
+                    ${user.editor_can_edit_news === true ? 'checked' : ''}
+                  >
+                  <span>📰 Xəbərləri dəyişə bilər</span>
+                </label>
+          
+                <button
+                  class="btn btn-primary btn-mini save-editor-permissions"
+                  type="button"
+                  data-id="${user.id}"
+                >
+                  💾 İcazələri yadda saxla
+                </button>
+              </div>
+            ` : ''}
           </div>
         </td>
         <td>
@@ -3203,6 +3287,69 @@ function bindUserEvents() {
     });
   });
 
+
+  // ============================================================
+  // REDAKTOR İCAZƏLƏRİNİN YADDA SAXLANMASI
+  // ============================================================
+
+  $$('.save-editor-permissions').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const userId = button.dataset.id;
+      const permissionsCard = button.closest('.editor-permissions-card');
+
+      if (!permissionsCard) {
+        toast('Redaktor icazə paneli tapılmadı');
+        return;
+      }
+
+      const permissions = {
+        editor_can_edit_product_image: false,
+        editor_can_edit_product_name: false,
+        editor_can_edit_product_description: false,
+        editor_can_edit_banner: false,
+        editor_can_edit_news: false,
+      };
+
+      $$('.editor-permission', permissionsCard).forEach((input) => {
+        const field = input.dataset.field;
+
+        if (field && Object.prototype.hasOwnProperty.call(permissions, field)) {
+          permissions[field] = input.checked === true;
+        }
+      });
+
+      button.disabled = true;
+      button.textContent = '⏳ Saxlanılır...';
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...permissions,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId)
+        .eq('role', 'editor');
+
+      if (error) {
+        toast(error.message);
+        button.disabled = false;
+        button.textContent = '💾 İcazələri yadda saxla';
+        return;
+      }
+
+      toast('Redaktor icazələri yadda saxlanıldı');
+
+      button.disabled = false;
+      button.textContent = '✅ İcazələr saxlanıldı';
+
+      setTimeout(() => {
+        button.textContent = '💾 İcazələri yadda saxla';
+      }, 1600);
+    });
+  });
+
+
+  
   $$('.toggle-user-active').forEach((input) => input.addEventListener('change', toggleActive));
 
   $$('.view-user').forEach((btn) => {
@@ -3229,11 +3376,43 @@ function bindUserEvents() {
         <div class="admin-detail-box admin-detail-full"><b>Ünvan</b><span>${esc([u.city_region, u.address_line, u.apartment, u.door_code].filter(Boolean).join(', ') || 'Ünvan yoxdur')}</span></div>
         <div class="admin-detail-box admin-detail-full"><b>Koordinat</b><span>${esc([u.lat, u.lng].filter(Boolean).join(', ') || 'GPS yoxdur')}</span></div>
         <div class="admin-detail-box admin-detail-full"><b>Bio</b><span>${esc(u.bio || 'Qeyd yoxdur')}</span></div>
-      </div>
-    `);
-    });
-  });
-}
+
+                ${u.role === 'editor' ? `
+                  <div class="admin-detail-box admin-detail-full">
+                    <b>Redaktor icazələri</b>
+        
+                    <span>
+                      ${u.editor_can_edit_product_image ? '✅' : '❌'}
+                      Məhsul şəkli
+                    </span>
+        
+                    <span>
+                      ${u.editor_can_edit_product_name ? '✅' : '❌'}
+                      Məhsul adı
+                    </span>
+        
+                    <span>
+                      ${u.editor_can_edit_product_description ? '✅' : '❌'}
+                      Məhsul açıqlaması
+                    </span>
+        
+                    <span>
+                      ${u.editor_can_edit_banner ? '✅' : '❌'}
+                      Banner
+                    </span>
+        
+                    <span>
+                      ${u.editor_can_edit_news ? '✅' : '❌'}
+                      Xəbərlər
+                    </span>
+                  </div>
+                ` : ''}
+        
+            </div>
+          `);
+          });
+        });
+      }
 
 async function loadReviews() {
   const search = ($('#reviewSearch')?.value || '').toLowerCase();
