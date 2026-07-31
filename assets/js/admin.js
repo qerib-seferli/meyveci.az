@@ -3193,61 +3193,73 @@ async function loadUsers() {
         </td>
       </tr>
 
-
-                  ${user.role === 'editor' ? `
-              <div class="editor-permissions-card" data-editor-user="${user.id}">
-                <b>Redaktor icazələri</b>
-          
-                <label>
-                  <input
-                    type="checkbox"
-                    class="editor-permission"
-                    data-field="editor_can_edit_product_image"
-                    ${user.editor_can_edit_product_image === true ? 'checked' : ''}
-                  >
-                  <span>📸 Məhsul şəkli dəyişə bilər</span>
-                </label>
-          
-                <label>
-                  <input
-                    type="checkbox"
-                    class="editor-permission"
-                    data-field="editor_can_edit_product_name"
-                    ${user.editor_can_edit_product_name === true ? 'checked' : ''}
-                  >
-                  <span>✏️ Məhsul adını dəyişə bilər</span>
-                </label>
-          
-                <label>
-                  <input
-                    type="checkbox"
-                    class="editor-permission"
-                    data-field="editor_can_edit_product_description"
-                    ${user.editor_can_edit_product_description === true ? 'checked' : ''}
-                  >
-                  <span>📝 Məhsul açıqlamasını dəyişə bilər</span>
-                </label>
-          
-                <label>
-                  <input
-                    type="checkbox"
-                    class="editor-permission"
-                    data-field="editor_can_edit_banner"
-                    ${user.editor_can_edit_banner === true ? 'checked' : ''}
-                  >
-                  <span>🎨 Banner dəyişə bilər</span>
-                </label>
-          
-                <label>
-                  <input
-                    type="checkbox"
-                    class="editor-permission"
-                    data-field="editor_can_edit_news"
-                    ${user.editor_can_edit_news === true ? 'checked' : ''}
-                  >
-                  <span>📰 Xəbərləri dəyişə bilər</span>
-                </label>
-          
+        ${user.role === 'editor' ? `
+          <tr class="editor-permissions-row">
+            <td colspan="8">
+              <div
+                class="editor-permissions-card"
+                data-editor-user="${user.id}"
+              >
+                <div class="editor-permissions-head">
+                  <b>Redaktor icazələri</b>
+  
+                  <small>
+                    ${esc(fullName)} üçün aktiv redaktə hüquqları
+                  </small>
+                </div>
+  
+                <div class="editor-permissions-list">
+                  <label>
+                    <input
+                      type="checkbox"
+                      class="editor-permission"
+                      data-field="editor_can_edit_product_image"
+                      ${user.editor_can_edit_product_image === true ? 'checked' : ''}
+                    >
+                    <span>📸 Məhsul şəkli dəyişə bilər</span>
+                  </label>
+  
+                  <label>
+                    <input
+                      type="checkbox"
+                      class="editor-permission"
+                      data-field="editor_can_edit_product_name"
+                      ${user.editor_can_edit_product_name === true ? 'checked' : ''}
+                    >
+                    <span>✏️ Məhsul adını dəyişə bilər</span>
+                  </label>
+  
+                  <label>
+                    <input
+                      type="checkbox"
+                      class="editor-permission"
+                      data-field="editor_can_edit_product_description"
+                      ${user.editor_can_edit_product_description === true ? 'checked' : ''}
+                    >
+                    <span>📝 Məhsul açıqlamasını dəyişə bilər</span>
+                  </label>
+  
+                  <label>
+                    <input
+                      type="checkbox"
+                      class="editor-permission"
+                      data-field="editor_can_edit_banner"
+                      ${user.editor_can_edit_banner === true ? 'checked' : ''}
+                    >
+                    <span>🎨 Banner dəyişə bilər</span>
+                  </label>
+  
+                  <label>
+                    <input
+                      type="checkbox"
+                      class="editor-permission"
+                      data-field="editor_can_edit_news"
+                      ${user.editor_can_edit_news === true ? 'checked' : ''}
+                    >
+                    <span>📰 Xəbərləri dəyişə bilər</span>
+                  </label>
+                </div>
+  
                 <button
                   class="btn btn-primary btn-mini save-editor-permissions"
                   type="button"
@@ -3256,7 +3268,9 @@ async function loadUsers() {
                   💾 İcazələri yadda saxla
                 </button>
               </div>
-            ` : ''}
+            </td>
+          </tr>
+        ` : ''}
 
             
           `;
