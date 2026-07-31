@@ -2552,145 +2552,247 @@ th {
 
 /* ============================================================
    REDAKTOR İCAZƏLƏRİ
-   İstifadəçinin əsas sətrinin altında tam en görünüş
+   Kompakt, tam en və responsiv görünüş
    ============================================================ */
 
 .role-badge.role-editor {
   color: #6d28d9;
-  border-color: rgba(109, 40, 217, 0.25);
-  background: rgba(237, 233, 254, 0.88);
+  border-color: rgba(109, 40, 217, 0.24);
+  background: rgba(237, 233, 254, 0.9);
 }
 
-.editor-permissions-row td {
-  padding: 0 14px 16px !important;
+/* İcazə sətri bütün cədvəl sütunlarını əhatə edir */
+.pro-table .editor-permissions-row {
+  display: table-row;
+}
+
+.pro-table .editor-permissions-row > td {
+  padding: 0 14px 14px !important;
   border-top: 0 !important;
 }
 
+/* Əsas panel */
 .editor-permissions-card {
   width: 100%;
-  padding: 12px 14px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  min-width: 0;
+  box-sizing: border-box;
+
+  padding: 10px 12px;
+
+  display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+
   border: 1px solid rgba(22, 163, 74, 0.22);
-  border-radius: 15px;
+  border-radius: 14px;
+
   background:
     linear-gradient(
       145deg,
-      rgba(240, 253, 244, 0.97),
-      rgba(255, 255, 255, 0.98)
+      rgba(240, 253, 244, 0.98),
+      rgba(255, 255, 255, 0.99)
     );
-  box-shadow: 0 7px 22px rgba(22, 101, 52, 0.07);
+
+  box-shadow: 0 6px 18px rgba(22, 101, 52, 0.06);
 }
 
+/* Sol başlıq */
 .editor-permissions-head {
-  min-width: 135px;
-  display: grid;
+  flex: 0 0 145px;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
   gap: 2px;
 }
 
 .editor-permissions-head b {
   color: #166534;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
 .editor-permissions-head small {
   color: #64748b;
-  font-size: 10px;
+  font-size: 9px;
+  line-height: 1.25;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* İcazələrin yerləşdiyi orta hissə */
 .editor-permissions-list {
+  flex: 1 1 auto;
   min-width: 0;
+
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  align-items: center;
+  gap: 8px;
+}
+
+/* Hər checkbox sətri */
+.editor-permissions-list label {
+  min-width: 0;
+
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: nowrap;
+  gap: 5px;
+
+  margin: 0;
+  padding: 5px 7px;
+
+  color: #334155;
+  font-size: 10px;
+  line-height: 1.25;
+
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.68);
+
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
 }
 
-.editor-permissions-list label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #334155;
-  font-size: 11px;
-  line-height: 1.3;
+.editor-permissions-list label:hover {
+  background: rgba(220, 252, 231, 0.9);
+  transform: translateY(-1px);
+}
+
+.editor-permissions-list label span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
 }
 
 .editor-permissions-list input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+
   margin: 0;
+
   accent-color: #16a34a;
   cursor: pointer;
 }
 
+/* Yadda saxla düyməsi */
 .editor-permissions-card .save-editor-permissions {
+  flex: 0 0 auto;
+
   width: auto;
-  min-width: 180px;
+  min-width: 168px;
+  max-width: 190px;
+
   margin: 0;
+  padding-left: 14px;
+  padding-right: 14px;
+
   justify-content: center;
+
+  font-size: 11px;
   white-space: nowrap;
 }
 
-@media (max-width: 1250px) {
+/* Orta ölçülü kompüterlər */
+@media (max-width: 1350px) {
   .editor-permissions-card {
-    grid-template-columns: 1fr auto;
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .editor-permissions-head {
-    grid-column: 1 / -1;
+    flex: 1 1 auto;
   }
 
   .editor-permissions-list {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    order: 3;
+    flex: 1 0 100%;
+
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .editor-permissions-card .save-editor-permissions {
+    margin-left: auto;
   }
 }
 
+/* Kiçik laptop və planşet */
+@media (max-width: 1050px) {
+  .editor-permissions-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .editor-permissions-list label span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+  }
+}
+
+/* Telefon */
 @media (max-width: 768px) {
-  .editor-permissions-row td {
+  .pro-table .editor-permissions-row > td {
     padding: 0 8px 12px !important;
   }
 
   .editor-permissions-card {
-    padding: 11px;
+    display: grid;
     grid-template-columns: 1fr;
-    gap: 10px;
-    border-radius: 13px;
+    gap: 9px;
+
+    padding: 10px;
+    border-radius: 12px;
   }
 
   .editor-permissions-head {
-    min-width: 0;
+    width: 100%;
+    flex: none;
+  }
+
+  .editor-permissions-head b {
+    font-size: 12px;
   }
 
   .editor-permissions-head small {
     white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
   }
 
   .editor-permissions-list {
+    order: initial;
+
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
+    gap: 7px;
   }
 
   .editor-permissions-list label {
-    white-space: normal;
     align-items: flex-start;
+    padding: 7px;
+
+    font-size: 10px;
+  }
+
+  .editor-permissions-list label span {
+    white-space: normal;
   }
 
   .editor-permissions-card .save-editor-permissions {
     width: 100%;
+    max-width: none;
     min-width: 0;
+    margin: 0;
   }
 }
 
+/* Çox dar telefon */
 @media (max-width: 480px) {
   .editor-permissions-list {
     grid-template-columns: 1fr;
