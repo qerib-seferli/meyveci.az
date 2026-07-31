@@ -9560,3 +9560,218 @@ body[data-page="home"] .site-footer {
     right: 12px !important;
   }
 }
+
+
+
+
+/* ============================================================
+   REDAKTOR MƏHSUL ŞƏKLİ shop.js də
+   ============================================================ */
+
+.product-media,
+.product-detail-image {
+  position: relative;
+}
+
+.editor-product-image-btn {
+  position: absolute;
+  top: 10px;
+  right: 52px;
+  z-index: 12;
+
+  width: 38px;
+  height: 38px;
+  padding: 0;
+
+  display: inline-grid;
+  place-items: center;
+
+  border: 1px solid rgba(22, 163, 74, 0.28);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 6px 18px rgba(15, 23, 42, 0.14),
+    0 0 0 4px rgba(22, 163, 74, 0.08);
+
+  font-size: 18px;
+  line-height: 1;
+
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.editor-product-image-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: #ffffff;
+  box-shadow:
+    0 9px 24px rgba(15, 23, 42, 0.17),
+    0 0 0 5px rgba(22, 163, 74, 0.11);
+}
+
+.editor-product-image-btn:active {
+  transform: scale(0.96);
+}
+
+.editor-detail-image-btn {
+  right: 14px;
+}
+
+/* Modal */
+.editor-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+
+  display: none;
+  place-items: center;
+
+  padding: 18px;
+
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(8px);
+}
+
+.editor-image-modal.show {
+  display: grid;
+}
+
+.editor-image-modal-card {
+  width: min(440px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+
+  padding: 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 22px;
+
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+}
+
+.editor-image-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 13px;
+}
+
+.editor-image-modal-head > div {
+  display: grid;
+  gap: 3px;
+}
+
+.editor-image-modal-head b {
+  color: #166534;
+  font-size: 17px;
+}
+
+.editor-image-modal-head small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.editor-image-modal-close {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  color: #475569;
+  background: #f1f5f9;
+
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.editor-image-preview-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+
+  overflow: hidden;
+
+  border: 1px solid #dcfce7;
+  border-radius: 17px;
+
+  background: #f8fafc;
+}
+
+.editor-image-preview-wrap img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.editor-image-help {
+  margin: 11px 2px;
+
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.editor-image-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.editor-image-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.editor-image-progress {
+  margin-top: 11px;
+  padding: 10px;
+
+  border-radius: 12px;
+
+  color: #166534;
+  background: #f0fdf4;
+
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .editor-product-image-btn {
+    top: 8px;
+    right: 46px;
+
+    width: 34px;
+    height: 34px;
+
+    font-size: 16px;
+  }
+
+  .editor-detail-image-btn {
+    right: 10px;
+  }
+
+  .editor-image-modal {
+    padding: 10px;
+  }
+
+  .editor-image-modal-card {
+    padding: 13px;
+    border-radius: 18px;
+  }
+
+  .editor-image-actions {
+    grid-template-columns: 1fr;
+  }
+}
