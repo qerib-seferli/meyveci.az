@@ -95,11 +95,29 @@
         <table class="pro-table">
           <thead>
             <tr>
-              <th>Şəkil</th><th>Məhsul</th><th>Kateqoriya</th><th>Qiymət</th><th>Stok</th><th>Tip</th><th>Status</th><th>Tarix</th><th>Əməliyyat</th>
+              <th>Şəkil</th>
+              <th>Məhsul</th>
+              <th>Kateqoriya</th>
+              <th>Qiymət</th>
+              <th>Stok</th>
+              <th>Tip</th>
+              <th>Status</th>
+              <th>Tarix</th>
+              <th>Əməliyyat</th>
             </tr>
           </thead>
+
           <tbody id="productTable"></tbody>
         </table>
+      </div>
+
+      <!-- Aşağı çatanda növbəti 20 məhsul yüklənəcək -->
+      <div
+        id="productLoadMoreSentinel"
+        class="catalog-load-sentinel"
+        aria-live="polite"
+      >
+        <span id="productLoadMoreText">Aşağı endikcə digər məhsullar yüklənəcək</span>
       </div>
     </section>
 
@@ -156,6 +174,17 @@
       </div>
     
       <div id="discountCardsGrid" class="discount-cards-grid"></div>
+
+      <!-- Aşağı çatanda növbəti 15 endirim kartı yüklənəcək -->
+      <div
+        id="discountCardsLoadMoreSentinel"
+        class="catalog-load-sentinel"
+        aria-live="polite"
+      >
+        <span id="discountCardsLoadMoreText">
+          Aşağı endikcə digər endirim kartları yüklənəcək
+        </span>
+      </div>
     </section>
 
         </div>
