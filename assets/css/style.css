@@ -9778,7 +9778,7 @@ body[data-page="home"] .site-footer {
 
 /*=============================================================================================================*/
 /* ============================================================
-   MEYVƏÇİ.AZ — RESPONSİV YAN REKLAMLAR
+   RESPONSİV YAN REKLAMLAR
    340 × 1360 px reklam şəkilləri üçün
    ============================================================ */
 
@@ -9794,40 +9794,48 @@ body[data-page="home"] .site-footer {
 
 .site-side-ad {
   /*
-    Ekranın yan boşluğuna görə reklam eni avtomatik hesablanır.
+    Reklam eni həm ekranın hündürlüyünə,
+    həm də saytın kənarında qalan real boşluğa görə hesablanır.
 
-    55px  → dar desktop ekranlarda minimum en
-    165px → geniş ekranlarda maksimum en
+    min(...) hissəsi reklamın:
+    - ekran hündürlüyündən daşmamasını;
+    - saytın üstünə çıxmamasını təmin edir.
+
+    70px  → minimum en
+    165px → maksimum en
   */
   --side-ad-width: clamp(
-    55px,
-    calc((100vw - 1240px) / 2 - 10px),
+    70px,
+    min(
+      calc((100vh - 145px) / 4),
+      calc((100vw - 1240px) / 2 - 8px)
+    ),
     165px
   );
 
   position: fixed !important;
 
-  /* Şaquli olaraq ekranın ortasında qalır */
+  /* Reklam ekranın şaquli mərkəzində qalır */
   top: 50% !important;
   bottom: auto !important;
 
-  width: var(--side-ad-width) !important;
-
-  /* Reklam şəkli 340 × 1360, yəni 1:4 nisbətindədir */
-  aspect-ratio: 1 / 4;
-  height: auto !important;
-
   /*
-    Reklam çox hündür ekranlarda belə
-    yuxarı və aşağı menyulara girməsin
+    Şəkil 340 × 1360 px-dir.
+    Nisbət 1:4 olduğu üçün hündürlük enin 4 qatıdır.
   */
-  max-height: calc(100vh - 150px);
+  width: var(--side-ad-width) !important;
+  height: calc(var(--side-ad-width) * 4) !important;
+
+  aspect-ratio: auto !important;
+
+  /* Yuxarı və aşağı menyulara girməsin */
+  max-height: calc(100vh - 145px);
 
   z-index: 35;
 
   overflow: hidden;
 
-  /* Künclər yalnız çox cüzi yumru */
+  /* Künclər çox cüzi yumru */
   border-radius: 8px;
 
   background: rgba(255, 255, 255, 0.96);
@@ -9849,12 +9857,12 @@ body[data-page="home"] .site-footer {
 
 /* Sol reklam */
 .site-side-ad-left {
-  left: 6px !important;
+  left: 4px !important;
 }
 
 /* Sağ reklam */
 .site-side-ad-right {
-  right: 6px !important;
+  right: 4px !important;
 }
 
 /* ============================================================
@@ -9868,8 +9876,8 @@ body[data-page="home"] .site-footer {
   height: 100% !important;
 
   /*
-    contain istifadə olunur:
-    şəkil sağdan və soldan kəsilmir
+    Şəkil qutunun içinə tam sığır.
+    Sağ-sol və yuxarı-aşağı kəsilmir.
   */
   object-fit: contain !important;
   object-position: center center !important;
@@ -9978,11 +9986,7 @@ body[data-page="home"] .site-footer {
    ============================================================ */
 
 /*
-  1366px və daha geniş CSS viewport-da göstərilir.
-
-  Qeyd:
-  Brauzer zoomu viewport ölçüsünü dəyişir.
-  100%-də ekran eni 1366px-dən aşağıdırsa reklam gizlənəcək.
+  1366px və daha geniş CSS viewport-da reklamlar görünür.
 */
 @media (min-width: 1366px) {
   .site-side-ads {
@@ -9994,7 +9998,10 @@ body[data-page="home"] .site-footer {
   }
 }
 
-/* 1365px və daha aşağıda gizlənir */
+/*
+  1365px və daha aşağıda reklamlar gizlənir.
+  Saytın məzmununun üstünə çıxmasının qarşısını alır.
+*/
 @media (max-width: 1365px) {
   .site-side-ads,
   .site-side-ad {
