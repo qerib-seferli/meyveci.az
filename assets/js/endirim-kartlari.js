@@ -60,8 +60,8 @@ const CARD_LAYOUT = {
   // height artır → şəkil sahəsi aşağıya doğru böyüyür
   // ==========================================================
   productImage: {
-    x: 740,
-    y: 60,
+    x: 735,
+    y: 65,
     width: 657,
     height: 748,
 
@@ -123,8 +123,8 @@ const CARD_LAYOUT = {
     fontSize: 69,
     minFontSize: 44,
 
-    labelY: 398,        // ENDİRİM yazısının yeri
-    labelFontSize: 24,
+                                          // labelY: 398,        // ENDİRİM yazısının yeri
+                                          // labelFontSize: 24,
   },
 
   // ==========================================================
@@ -139,9 +139,9 @@ const CARD_LAYOUT = {
 
     // Üstündən keçən çəhrayı xətt
     lineStartX: 490,
-    lineStartY: 492,
+    lineStartY: 552,
     lineEndX: 752,
-    lineEndY: 471,
+    lineEndY: 551,
     lineWidth: 7,
   },
 
