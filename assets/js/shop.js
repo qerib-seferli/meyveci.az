@@ -167,6 +167,13 @@ function setupHomeEvents() {
           behavior: 'smooth',
           block: 'start',
         });
+        
+        window.setTimeout(() => {
+          window.scrollBy({
+            top: -85,
+            behavior: 'smooth',
+          });
+        }, 350);
       });  
     }
   }
