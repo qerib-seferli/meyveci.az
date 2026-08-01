@@ -179,6 +179,65 @@ function drawTextFit(ctx, text, x, y, maxWidth, fontSize, minFontSize, fontWeigh
   return size;
 }
 
+
+// Yumru künclü düzbucaqlı yol yaradır
+function roundedRectPath(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(
+    x + width,
+    y + height,
+    x + width - r,
+    y + height
+  );
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+
+// JPG şəklini proporsiyasını pozmadan sahəyə yerləşdirir
+function drawImageCover(ctx, img, x, y, width, height) {
+  const imageRatio = img.naturalWidth / img.naturalHeight;
+  const boxRatio = width / height;
+
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceWidth = img.naturalWidth;
+  let sourceHeight = img.naturalHeight;
+
+  if (imageRatio > boxRatio) {
+    // Şəkil daha enlidir — sağ və soldan kəsilir
+    sourceWidth = img.naturalHeight * boxRatio;
+    sourceX = (img.naturalWidth - sourceWidth) / 2;
+  } else {
+    // Şəkil daha hündürdür — yuxarı və aşağıdan kəsilir
+    sourceHeight = img.naturalWidth / boxRatio;
+    sourceY = (img.naturalHeight - sourceHeight) / 2;
+  }
+
+  ctx.drawImage(
+    img,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    x,
+    y,
+    width,
+    height
+  );
+}
+
+
+
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
   const words = String(text || '').split(' ');
   let line = '';
@@ -223,24 +282,162 @@ async function drawDiscountCanvas(canvas, product, originText = 'YERLİ FERMER')
   // h: hündürlük
   // globalAlpha: şəffaflıq
   // ============================================================
-  if (product.image_url) {
-    try {
-      const productImg = await loadCanvasImage(product.image_url);
+if (product.image_url) {
+  try {
+    const productImg = await loadCanvasImage(product.image_url);
 
-      ctx.save();
-      ctx.globalAlpha = 0.60; // Şəklin görünmə gücü
+    // ==========================================================
+    // JPG MƏHSUL ŞƏKLİ ÜÇÜN PRO FOTO VİTRİN
+    // ==========================================================
+    const imgX = 410;
+    const imgY = 265;
+    const imgW = 585;
+    const imgH = 445;
+    const imgRadius = 38;
 
-      const imgX = 420; // sağa artır, sola azalt
-      const imgY = 260; // aşağı artır, yuxarı azalt
-      const imgW = 550; // şəkli böyütmək üçün artır
-      const imgH = 440; // şəkli böyütmək üçün artır
+    ctx.save();
 
-      ctx.drawImage(productImg, imgX, imgY, imgW, imgH);
-      ctx.restore();
-    } catch (error) {
-      console.warn('Məhsul şəkli yüklənmədi:', error.message);
-    }
+    // Vitrinin arxasındakı yumşaq kölgə
+    ctx.shadowColor = 'rgba(52, 83, 20, 0.30)';
+    ctx.shadowBlur = 32;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 18;
+
+    roundedRectPath(
+      ctx,
+      imgX - 10,
+      imgY - 10,
+      imgW + 20,
+      imgH + 20,
+      imgRadius + 8
+    );
+
+    const frameGradient = ctx.createLinearGradient(
+      imgX,
+      imgY,
+      imgX,
+      imgY + imgH
+    );
+
+    frameGradient.addColorStop(0, 'rgba(255,255,255,0.98)');
+    frameGradient.addColorStop(0.55, 'rgba(255,249,215,0.98)');
+    frameGradient.addColorStop(1, 'rgba(239,194,45,0.98)');
+
+    ctx.fillStyle = frameGradient;
+    ctx.fill();
+
+    ctx.restore();
+
+
+    // Şəkli yumru çərçivənin daxilində saxlayırıq
+    ctx.save();
+
+    roundedRectPath(
+      ctx,
+      imgX,
+      imgY,
+      imgW,
+      imgH,
+      imgRadius
+    );
+
+    ctx.clip();
+
+    // JPG şəkil artıq şəffaf olmayacaq
+    ctx.globalAlpha = 1;
+
+    // Rəng və kontrastı bir qədər yaxşılaşdırır
+    ctx.filter = 'contrast(1.06) saturate(1.08) brightness(1.02)';
+
+    // Şəkli dartmadan və proporsiyanı pozmadan yerləşdirir
+    drawImageCover(
+      ctx,
+      productImg,
+      imgX,
+      imgY,
+      imgW,
+      imgH
+    );
+
+    ctx.filter = 'none';
+
+
+    // Şəklin yuxarı hissəsinə çox zəif işıq effekti
+    const topLight = ctx.createLinearGradient(
+      imgX,
+      imgY,
+      imgX,
+      imgY + 150
+    );
+
+    topLight.addColorStop(0, 'rgba(255,255,255,0.20)');
+    topLight.addColorStop(1, 'rgba(255,255,255,0)');
+
+    ctx.fillStyle = topLight;
+    ctx.fillRect(imgX, imgY, imgW, 150);
+
+
+    // Şəklin aşağı hissəsini kartla yumşaq birləşdirir
+    const bottomFade = ctx.createLinearGradient(
+      imgX,
+      imgY + imgH - 125,
+      imgX,
+      imgY + imgH
+    );
+
+    bottomFade.addColorStop(0, 'rgba(255,215,20,0)');
+    bottomFade.addColorStop(1, 'rgba(255,215,20,0.22)');
+
+    ctx.fillStyle = bottomFade;
+    ctx.fillRect(
+      imgX,
+      imgY + imgH - 125,
+      imgW,
+      125
+    );
+
+    ctx.restore();
+
+
+    // Vitrinin ağ-qızılı konturu
+    ctx.save();
+
+    roundedRectPath(
+      ctx,
+      imgX,
+      imgY,
+      imgW,
+      imgH,
+      imgRadius
+    );
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+    roundedRectPath(
+      ctx,
+      imgX + 7,
+      imgY + 7,
+      imgW - 14,
+      imgH - 14,
+      imgRadius - 6
+    );
+
+    ctx.strokeStyle = 'rgba(232,177,0,0.38)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.restore();
+
+  } catch (error) {
+    console.warn('Məhsul şəkli yüklənmədi:', error);
   }
+}
+
+
+
+  
 
   const percent = discountPercent(product.price, product.old_price);
   const price = Number(product.price || 0).toFixed(2);
