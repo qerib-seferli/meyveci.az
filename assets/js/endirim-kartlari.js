@@ -1,6 +1,6 @@
 // ============================================================
 // ENDİRİM KARTLARI CANVAS MODULU
-// Yeni Endirim-karti.png şablonuna uyğun versiya
+// Endirim-karti.png şablonuna uyğun yekun versiya
 // Canvas ölçüsü: 1402 × 1122
 // ============================================================
 
@@ -18,11 +18,9 @@ const selectedDiscountCardIds = new Set();
 const DISCOUNT_CARD_BG =
   '../assets/img/fotolar/Endirim-karti.png';
 
-// Yeni PNG şablonun real ölçüsü
 const CARD_WIDTH = 1402;
 const CARD_HEIGHT = 1122;
 
-// Şəkilləri təkrar-təkrar yükləməmək üçün keş
 const canvasImageCache = new Map();
 
 const discountOriginOptions = [
@@ -33,6 +31,162 @@ const discountOriginOptions = [
   'SELEKSİYA',
   'ORQANİK',
 ];
+
+
+// ============================================================
+// KARTDAKI BÜTÜN KOORDİNATLAR
+//
+// X artır  → sağa gedir
+// X azalt  → sola gedir
+// Y artır  → aşağı gedir
+// Y azalt  → yuxarı gedir
+// W artır  → en böyüyür
+// H artır  → hündürlük böyüyür
+// FONT artır → yazı böyüyür
+// ============================================================
+
+const CARD_LAYOUT = {
+  // ==========================================================
+  // MƏHSUL ŞƏKLİ
+  //
+  // Şəkil PNG şablonundan ƏVVƏL çəkilir.
+  // Şablondakı şəffaf sahənin altını tam doldurur.
+  //
+  // x azalt → şəkil sola gəlir
+  // x artır → şəkil sağa gedir
+  // y azalt → şəkil yuxarı qalxır
+  // y artır → şəkil aşağı düşür
+  // width artır → şəkil sahəsi sola doğru da böyüyür
+  // height artır → şəkil sahəsi aşağıya doğru böyüyür
+  // ==========================================================
+  productImage: {
+    x: 745,
+    y: 55,
+    width: 657,
+    height: 748,
+
+    // Şəkildə əsas məhsul sağdadırsa focusX artır.
+    // Məhsul soldadırsa focusX azalt.
+    // 0 = ən sol, 0.5 = orta, 1 = ən sağ
+    focusX: 0.50,
+
+    // 0 = ən yuxarı, 0.5 = orta, 1 = ən aşağı
+    focusY: 0.50,
+
+    brightness: 1.01,
+    contrast: 1.03,
+    saturation: 1.04,
+  },
+
+  // ==========================================================
+  // MƏHSUL ADI
+  // ==========================================================
+  productName: {
+    x: 100,             // artır → sağa, azalt → sola
+    y: 335,             // artır → aşağı, azalt → yuxarı
+    maxWidth: 395,      // artır → uzun ad üçün daha çox yer
+    maxLines: 2,
+    fontSize: 49,       // başlanğıc ölçü
+    minFontSize: 29,    // bundan balaca olmayacaq
+    lineHeight: 1.08,
+  },
+
+  // ==========================================================
+  // VAHİD — kq, ədəd və s.
+  // ==========================================================
+  unit: {
+    x: 102,
+    gapAfterName: 50,   // məhsul adından aşağı məsafə
+    fontSize: 31,
+  },
+
+  // ==========================================================
+  // XÜSUSİYYƏTLƏR
+  // ==========================================================
+  features: {
+    iconX: 120,         // ikonları sağa/sola çəkir
+    textX: 164,         // yazıları sağa/sola çəkir
+    startY: 500,        // birinci sətri aşağı/yuxarı çəkir
+    gap: 62,            // sətirlər arasındakı məsafə
+    textMaxWidth: 335,
+    fontSize: 25,
+    minFontSize: 18,
+  },
+
+  // ==========================================================
+  // ENDİRİM FAİZİ — ULDUZUN İÇİ
+  // ==========================================================
+  percent: {
+    centerX: 690,       // artır → sağa, azalt → sola
+    y: 333,             // artır → aşağı, azalt → yuxarı
+    maxWidth: 225,
+    fontSize: 69,
+    minFontSize: 44,
+
+    labelY: 378,        // ENDİRİM yazısının yeri
+    labelFontSize: 24,
+  },
+
+  // ==========================================================
+  // KÖHNƏ QİYMƏT
+  // ==========================================================
+  oldPrice: {
+    centerX: 622,
+    y: 505,
+    maxWidth: 275,
+    fontSize: 48,
+    minFontSize: 31,
+
+    // Üstündən keçən çəhrayı xətt
+    lineStartX: 490,
+    lineStartY: 492,
+    lineEndX: 752,
+    lineEndY: 471,
+    lineWidth: 7,
+  },
+
+  // ==========================================================
+  // YENİ QİYMƏT
+  //
+  // Qiymət soldan başlayır.
+  // Buna görə uzun qiymətlər sağa, məhsul şəklinin üzərinə
+  // bir qədər keçə bilər və çox balacalaşmaz.
+  // ==========================================================
+  newPrice: {
+    x: 455,             // artır → sağa, azalt → sola
+    y: 665,             // artır → aşağı, azalt → yuxarı
+
+    // Qiymətin istifadə edə biləcəyi sahə.
+    // Artırsan uzun qiymət daha az kiçiləcək.
+    maxWidth: 475,
+
+    fontSize: 112,
+    minFontSize: 82,
+
+    // ₼ işarəsi rəqəmdən bir qədər balaca çəkilir
+    currencyFontRatio: 0.56,
+    currencyGap: 14,
+  },
+
+  // ==========================================================
+  // BARKOD
+  // ==========================================================
+  barcode: {
+    boxX: 925,          // bütün barkodu sağa/sola çəkir
+    boxY: 852,          // bütün barkodu aşağı/yuxarı çəkir
+    boxWidth: 415,
+    boxHeight: 145,
+
+    sidePadding: 25,
+    topPadding: 14,
+
+    barsHeight: 76,
+
+    numberY: 124,       // boxY üzərinə əlavə olunur
+    numberFontSize: 25,
+    numberMinFontSize: 18,
+  },
+};
 
 
 // ============================================================
@@ -88,7 +242,7 @@ function formatPrice(value) {
 
 
 // ============================================================
-// SKU / BARKOD KODUNU TƏMİZLƏMƏ
+// SKU TƏMİZLƏMƏ
 // ============================================================
 
 function normalizeSku(value) {
@@ -168,7 +322,7 @@ function renderDiscountCard(product) {
 
 
 // ============================================================
-// ENDİRİMLİ MƏHSULLARI SUPABASE-DƏN ÇƏKMƏ
+// SUPABASE-DƏN ENDİRİMLİ MƏHSULLAR
 // ============================================================
 
 export async function loadDiscountCards() {
@@ -284,14 +438,16 @@ function bindDiscountCardEvents() {
 
   $$('.print-discount-card').forEach((button) => {
     button.addEventListener('click', async () => {
-      await printSingleDiscountCanvas(button.dataset.id);
+      await printSingleDiscountCanvas(
+        button.dataset.id
+      );
     });
   });
 }
 
 
 // ============================================================
-// ŞƏKİL YÜKLƏMƏ
+// CANVAS ŞƏKİL YÜKLƏMƏ
 // ============================================================
 
 function loadCanvasImage(src) {
@@ -325,7 +481,10 @@ function loadCanvasImage(src) {
     image.src = imageUrl;
   });
 
-  canvasImageCache.set(imageUrl, imagePromise);
+  canvasImageCache.set(
+    imageUrl,
+    imagePromise
+  );
 
   return imagePromise;
 }
@@ -337,7 +496,8 @@ function loadCanvasImage(src) {
 
 function getDiscountProductById(id) {
   return discountCardsCache.find(
-    (product) => String(product.id) === String(id)
+    (product) =>
+      String(product.id) === String(id)
   );
 }
 
@@ -505,7 +665,13 @@ function drawWrappedTextFit(
 ) {
   const value = String(text || '').trim();
 
-  if (!value) return;
+  if (!value) {
+    return {
+      fontSize: startSize,
+      lines: [],
+      height: 0,
+    };
+  }
 
   for (
     let fontSize = startSize;
@@ -565,7 +731,10 @@ function drawWrappedTextFit(
       return {
         fontSize,
         lines,
-        height: lines.length * lineHeight,
+        height:
+          lines.length > 1
+            ? (lines.length - 1) * lineHeight
+            : 0,
       };
     }
   }
@@ -584,14 +753,18 @@ function drawWrappedTextFit(
   return {
     fontSize: minSize,
     lines: [value],
-    height: minSize,
+    height: 0,
   };
 }
 
 
 // ============================================================
 // ŞƏKLİ COVER FORMASINDA ÇƏKMƏ
-// Proporsiya pozulmur, boşluq qalmır
+//
+// Şəkil sahəni tam doldurur.
+// Boşluq qalmır.
+// Proporsiya pozulmur.
+// Artıq hissələr avtomatik kəsilir.
 // ============================================================
 
 function drawImageCover(
@@ -623,20 +796,26 @@ function drawImageCover(
   let cropWidth = sourceWidth;
   let cropHeight = sourceHeight;
 
+  const safeFocusX =
+    Math.min(1, Math.max(0, focusX));
+
+  const safeFocusY =
+    Math.min(1, Math.max(0, focusY));
+
   if (imageRatio > boxRatio) {
     cropWidth =
       sourceHeight * boxRatio;
 
     cropX =
       (sourceWidth - cropWidth) *
-      Math.min(1, Math.max(0, focusX));
+      safeFocusX;
   } else {
     cropHeight =
       sourceWidth / boxRatio;
 
     cropY =
       (sourceHeight - cropHeight) *
-      Math.min(1, Math.max(0, focusY));
+      safeFocusY;
   }
 
   ctx.drawImage(
@@ -654,62 +833,81 @@ function drawImageCover(
 
 
 // ============================================================
-// MƏHSUL ŞƏKLİ ÜÇÜN YUMŞAQ FON
-// Şəkil yüklənməsə boş qara sahə qalmasın
+// KARTIN XARİCİNƏ ŞƏKİL DAŞMASIN DEYƏ ÜMUMİ MASKA
 // ============================================================
 
-function drawProductImageFallback(ctx) {
-  const imageX = 800;
-  const imageY = 188;
-  const imageWidth = 590;
-  const imageHeight = 443; // Dəqiq 4:3
-
-  ctx.save();
-
-  const gradient = ctx.createLinearGradient(
-    imageX,
-    imageY,
-    imageX,
-    imageY + imageHeight
-  );
-
-  gradient.addColorStop(0, '#eef8df');
-  gradient.addColorStop(0.55, '#b7df8c');
-  gradient.addColorStop(1, '#72b84c');
-
-  ctx.fillStyle = gradient;
+function clipToCardShape(ctx) {
+  ctx.beginPath();
 
   roundedRectPath(
     ctx,
-    imageX,
-    imageY,
-    imageWidth,
-    imageHeight,
-    36
+    60,
+    70,
+    CARD_WIDTH - 120,
+    CARD_HEIGHT - 140,
+    82
   );
 
-  ctx.fill();
+  ctx.clip();
+}
+
+
+// ============================================================
+// MƏHSUL ŞƏKLİ OLMADIQDA FON
+// ============================================================
+
+function drawProductImageFallback(ctx) {
+  const photo = CARD_LAYOUT.productImage;
+
+  ctx.save();
+
+  clipToCardShape(ctx);
+
+  const gradient = ctx.createLinearGradient(
+    photo.x,
+    photo.y,
+    photo.x,
+    photo.y + photo.height
+  );
+
+  gradient.addColorStop(
+    0,
+    '#eef8df'
+  );
+
+  gradient.addColorStop(
+    0.55,
+    '#a8d77a'
+  );
+
+  gradient.addColorStop(
+    1,
+    '#599f3f'
+  );
+
+  ctx.fillStyle = gradient;
+
+  ctx.fillRect(
+    photo.x,
+    photo.y,
+    photo.width,
+    photo.height
+  );
+
   ctx.restore();
 }
 
 
 // ============================================================
-// MƏHSUL ŞƏKLİNİ SAĞ HİSSƏYƏ ÇƏKMƏ
-// Şəkil şablondan əvvəl çəkilir.
-// PNG yarpaqları və dekorlar şəklin üstündə qalır.
+// MƏHSUL ŞƏKLİNİ ÇƏKMƏ
+//
+// Şəkil əvvəl çəkilir.
+// PNG şablonu sonra çəkildiyi üçün yarpaqlar və digər
+// dekorlar məhsul şəklinin üzərində qalır.
 // ============================================================
 
 async function drawProductImage(ctx, product) {
-  /*
-   * Sağ tərəfdə dəqiq 4:3 foto sahəsi.
-   * Şəkil hansı ölçüdə yüklənirsə-yüklənsin,
-   * proporsiyası pozulmadan avtomatik yerləşir.
-   */
-  const imageX = 800;
-  const imageY = 188;
-  const imageWidth = 590;
-  const imageHeight = 443;
-  const imageRadius = 36;
+  const photo = CARD_LAYOUT.productImage;
 
   if (!product.image_url) {
     drawProductImageFallback(ctx);
@@ -717,86 +915,34 @@ async function drawProductImage(ctx, product) {
   }
 
   try {
-    const productImage = await loadCanvasImage(product.image_url);
+    const productImage =
+      await loadCanvasImage(
+        product.image_url
+      );
 
     ctx.save();
 
-    roundedRectPath(
-      ctx,
-      imageX,
-      imageY,
-      imageWidth,
-      imageHeight,
-      imageRadius
-    );
+    // Şəkil kartın ümumi yumru sərhədindən kənara çıxmır
+    clipToCardShape(ctx);
 
-    ctx.clip();
-
-    ctx.filter =
-      'contrast(1.03) saturate(1.04) brightness(1.01)';
+    ctx.filter = `
+      brightness(${photo.brightness})
+      contrast(${photo.contrast})
+      saturate(${photo.saturation})
+    `;
 
     drawImageCover(
       ctx,
       productImage,
-      imageX,
-      imageY,
-      imageWidth,
-      imageHeight,
-      0.5,
-      0.5
+      photo.x,
+      photo.y,
+      photo.width,
+      photo.height,
+      photo.focusX,
+      photo.focusY
     );
 
     ctx.filter = 'none';
-    ctx.restore();
-
-    // Şəklin sol hissəsini sarı sahəyə yumşaq bağlayır
-    ctx.save();
-
-    roundedRectPath(
-      ctx,
-      imageX,
-      imageY,
-      imageWidth,
-      imageHeight,
-      imageRadius
-    );
-
-    ctx.clip();
-
-    const leftFade = ctx.createLinearGradient(
-      imageX,
-      imageY,
-      imageX + 105,
-      imageY
-    );
-
-    leftFade.addColorStop(0, 'rgba(241, 238, 35, 0.24)');
-    leftFade.addColorStop(1, 'rgba(241, 238, 35, 0)');
-
-    ctx.fillStyle = leftFade;
-    ctx.fillRect(imageX, imageY, 105, imageHeight);
-
-    ctx.restore();
-
-    // Çox yüngül çərçivə və kölgə
-    ctx.save();
-
-    ctx.shadowColor = 'rgba(22, 70, 20, 0.24)';
-    ctx.shadowBlur = 22;
-    ctx.shadowOffsetY = 12;
-
-    roundedRectPath(
-      ctx,
-      imageX,
-      imageY,
-      imageWidth,
-      imageHeight,
-      imageRadius
-    );
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
-    ctx.lineWidth = 7;
-    ctx.stroke();
 
     ctx.restore();
   } catch (error) {
@@ -811,7 +957,7 @@ async function drawProductImage(ctx, product) {
 
 
 // ============================================================
-// SOLDAKI XÜSUSİYYƏT İKONLARI
+// XÜSUSİYYƏT İKONLARI
 // ============================================================
 
 function drawLeafIcon(ctx, centerX, centerY) {
@@ -823,6 +969,7 @@ function drawLeafIcon(ctx, centerX, centerY) {
   ctx.fillStyle = '#159447';
 
   ctx.beginPath();
+
   ctx.ellipse(
     0,
     0,
@@ -832,6 +979,7 @@ function drawLeafIcon(ctx, centerX, centerY) {
     0,
     Math.PI * 2
   );
+
   ctx.fill();
 
   ctx.strokeStyle =
@@ -854,6 +1002,7 @@ function drawPinIcon(ctx, centerX, centerY) {
   ctx.fillStyle = '#da075f';
 
   ctx.beginPath();
+
   ctx.arc(
     centerX,
     centerY - 7,
@@ -873,6 +1022,7 @@ function drawPinIcon(ctx, centerX, centerY) {
   ctx.fillStyle = '#ffffff';
 
   ctx.beginPath();
+
   ctx.arc(
     centerX,
     centerY - 7,
@@ -971,13 +1121,14 @@ function drawFeatureRow(
   iconY,
   textX,
   textY,
-  maxWidth
+  maxWidth,
+  fontSize,
+  minFontSize
 ) {
   ctx.save();
 
-  // İkonun arxasındakı çox zəif ağ dairə
   ctx.fillStyle =
-    'rgba(255,255,255,0.66)';
+    'rgba(255,255,255,0.68)';
 
   ctx.beginPath();
 
@@ -992,15 +1143,27 @@ function drawFeatureRow(
   ctx.fill();
 
   if (type === 'leaf') {
-    drawLeafIcon(ctx, iconX, iconY);
+    drawLeafIcon(
+      ctx,
+      iconX,
+      iconY
+    );
   }
 
   if (type === 'pin') {
-    drawPinIcon(ctx, iconX, iconY);
+    drawPinIcon(
+      ctx,
+      iconX,
+      iconY
+    );
   }
 
   if (type === 'shield') {
-    drawShieldIcon(ctx, iconX, iconY);
+    drawShieldIcon(
+      ctx,
+      iconX,
+      iconY
+    );
   }
 
   ctx.fillStyle = '#111111';
@@ -1013,8 +1176,8 @@ function drawFeatureRow(
     textX,
     textY,
     maxWidth,
-    25,
-    18,
+    fontSize,
+    minFontSize,
     '900'
   );
 
@@ -1023,120 +1186,79 @@ function drawFeatureRow(
 
 
 // ============================================================
-// CODE 128-B BARKOD NÜMUNƏLƏRİ
+// CODE 128 BARKOD CƏDVƏLİ
+//
+// SKU 12 və ya 13 rəqəm olsa da olduğu kimi kodlanır.
+// Heç bir əlavə yoxlama rəqəmi əlavə edilmir.
 // ============================================================
 
-const EAN13_LEFT_ODD = {
-  0: '0001101',
-  1: '0011001',
-  2: '0010011',
-  3: '0111101',
-  4: '0100011',
-  5: '0110001',
-  6: '0101111',
-  7: '0111011',
-  8: '0110111',
-  9: '0001011',
-};
+const CODE128_PATTERNS = [
+  '212222', '222122', '222221', '121223',
+  '121322', '131222', '122213', '122312',
+  '132212', '221213', '221312', '231212',
+  '112232', '122132', '122231', '113222',
+  '123122', '123221', '223211', '221132',
+  '221231', '213212', '223112', '312131',
+  '311222', '321122', '321221', '312212',
+  '322112', '322211', '212123', '212321',
+  '232121', '111323', '131123', '131321',
+  '112313', '132113', '132311', '211313',
+  '231113', '231311', '112133', '112331',
+  '132131', '113123', '113321', '133121',
+  '313121', '211331', '231131', '213113',
+  '213311', '213131', '311123', '311321',
+  '331121', '312113', '312311', '332111',
+  '314111', '221411', '431111', '111224',
+  '111422', '121124', '121421', '141122',
+  '141221', '112214', '112412', '122114',
+  '122411', '142112', '142211', '241211',
+  '221114', '413111', '241112', '134111',
+  '111242', '121142', '121241', '114212',
+  '124112', '124211', '411212', '421112',
+  '421211', '212141', '214121', '412121',
+  '111143', '111341', '131141', '114113',
+  '114311', '411113', '411311', '113141',
+  '114131', '311141', '411131', '211412',
+  '211214', '211232', '2331112',
+];
 
-const EAN13_LEFT_EVEN = {
-  0: '0100111',
-  1: '0110011',
-  2: '0011011',
-  3: '0100001',
-  4: '0011101',
-  5: '0111001',
-  6: '0000101',
-  7: '0010001',
-  8: '0001001',
-  9: '0010111',
-};
 
-const EAN13_RIGHT = {
-  0: '1110010',
-  1: '1100110',
-  2: '1101100',
-  3: '1000010',
-  4: '1011100',
-  5: '1001110',
-  6: '1010000',
-  7: '1000100',
-  8: '1001000',
-  9: '1110100',
-};
+// ============================================================
+// CODE 128-B DƏYƏRLƏRİ
+// ============================================================
 
-const EAN13_PARITY = {
-  0: 'OOOOOO',
-  1: 'OOEOEE',
-  2: 'OOEEOE',
-  3: 'OOEEEO',
-  4: 'OEOOEE',
-  5: 'OEEOOE',
-  6: 'OEEEOO',
-  7: 'OEOEOE',
-  8: 'OEOEEO',
-  9: 'OEEOEO',
-};
+function code128Values(value) {
+  const text = String(value || '');
 
-function calculateEan13CheckDigit(first12Digits) {
-  const digits = first12Digits.split('').map(Number);
+  if (!text) return [];
 
-  let sum = 0;
+  const values = [];
 
-  digits.forEach((digit, index) => {
-    sum += index % 2 === 0 ? digit : digit * 3;
-  });
+  for (const character of text) {
+    const charCode =
+      character.charCodeAt(0);
 
-  return String((10 - (sum % 10)) % 10);
+    if (
+      charCode < 32 ||
+      charCode > 126
+    ) {
+      continue;
+    }
+
+    values.push(
+      charCode - 32
+    );
+  }
+
+  return values;
 }
 
-function normalizeEan13(value) {
-  const digits = String(value || '').replace(/\D/g, '');
 
-  if (digits.length === 12) {
-    return digits + calculateEan13CheckDigit(digits);
-  }
+// ============================================================
+// CODE 128 BARKODUNU ÇƏKMƏ
+// ============================================================
 
-  if (digits.length === 13) {
-    return digits;
-  }
-
-  return '';
-}
-
-function buildEan13Bits(value) {
-  const ean = normalizeEan13(value);
-
-  if (!ean) return null;
-
-  const firstDigit = Number(ean[0]);
-  const parity = EAN13_PARITY[firstDigit];
-
-  let bits = '101';
-
-  for (let index = 1; index <= 6; index += 1) {
-    const digit = Number(ean[index]);
-
-    bits += parity[index - 1] === 'O'
-      ? EAN13_LEFT_ODD[digit]
-      : EAN13_LEFT_EVEN[digit];
-  }
-
-  bits += '01010';
-
-  for (let index = 7; index <= 12; index += 1) {
-    bits += EAN13_RIGHT[Number(ean[index])];
-  }
-
-  bits += '101';
-
-  return {
-    ean,
-    bits,
-  };
-}
-
-function drawEan13Barcode(
+function drawCode128Barcode(
   ctx,
   value,
   x,
@@ -1144,69 +1266,127 @@ function drawEan13Barcode(
   width,
   height
 ) {
-  const barcode = buildEan13Bits(value);
+  const text = normalizeSku(value);
 
-  if (!barcode) return false;
+  if (!text) return false;
 
-  const quietZoneModules = 9;
-  const totalModules =
-    barcode.bits.length + quietZoneModules * 2;
+  const dataValues =
+    code128Values(text);
 
-  const moduleWidth = width / totalModules;
+  if (!dataValues.length) {
+    return false;
+  }
+
+  const startCode = 104;
+
+  let checksum = startCode;
+
+  dataValues.forEach((code, index) => {
+    checksum +=
+      code * (index + 1);
+  });
+
+  checksum %= 103;
+
+  const codes = [
+    startCode,
+    ...dataValues,
+    checksum,
+    106,
+  ];
+
+  const patterns = codes
+    .map((code) =>
+      CODE128_PATTERNS[code]
+    )
+    .filter(Boolean);
+
+  if (!patterns.length) {
+    return false;
+  }
+
+  const quietModules = 10;
+
+  let totalModules =
+    quietModules * 2;
+
+  patterns.forEach((pattern) => {
+    for (const digit of pattern) {
+      totalModules += Number(digit);
+    }
+  });
+
+  const moduleWidth =
+    width / totalModules;
+
+  let currentX =
+    x + quietModules * moduleWidth;
 
   ctx.save();
-  ctx.fillStyle = '#000000';
 
-  let currentX = x + quietZoneModules * moduleWidth;
+  ctx.fillStyle = '#050505';
 
-  for (let index = 0; index < barcode.bits.length; index += 1) {
-    if (barcode.bits[index] === '1') {
-      const isGuard =
-        index < 3 ||
-        (index >= 45 && index <= 49) ||
-        index >= barcode.bits.length - 3;
+  patterns.forEach((pattern) => {
+    let isBar = true;
 
-      ctx.fillRect(
-        currentX,
-        y,
-        Math.ceil(moduleWidth),
-        isGuard ? height + 8 : height
-      );
+    for (const digit of pattern) {
+      const partWidth =
+        Number(digit) * moduleWidth;
+
+      if (isBar) {
+        ctx.fillRect(
+          currentX,
+          y,
+          Math.max(1, partWidth),
+          height
+        );
+      }
+
+      currentX += partWidth;
+      isBar = !isBar;
     }
-
-    currentX += moduleWidth;
-  }
+  });
 
   ctx.restore();
 
-  return barcode.ean;
+  return true;
 }
 
 
 // ============================================================
-// BARKOD BLOKU
+// BARKOD SAHƏSİ
 // ============================================================
 
 function drawBarcodeArea(ctx, sku) {
-  const boxX = 936;
-  const boxY = 844;
-  const boxW = 390;
-  const boxH = 132;
+  const value = normalizeSku(sku);
 
-  const barcodeValue = normalizeEan13(sku);
+  if (!value) return;
 
-  if (!barcodeValue) return;
+  const barcode =
+    CARD_LAYOUT.barcode;
 
-  const drawnValue = drawEan13Barcode(
+  const barsX =
+    barcode.boxX +
+    barcode.sidePadding;
+
+  const barsY =
+    barcode.boxY +
+    barcode.topPadding;
+
+  const barsWidth =
+    barcode.boxWidth -
+    barcode.sidePadding * 2;
+
+  const success = drawCode128Barcode(
     ctx,
-    barcodeValue,
-    boxX + 22,
-    boxY + 13,
-    boxW - 44,
-    72
+    value,
+    barsX,
+    barsY,
+    barsWidth,
+    barcode.barsHeight
   );
 
-  if (!drawnValue) return;
+  if (!success) return;
 
   ctx.save();
 
@@ -1216,12 +1396,14 @@ function drawBarcodeArea(ctx, sku) {
 
   drawTextFit(
     ctx,
-    drawnValue,
-    boxX + boxW / 2,
-    boxY + 119,
-    boxW - 34,
-    25,
-    18,
+    value,
+    barcode.boxX +
+      barcode.boxWidth / 2,
+    barcode.boxY +
+      barcode.numberY,
+    barcode.boxWidth - 40,
+    barcode.numberFontSize,
+    barcode.numberMinFontSize,
     '700'
   );
 
@@ -1230,7 +1412,74 @@ function drawBarcodeArea(ctx, sku) {
 
 
 // ============================================================
-// ƏSAS ENDİRİM KARTININ ÇƏKİLMƏSİ
+// YENİ QİYMƏTİ ÇƏKMƏ
+//
+// Rəqəm və ₼ ayrı çəkilir.
+// Uzun qiymətlər lazımsız dərəcədə balacalaşmır.
+// ============================================================
+
+function drawLargePrice(ctx, priceText) {
+  const layout =
+    CARD_LAYOUT.newPrice;
+
+  let fontSize =
+    layout.fontSize;
+
+  const minFontSize =
+    layout.minFontSize;
+
+  ctx.save();
+
+  ctx.fillStyle = '#050505';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  ctx.font =
+    `1000 ${fontSize}px Inter, Arial, sans-serif`;
+
+  while (
+    ctx.measureText(priceText).width >
+      layout.maxWidth &&
+    fontSize > minFontSize
+  ) {
+    fontSize -= 2;
+
+    ctx.font =
+      `1000 ${fontSize}px Inter, Arial, sans-serif`;
+  }
+
+  ctx.fillText(
+    priceText,
+    layout.x,
+    layout.y
+  );
+
+  const priceWidth =
+    ctx.measureText(priceText).width;
+
+  const currencyFontSize =
+    Math.round(
+      fontSize *
+      layout.currencyFontRatio
+    );
+
+  ctx.font =
+    `1000 ${currencyFontSize}px Inter, Arial, sans-serif`;
+
+  ctx.fillText(
+    '₼',
+    layout.x +
+      priceWidth +
+      layout.currencyGap,
+    layout.y
+  );
+
+  ctx.restore();
+}
+
+
+// ============================================================
+// ƏSAS ENDİRİM KARTINI ÇƏKMƏ
 // ============================================================
 
 async function drawDiscountCanvas(
@@ -1243,7 +1492,8 @@ async function drawDiscountCanvas(
   canvas.width = CARD_WIDTH;
   canvas.height = CARD_HEIGHT;
 
-  const ctx = canvas.getContext('2d');
+  const ctx =
+    canvas.getContext('2d');
 
   if (!ctx) return;
 
@@ -1269,23 +1519,26 @@ async function drawDiscountCanvas(
     formatPrice(product.old_price);
 
   const unit =
-    String(product.unit || 'ədəd').trim();
+    String(
+      product.unit || 'ədəd'
+    ).trim();
 
   const sku =
     normalizeSku(product.sku);
 
+
   // ==========================================================
   // 1. MƏHSUL ŞƏKLİ
-  // Əvvəl çəkilir ki, PNG dekorları onun üstündə qalsın.
   // ==========================================================
 
-  await drawProductImage(ctx, product);
+  await drawProductImage(
+    ctx,
+    product
+  );
 
 
   // ==========================================================
   // 2. PNG ŞABLON
-  // Yarpaqlar, loqo, başlıq və ağ barkod sahəsi
-  // məhsul şəklinin üstünə gəlir.
   // ==========================================================
 
   try {
@@ -1313,47 +1566,51 @@ async function drawDiscountCanvas(
   // 3. MƏHSUL ADI
   // ==========================================================
 
+  const nameLayout =
+    CARD_LAYOUT.productName;
+
   ctx.save();
 
   ctx.fillStyle = '#050505';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
-  const nameResult = drawWrappedTextFit(
-    ctx,
-    product.name,
-    105,  // soldan
-    330,  // yuxarıdan
-    355,  // maksimum en
-    2,    // maksimum 2 sətir
-    47,   // başlanğıc font
-    29,   // minimum font
-    1.08,
-    '950'
-  );
+  const nameResult =
+    drawWrappedTextFit(
+      ctx,
+      product.name,
+      nameLayout.x,
+      nameLayout.y,
+      nameLayout.maxWidth,
+      nameLayout.maxLines,
+      nameLayout.fontSize,
+      nameLayout.minFontSize,
+      nameLayout.lineHeight,
+      '950'
+    );
 
   const nameBottom =
-    350 +
-    Math.max(
-      0,
-      (nameResult?.lines?.length || 1) - 1
-    ) *
-    (nameResult?.fontSize || 40) *
-    1.08;
+    nameLayout.y +
+    (nameResult?.height || 0);
 
 
   // ==========================================================
-  // 4. ÖLÇÜ VAHİDİ
+  // 4. VAHİD
   // ==========================================================
+
+  const unitLayout =
+    CARD_LAYOUT.unit;
 
   ctx.fillStyle = '#111111';
+
   ctx.font =
-    '500 30px Inter, Arial, sans-serif';
+    `500 ${unitLayout.fontSize}px Inter, Arial, sans-serif`;
 
   ctx.fillText(
     unit,
-    106,
-    nameBottom + 45
+    unitLayout.x,
+    nameBottom +
+      unitLayout.gapAfterName
   );
 
   ctx.restore();
@@ -1363,142 +1620,153 @@ async function drawDiscountCanvas(
   // 5. XÜSUSİYYƏTLƏR
   // ==========================================================
 
-  const featureStartY = 487;
-  const featureGap = 58;
+  const features =
+    CARD_LAYOUT.features;
 
-drawFeatureRow(
-  ctx,
-  'leaf',
-  'TƏBİİ VƏ TƏZƏ',
-  120,
-  featureStartY - 8,
-  162,
-  featureStartY,
-  300
-);
+  drawFeatureRow(
+    ctx,
+    'leaf',
+    'TƏBİİ VƏ TƏZƏ',
+    features.iconX,
+    features.startY - 8,
+    features.textX,
+    features.startY,
+    features.textMaxWidth,
+    features.fontSize,
+    features.minFontSize
+  );
 
-drawFeatureRow(
-  ctx,
-  'pin',
-  originText,
-  120,
-  featureStartY + featureGap - 8,
-  162,
-  featureStartY + featureGap,
-  300
-);
+  drawFeatureRow(
+    ctx,
+    'pin',
+    originText,
+    features.iconX,
+    features.startY +
+      features.gap - 8,
+    features.textX,
+    features.startY +
+      features.gap,
+    features.textMaxWidth,
+    features.fontSize,
+    features.minFontSize
+  );
 
-drawFeatureRow(
-  ctx,
-  'shield',
-  'KEYFİYYƏT ZƏMANƏTİ',
-  120,
-  featureStartY + featureGap * 2 - 8,
-  162,
-  featureStartY + featureGap * 2,
-  315
-);
+  drawFeatureRow(
+    ctx,
+    'shield',
+    'KEYFİYYƏT ZƏMANƏTİ',
+    features.iconX,
+    features.startY +
+      features.gap * 2 - 8,
+    features.textX,
+    features.startY +
+      features.gap * 2,
+    features.textMaxWidth,
+    features.fontSize,
+    features.minFontSize
+  );
 
 
   // ==========================================================
   // 6. ENDİRİM FAİZİ
-  // Photoshop şablonundakı ulduz formasının içi
   // ==========================================================
 
-ctx.save();
+  const percentLayout =
+    CARD_LAYOUT.percent;
 
-ctx.fillStyle = '#d40861';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'alphabetic';
+  ctx.save();
 
-drawTextFit(
-  ctx,
-  `-${percent}%`,
-  570,
-  304,
-  190,
-  59,
-  40,
-  '1000'
-);
+  ctx.fillStyle = '#d40861';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
 
-ctx.font = '950 22px Inter, Arial, sans-serif';
+  drawTextFit(
+    ctx,
+    `-${percent}%`,
+    percentLayout.centerX,
+    percentLayout.y,
+    percentLayout.maxWidth,
+    percentLayout.fontSize,
+    percentLayout.minFontSize,
+    '1000'
+  );
 
-ctx.fillText(
-  'ENDİRİM',
-  570,
-  343
-);
+  ctx.font =
+    `950 ${percentLayout.labelFontSize}px Inter, Arial, sans-serif`;
 
-ctx.restore();
+  ctx.fillText(
+    'ENDİRİM',
+    percentLayout.centerX,
+    percentLayout.labelY
+  );
+
+  ctx.restore();
 
 
   // ==========================================================
   // 7. KÖHNƏ QİYMƏT
   // ==========================================================
 
-ctx.save();
+  const oldLayout =
+    CARD_LAYOUT.oldPrice;
 
-ctx.fillStyle = '#111111';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'alphabetic';
+  ctx.save();
 
-drawTextFit(
-  ctx,
-  `${oldPrice} ₼`,
-  590,
-  465,
-  250,
-  43,
-  31,
-  '500'
-);
+  ctx.fillStyle = '#111111';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
 
-// Köhnə qiymətin üstündən çəhrayı xətt
-ctx.strokeStyle = '#d40861';
-ctx.lineWidth = 6;
-ctx.lineCap = 'round';
+  drawTextFit(
+    ctx,
+    `${oldPrice} ₼`,
+    oldLayout.centerX,
+    oldLayout.y,
+    oldLayout.maxWidth,
+    oldLayout.fontSize,
+    oldLayout.minFontSize,
+    '500'
+  );
 
-ctx.beginPath();
-ctx.moveTo(475, 454);
-ctx.lineTo(704, 435);
-ctx.stroke();
+  ctx.strokeStyle = '#d40861';
+  ctx.lineWidth =
+    oldLayout.lineWidth;
+  ctx.lineCap = 'round';
 
-ctx.restore();
+  ctx.beginPath();
+
+  ctx.moveTo(
+    oldLayout.lineStartX,
+    oldLayout.lineStartY
+  );
+
+  ctx.lineTo(
+    oldLayout.lineEndX,
+    oldLayout.lineEndY
+  );
+
+  ctx.stroke();
+
+  ctx.restore();
 
 
   // ==========================================================
   // 8. YENİ QİYMƏT
-  // Qiymət və manat işarəsi birlikdə avtomatik yerləşir
   // ==========================================================
 
-ctx.save();
-
-ctx.fillStyle = '#050505';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'alphabetic';
-
-drawTextFit(
-  ctx,
-  `${price} ₼`,
-  590,
-  590,
-  330,
-  96,
-  58,
-  '1000'
-);
-
-ctx.restore();
+  drawLargePrice(
+    ctx,
+    price
+  );
 
 
   // ==========================================================
   // 9. BARKOD
-  // SKU: sözü yazılmır
-  // Rəqəm barkodun altında göstərilir
   // ==========================================================
 
-  drawBarcodeArea(ctx, sku);
+  drawBarcodeArea(
+    ctx,
+    sku
+  );
 }
 
 
@@ -1507,11 +1775,13 @@ ctx.restore();
 // ============================================================
 
 async function printSingleDiscountCanvas(id) {
-  const productId = String(id);
+  const productId =
+    String(id);
 
-  const canvas = document.querySelector(
-    `#discount-card-${CSS.escape(productId)}`
-  );
+  const canvas =
+    document.querySelector(
+      `#discount-card-${CSS.escape(productId)}`
+    );
 
   if (!canvas) return;
 
@@ -1675,9 +1945,10 @@ export async function printSelectedDiscountCards() {
   }
 
   for (const id of selectedIds) {
-    const canvas = document.querySelector(
-      `#discount-card-${CSS.escape(id)}`
-    );
+    const canvas =
+      document.querySelector(
+        `#discount-card-${CSS.escape(id)}`
+      );
 
     const product =
       getDiscountProductById(id);
