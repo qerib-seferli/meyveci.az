@@ -62,8 +62,8 @@ const CARD_LAYOUT = {
   productImage: {
     x: 705,
     y: 70,
-    width: 657,
-    height: 748,
+    width: 660,
+    height: 755,
 
     // Şəkildə əsas məhsul sağdadırsa focusX artır.
     // Məhsul soldadırsa focusX azalt.
@@ -117,8 +117,8 @@ const CARD_LAYOUT = {
   // ENDİRİM FAİZİ — ULDUZUN İÇİ
   // ==========================================================
   percent: {
-    centerX: 700,       // artır → sağa, azalt → sola
-    y: 370,             // artır → aşağı, azalt → yuxarı
+    centerX: 710,       // artır → sağa, azalt → sola
+    y: 380,             // artır → aşağı, azalt → yuxarı
     maxWidth: 225,
     fontSize: 69,
     minFontSize: 44,
@@ -141,7 +141,7 @@ const CARD_LAYOUT = {
     lineStartX: 490,
     lineStartY: 552,
     lineEndX: 752,
-    lineEndY: 501,
+    lineEndY: 500,
     lineWidth: 7,
   },
 
