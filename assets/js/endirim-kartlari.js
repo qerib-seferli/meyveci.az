@@ -60,8 +60,8 @@ const CARD_LAYOUT = {
   // height artır → şəkil sahəsi aşağıya doğru böyüyür
   // ==========================================================
   productImage: {
-    x: 705,
-    y: 70,
+    x: 700,
+    y: 75,
     width: 660,
     height: 755,
 
