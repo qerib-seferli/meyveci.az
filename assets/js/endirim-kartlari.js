@@ -132,17 +132,20 @@ const CARD_LAYOUT = {
   // ==========================================================
   oldPrice: {
     centerX: 622,
-    y: 550,
+    y: 560,
     maxWidth: 275,
     fontSize: 48,
     minFontSize: 31,
 
     // Üstündən keçən çəhrayı xətt
-    lineStartX: 490,
-    lineStartY: 552,
-    lineEndX: 752,
-    lineEndY: 500,
-    lineWidth: 7,
+    // aşağı endir → Y artır
+    // yuxarı qaldır → Y azalt
+    
+    lineStartX: 490, // xəttin sol ucu: sağa/sola
+    lineStartY: 512, // xəttin sol ucu: aşağı/yuxarı
+    lineEndX: 752,   // xəttin sağ ucu: sağa/sola
+    lineEndY: 491,   // xəttin sağ ucu: aşağı/yuxarı
+    lineWidth: 7,    // xəttin qalınlığı
   },
 
   // ==========================================================
