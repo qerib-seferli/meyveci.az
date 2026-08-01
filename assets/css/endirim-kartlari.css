@@ -1,89 +1,116 @@
+/* ============================================================
+   MEYVƏÇİ.AZ — ENDİRİM KARTLARI
+   ============================================================ */
+
 .discount-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  grid-template-columns: repeat(2, minmax(420px, 1fr));
   gap: 22px;
   align-items: start;
 }
 
 .discount-card-wrap {
+  min-width: 0;
   display: grid;
-  gap: 10px;
+  gap: 12px;
   padding: 14px;
-  border-radius: 26px;
-  background: rgba(255,255,255,.86);
-  box-shadow: 0 16px 36px rgba(15,122,55,.10);
+  border: 1px solid rgba(22, 163, 74, 0.10);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 16px 38px rgba(15, 23, 42, 0.08),
+    0 5px 14px rgba(22, 163, 74, 0.06);
 }
 
 .discount-card-admin-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(150px, 1fr) auto;
   gap: 10px;
   align-items: center;
 }
 
 .discount-origin-select {
-  min-height: 38px;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid rgba(34, 197, 94, 0.28);
   border-radius: 999px;
-  border: 1px solid rgba(34,197,94,.28);
-  background: rgba(236,253,245,.96);
+  padding: 0 14px;
+  background: rgba(236, 253, 245, 0.96);
   color: #047857;
   font-size: 12px;
-  font-weight: 950;
-  padding: 0 14px;
+  font-weight: 900;
+  outline: none;
+}
+
+.discount-origin-select:focus {
+  border-color: rgba(22, 163, 74, 0.62);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+.discount-select-card {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 999px;
+  background: rgba(220, 252, 231, 0.92);
+  color: #047857;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  user-select: none;
+}
+
+.discount-select-card input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #16a34a;
 }
 
 .discount-canvas-box {
-  border-radius: 22px;
+  width: 100%;
   overflow: hidden;
-  background: #fffbe6;
-  box-shadow: 0 14px 30px rgba(15,23,42,.16);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65);
 }
 
 .discount-card-canvas {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 1402 / 1122;
 }
 
-@media (max-width: 1350px) {
-  .discount-cards-grid {
-    grid-template-columns: repeat(2, minmax(320px, 1fr));
-  }
-}
-
-@media (max-width: 760px) {
+@media (max-width: 1200px) {
   .discount-cards-grid {
     grid-template-columns: 1fr;
   }
 }
 
+@media (max-width: 620px) {
+  .discount-card-wrap {
+    padding: 10px;
+    border-radius: 18px;
+  }
 
+  .discount-card-admin-actions {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
 
-/*======== SEÇİLMİŞ ENDİRİM KARTLARIN ÇAP ETMƏK ÜÇÜNDÜ =========*/
-.discount-card-admin-actions {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-}
+  .print-discount-card {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
 
-.discount-select-card {
-  min-height: 38px;
-  border-radius: 999px;
-  padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(220, 252, 231, 0.92);
-  color: #047857;
-  font-size: 12px;
-  font-weight: 950;
-  cursor: pointer;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-}
-
-.discount-select-card input {
-  width: 16px;
-  height: 16px;
-  accent-color: #16a34a;
+  .discount-canvas-box {
+    border-radius: 15px;
+  }
 }
