@@ -2672,3 +2672,17 @@
     grid-template-columns: 32px minmax(0, 1fr) 32px !important;
   }
 }
+
+
+/* ============================================================
+   KATEQORİYA SEÇİLƏNDƏ MƏHSULLARIN DÜZGÜN YERDƏN GÖRÜNMƏSİ
+   ============================================================ */
+
+.bulk-products-area {
+  /*
+    Sabit üst menyu məhsulların birinci sırasını örtməsin.
+    Artır → məhsullar bir az daha aşağıda dayanır.
+    Azalt → məhsullar bir az daha yuxarıda dayanır.
+  */
+  scroll-margin-top: 105px;
+}
