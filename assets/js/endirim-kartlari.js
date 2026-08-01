@@ -62,8 +62,8 @@ const CARD_LAYOUT = {
   productImage: {
     x: 695,
     y: 75,
-    width: 660,
-    height: 755,
+    width: 650,
+    height: 750,
 
     // Şəkildə əsas məhsul sağdadırsa focusX artır.
     // Məhsul soldadırsa focusX azalt.
