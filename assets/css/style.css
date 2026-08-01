@@ -9775,3 +9775,120 @@ body[data-page="home"] .site-footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+
+
+
+/* ============================================================
+   FINAL 16:9 XƏBƏR + BANNER SİMMETRİYA FIX
+   ============================================================ */
+
+@media (min-width: 901px) {
+
+  /* Sağ banner sahəsini bir az yığcam edirik */
+  #bannerGrid {
+    width: 315px !important;
+    max-width: 315px !important;
+    right: 0 !important;
+
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+
+    padding: 0 !important;
+  }
+
+  /* Xəbər sahəsinə daha çox en veririk */
+  #newsGrid {
+    width: calc(100% - 335px) !important;
+    max-width: calc(100% - 335px) !important;
+
+    grid-template-columns:
+      minmax(0, 1.45fr)
+      minmax(210px, 0.65fr) !important;
+
+    gap: 14px !important;
+
+    min-height: 0 !important;
+    height: auto !important;
+    align-items: stretch !important;
+  }
+
+  /* Böyük xəbər kartı tam 16:9 olsun */
+  .home-main-news {
+    position: relative !important;
+
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    aspect-ratio: 16 / 9 !important;
+
+    overflow: hidden !important;
+    border-radius: 22px !important;
+  }
+
+  /* 16:9 şəkil artıq kəsilməyəcək */
+  .home-main-news img {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    min-height: 0 !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+
+  /* Sağdakı 3 kiçik xəbər böyük xəbərin hündürlüyünə uyğunlaşsın */
+  .home-side-news {
+    height: 100% !important;
+
+    display: grid !important;
+    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+
+    gap: 10px !important;
+  }
+
+  .home-mini-news {
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+
+  .home-mini-news img {
+    width: 100% !important;
+    height: 100% !important;
+
+    min-height: 0 !important;
+
+    object-fit: cover !important;
+  }
+
+  /* Banner kartları yığcam olsun */
+  .home-banner-card {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .home-banner-card img {
+    width: 100% !important;
+    height: auto !important;
+
+    aspect-ratio: 2 / 1 !important;
+
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  /* Banner adının yaratdığı əlavə aşağı boşluğu azaldır */
+  .home-banner-card b {
+    margin: 3px 0 0 !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+}
