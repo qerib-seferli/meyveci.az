@@ -117,13 +117,13 @@ const CARD_LAYOUT = {
   // ENDİRİM FAİZİ — ULDUZUN İÇİ
   // ==========================================================
   percent: {
-    centerX: 695,       // artır → sağa, azalt → sola
-    y: 340,             // artır → aşağı, azalt → yuxarı
+    centerX: 700,       // artır → sağa, azalt → sola
+    y: 350,             // artır → aşağı, azalt → yuxarı
     maxWidth: 225,
     fontSize: 69,
     minFontSize: 44,
 
-    labelY: 378,        // ENDİRİM yazısının yeri
+    labelY: 368,        // ENDİRİM yazısının yeri
     labelFontSize: 24,
   },
 
@@ -132,7 +132,7 @@ const CARD_LAYOUT = {
   // ==========================================================
   oldPrice: {
     centerX: 622,
-    y: 530,
+    y: 550,
     maxWidth: 275,
     fontSize: 48,
     minFontSize: 31,
@@ -153,8 +153,8 @@ const CARD_LAYOUT = {
   // bir qədər keçə bilər və çox balacalaşmaz.
   // ==========================================================
   newPrice: {
-    x: 475,             // artır → sağa, azalt → sola
-    y: 665,             // artır → aşağı, azalt → yuxarı
+    x: 485,             // artır → sağa, azalt → sola
+    y: 685,             // artır → aşağı, azalt → yuxarı
 
     // Qiymətin istifadə edə biləcəyi sahə.
     // Artırsan uzun qiymət daha az kiçiləcək.
@@ -172,7 +172,7 @@ const CARD_LAYOUT = {
   // BARKOD
   // ==========================================================
   barcode: {
-    boxX: 905,          // bütün barkodu sağa/sola çəkir
+    boxX: 900,          // bütün barkodu sağa/sola çəkir
     boxY: 855,          // bütün barkodu aşağı/yuxarı çəkir
     boxWidth: 415,
     boxHeight: 145,
