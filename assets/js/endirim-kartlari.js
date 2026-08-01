@@ -60,8 +60,8 @@ const CARD_LAYOUT = {
   // height artır → şəkil sahəsi aşağıya doğru böyüyür
   // ==========================================================
   productImage: {
-    x: 735,
-    y: 65,
+    x: 705,
+    y: 70,
     width: 657,
     height: 748,
 
@@ -118,13 +118,13 @@ const CARD_LAYOUT = {
   // ==========================================================
   percent: {
     centerX: 700,       // artır → sağa, azalt → sola
-    y: 350,             // artır → aşağı, azalt → yuxarı
+    y: 370,             // artır → aşağı, azalt → yuxarı
     maxWidth: 225,
     fontSize: 69,
     minFontSize: 44,
 
-                                          // labelY: 398,        // ENDİRİM yazısının yeri
-                                          // labelFontSize: 24,
+            // labelY: 398,        // ENDİRİM yazısının yeri
+            // labelFontSize: 24,
   },
 
   // ==========================================================
@@ -141,7 +141,7 @@ const CARD_LAYOUT = {
     lineStartX: 490,
     lineStartY: 552,
     lineEndX: 752,
-    lineEndY: 551,
+    lineEndY: 501,
     lineWidth: 7,
   },
 
