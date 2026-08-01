@@ -9865,7 +9865,7 @@ body[data-page="home"] .site-footer {
   /* Sağ banner sahəsi də xəbərlərlə eyni hündürlükdə */
   #bannerGrid {
     right: 0 !important;
-    top: 92px !important;
+    top: 102px !important;
 
     width: 315px !important;
     max-width: 315px !important;
