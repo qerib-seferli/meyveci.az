@@ -61,7 +61,7 @@ const CARD_LAYOUT = {
   // ==========================================================
   productImage: {
     x: 745,
-    y: 55,
+    y: 57,
     width: 657,
     height: 748,
 
@@ -117,8 +117,8 @@ const CARD_LAYOUT = {
   // ENDİRİM FAİZİ — ULDUZUN İÇİ
   // ==========================================================
   percent: {
-    centerX: 690,       // artır → sağa, azalt → sola
-    y: 333,             // artır → aşağı, azalt → yuxarı
+    centerX: 695,       // artır → sağa, azalt → sola
+    y: 340,             // artır → aşağı, azalt → yuxarı
     maxWidth: 225,
     fontSize: 69,
     minFontSize: 44,
@@ -132,7 +132,7 @@ const CARD_LAYOUT = {
   // ==========================================================
   oldPrice: {
     centerX: 622,
-    y: 505,
+    y: 530,
     maxWidth: 275,
     fontSize: 48,
     minFontSize: 31,
@@ -153,7 +153,7 @@ const CARD_LAYOUT = {
   // bir qədər keçə bilər və çox balacalaşmaz.
   // ==========================================================
   newPrice: {
-    x: 455,             // artır → sağa, azalt → sola
+    x: 475,             // artır → sağa, azalt → sola
     y: 665,             // artır → aşağı, azalt → yuxarı
 
     // Qiymətin istifadə edə biləcəyi sahə.
@@ -172,8 +172,8 @@ const CARD_LAYOUT = {
   // BARKOD
   // ==========================================================
   barcode: {
-    boxX: 925,          // bütün barkodu sağa/sola çəkir
-    boxY: 852,          // bütün barkodu aşağı/yuxarı çəkir
+    boxX: 905,          // bütün barkodu sağa/sola çəkir
+    boxY: 855,          // bütün barkodu aşağı/yuxarı çəkir
     boxWidth: 415,
     boxHeight: 145,
 
