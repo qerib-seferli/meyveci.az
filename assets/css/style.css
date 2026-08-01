@@ -9777,6 +9777,7 @@ body[data-page="home"] .site-footer {
 
 
 /*=============================================================================================================*/
+
 /* ============================================================
    RESPONSİV YAN REKLAMLAR
    340 × 1360 px reklam şəkilləri üçün
@@ -9794,48 +9795,40 @@ body[data-page="home"] .site-footer {
 
 .site-side-ad {
   /*
-    Reklam eni həm ekranın hündürlüyünə,
-    həm də saytın kənarında qalan real boşluğa görə hesablanır.
+    Ekranın yan boşluğuna görə reklam eni avtomatik hesablanır.
 
-    min(...) hissəsi reklamın:
-    - ekran hündürlüyündən daşmamasını;
-    - saytın üstünə çıxmamasını təmin edir.
-
-    70px  → minimum en
-    165px → maksimum en
+    55px  → dar desktop ekranlarda minimum en
+    165px → geniş ekranlarda maksimum en
   */
   --side-ad-width: clamp(
-    70px,
-    min(
-      calc((100vh - 145px) / 4),
-      calc((100vw - 1240px) / 2 - 8px)
-    ),
+    55px,
+    calc((100vw - 1240px) / 2 - 10px),
     165px
   );
 
   position: fixed !important;
 
-  /* Reklam ekranın şaquli mərkəzində qalır */
+  /* Şaquli olaraq ekranın ortasında qalır */
   top: 50% !important;
   bottom: auto !important;
 
-  /*
-    Şəkil 340 × 1360 px-dir.
-    Nisbət 1:4 olduğu üçün hündürlük enin 4 qatıdır.
-  */
   width: var(--side-ad-width) !important;
-  height: calc(var(--side-ad-width) * 4) !important;
 
-  aspect-ratio: auto !important;
+  /* Reklam şəkli 340 × 1360, yəni 1:4 nisbətindədir */
+  aspect-ratio: 1 / 4;
+  height: auto !important;
 
-  /* Yuxarı və aşağı menyulara girməsin */
-  max-height: calc(100vh - 145px);
+  /*
+    Reklam çox hündür ekranlarda belə
+    yuxarı və aşağı menyulara girməsin
+  */
+  max-height: calc(100vh - 150px);
 
   z-index: 35;
 
   overflow: hidden;
 
-  /* Künclər çox cüzi yumru */
+  /* Künclər yalnız çox cüzi yumru */
   border-radius: 8px;
 
   background: rgba(255, 255, 255, 0.96);
@@ -9857,12 +9850,12 @@ body[data-page="home"] .site-footer {
 
 /* Sol reklam */
 .site-side-ad-left {
-  left: 4px !important;
+  left: 6px !important;
 }
 
 /* Sağ reklam */
 .site-side-ad-right {
-  right: 4px !important;
+  right: 6px !important;
 }
 
 /* ============================================================
@@ -9876,8 +9869,8 @@ body[data-page="home"] .site-footer {
   height: 100% !important;
 
   /*
-    Şəkil qutunun içinə tam sığır.
-    Sağ-sol və yuxarı-aşağı kəsilmir.
+    contain istifadə olunur:
+    şəkil sağdan və soldan kəsilmir
   */
   object-fit: contain !important;
   object-position: center center !important;
@@ -9986,7 +9979,11 @@ body[data-page="home"] .site-footer {
    ============================================================ */
 
 /*
-  1366px və daha geniş CSS viewport-da reklamlar görünür.
+  1366px və daha geniş CSS viewport-da göstərilir.
+
+  Qeyd:
+  Brauzer zoomu viewport ölçüsünü dəyişir.
+  100%-də ekran eni 1366px-dən aşağıdırsa reklam gizlənəcək.
 */
 @media (min-width: 1366px) {
   .site-side-ads {
@@ -9998,10 +9995,7 @@ body[data-page="home"] .site-footer {
   }
 }
 
-/*
-  1365px və daha aşağıda reklamlar gizlənir.
-  Saytın məzmununun üstünə çıxmasının qarşısını alır.
-*/
+/* 1365px və daha aşağıda gizlənir */
 @media (max-width: 1365px) {
   .site-side-ads,
   .site-side-ad {
