@@ -106,7 +106,7 @@ const CARD_LAYOUT = {
   features: {
     iconX: 120,         // ikonları sağa/sola çəkir
     textX: 164,         // yazıları sağa/sola çəkir
-    startY: 500,        // birinci sətri aşağı/yuxarı çəkir
+    startY: 530,        // birinci sətri aşağı/yuxarı çəkir
     gap: 62,            // sətirlər arasındakı məsafə
     textMaxWidth: 335,
     fontSize: 25,
