@@ -60,8 +60,8 @@ const CARD_LAYOUT = {
   // height artır → şəkil sahəsi aşağıya doğru böyüyür
   // ==========================================================
   productImage: {
-    x: 745,
-    y: 57,
+    x: 740,
+    y: 60,
     width: 657,
     height: 748,
 
@@ -123,7 +123,7 @@ const CARD_LAYOUT = {
     fontSize: 69,
     minFontSize: 44,
 
-    labelY: 368,        // ENDİRİM yazısının yeri
+    labelY: 398,        // ENDİRİM yazısının yeri
     labelFontSize: 24,
   },
 
