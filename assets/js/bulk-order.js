@@ -704,12 +704,12 @@ const discountProductsCount =
       if (
         selectedCategory === state.category
       ) {
-        document
-          .querySelector('#bulkProducts')
-          ?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
+    document
+      .querySelector('.bulk-products-area')
+      ?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
 
         return;
       }
@@ -721,12 +721,12 @@ const discountProductsCount =
 
       await loadBulkProducts(true);
 
-      document
-        .querySelector('#bulkProducts')
-        ?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
+    document
+      .querySelector('.bulk-products-area')
+      ?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     });
   });
 }
