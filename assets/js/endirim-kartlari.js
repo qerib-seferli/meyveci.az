@@ -13,7 +13,29 @@ import {
 
 let discountCardsCache = [];
 
-const selectedDiscountCardIds = new Set();
+const selectedDiscountCardIds =
+  new Set();
+
+/* ============================================================
+   ENDİRİM KARTLARI — 15-LİK SƏHİFƏLƏMƏ
+   ============================================================ */
+
+const DISCOUNT_PAGE_SIZE = 15;
+
+/*
+  Sorğuda old_price > price müqayisəsini hazırkı
+  strukturda brauzerdə yoxladığımız üçün bir dəfəyə
+  45 sətir oxuyuruq və onların içindən 15 endirimli
+  məhsulu seçirik.
+*/
+const DISCOUNT_FETCH_CHUNK = 45;
+
+let discountRawOffset = 0;
+let discountHasMore = true;
+let discountIsLoading = false;
+let discountObserver = null;
+let discountSearchTimer = null;
+let discountRequestToken = 0;
 
 const DISCOUNT_CARD_BG =
   '../assets/img/fotolar/Endirim-karti.png';
@@ -328,18 +350,45 @@ function renderDiscountCard(product) {
 // SUPABASE-DƏN ENDİRİMLİ MƏHSULLAR
 // ============================================================
 
-export async function loadDiscountCards() {
-  const grid = $('#discountCardsGrid');
+// ============================================================
+// ENDİRİM KARTI YÜKLƏMƏ STATUSU
+// ============================================================
 
-  if (!grid) return;
+function setDiscountLoadStatus(
+  text,
+  {
+    loading = false,
+    finished = false,
+  } = {}
+) {
+  const sentinel =
+    $('#discountCardsLoadMoreSentinel');
 
-  const search = String(
-    $('#discountCardSearch')?.value || ''
-  )
-    .trim()
-    .toLowerCase();
+  const label =
+    $('#discountCardsLoadMoreText');
 
-  const { data, error } = await supabase
+  if (label) {
+    label.textContent = text;
+  }
+
+  sentinel?.classList.toggle(
+    'is-loading',
+    loading
+  );
+
+  sentinel?.classList.toggle(
+    'is-finished',
+    finished
+  );
+}
+
+
+// ============================================================
+// SUPABASE SORĞUSUNUN ƏSAS SEÇİMİ
+// ============================================================
+
+function createDiscountProductsQuery() {
+  return supabase
     .from('products')
     .select(`
       id,
@@ -350,102 +399,474 @@ export async function loadDiscountCards() {
       status,
       image_url,
       sku,
+      created_at,
       categories(name)
     `)
     .eq('status', 'active')
     .not('old_price', 'is', null)
-    .order('name', { ascending: true })
-    .limit(5000);
+    .order('created_at', {
+      ascending: false,
+    });
+}
 
-  if (error) {
-    console.error('Endirim kartları yüklənmədi:', error);
 
+// ============================================================
+// ENDİRİMİN HƏQİQİ OLDUĞUNU YOXLAMA
+// ============================================================
+
+function isDiscountProduct(product) {
+  const price =
+    Number(product?.price || 0);
+
+  const oldPrice =
+    Number(product?.old_price || 0);
+
+  return (
+    Number.isFinite(price) &&
+    Number.isFinite(oldPrice) &&
+    oldPrice > price
+  );
+}
+
+
+// ============================================================
+// SUPABASE-DƏN ENDİRİM KARTLARINI 15-LİK YÜKLƏ
+// ============================================================
+
+export async function loadDiscountCards(
+  reset = true
+) {
+  const grid =
+    $('#discountCardsGrid');
+
+  if (!grid) return;
+
+  if (reset) {
+    discountRequestToken += 1;
+    discountRawOffset = 0;
+    discountHasMore = true;
+    discountIsLoading = false;
+    discountCardsCache = [];
+
+    grid.innerHTML = '';
+
+    setDiscountLoadStatus(
+      'Endirim kartları yüklənir...',
+      { loading: true }
+    );
+  }
+
+  if (
+    discountIsLoading ||
+    (!reset && !discountHasMore)
+  ) {
+    return;
+  }
+
+  const currentToken =
+    discountRequestToken;
+
+  const search =
+    String(
+      $('#discountCardSearch')?.value || ''
+    ).trim();
+
+  discountIsLoading = true;
+
+  setDiscountLoadStatus(
+    reset
+      ? 'Endirim kartları yüklənir...'
+      : 'Növbəti 15 kart yüklənir...',
+    { loading: true }
+  );
+
+  const collected = [];
+
+  /*
+    Bəzi sətirlərdə old_price mövcuddur,
+    amma real endirim yoxdur. Ona görə 15 həqiqi
+    endirimli məhsul tapana qədər sorğunu davam etdiririk.
+  */
+  while (
+    collected.length < DISCOUNT_PAGE_SIZE &&
+    discountHasMore
+  ) {
+    const from =
+      discountRawOffset;
+
+    const to =
+      from + DISCOUNT_FETCH_CHUNK - 1;
+
+    let query =
+      createDiscountProductsQuery()
+        .range(from, to);
+
+    /*
+      Axtarış serverdə aparılır.
+      Ad və SKU üzrə yoxlanır.
+    */
+    if (search) {
+      const safeSearch = search
+        .replaceAll(',', ' ')
+        .replaceAll('(', ' ')
+        .replaceAll(')', ' ');
+
+      query = query.or(
+        `name.ilike.%${safeSearch}%,sku.ilike.%${safeSearch}%`
+      );
+    }
+
+    const { data, error } =
+      await query;
+
+    if (
+      currentToken !==
+      discountRequestToken
+    ) {
+      discountIsLoading = false;
+      return;
+    }
+
+    if (error) {
+      discountIsLoading = false;
+
+      console.error(
+        'Endirim kartları yüklənmədi:',
+        error
+      );
+
+      if (reset) {
+        grid.innerHTML = `
+          <div class="muted">
+            ${esc(error.message)}
+          </div>
+        `;
+      }
+
+      setDiscountLoadStatus(
+        'Endirim kartları yüklənmədi',
+        { finished: true }
+      );
+
+      return;
+    }
+
+    const rows =
+      data || [];
+
+    discountRawOffset +=
+      rows.length;
+
+    if (
+      rows.length <
+      DISCOUNT_FETCH_CHUNK
+    ) {
+      discountHasMore = false;
+    }
+
+    for (const product of rows) {
+      if (!isDiscountProduct(product)) {
+        continue;
+      }
+
+      /*
+        Eyni məhsul iki dəfə əlavə olunmur.
+      */
+      const alreadyLoaded =
+        discountCardsCache.some(
+          (item) =>
+            String(item.id) ===
+            String(product.id)
+        ) ||
+        collected.some(
+          (item) =>
+            String(item.id) ===
+            String(product.id)
+        );
+
+      if (alreadyLoaded) {
+        continue;
+      }
+
+      collected.push(product);
+
+      if (
+        collected.length >=
+        DISCOUNT_PAGE_SIZE
+      ) {
+        break;
+      }
+    }
+
+    if (!rows.length) {
+      discountHasMore = false;
+    }
+  }
+
+  discountIsLoading = false;
+
+  if (
+    reset &&
+    !collected.length
+  ) {
     grid.innerHTML = `
       <div class="muted">
-        ${esc(error.message)}
+        Endirimli məhsul yoxdur.
       </div>
     `;
+
+    setDiscountLoadStatus(
+      'Başqa endirim kartı yoxdur',
+      { finished: true }
+    );
 
     return;
   }
 
-  discountCardsCache = (data || []).filter((product) => {
-    const price = Number(product.price || 0);
-    const oldPrice = Number(product.old_price || 0);
+  discountCardsCache.push(
+    ...collected
+  );
 
-    const hasDiscount =
-      Number.isFinite(price) &&
-      Number.isFinite(oldPrice) &&
-      oldPrice > price;
+  const cardsHtml =
+    collected
+      .map((product) =>
+        renderDiscountCard(product)
+      )
+      .join('');
 
-    const matchesSearch =
-      !search ||
-      String(product.name || '')
-        .toLowerCase()
-        .includes(search) ||
-      String(product.sku || '')
-        .toLowerCase()
-        .includes(search);
+  grid.insertAdjacentHTML(
+    'beforeend',
+    cardsHtml
+  );
 
-    return hasDiscount && matchesSearch;
-  });
+  /*
+    Yalnız yeni əlavə olunan kartların hadisələri
+    və canvas-ları hazırlanır.
+  */
+  await bindDiscountCardEvents();
 
-  grid.innerHTML =
-    discountCardsCache
-      .map((product) => renderDiscountCard(product))
-      .join('') ||
-    '<div class="muted">Endirimli məhsul yoxdur.</div>';
+  if (discountHasMore) {
+    setDiscountLoadStatus(
+      'Aşağı endikcə digər 15 kart yüklənəcək'
+    );
+  } else {
+    setDiscountLoadStatus(
+      'Bütün endirim kartları göstərildi',
+      { finished: true }
+    );
+  }
+}
 
-  bindDiscountCardEvents();
+
+// ============================================================
+// ENDİRİM KARTI AXTARIŞI VƏ INFINITE SCROLL
+// ============================================================
+
+export function initDiscountCardsInfiniteScroll() {
+  const sentinel =
+    $('#discountCardsLoadMoreSentinel');
+
+  if (!sentinel) return;
+
+  /*
+    Axtarış hadisəsini yalnız bir dəfə bağlayırıq.
+  */
+  const searchInput =
+    $('#discountCardSearch');
+
+  if (
+    searchInput &&
+    searchInput.dataset.paginationBound !== '1'
+  ) {
+    searchInput.dataset.paginationBound = '1';
+
+    searchInput.addEventListener(
+      'input',
+      () => {
+        clearTimeout(
+          discountSearchTimer
+        );
+
+        discountSearchTimer =
+          setTimeout(() => {
+            loadDiscountCards(true);
+          }, 350);
+      }
+    );
+  }
+
+  if (discountObserver) return;
+
+  discountObserver =
+    new IntersectionObserver(
+      (entries) => {
+        const entry =
+          entries[0];
+
+        if (
+          !entry?.isIntersecting ||
+          discountIsLoading ||
+          !discountHasMore
+        ) {
+          return;
+        }
+
+        /*
+          Endirim kartları tabı bağlıdırsa
+          əlavə sorğu göndərmir.
+        */
+        const panel =
+          $('#discountCardsPanel');
+
+        if (
+          !panel?.classList.contains('active')
+        ) {
+          return;
+        }
+
+        loadDiscountCards(false);
+      },
+      {
+        root: null,
+        rootMargin: '700px 0px',
+        threshold: 0.01,
+      }
+    );
+
+  discountObserver.observe(
+    sentinel
+  );
 }
 
 
 // ============================================================
 // HADİSƏLƏR
 // ============================================================
+// YALNIZ YENİ KARTLARIN HADİSƏLƏRİNİ BAĞLA
+// ============================================================
 
-function bindDiscountCardEvents() {
-  drawAllDiscountCanvases();
+async function bindDiscountCardEvents() {
+  const newCanvases = [];
 
-  $$('.discount-card-check').forEach((input) => {
-    input.addEventListener('change', () => {
-      const id = String(input.dataset.id);
-
-      if (input.checked) {
-        selectedDiscountCardIds.add(id);
-      } else {
-        selectedDiscountCardIds.delete(id);
+  $$('.discount-card-check').forEach(
+    (input) => {
+      if (input.dataset.bound === '1') {
+        return;
       }
-    });
-  });
 
-  $$('.discount-origin-select').forEach((select) => {
-    select.addEventListener('change', async () => {
-      const productId = String(select.dataset.id);
+      input.dataset.bound = '1';
 
-      const canvas = document.querySelector(
-        `#discount-card-${CSS.escape(productId)}`
+      input.addEventListener(
+        'change',
+        () => {
+          const id =
+            String(input.dataset.id);
+
+          if (input.checked) {
+            selectedDiscountCardIds.add(id);
+          } else {
+            selectedDiscountCardIds.delete(id);
+          }
+        }
+      );
+    }
+  );
+
+  $$('.discount-origin-select').forEach(
+    (select) => {
+      if (select.dataset.bound === '1') {
+        return;
+      }
+
+      select.dataset.bound = '1';
+
+      select.addEventListener(
+        'change',
+        async () => {
+          const productId =
+            String(select.dataset.id);
+
+          const canvas =
+            document.querySelector(
+              `#discount-card-${CSS.escape(productId)}`
+            );
+
+          const product =
+            getDiscountProductById(
+              productId
+            );
+
+          if (!canvas || !product) return;
+
+          await drawDiscountCanvas(
+            canvas,
+            product,
+            select.value
+          );
+        }
+      );
+    }
+  );
+
+  $$('.print-discount-card').forEach(
+    (button) => {
+      if (button.dataset.bound === '1') {
+        return;
+      }
+
+      button.dataset.bound = '1';
+
+      button.addEventListener(
+        'click',
+        async () => {
+          await printSingleDiscountCanvas(
+            button.dataset.id
+          );
+        }
+      );
+    }
+  );
+
+  $$('.discount-card-canvas').forEach(
+    (canvas) => {
+      if (
+        canvas.dataset.drawn === '1'
+      ) {
+        return;
+      }
+
+      canvas.dataset.drawn = '1';
+      newCanvases.push(canvas);
+    }
+  );
+
+  /*
+    Köhnə 15 kart yenidən çəkilmir.
+    Yalnız yeni gəlmiş kartlar çəkilir.
+  */
+  for (const canvas of newCanvases) {
+    const product =
+      getDiscountProductById(
+        canvas.dataset.id
       );
 
-      const product = getDiscountProductById(productId);
+    if (!product) continue;
 
-      if (!canvas || !product) return;
-
+    try {
       await drawDiscountCanvas(
         canvas,
         product,
-        select.value
+        getDiscountOriginValue(
+          product.id
+        )
       );
-    });
-  });
-
-  $$('.print-discount-card').forEach((button) => {
-    button.addEventListener('click', async () => {
-      await printSingleDiscountCanvas(
-        button.dataset.id
+    } catch (error) {
+      console.error(
+        `Kart çəkilmədi: ${product.name}`,
+        error
       );
-    });
-  });
+    }
+  }
 }
 
 
@@ -1774,6 +2195,77 @@ async function drawDiscountCanvas(
 
 
 // ============================================================
+// BÜTÜN ENDİRİMLİ MƏHSULLARI YALNIZ ÇAP ÜÇÜN ÇƏK
+// ============================================================
+
+async function fetchAllDiscountProductsForPrint() {
+  const allProducts = [];
+  const pageSize = 200;
+
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } =
+      await createDiscountProductsQuery()
+        .range(
+          offset,
+          offset + pageSize - 1
+        );
+
+    if (error) {
+      throw error;
+    }
+
+    const rows =
+      data || [];
+
+    allProducts.push(
+      ...rows.filter(
+        isDiscountProduct
+      )
+    );
+
+    offset += rows.length;
+
+    hasMore =
+      rows.length === pageSize;
+  }
+
+  return allProducts;
+}
+
+
+// ============================================================
+// MÜVƏQQƏTİ CANVAS-DA KART HAZIRLA
+// ============================================================
+
+async function productToCardImage(
+  product,
+  originText = 'YERLİ FERMER'
+) {
+  const canvas =
+    document.createElement('canvas');
+
+  canvas.width =
+    CARD_WIDTH;
+
+  canvas.height =
+    CARD_HEIGHT;
+
+  await drawDiscountCanvas(
+    canvas,
+    product,
+    originText
+  );
+
+  return canvas.toDataURL(
+    'image/png'
+  );
+}
+
+
+// ============================================================
 // TƏK KARTI ÇAP ETMƏ
 // ============================================================
 
@@ -1884,49 +2376,89 @@ async function printSingleDiscountCanvas(id) {
 
 // ============================================================
 // BÜTÜN KARTLARI ÇAP ETMƏ
+// BAZADAKI BÜTÜN ENDİRİM KARTLARINI ÇAP ET
 // ============================================================
 
 export async function printAllDiscountCards() {
-  await drawAllDiscountCanvases();
+  const button =
+    $('#discountPrintAllBtn');
 
-  const canvases = [
-    ...document.querySelectorAll(
-      '.discount-card-canvas'
-    ),
-  ];
+  const oldText =
+    button?.textContent || '';
 
-  if (!canvases.length) {
-    toast(
-      'Çap üçün endirim kartı yoxdur'
-    );
-
-    return;
+  if (button) {
+    button.disabled = true;
+    button.textContent =
+      '⏳ Kartlar hazırlanır...';
   }
 
-  let images;
-
   try {
-    images = canvases.map(
-      (canvas) =>
-        canvas.toDataURL('image/png')
+    const products =
+      await fetchAllDiscountProductsForPrint();
+
+    if (!products.length) {
+      toast(
+        'Çap üçün endirim kartı yoxdur'
+      );
+
+      return;
+    }
+
+    const images = [];
+
+    /*
+      Kartları ardıcıl hazırlayırıq.
+      Bu, çoxlu böyük canvas-ın eyni anda
+      yaddaşa yüklənməsinin qarşısını alır.
+    */
+    for (
+      let index = 0;
+      index < products.length;
+      index += 1
+    ) {
+      const product =
+        products[index];
+
+      const originText =
+        getDiscountOriginValue(
+          product.id
+        );
+
+      const image =
+        await productToCardImage(
+          product,
+          originText
+        );
+
+      images.push(image);
+
+      if (button) {
+        button.textContent =
+          `⏳ ${index + 1}/${products.length}`;
+      }
+    }
+
+    openMultipleCardPrintWindow(
+      images,
+      'Toplu endirim kartları'
     );
   } catch (error) {
     console.error(
-      'Kartlar şəkilə çevrilmədi:',
+      'Toplu kartlar hazırlanmadı:',
       error
     );
 
     toast(
-      'Kartlardan biri hazırlanmadı. Şəkil icazələrini yoxlayın.'
+      error?.message ||
+      'Toplu çap hazırlanmadı'
     );
-
-    return;
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent =
+        oldText || '🖨️ Toplu çap et';
+    }
   }
-
-  openMultipleCardPrintWindow(
-    images,
-    'Toplu endirim kartları'
-  );
 }
 
 
