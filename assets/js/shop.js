@@ -163,17 +163,23 @@ function setupHomeEvents() {
         renderCategoryChips();
         renderProducts();
     
-        document.querySelector('#products')?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
+        requestAnimationFrame(() => {
+          const productsGrid = document.querySelector('#productsGrid');
         
-        window.setTimeout(() => {
-          window.scrollBy({
-            top: -85,
+          if (!productsGrid) return;
+        
+          const headerOffset = 90;
+        
+          const targetTop =
+            productsGrid.getBoundingClientRect().top +
+            window.scrollY -
+            headerOffset;
+        
+          window.scrollTo({
+            top: Math.max(0, targetTop),
             behavior: 'smooth',
           });
-        }, 350);
+        });
       });  
     }
   }
