@@ -1,5 +1,5 @@
 // ============================================================
-// MEYVƏÇİ.AZ - TOPLU SİFARİŞ SƏHİFƏSİ
+// TOPLU SİFARİŞ SƏHİFƏSİ
 // Restoran, hotel və mağazalar üçün toplu məhsul seçimi,
 // çatdırılma, bonus və Kapital Bank checkout axını.
 // ============================================================
@@ -45,9 +45,12 @@ const state = {
   categories: [],
   products: [],
   selected: new Map(),
+
+  /* Bütün bazadakı aktiv endirimli məhsulların dəqiq sayı */
+  discountProductsCount: 0,
+
   category: 'all',
   query: '',
-  visible: 24,
 
   productsTotal: 0,
   deliveryFee: 0,
@@ -56,6 +59,27 @@ const state = {
   bonusUsed: 0,
   deliveryDistanceKm: null,
 };
+
+/* ============================================================
+   TOPLU SİFARİŞ — 20-LİK SERVER SƏHİFƏLƏMƏSİ
+   ============================================================ */
+
+const BULK_PRODUCT_PAGE_SIZE = 20;
+
+/*
+  Endirimli filterdə old_price > price yoxlaması
+  JavaScript-də aparıldığı üçün serverdən bir qədər
+  böyük hissələr oxuyuruq və 20 real endirimli məhsul toplayırıq.
+*/
+const BULK_DISCOUNT_FETCH_SIZE = 60;
+
+let bulkProductOffset = 0;
+let bulkProductsHaveMore = true;
+let bulkProductsLoading = false;
+
+let bulkProductsObserver = null;
+let bulkSearchTimer = null;
+let bulkProductsRequestToken = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -72,28 +96,58 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.dispatchEvent(new Event('hideLoader'));
 });
 
+
 function setupEvents() {
+  /* ==========================================================
+     MƏHSUL AXTARIŞI
+     Hər hərfdə dərhal Supabase sorğusu göndərmir.
+     350 ms gözlədikdən sonra yeni 20-lik nəticə gətirir.
+     ========================================================== */
+
   $('#bulkSearchInput')?.addEventListener('input', (event) => {
-    state.query = event.target.value.trim().toLowerCase();
-    state.visible = 24;
-    renderProducts();
+    state.query = event.target.value.trim();
+
+    clearTimeout(bulkSearchTimer);
+
+    bulkSearchTimer = setTimeout(() => {
+      loadBulkProducts(true);
+    }, 350);
   });
 
-  $('#bulkClearFilters')?.addEventListener('click', () => {
+
+  /* ==========================================================
+     FİLTRLƏRİ TƏMİZLƏ
+     ========================================================== */
+
+  $('#bulkClearFilters')?.addEventListener('click', async () => {
     state.category = 'all';
     state.query = '';
-    state.visible = 24;
 
-    if ($('#bulkSearchInput')) $('#bulkSearchInput').value = '';
+    if ($('#bulkSearchInput')) {
+      $('#bulkSearchInput').value = '';
+    }
 
     renderCategories();
-    renderProducts();
+    await loadBulkProducts(true);
   });
 
-  $('#bulkLoadMore')?.addEventListener('click', () => {
-    state.visible += 24;
-    renderProducts();
+
+  /* ==========================================================
+     "DAHA ÇOX GÖSTƏR" DÜYMƏSİ
+     Infinite scroll işləməsə belə ehtiyat variantdır.
+     ========================================================== */
+
+  $('#bulkLoadMore')?.addEventListener('click', async () => {
+    await loadBulkProducts(false);
   });
+
+
+  /* ==========================================================
+     AŞAĞI ENDİKCƏ AVTOMATİK YÜKLƏMƏ
+     ========================================================== */
+
+  initBulkProductsInfiniteScroll();
+
 
   $('#bulkCheckoutToggle')?.addEventListener('click', () => {
     $('#bulkPersonalFields')?.classList.toggle('checkout-collapsed');
@@ -117,51 +171,506 @@ function setupEvents() {
     updateDeliveryFee();
   });
 
-  $('#bulkGetLocation')?.addEventListener('click', getCheckoutLocation);
-  $('#bulkUseBonus')?.addEventListener('change', updateBonusPreview);
-  $('#bulkBonusAmountInput')?.addEventListener('input', updateBonusPreview);
+  $('#bulkGetLocation')?.addEventListener(
+    'click',
+    getCheckoutLocation
+  );
 
-  form?.addEventListener('submit', checkoutBulkOrder);
+  $('#bulkUseBonus')?.addEventListener(
+    'change',
+    updateBonusPreview
+  );
+
+  $('#bulkBonusAmountInput')?.addEventListener(
+    'input',
+    updateBonusPreview
+  );
+
+  form?.addEventListener(
+    'submit',
+    checkoutBulkOrder
+  );
 }
 
+
+/* ============================================================
+   BÜTÜN BAZADAKI ENDİRİMLİ MƏHSULLARIN DƏQİQ SAYI
+   ============================================================ */
+
+async function loadBulkDiscountProductsCount() {
+  const { data, error } = await supabase.rpc(
+    'get_bulk_discount_products_count'
+  );
+
+  if (error) {
+    console.warn(
+      'Endirimli məhsul sayı alınmadı:',
+      error.message
+    );
+
+    state.discountProductsCount = 0;
+    return;
+  }
+
+  state.discountProductsCount = Number(data || 0);
+}
+
+
+
 async function loadBulkData() {
-  const [categoriesRes, productsRes] = await Promise.all([
-    supabase
-      .from('categories')
-      .select('id,name,slug,description,image_url,sort_order')
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(80),
+  /*
+    Kateqoriyalar az olduğu üçün əvvəlki kimi bir dəfə yüklənir.
+    Məhsullar isə ayrıca 20-lik sorğularla gəlir.
+  */
+const [
+  { data: categories, error: categoriesError },
+] = await Promise.all([
+  supabase
+    .from('categories')
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      image_url,
+      sort_order
+    `)
+    .eq('is_active', true)
+    .order('sort_order')
+    .limit(80),
 
-    supabase
-      .from('products')
-      .select('*')
-      .eq('status', 'active')
-      .order('is_featured', { ascending: false })
-      .order('name', { ascending: true })
-      .limit(500),
-  ]);
+  loadBulkDiscountProductsCount(),
+]);
 
-  if (categoriesRes.error) toast(categoriesRes.error.message);
-  if (productsRes.error) toast(productsRes.error.message);
+  if (categoriesError) {
+    toast(categoriesError.message);
+  }
 
-  state.categories = categoriesRes.data || [];
-  state.products = productsRes.data || [];
+  state.categories = categories || [];
 
-  restoreBulkDraft();
+  /*
+    İlk 20 aktiv məhsul.
+  */
+  await loadBulkProducts(true);
+
+  /*
+    LocalStorage-də əvvəldən seçilmiş məhsul ilk 20-də
+    deyilsə, ayrıca bazadan götürülüb seçilmiş siyahıya qaytarılır.
+  */
+  await restoreBulkDraft();
+
   renderCategories();
   renderProducts();
   renderSelected();
   enableBulkCategoryDrag();
 }
 
+
+/* ============================================================
+   TOPLU MƏHSUL SORĞUSUNUN ƏSAS HİSSƏSİ
+   ============================================================ */
+
+function createBulkProductsQuery() {
+  let query = supabase
+    .from('products')
+    .select(`
+      id,
+      category_id,
+      name,
+      slug,
+      price,
+      old_price,
+      stock_quantity,
+      unit,
+      image_url,
+      short_description,
+      description,
+      is_featured,
+      status,
+      created_at
+    `)
+    .eq('status', 'active')
+    .order('is_featured', {
+      ascending: false,
+    })
+    .order('name', {
+      ascending: true,
+    })
+    .order('id', {
+      ascending: true,
+    });
+
+  /*
+    Adi kateqoriya seçilibsə birbaşa serverdə filter olunur.
+  */
+  if (
+    state.category !== 'all' &&
+    state.category !== 'discounts'
+  ) {
+    query = query.eq(
+      'category_id',
+      state.category
+    );
+  }
+
+  /*
+    Axtarış bütün 500 məhsul yükləndikdən sonra deyil,
+    birbaşa Supabase-də aparılır.
+  */
+  const search = String(state.query || '').trim();
+
+  if (search) {
+    /*
+      PostgREST filter sintaksisini pozan işarələri
+      boşluqla əvəz edirik.
+    */
+    const safeSearch = search
+      .replaceAll(',', ' ')
+      .replaceAll('(', ' ')
+      .replaceAll(')', ' ')
+      .replaceAll('.', ' ')
+      .trim();
+
+    if (safeSearch) {
+      query = query.or(
+        [
+          `name.ilike.%${safeSearch}%`,
+          `unit.ilike.%${safeSearch}%`,
+          `short_description.ilike.%${safeSearch}%`,
+        ].join(',')
+      );
+    }
+  }
+
+  return query;
+}
+
+
+/* ============================================================
+   HƏQİQİ ENDİRİMLİ MƏHSUL YOXLAMASI
+   ============================================================ */
+
+function isBulkDiscountProduct(product) {
+  const price = Number(product?.price || 0);
+  const oldPrice = Number(product?.old_price || 0);
+
+  return (
+    Number.isFinite(price) &&
+    Number.isFinite(oldPrice) &&
+    oldPrice > price
+  );
+}
+
+
+/* ============================================================
+   MƏHSUL YÜKLƏMƏ DÜYMƏSİNİN STATUSU
+   ============================================================ */
+
+function updateBulkLoadMoreButton() {
+  const button = $('#bulkLoadMore');
+
+  if (!button) return;
+
+  if (bulkProductsLoading) {
+    button.style.display = 'inline-flex';
+    button.disabled = true;
+    button.textContent = 'Məhsullar yüklənir...';
+    return;
+  }
+
+  button.disabled = false;
+
+  if (bulkProductsHaveMore) {
+    button.style.display = 'inline-flex';
+    button.textContent = 'Daha çox göstər';
+  } else {
+    button.style.display = 'none';
+  }
+}
+
+
+/* ============================================================
+   SUPABASE-DƏN MƏHSULLARI 20-20 YÜKLƏ
+   ============================================================ */
+
+async function loadBulkProducts(reset = true) {
+  const container = $('#bulkProducts');
+
+  if (!container) return;
+
+  /*
+    Filter, axtarış və ya kateqoriya dəyişibsə
+    əvvəlki nəticələr sıfırlanır.
+  */
+  if (reset) {
+    bulkProductsRequestToken += 1;
+
+    bulkProductOffset = 0;
+    bulkProductsHaveMore = true;
+    bulkProductsLoading = false;
+
+    state.products = [];
+
+    container.innerHTML = `
+      <div class="card bulk-not-found">
+        <b>Məhsullar yüklənir...</b>
+        <p class="muted">Zəhmət olmasa gözləyin.</p>
+      </div>
+    `;
+  }
+
+  if (
+    bulkProductsLoading ||
+    (!reset && !bulkProductsHaveMore)
+  ) {
+    return;
+  }
+
+  const currentRequestToken =
+    bulkProductsRequestToken;
+
+  bulkProductsLoading = true;
+  updateBulkLoadMoreButton();
+
+  try {
+    const collectedProducts = [];
+
+    /*
+      "Endirimli" filterdə 20 real endirimli məhsul tapana
+      qədər 60-lıq server hissələrini yoxlayırıq.
+    */
+    if (state.category === 'discounts') {
+      while (
+        collectedProducts.length < BULK_PRODUCT_PAGE_SIZE &&
+        bulkProductsHaveMore
+      ) {
+        const from = bulkProductOffset;
+        const to =
+          from + BULK_DISCOUNT_FETCH_SIZE - 1;
+
+        const { data, error } =
+          await createBulkProductsQuery()
+            .not('old_price', 'is', null)
+            .range(from, to);
+
+        if (
+          currentRequestToken !==
+          bulkProductsRequestToken
+        ) {
+          return;
+        }
+
+        if (error) {
+          throw error;
+        }
+
+        const rows = data || [];
+
+        bulkProductOffset += rows.length;
+
+        if (
+          rows.length <
+          BULK_DISCOUNT_FETCH_SIZE
+        ) {
+          bulkProductsHaveMore = false;
+        }
+
+        for (const product of rows) {
+          if (!isBulkDiscountProduct(product)) {
+            continue;
+          }
+
+          const alreadyLoaded =
+            state.products.some(
+              (item) =>
+                String(item.id) ===
+                String(product.id)
+            ) ||
+            collectedProducts.some(
+              (item) =>
+                String(item.id) ===
+                String(product.id)
+            );
+
+          if (alreadyLoaded) {
+            continue;
+          }
+
+          collectedProducts.push(product);
+
+          if (
+            collectedProducts.length >=
+            BULK_PRODUCT_PAGE_SIZE
+          ) {
+            break;
+          }
+        }
+
+        if (!rows.length) {
+          bulkProductsHaveMore = false;
+        }
+      }
+    } else {
+      /*
+        Hamısı, kateqoriya və axtarış üçün
+        birbaşa 20 sətirlik range istifadə olunur.
+      */
+      const from = bulkProductOffset;
+      const to =
+        from + BULK_PRODUCT_PAGE_SIZE - 1;
+
+      const { data, error } =
+        await createBulkProductsQuery()
+          .range(from, to);
+
+      if (
+        currentRequestToken !==
+        bulkProductsRequestToken
+      ) {
+        return;
+      }
+
+      if (error) {
+        throw error;
+      }
+
+      const rows = data || [];
+
+      bulkProductOffset += rows.length;
+
+      bulkProductsHaveMore =
+        rows.length === BULK_PRODUCT_PAGE_SIZE;
+
+      collectedProducts.push(...rows);
+    }
+
+    /*
+      Sorğu davam edərkən yeni axtarış başlayıbsa
+      köhnə nəticəni səhifəyə əlavə etmirik.
+    */
+    if (
+      currentRequestToken !==
+      bulkProductsRequestToken
+    ) {
+      return;
+    }
+
+    const existingIds = new Set(
+      state.products.map((product) =>
+        String(product.id)
+      )
+    );
+
+    const uniqueProducts =
+      collectedProducts.filter((product) => {
+        const id = String(product.id);
+
+        if (existingIds.has(id)) {
+          return false;
+        }
+
+        existingIds.add(id);
+        return true;
+      });
+
+    state.products.push(...uniqueProducts);
+
+    renderProducts();
+    renderCategories();
+  } catch (error) {
+    console.error(
+      'Toplu sifariş məhsulları yüklənmədi:',
+      error
+    );
+
+    if (reset) {
+      container.innerHTML = `
+        <div class="card bulk-not-found">
+          <b>Məhsullar yüklənmədi</b>
+          <p class="muted">
+            ${safeText(
+              error?.message ||
+              'Naməlum xəta baş verdi'
+            )}
+          </p>
+        </div>
+      `;
+    }
+
+    toast(
+      error?.message ||
+      'Məhsullar yüklənmədi'
+    );
+  } finally {
+    if (
+      currentRequestToken ===
+      bulkProductsRequestToken
+    ) {
+      bulkProductsLoading = false;
+      updateBulkLoadMoreButton();
+    }
+  }
+}
+
+
+/* ============================================================
+   AŞAĞI ENDİKCƏ NÖVBƏTİ 20 MƏHSUL
+   ============================================================ */
+
+function initBulkProductsInfiniteScroll() {
+  const loadMoreButton =
+    $('#bulkLoadMore');
+
+  if (
+    !loadMoreButton ||
+    bulkProductsObserver
+  ) {
+    return;
+  }
+
+  bulkProductsObserver =
+    new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (
+          !entry?.isIntersecting ||
+          bulkProductsLoading ||
+          !bulkProductsHaveMore
+        ) {
+          return;
+        }
+
+        /*
+          Səhifə ilk açılan kimi avtomatik 40-60 məhsul
+          yükləməsin. İstifadəçi bir qədər aşağı endikdən
+          sonra infinite scroll aktiv olur.
+        */
+        if (window.scrollY < 180) {
+          return;
+        }
+
+        loadBulkProducts(false);
+      },
+      {
+        root: null,
+        rootMargin: '350px 0px',
+        threshold: 0.01,
+      }
+    );
+
+  bulkProductsObserver.observe(
+    loadMoreButton
+  );
+}
+
+
 function renderCategories() {
   const container = $('#bulkCategoryChips');
   if (!container) return;
 
-  const discountProducts = state.products.filter((product) =>
-    Number(product.old_price) > Number(product.price)
-  );
+const discountProductsCount =
+  Number(state.discountProductsCount || 0);
 
   container.innerHTML = `
     <button class="bulk-category-chip ${state.category === 'all' ? 'active' : ''}" data-id="all">
@@ -172,7 +681,7 @@ function renderCategories() {
     <button class="bulk-category-chip discount ${state.category === 'discounts' ? 'active' : ''}" data-id="discounts">
       <span class="bulk-discount-ico">%</span>
       <span>Endirimli</span>
-      <b>${discountProducts.length}</b>
+      <b>${discountProductsCount}</b>
     </button>
 
     ${state.categories.map((category) => `
@@ -184,78 +693,104 @@ function renderCategories() {
   `;
 
   $$('#bulkCategoryChips .bulk-category-chip').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.category = button.dataset.id || 'all';
-      state.visible = 24;
-    
+    button.addEventListener('click', async () => {
+      const selectedCategory =
+        button.dataset.id || 'all';
+
+      /*
+        Aktiv kateqoriyaya yenidən vurulubsa
+        lazımsız Supabase sorğusu göndərmirik.
+      */
+      if (
+        selectedCategory === state.category
+      ) {
+        document
+          .querySelector('#bulkProducts')
+          ?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+
+        return;
+      }
+
+      state.category =
+        selectedCategory;
+
       renderCategories();
-      renderProducts();
-    
-      document.querySelector('#bulkProducts')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+
+      await loadBulkProducts(true);
+
+      document
+        .querySelector('#bulkProducts')
+        ?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
     });
   });
 }
 
-function filteredProducts() {
-  return state.products.filter((product) => {
-    const discount = getDiscount(product.price, product.old_price);
 
-    const categoryMatch =
-      state.category === 'all' ||
-      (state.category === 'discounts' && discount > 0) ||
-      product.category_id === state.category;
-
-    const searchText = [
-      product.name,
-      product.unit,
-      product.short_description,
-      product.description,
-    ].join(' ').toLowerCase();
-
-    const searchMatch = !state.query || searchText.includes(state.query);
-
-    return categoryMatch && searchMatch;
-  });
-}
 
 function renderProducts() {
   const container = $('#bulkProducts');
+
   if (!container) return;
 
-  const rows = filteredProducts();
-  const visibleRows = rows.slice(0, state.visible);
+  const rows = state.products;
 
-  container.innerHTML = visibleRows.map(productCard).join('') || `
-    <div class="card bulk-not-found">
-      <b>Məhsul tapılmadı</b>
-      <p class="muted">Axtarışı və ya kateqoriyanı dəyişin.</p>
-    </div>
-  `;
+  container.innerHTML =
+    rows.map(productCard).join('') ||
+    `
+      <div class="card bulk-not-found">
+        <b>Məhsul tapılmadı</b>
+        <p class="muted">
+          Axtarışı və ya kateqoriyanı dəyişin.
+        </p>
+      </div>
+    `;
 
   $$('.bulk-add').forEach((button) => {
-    button.addEventListener('click', () => increaseProduct(button.dataset.id));
+    button.addEventListener(
+      'click',
+      () => increaseProduct(
+        button.dataset.id
+      )
+    );
   });
 
   $$('.bulk-minus').forEach((button) => {
-    button.addEventListener('click', () => decreaseProduct(button.dataset.id));
+    button.addEventListener(
+      'click',
+      () => decreaseProduct(
+        button.dataset.id
+      )
+    );
   });
 
   $$('.bulk-plus').forEach((button) => {
-    button.addEventListener('click', () => increaseProduct(button.dataset.id));
+    button.addEventListener(
+      'click',
+      () => increaseProduct(
+        button.dataset.id
+      )
+    );
   });
 
   $$('.bulk-card-qty-input').forEach((input) => {
-    input.addEventListener('change', () => setProductQuantity(input.dataset.id, Number(input.value || 0)));
+    input.addEventListener(
+      'change',
+      () => setProductQuantity(
+        input.dataset.id,
+        Number(input.value || 0)
+      )
+    );
   });
 
-  const loadMoreButton = $('#bulkLoadMore');
-  if (loadMoreButton) {
-    loadMoreButton.style.display = rows.length > visibleRows.length ? 'inline-flex' : 'none';
-  }
+  updateBulkLoadMoreButton();
 }
+
 
 function productCard(product) {
   const discount = getDiscount(product.price, product.old_price);
@@ -895,7 +1430,23 @@ async function checkoutBulkOrder(event) {
 }
 
 function findProduct(productId) {
-  return state.products.find((product) => product.id === productId);
+  /*
+    Əvvəl seçilmiş məhsullar arasında axtarırıq.
+    Beləliklə draft-dan bərpa edilmiş, amma cari 20-lik
+    səhifədə görünməyən məhsul da işləyir.
+  */
+  const selectedProduct =
+    state.selected.get(productId)?.product;
+
+  if (selectedProduct) {
+    return selectedProduct;
+  }
+
+  return state.products.find(
+    (product) =>
+      String(product.id) ===
+      String(productId)
+  );
 }
 
 function getDiscount(price, oldPrice) {
@@ -955,23 +1506,130 @@ function saveBulkDraft() {
   }));
 }
 
-function restoreBulkDraft() {
+
+async function restoreBulkDraft() {
   try {
-    const draft = JSON.parse(localStorage.getItem(BULK_STORAGE_KEY) || 'null');
-    const items = draft?.items || [];
+    const draft = JSON.parse(
+      localStorage.getItem(
+        BULK_STORAGE_KEY
+      ) || 'null'
+    );
 
-    items.forEach((item) => {
-      const product = state.products.find((p) => p.id === item.product_id);
-      const quantity = Number(item.quantity || 0);
+    const items =
+      Array.isArray(draft?.items)
+        ? draft.items
+        : [];
 
-      if (product && quantity > 0) {
-        state.selected.set(product.id, { product, quantity });
+    if (!items.length) {
+      return;
+    }
+
+    const validItems = items.filter(
+      (item) =>
+        item?.product_id &&
+        Number(item.quantity || 0) > 0
+    );
+
+    if (!validItems.length) {
+      return;
+    }
+
+    const loadedProductsMap = new Map(
+      state.products.map((product) => [
+        String(product.id),
+        product,
+      ])
+    );
+
+    const missingProductIds =
+      validItems
+        .map((item) =>
+          String(item.product_id)
+        )
+        .filter(
+          (productId) =>
+            !loadedProductsMap.has(productId)
+        );
+
+    /*
+      Draft-dakı məhsul ilk 20-də yoxdursa
+      yalnız həmin məhsulları ayrıca bazadan gətiririk.
+    */
+    if (missingProductIds.length) {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          category_id,
+          name,
+          slug,
+          price,
+          old_price,
+          stock_quantity,
+          unit,
+          image_url,
+          short_description,
+          description,
+          is_featured,
+          status,
+          created_at
+        `)
+        .in('id', missingProductIds)
+        .eq('status', 'active');
+
+      if (error) {
+        console.warn(
+          'Toplu sifariş draft məhsulları bərpa edilmədi:',
+          error.message
+        );
+      } else {
+        (data || []).forEach((product) => {
+          loadedProductsMap.set(
+            String(product.id),
+            product
+          );
+        });
+      }
+    }
+
+    validItems.forEach((item) => {
+      const product =
+        loadedProductsMap.get(
+          String(item.product_id)
+        );
+
+      const quantity =
+        Number(item.quantity || 0);
+
+      if (
+        product &&
+        quantity > 0
+      ) {
+        state.selected.set(
+          String(product.id),
+          {
+            product,
+            quantity: normalizeQty(
+              product,
+              quantity
+            ),
+          }
+        );
       }
     });
-  } catch (_) {
-    localStorage.removeItem(BULK_STORAGE_KEY);
+  } catch (error) {
+    console.warn(
+      'Toplu sifariş draftı oxunmadı:',
+      error
+    );
+
+    localStorage.removeItem(
+      BULK_STORAGE_KEY
+    );
   }
 }
+
+
 
 function clearBulkDraft() {
   localStorage.removeItem(BULK_STORAGE_KEY);
