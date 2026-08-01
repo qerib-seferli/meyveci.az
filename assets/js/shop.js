@@ -168,7 +168,7 @@ function setupHomeEvents() {
         
           if (!productsGrid) return;
         
-          const headerOffset = 95;
+          const headerOffset = 100;
         
           const targetTop =
             productsGrid.getBoundingClientRect().top +
