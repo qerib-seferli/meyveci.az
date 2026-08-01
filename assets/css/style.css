@@ -7334,156 +7334,9 @@ Müştəridə status “Geri ödəndi” sarı görünür ======================
     letter-spacing: 6px;
   }
 }
+
 /*=============================================================================================================*/
-/* ============================================================
-   MEYVƏÇİ.AZ - YAN REKLAMLAR
-   ============================================================ */
 
-.site-side-ads {
-  display: none;
-}
-
-.site-side-ad {
-  position: fixed !important;
-
-  /* Üstdən məsafə */
-  top: 80px !important;
-
-  /* Altdan məsafə */
-  bottom: 80px !important;
-
-  z-index: 35;
-
-  /* Reklamın eni 170 - 90% olanda*/  
-  width: 165px;
-
-  /* Hündürlüyü avtomatik olsun ki, alt menyuya girməsin */
-  height: auto !important;
-
-  overflow: hidden;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(34, 197, 94, 0.24);
-
-  box-shadow:
-    0 24px 58px rgba(15, 122, 55, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.82) inset;
-
-  backdrop-filter: blur(16px);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    filter 0.25s ease;
-}
-
-/* Sol reklam */
-.site-side-ad-left {
-  left: 12px;
-}
-
-/* Sağ reklam */
-.site-side-ad-right {
-  right: 12px;
-}
-
-.site-side-ad img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.site-side-ad::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    transparent 34%,
-    rgba(255,255,255,0.72) 45%,
-    rgba(255,255,255,0.18) 54%,
-    transparent 66%,
-    transparent 100%
-  );
-
-  transform: translateX(-145%) skewX(-16deg);
-  pointer-events: none;
-}
-
-.site-side-ad::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-
-  background:
-    radial-gradient(circle at 30% 10%, rgba(255,255,255,0.42), transparent 30%),
-    linear-gradient(180deg, rgba(255,255,255,0.12), transparent 45%);
-
-  pointer-events: none;
-}
-
-.site-side-ad:hover {
-  transform: translateY(-4px) scale(1.015);
-  filter: saturate(1.08);
-
-  box-shadow:
-    0 32px 76px rgba(15, 122, 55, 0.26),
-    0 0 26px rgba(34, 197, 94, 0.3),
-    0 0 0 1px rgba(255,255,255,0.9) inset;
-}
-
-.site-side-ad:hover::before {
-  animation: sideAdGlassShine 0.9s ease forwards;
-}
-
-.site-side-ad span {
-  position: absolute;
-  left: 50%;
-  bottom: 10px;
-
-  z-index: 3;
-  transform: translateX(-50%);
-
-  border-radius: 999px;
-  padding: 5px 11px;
-
-  color: rgba(6, 95, 70, 0.82);
-  background: rgba(255,255,255,0.88);
-
-  font-size: 10px;
-  font-weight: 900;
-
-  box-shadow: 0 8px 18px rgba(15, 122, 55, 0.12);
-}
-
-@keyframes sideAdGlassShine {
-  from {
-    transform: translateX(-145%) skewX(-16deg);
-  }
-
-  to {
-    transform: translateX(145%) skewX(-16deg);
-  }
-}
-
-@media (min-width: 1640px) {
-  .site-side-ads {
-    display: block;
-  }
-}
-
-@media (max-width: 1639px) {
-  .site-side-ads,
-  .site-side-ad {
-    display: none !important;
-  }
-}
-/*=============================================================================================================*/
 /* Footer öncəsi artıq boşluğu bütün istifadəçi səhifələrində azaldır */
 .app-shell {
   padding-bottom: 18px !important;
@@ -9563,7 +9416,7 @@ body[data-page="home"] .site-footer {
 
 
 
-
+/*=============================================================================================================*/
 /* ============================================================
    REDAKTOR MƏHSUL ŞƏKLİ shop.js də
    ============================================================ */
@@ -9778,7 +9631,7 @@ body[data-page="home"] .site-footer {
 
 
 
-
+/*=============================================================================================================*/
 /* ============================================================
    FINAL DESKTOP NEWS + BANNER HEIGHT FIX
    ============================================================ */
@@ -9919,5 +9772,222 @@ body[data-page="home"] .site-footer {
     font-size: 10px !important;
     line-height: 1.1 !important;
     text-align: center !important;
+  }
+}
+
+
+/*=============================================================================================================*/
+/* ============================================================
+   MEYVƏÇİ.AZ — RESPONSİV YAN REKLAMLAR
+   340 × 1360 px şəkillər üçün 1:4 nisbəti
+   ============================================================ */
+
+.site-side-ads {
+  display: none;
+}
+
+/*
+  Reklam eni ekranın yanındakı real boşluğa görə avtomatik hesablanır.
+
+  100vw          → brauzerin görünən eni
+  1240px         → saytın əsas app-shell eni
+  Qalan boşluq   → sağ və sol tərəfə bölünür
+  20px           → reklamla sayt arasında təhlükəsiz məsafə
+
+  minimum: 105px
+  maksimum: 165px
+*/
+.site-side-ad {
+  --side-ad-width: clamp(
+    105px,
+    calc((100vw - 1240px) / 2 - 20px),
+    165px
+  );
+
+  position: fixed !important;
+
+  /* Reklamı ekranın ortasında saxlayır */
+  top: 50% !important;
+  bottom: auto !important;
+
+  width: var(--side-ad-width) !important;
+
+  /*
+    Şəkil ölçüsü 340 × 1360-dır.
+    Bu da 1:4 nisbətidir.
+  */
+  aspect-ratio: 1 / 4;
+  height: auto !important;
+
+  max-height: calc(100vh - 150px);
+
+  z-index: 35;
+
+  overflow: hidden;
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(34, 197, 94, 0.24);
+
+  box-shadow:
+    0 24px 58px rgba(15, 122, 55, 0.20),
+    0 0 0 1px rgba(255, 255, 255, 0.82) inset;
+
+  backdrop-filter: blur(16px);
+
+  /* top: 50%-ə görə şaquli mərkəzləyir */
+  transform: translateY(-50%);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+/* Sol reklam */
+.site-side-ad-left {
+  left: 10px !important;
+}
+
+/* Sağ reklam */
+.site-side-ad-right {
+  right: 10px !important;
+}
+
+/*
+  Şəkil tam görünür.
+  cover istifadə etmirik, buna görə sağ-sol kəsilməyəcək.
+*/
+.site-side-ad img {
+  display: block;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center center !important;
+
+  border-radius: inherit;
+  background: #ffffff;
+}
+
+/* Şüşə parıltı effekti */
+.site-side-ad::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 34%,
+    rgba(255, 255, 255, 0.72) 45%,
+    rgba(255, 255, 255, 0.18) 54%,
+    transparent 66%,
+    transparent 100%
+  );
+
+  transform: translateX(-145%) skewX(-16deg);
+  pointer-events: none;
+}
+
+/* Yüngül işıq qatı */
+.site-side-ad::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  border-radius: inherit;
+
+  background:
+    radial-gradient(
+      circle at 30% 10%,
+      rgba(255, 255, 255, 0.42),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.12),
+      transparent 45%
+    );
+
+  pointer-events: none;
+}
+
+/*
+  translateY(-50%) hover zamanı da saxlanmalıdır.
+  Yoxsa reklam şaquli olaraq yerindən oynayar.
+*/
+.site-side-ad:hover {
+  transform: translateY(calc(-50% - 4px)) scale(1.015);
+  filter: saturate(1.08);
+
+  box-shadow:
+    0 32px 76px rgba(15, 122, 55, 0.26),
+    0 0 26px rgba(34, 197, 94, 0.30),
+    0 0 0 1px rgba(255, 255, 255, 0.90) inset;
+}
+
+.site-side-ad:hover::before {
+  animation: sideAdGlassShine 0.9s ease forwards;
+}
+
+/* Reklam etiketi */
+.site-side-ad span {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+
+  z-index: 3;
+
+  transform: translateX(-50%);
+
+  border-radius: 999px;
+  padding: 5px 11px;
+
+  color: rgba(6, 95, 70, 0.82);
+  background: rgba(255, 255, 255, 0.88);
+
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+
+  box-shadow: 0 8px 18px rgba(15, 122, 55, 0.12);
+}
+
+@keyframes sideAdGlassShine {
+  from {
+    transform: translateX(-145%) skewX(-16deg);
+  }
+
+  to {
+    transform: translateX(145%) skewX(-16deg);
+  }
+}
+
+/*
+  1500px və daha geniş ekranlarda reklam görünür.
+  Eni ekran boşluğuna uyğun avtomatik kiçilir.
+*/
+@media (min-width: 1500px) {
+  .site-side-ads {
+    display: block !important;
+  }
+
+  .site-side-ad {
+    display: block !important;
+  }
+}
+
+/*
+  1499px və aşağı ekranlarda reklamlar saytın üstünə
+  çıxmasın deyə tam gizlənir.
+*/
+@media (max-width: 1499px) {
+  .site-side-ads,
+  .site-side-ad {
+    display: none !important;
   }
 }
