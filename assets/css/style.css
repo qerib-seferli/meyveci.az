@@ -9779,52 +9779,56 @@ body[data-page="home"] .site-footer {
 /*=============================================================================================================*/
 /* ============================================================
    MEYVƏÇİ.AZ — RESPONSİV YAN REKLAMLAR
-   340 × 1360 px şəkillər üçün 1:4 nisbəti
+   340 × 1360 px reklam şəkilləri üçün
    ============================================================ */
 
-.site-side-ads {
+/* Standart halda gizlidir */
+.site-side-ads,
+.site-side-ad {
   display: none;
 }
 
-/*
-  Reklam eni ekranın yanındakı real boşluğa görə avtomatik hesablanır.
+/* ============================================================
+   YAN REKLAM QUTUSU
+   ============================================================ */
 
-  100vw          → brauzerin görünən eni
-  1240px         → saytın əsas app-shell eni
-  Qalan boşluq   → sağ və sol tərəfə bölünür
-  20px           → reklamla sayt arasında təhlükəsiz məsafə
-
-  minimum: 105px
-  maksimum: 165px
-*/
 .site-side-ad {
+  /*
+    Ekranın yan boşluğuna görə reklam eni avtomatik hesablanır.
+
+    55px  → dar desktop ekranlarda minimum en
+    165px → geniş ekranlarda maksimum en
+  */
   --side-ad-width: clamp(
-    105px,
-    calc((100vw - 1240px) / 2 - 20px),
+    55px,
+    calc((100vw - 1240px) / 2 - 10px),
     165px
   );
 
   position: fixed !important;
 
-  /* Reklamı ekranın ortasında saxlayır */
+  /* Şaquli olaraq ekranın ortasında qalır */
   top: 50% !important;
   bottom: auto !important;
 
   width: var(--side-ad-width) !important;
 
-  /*
-    Şəkil ölçüsü 340 × 1360-dır.
-    Bu da 1:4 nisbətidir.
-  */
+  /* Reklam şəkli 340 × 1360, yəni 1:4 nisbətindədir */
   aspect-ratio: 1 / 4;
   height: auto !important;
 
+  /*
+    Reklam çox hündür ekranlarda belə
+    yuxarı və aşağı menyulara girməsin
+  */
   max-height: calc(100vh - 150px);
 
   z-index: 35;
 
   overflow: hidden;
-  border-radius: 22px;
+
+  /* Künclər yalnız çox cüzi yumru */
+  border-radius: 8px;
 
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(34, 197, 94, 0.24);
@@ -9835,7 +9839,6 @@ body[data-page="home"] .site-footer {
 
   backdrop-filter: blur(16px);
 
-  /* top: 50%-ə görə şaquli mərkəzləyir */
   transform: translateY(-50%);
 
   transition:
@@ -9846,32 +9849,39 @@ body[data-page="home"] .site-footer {
 
 /* Sol reklam */
 .site-side-ad-left {
-  left: 10px !important;
+  left: 6px !important;
 }
 
 /* Sağ reklam */
 .site-side-ad-right {
-  right: 10px !important;
+  right: 6px !important;
 }
 
-/*
-  Şəkil tam görünür.
-  cover istifadə etmirik, buna görə sağ-sol kəsilməyəcək.
-*/
+/* ============================================================
+   REKLAM ŞƏKLİ
+   ============================================================ */
+
 .site-side-ad img {
   display: block;
 
   width: 100% !important;
   height: 100% !important;
 
+  /*
+    contain istifadə olunur:
+    şəkil sağdan və soldan kəsilmir
+  */
   object-fit: contain !important;
   object-position: center center !important;
 
-  border-radius: inherit;
+  border-radius: 7px;
   background: #ffffff;
 }
 
-/* Şüşə parıltı effekti */
+/* ============================================================
+   ŞÜŞƏ PARILTI EFFEKTİ
+   ============================================================ */
+
 .site-side-ad::before {
   content: "";
   position: absolute;
@@ -9916,17 +9926,14 @@ body[data-page="home"] .site-footer {
   pointer-events: none;
 }
 
-/*
-  translateY(-50%) hover zamanı da saxlanmalıdır.
-  Yoxsa reklam şaquli olaraq yerindən oynayar.
-*/
+/* Hover effekti */
 .site-side-ad:hover {
-  transform: translateY(calc(-50% - 4px)) scale(1.015);
-  filter: saturate(1.08);
+  transform: translateY(calc(-50% - 4px)) scale(1.01);
+  filter: saturate(1.06);
 
   box-shadow:
-    0 32px 76px rgba(15, 122, 55, 0.26),
-    0 0 26px rgba(34, 197, 94, 0.30),
+    0 30px 68px rgba(15, 122, 55, 0.24),
+    0 0 22px rgba(34, 197, 94, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.90) inset;
 }
 
@@ -9938,14 +9945,13 @@ body[data-page="home"] .site-footer {
 .site-side-ad span {
   position: absolute;
   left: 50%;
-  bottom: 10px;
-
+  bottom: 8px;
   z-index: 3;
 
   transform: translateX(-50%);
 
   border-radius: 999px;
-  padding: 5px 11px;
+  padding: 4px 10px;
 
   color: rgba(6, 95, 70, 0.82);
   background: rgba(255, 255, 255, 0.88);
@@ -9967,11 +9973,18 @@ body[data-page="home"] .site-footer {
   }
 }
 
+/* ============================================================
+   EKRAN ÖLÇÜLƏRİ
+   ============================================================ */
+
 /*
-  1500px və daha geniş ekranlarda reklam görünür.
-  Eni ekran boşluğuna uyğun avtomatik kiçilir.
+  1366px və daha geniş CSS viewport-da göstərilir.
+
+  Qeyd:
+  Brauzer zoomu viewport ölçüsünü dəyişir.
+  100%-də ekran eni 1366px-dən aşağıdırsa reklam gizlənəcək.
 */
-@media (min-width: 1500px) {
+@media (min-width: 1366px) {
   .site-side-ads {
     display: block !important;
   }
@@ -9981,11 +9994,8 @@ body[data-page="home"] .site-footer {
   }
 }
 
-/*
-  1499px və aşağı ekranlarda reklamlar saytın üstünə
-  çıxmasın deyə tam gizlənir.
-*/
-@media (max-width: 1499px) {
+/* 1365px və daha aşağıda gizlənir */
+@media (max-width: 1365px) {
   .site-side-ads,
   .site-side-ad {
     display: none !important;
