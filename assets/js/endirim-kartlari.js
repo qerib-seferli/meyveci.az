@@ -142,9 +142,9 @@ const CARD_LAYOUT = {
     // yuxarı qaldır → Y azalt
     
     lineStartX: 490, // xəttin sol ucu: sağa/sola
-    lineStartY: 542, // xəttin sol ucu: aşağı/yuxarı
+    lineStartY: 552, // xəttin sol ucu: aşağı/yuxarı
     lineEndX: 752,   // xəttin sağ ucu: sağa/sola
-    lineEndY: 511,   // xəttin sağ ucu: aşağı/yuxarı
+    lineEndY: 521,   // xəttin sağ ucu: aşağı/yuxarı
     lineWidth: 7,    // xəttin qalınlığı
   },
 
