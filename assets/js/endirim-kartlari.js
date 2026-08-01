@@ -1,5 +1,5 @@
 // ============================================================
-// MEYVƏÇİ.AZ - ENDİRİM KARTLARI CANVAS MODULU
+// ENDİRİM KARTLARI CANVAS MODULU
 // Yeni Endirim-karti.png şablonuna uyğun versiya
 // Canvas ölçüsü: 1402 × 1122
 // ============================================================
@@ -659,10 +659,10 @@ function drawImageCover(
 // ============================================================
 
 function drawProductImageFallback(ctx) {
-  const imageX = 770;
-  const imageY = 70;
-  const imageWidth = 632;
-  const imageHeight = 780;
+  const imageX = 800;
+  const imageY = 188;
+  const imageWidth = 590;
+  const imageHeight = 443; // Dəqiq 4:3
 
   ctx.save();
 
@@ -673,30 +673,22 @@ function drawProductImageFallback(ctx) {
     imageY + imageHeight
   );
 
-  gradient.addColorStop(
-    0,
-    '#dff7c7'
-  );
-
-  gradient.addColorStop(
-    0.5,
-    '#96cf66'
-  );
-
-  gradient.addColorStop(
-    1,
-    '#4e9d3a'
-  );
+  gradient.addColorStop(0, '#eef8df');
+  gradient.addColorStop(0.55, '#b7df8c');
+  gradient.addColorStop(1, '#72b84c');
 
   ctx.fillStyle = gradient;
 
-  ctx.fillRect(
+  roundedRectPath(
+    ctx,
     imageX,
     imageY,
     imageWidth,
-    imageHeight
+    imageHeight,
+    36
   );
 
+  ctx.fill();
   ctx.restore();
 }
 
@@ -708,10 +700,16 @@ function drawProductImageFallback(ctx) {
 // ============================================================
 
 async function drawProductImage(ctx, product) {
-  const imageX = 770;
-  const imageY = 70;
-  const imageWidth = 632;
-  const imageHeight = 780;
+  /*
+   * Sağ tərəfdə dəqiq 4:3 foto sahəsi.
+   * Şəkil hansı ölçüdə yüklənirsə-yüklənsin,
+   * proporsiyası pozulmadan avtomatik yerləşir.
+   */
+  const imageX = 800;
+  const imageY = 188;
+  const imageWidth = 590;
+  const imageHeight = 443;
+  const imageRadius = 36;
 
   if (!product.image_url) {
     drawProductImageFallback(ctx);
@@ -719,26 +717,23 @@ async function drawProductImage(ctx, product) {
   }
 
   try {
-    const productImage =
-      await loadCanvasImage(product.image_url);
+    const productImage = await loadCanvasImage(product.image_url);
 
     ctx.save();
 
-    // Şəkilin ətrafından kənara çıxmaması üçün
-    // sağ sahəni yumşaq şəkildə kəsirik
     roundedRectPath(
       ctx,
       imageX,
       imageY,
       imageWidth,
       imageHeight,
-      54
+      imageRadius
     );
 
     ctx.clip();
 
     ctx.filter =
-      'contrast(1.04) saturate(1.06) brightness(1.01)';
+      'contrast(1.03) saturate(1.04) brightness(1.01)';
 
     drawImageCover(
       ctx,
@@ -752,62 +747,56 @@ async function drawProductImage(ctx, product) {
     );
 
     ctx.filter = 'none';
+    ctx.restore();
 
-    // Şəklin sol kənarında sarı fonla yumşaq keçid
-    const leftFade =
-      ctx.createLinearGradient(
-        imageX,
-        imageY,
-        imageX + 150,
-        imageY
-      );
+    // Şəklin sol hissəsini sarı sahəyə yumşaq bağlayır
+    ctx.save();
 
-    leftFade.addColorStop(
-      0,
-      'rgba(245, 236, 42, 0.38)'
-    );
-
-    leftFade.addColorStop(
-      1,
-      'rgba(245, 236, 42, 0)'
-    );
-
-    ctx.fillStyle = leftFade;
-
-    ctx.fillRect(
+    roundedRectPath(
+      ctx,
       imageX,
       imageY,
-      150,
-      imageHeight
-    );
-
-    // Aşağı hissəyə çox zəif kölgə
-    const bottomShadow =
-      ctx.createLinearGradient(
-        imageX,
-        imageY + imageHeight - 150,
-        imageX,
-        imageY + imageHeight
-      );
-
-    bottomShadow.addColorStop(
-      0,
-      'rgba(0,0,0,0)'
-    );
-
-    bottomShadow.addColorStop(
-      1,
-      'rgba(0,0,0,0.10)'
-    );
-
-    ctx.fillStyle = bottomShadow;
-
-    ctx.fillRect(
-      imageX,
-      imageY + imageHeight - 150,
       imageWidth,
-      150
+      imageHeight,
+      imageRadius
     );
+
+    ctx.clip();
+
+    const leftFade = ctx.createLinearGradient(
+      imageX,
+      imageY,
+      imageX + 105,
+      imageY
+    );
+
+    leftFade.addColorStop(0, 'rgba(241, 238, 35, 0.24)');
+    leftFade.addColorStop(1, 'rgba(241, 238, 35, 0)');
+
+    ctx.fillStyle = leftFade;
+    ctx.fillRect(imageX, imageY, 105, imageHeight);
+
+    ctx.restore();
+
+    // Çox yüngül çərçivə və kölgə
+    ctx.save();
+
+    ctx.shadowColor = 'rgba(22, 70, 20, 0.24)';
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetY = 12;
+
+    roundedRectPath(
+      ctx,
+      imageX,
+      imageY,
+      imageWidth,
+      imageHeight,
+      imageRadius
+    );
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+    ctx.lineWidth = 7;
+    ctx.stroke();
 
     ctx.restore();
   } catch (error) {
@@ -1037,72 +1026,117 @@ function drawFeatureRow(
 // CODE 128-B BARKOD NÜMUNƏLƏRİ
 // ============================================================
 
-const CODE128_PATTERNS = [
-  '212222', '222122', '222221', '121223',
-  '121322', '131222', '122213', '122312',
-  '132212', '221213', '221312', '231212',
-  '112232', '122132', '122231', '113222',
-  '123122', '123221', '223211', '221132',
-  '221231', '213212', '223112', '312131',
-  '311222', '321122', '321221', '312212',
-  '322112', '322211', '212123', '212321',
-  '232121', '111323', '131123', '131321',
-  '112313', '132113', '132311', '211313',
-  '231113', '231311', '112133', '112331',
-  '132131', '113123', '113321', '133121',
-  '313121', '211331', '231131', '213113',
-  '213311', '213131', '311123', '311321',
-  '331121', '312113', '312311', '332111',
-  '314111', '221411', '431111', '111224',
-  '111422', '121124', '121421', '141122',
-  '141221', '112214', '112412', '122114',
-  '122411', '142112', '142211', '241211',
-  '221114', '413111', '241112', '134111',
-  '111242', '121142', '121241', '114212',
-  '124112', '124211', '411212', '421112',
-  '421211', '212141', '214121', '412121',
-  '111143', '111341', '131141', '114113',
-  '114311', '411113', '411311', '113141',
-  '114131', '311141', '411131', '211412',
-  '211214', '211232', '2331112',
-];
+const EAN13_LEFT_ODD = {
+  0: '0001101',
+  1: '0011001',
+  2: '0010011',
+  3: '0111101',
+  4: '0100011',
+  5: '0110001',
+  6: '0101111',
+  7: '0111011',
+  8: '0110111',
+  9: '0001011',
+};
 
+const EAN13_LEFT_EVEN = {
+  0: '0100111',
+  1: '0110011',
+  2: '0011011',
+  3: '0100001',
+  4: '0011101',
+  5: '0111001',
+  6: '0000101',
+  7: '0010001',
+  8: '0001001',
+  9: '0010111',
+};
 
-// ============================================================
-// CODE 128-B MƏLUMAT KODLARI
-// ============================================================
+const EAN13_RIGHT = {
+  0: '1110010',
+  1: '1100110',
+  2: '1101100',
+  3: '1000010',
+  4: '1011100',
+  5: '1001110',
+  6: '1010000',
+  7: '1000100',
+  8: '1001000',
+  9: '1110100',
+};
 
-function code128Values(value) {
-  const text = String(value || '');
+const EAN13_PARITY = {
+  0: 'OOOOOO',
+  1: 'OOEOEE',
+  2: 'OOEEOE',
+  3: 'OOEEEO',
+  4: 'OEOOEE',
+  5: 'OEEOOE',
+  6: 'OEEEOO',
+  7: 'OEOEOE',
+  8: 'OEOEEO',
+  9: 'OEEOEO',
+};
 
-  if (!text) return [];
+function calculateEan13CheckDigit(first12Digits) {
+  const digits = first12Digits.split('').map(Number);
 
-  const values = [];
+  let sum = 0;
 
-  for (const character of text) {
-    const charCode =
-      character.charCodeAt(0);
+  digits.forEach((digit, index) => {
+    sum += index % 2 === 0 ? digit : digit * 3;
+  });
 
-    // Code 128-B yalnız ASCII 32–126
-    if (
-      charCode < 32 ||
-      charCode > 126
-    ) {
-      continue;
-    }
-
-    values.push(charCode - 32);
-  }
-
-  return values;
+  return String((10 - (sum % 10)) % 10);
 }
 
+function normalizeEan13(value) {
+  const digits = String(value || '').replace(/\D/g, '');
 
-// ============================================================
-// CODE 128-B BARKOD ÇƏKMƏ
-// ============================================================
+  if (digits.length === 12) {
+    return digits + calculateEan13CheckDigit(digits);
+  }
 
-function drawCode128Barcode(
+  if (digits.length === 13) {
+    return digits;
+  }
+
+  return '';
+}
+
+function buildEan13Bits(value) {
+  const ean = normalizeEan13(value);
+
+  if (!ean) return null;
+
+  const firstDigit = Number(ean[0]);
+  const parity = EAN13_PARITY[firstDigit];
+
+  let bits = '101';
+
+  for (let index = 1; index <= 6; index += 1) {
+    const digit = Number(ean[index]);
+
+    bits += parity[index - 1] === 'O'
+      ? EAN13_LEFT_ODD[digit]
+      : EAN13_LEFT_EVEN[digit];
+  }
+
+  bits += '01010';
+
+  for (let index = 7; index <= 12; index += 1) {
+    bits += EAN13_RIGHT[Number(ean[index])];
+  }
+
+  bits += '101';
+
+  return {
+    ean,
+    bits,
+  };
+}
+
+function drawEan13Barcode(
   ctx,
   value,
   x,
@@ -1110,90 +1144,42 @@ function drawCode128Barcode(
   width,
   height
 ) {
-  const text = normalizeSku(value);
+  const barcode = buildEan13Bits(value);
 
-  if (!text) return false;
+  if (!barcode) return false;
 
-  const dataValues =
-    code128Values(text);
+  const quietZoneModules = 9;
+  const totalModules =
+    barcode.bits.length + quietZoneModules * 2;
 
-  if (!dataValues.length) {
-    return false;
-  }
-
-  // Code Set B başlanğıcı
-  const startCode = 104;
-
-  let checksum = startCode;
-
-  dataValues.forEach((code, index) => {
-    checksum += code * (index + 1);
-  });
-
-  checksum %= 103;
-
-  const codes = [
-    startCode,
-    ...dataValues,
-    checksum,
-    106,
-  ];
-
-  const patterns = codes
-    .map((code) => CODE128_PATTERNS[code])
-    .filter(Boolean);
-
-  if (!patterns.length) {
-    return false;
-  }
-
-  // Sol və sağ sakit sahə
-  const quietModules = 10;
-
-  let moduleCount =
-    quietModules * 2;
-
-  patterns.forEach((pattern) => {
-    for (const digit of pattern) {
-      moduleCount += Number(digit);
-    }
-  });
-
-  const moduleWidth =
-    width / moduleCount;
-
-  let currentX =
-    x + quietModules * moduleWidth;
+  const moduleWidth = width / totalModules;
 
   ctx.save();
+  ctx.fillStyle = '#000000';
 
-  ctx.fillStyle = '#050505';
+  let currentX = x + quietZoneModules * moduleWidth;
 
-  patterns.forEach((pattern) => {
-    let drawBar = true;
+  for (let index = 0; index < barcode.bits.length; index += 1) {
+    if (barcode.bits[index] === '1') {
+      const isGuard =
+        index < 3 ||
+        (index >= 45 && index <= 49) ||
+        index >= barcode.bits.length - 3;
 
-    for (const digit of pattern) {
-      const modules = Number(digit);
-      const barWidth =
-        modules * moduleWidth;
-
-      if (drawBar) {
-        ctx.fillRect(
-          currentX,
-          y,
-          Math.max(1, barWidth),
-          height
-        );
-      }
-
-      currentX += barWidth;
-      drawBar = !drawBar;
+      ctx.fillRect(
+        currentX,
+        y,
+        Math.ceil(moduleWidth),
+        isGuard ? height + 8 : height
+      );
     }
-  });
+
+    currentX += moduleWidth;
+  }
 
   ctx.restore();
 
-  return true;
+  return barcode.ean;
 }
 
 
@@ -1202,31 +1188,26 @@ function drawCode128Barcode(
 // ============================================================
 
 function drawBarcodeArea(ctx, sku) {
-  const barcodeValue =
-    normalizeSku(sku);
+  const boxX = 936;
+  const boxY = 844;
+  const boxW = 390;
+  const boxH = 132;
+
+  const barcodeValue = normalizeEan13(sku);
 
   if (!barcodeValue) return;
 
-  // PNG-dəki ağ sahənin içi
-  const boxX = 928;
-  const boxY = 874;
-  const boxW = 404;
-
-  const barcodeX = boxX + 18;
-  const barcodeY = boxY + 10;
-  const barcodeW = boxW - 36;
-  const barcodeH = 82;
-
-  drawCode128Barcode(
+  const drawnValue = drawEan13Barcode(
     ctx,
     barcodeValue,
-    barcodeX,
-    barcodeY,
-    barcodeW,
-    barcodeH
+    boxX + 22,
+    boxY + 13,
+    boxW - 44,
+    72
   );
 
-  // Barkod rəqəmi
+  if (!drawnValue) return;
+
   ctx.save();
 
   ctx.fillStyle = '#050505';
@@ -1235,12 +1216,12 @@ function drawBarcodeArea(ctx, sku) {
 
   drawTextFit(
     ctx,
-    barcodeValue,
+    drawnValue,
     boxX + boxW / 2,
-    boxY + 126,
-    boxW - 30,
-    28,
-    19,
+    boxY + 119,
+    boxW - 34,
+    25,
+    18,
     '700'
   );
 
@@ -1338,19 +1319,18 @@ async function drawDiscountCanvas(
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
-  const nameResult =
-    drawWrappedTextFit(
-      ctx,
-      product.name,
-      118,
-      350,
-      385,
-      2,
-      50,
-      31,
-      1.08,
-      '950'
-    );
+  const nameResult = drawWrappedTextFit(
+    ctx,
+    product.name,
+    105,  // soldan
+    330,  // yuxarıdan
+    355,  // maksimum en
+    2,    // maksimum 2 sətir
+    47,   // başlanğıc font
+    29,   // minimum font
+    1.08,
+    '950'
+  );
 
   const nameBottom =
     350 +
@@ -1372,8 +1352,8 @@ async function drawDiscountCanvas(
 
   ctx.fillText(
     unit,
-    120,
-    nameBottom + 48
+    106,
+    nameBottom + 45
   );
 
   ctx.restore();
@@ -1383,41 +1363,41 @@ async function drawDiscountCanvas(
   // 5. XÜSUSİYYƏTLƏR
   // ==========================================================
 
-  const featureStartY = 510;
-  const featureGap = 61;
+  const featureStartY = 487;
+  const featureGap = 58;
 
-  drawFeatureRow(
-    ctx,
-    'leaf',
-    'TƏBİİ VƏ TƏZƏ',
-    137,
-    featureStartY - 8,
-    178,
-    featureStartY,
-    310
-  );
+drawFeatureRow(
+  ctx,
+  'leaf',
+  'TƏBİİ VƏ TƏZƏ',
+  120,
+  featureStartY - 8,
+  162,
+  featureStartY,
+  300
+);
 
-  drawFeatureRow(
-    ctx,
-    'pin',
-    originText,
-    137,
-    featureStartY + featureGap - 8,
-    178,
-    featureStartY + featureGap,
-    310
-  );
+drawFeatureRow(
+  ctx,
+  'pin',
+  originText,
+  120,
+  featureStartY + featureGap - 8,
+  162,
+  featureStartY + featureGap,
+  300
+);
 
-  drawFeatureRow(
-    ctx,
-    'shield',
-    'KEYFİYYƏT ZƏMANƏTİ',
-    137,
-    featureStartY + featureGap * 2 - 8,
-    178,
-    featureStartY + featureGap * 2,
-    330
-  );
+drawFeatureRow(
+  ctx,
+  'shield',
+  'KEYFİYYƏT ZƏMANƏTİ',
+  120,
+  featureStartY + featureGap * 2 - 8,
+  162,
+  featureStartY + featureGap * 2,
+  315
+);
 
 
   // ==========================================================
@@ -1425,76 +1405,66 @@ async function drawDiscountCanvas(
   // Photoshop şablonundakı ulduz formasının içi
   // ==========================================================
 
-  ctx.save();
+ctx.save();
 
-  ctx.fillStyle = '#d40861';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
+ctx.fillStyle = '#d40861';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'alphabetic';
 
-  drawTextFit(
-    ctx,
-    `-${percent}%`,
-    744,
-    341,
-    220,
-    68,
-    45,
-    '1000'
-  );
+drawTextFit(
+  ctx,
+  `-${percent}%`,
+  570,
+  304,
+  190,
+  59,
+  40,
+  '1000'
+);
 
-  ctx.font =
-    '950 25px Inter, Arial, sans-serif';
+ctx.font = '950 22px Inter, Arial, sans-serif';
 
-  ctx.fillText(
-    'ENDİRİM',
-    744,
-    385
-  );
+ctx.fillText(
+  'ENDİRİM',
+  570,
+  343
+);
 
-  ctx.restore();
+ctx.restore();
 
 
   // ==========================================================
   // 7. KÖHNƏ QİYMƏT
   // ==========================================================
 
-  ctx.save();
+ctx.save();
 
-  ctx.fillStyle = '#111111';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
+ctx.fillStyle = '#111111';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'alphabetic';
 
-  drawTextFit(
-    ctx,
-    `${oldPrice} ₼`,
-    632,
-    520,
-    280,
-    53,
-    37,
-    '500'
-  );
+drawTextFit(
+  ctx,
+  `${oldPrice} ₼`,
+  590,
+  465,
+  250,
+  43,
+  31,
+  '500'
+);
 
-  // Köhnə qiymətin üstündən xətt
-  ctx.strokeStyle = '#d40861';
-  ctx.lineWidth = 7;
-  ctx.lineCap = 'round';
+// Köhnə qiymətin üstündən çəhrayı xətt
+ctx.strokeStyle = '#d40861';
+ctx.lineWidth = 6;
+ctx.lineCap = 'round';
 
-  ctx.beginPath();
+ctx.beginPath();
+ctx.moveTo(475, 454);
+ctx.lineTo(704, 435);
+ctx.stroke();
 
-  ctx.moveTo(
-    510,
-    505
-  );
-
-  ctx.lineTo(
-    754,
-    482
-  );
-
-  ctx.stroke();
-
-  ctx.restore();
+ctx.restore();
 
 
   // ==========================================================
@@ -1502,24 +1472,24 @@ async function drawDiscountCanvas(
   // Qiymət və manat işarəsi birlikdə avtomatik yerləşir
   // ==========================================================
 
-  ctx.save();
+ctx.save();
 
-  ctx.fillStyle = '#050505';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
+ctx.fillStyle = '#050505';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'alphabetic';
 
-  drawTextFit(
-    ctx,
-    `${price} ₼`,
-    630,
-    684,
-    390,
-    119,
-    75,
-    '1000'
-  );
+drawTextFit(
+  ctx,
+  `${price} ₼`,
+  590,
+  590,
+  330,
+  96,
+  58,
+  '1000'
+);
 
-  ctx.restore();
+ctx.restore();
 
 
   // ==========================================================
