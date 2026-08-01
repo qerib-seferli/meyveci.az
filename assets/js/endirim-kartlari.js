@@ -289,10 +289,10 @@ if (product.image_url) {
     // ==========================================================
     // JPG MƏHSUL ŞƏKLİ ÜÇÜN PRO FOTO VİTRİN
     // ==========================================================
-    const imgX = 410;
-    const imgY = 265;
-    const imgW = 585;
-    const imgH = 445;
+    const imgX = 430;
+    const imgY = 285;
+    const imgW = 520;
+    const imgH = 470;
     const imgRadius = 38;
 
     ctx.save();
