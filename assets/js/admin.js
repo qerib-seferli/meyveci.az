@@ -22,6 +22,7 @@ import { initLayout } from './layout.js';
 
 import {
   loadDiscountCards,
+  initDiscountCardsInfiniteScroll,
   printAllDiscountCards,
   printSelectedDiscountCards,
 } from './endirim-kartlari.js';
@@ -32,6 +33,21 @@ let courierMarkers = new Map();
 let adminSoundReady = false;
 let adminAlarmLoop = null;
 let adminChatUnreadMap = new Map();
+
+
+/* ============================================================
+   KATALOQ MƏHSULLARI — 20-LİK SƏHİFƏLƏMƏ
+   ============================================================ */
+
+const PRODUCT_PAGE_SIZE = 20;
+
+let productPageOffset = 0;
+let productHasMore = true;
+let productIsLoading = false;
+let productObserver = null;
+let productSearchTimer = null;
+let productRequestToken = 0;
+let productCategoriesLoaded = false;
 
 
 const AZ_CITY_REGIONS = [
@@ -873,33 +889,218 @@ function stopAdminAlarm() {
   }
 }
 
+
 async function catalog() {
+  /*
+    Kateqoriya siyahısı əvvəlki kimi tam yüklənir.
+    Məhsullar 20-lik, endirim kartları 15-lik gəlir.
+  */
   await loadCategories();
-  await loadProducts();
+  await loadProductCategoryOptions();
+  await loadProducts(true);
+  await loadDiscountCards(true);
 
-  $('#catForm')?.addEventListener('submit', saveCategory);
-  $('#productForm')?.addEventListener('submit', saveProduct);
-  $('#newCat')?.addEventListener('click', () => resetForm('catForm'));
-  $('#newProduct')?.addEventListener('click', () => resetForm('productForm'));
+  initProductsInfiniteScroll();
+  initDiscountCardsInfiniteScroll();
 
-  $('#productSearch')?.addEventListener('input', loadProducts);
-  $('#categorySearch')?.addEventListener('input', loadCategories);
+  $('#catForm')?.addEventListener(
+    'submit',
+    saveCategory
+  );
 
-  $('#productImportBtn')?.addEventListener('click', () => {
-  $('#productExcelImport')?.click();
-  });
-  
-  $('#productExcelImport')?.addEventListener('change', importProductsFromExcel);
-  $('#productTemplateBtn')?.addEventListener('click', downloadProductExcelTemplate);
-  $('#productExportBtn')?.addEventListener('click', exportProductsToExcel);
+  $('#productForm')?.addEventListener(
+    'submit',
+    saveProduct
+  );
 
-    await loadDiscountCards();
+  $('#newCat')?.addEventListener(
+    'click',
+    () => resetForm('catForm')
+  );
 
-  $('#discountCardSearch')?.addEventListener('input', loadDiscountCards);
-  $('#discountPrintAllBtn')?.addEventListener('click', printAllDiscountCards);
-  $('#discountPrintSelectedBtn')?.addEventListener('click', printSelectedDiscountCards);
-  
+  $('#newProduct')?.addEventListener(
+    'click',
+    () => resetForm('productForm')
+  );
+
+  /*
+    Məhsul axtarışı:
+    hər hərfdə dərhal sorğu göndərməsin deyə
+    350 ms gözləyir.
+  */
+  $('#productSearch')?.addEventListener(
+    'input',
+    () => {
+      clearTimeout(productSearchTimer);
+
+      productSearchTimer = setTimeout(() => {
+        loadProducts(true);
+      }, 350);
+    }
+  );
+
+  $('#categorySearch')?.addEventListener(
+    'input',
+    loadCategories
+  );
+
+  $('#productImportBtn')?.addEventListener(
+    'click',
+    () => {
+      $('#productExcelImport')?.click();
+    }
+  );
+
+  $('#productExcelImport')?.addEventListener(
+    'change',
+    importProductsFromExcel
+  );
+
+  $('#productTemplateBtn')?.addEventListener(
+    'click',
+    downloadProductExcelTemplate
+  );
+
+  $('#productExportBtn')?.addEventListener(
+    'click',
+    exportProductsToExcel
+  );
+
+  $('#discountPrintAllBtn')?.addEventListener(
+    'click',
+    printAllDiscountCards
+  );
+
+  $('#discountPrintSelectedBtn')?.addEventListener(
+    'click',
+    printSelectedDiscountCards
+  );
 }
+
+
+/* ============================================================
+   MƏHSUL KATEQORİYA SELECT-İNİ BİR DƏFƏ YÜKLƏ
+   ============================================================ */
+
+async function loadProductCategoryOptions(force = false) {
+  const select = $('#productCategory');
+
+  if (!select) return;
+
+  if (productCategoriesLoaded && !force) {
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id,name')
+    .order('sort_order');
+
+  if (error) {
+    console.error(
+      'Məhsul kateqoriyaları yüklənmədi:',
+      error
+    );
+
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">Kateqoriya seç</option>
+
+    ${(data || []).map((category) => `
+      <option value="${category.id}">
+        ${esc(category.name)}
+      </option>
+    `).join('')}
+  `;
+
+  productCategoriesLoaded = true;
+}
+
+
+/* ============================================================
+   MƏHSUL YÜKLƏMƏ STATUSU
+   ============================================================ */
+
+function setProductLoadStatus(
+  text,
+  {
+    loading = false,
+    finished = false,
+  } = {}
+) {
+  const sentinel =
+    $('#productLoadMoreSentinel');
+
+  const label =
+    $('#productLoadMoreText');
+
+  if (label) {
+    label.textContent = text;
+  }
+
+  sentinel?.classList.toggle(
+    'is-loading',
+    loading
+  );
+
+  sentinel?.classList.toggle(
+    'is-finished',
+    finished
+  );
+}
+
+
+/* ============================================================
+   MƏHSULLAR ÜÇÜN INFINITE SCROLL
+   ============================================================ */
+
+function initProductsInfiniteScroll() {
+  const sentinel =
+    $('#productLoadMoreSentinel');
+
+  if (!sentinel || productObserver) return;
+
+  productObserver = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+
+      if (
+        !entry?.isIntersecting ||
+        productIsLoading ||
+        !productHasMore
+      ) {
+        return;
+      }
+
+      /*
+        Məhsullar paneli bağlıdırsa sorğu göndərmir.
+      */
+      const panel =
+        $('#productsPanel');
+
+      if (!panel?.classList.contains('active')) {
+        return;
+      }
+
+      loadProducts(false);
+    },
+    {
+      root: null,
+
+      /*
+        İstifadəçi tam aşağı çatmamış
+        növbəti 20 məhsul hazır olsun.
+      */
+      rootMargin: '600px 0px',
+      threshold: 0.01,
+    }
+  );
+
+  productObserver.observe(sentinel);
+}
+
 
 async function loadCategories() {
   const q = ($('#categorySearch')?.value || '').trim();
@@ -986,76 +1187,376 @@ async function saveCategory(event) {
 
     toast(response.error ? response.error.message : 'Kateqoriya saxlanıldı');
     event.target.reset();
-    loadCategories();
-    loadProducts();
+    
+    await loadCategories();
+
+    productCategoriesLoaded = false;
+    await loadProductCategoryOptions(true);
+
+    await loadProducts(true);
+    
   } catch (error) {
     toast(error.message);
   }
 }
 
-async function loadProducts() {
-  const q = ($('#productSearch')?.value || '').trim();
 
-  const [products, categories] = await Promise.all([
-    supabase.from('products').select('*,categories(name)').order('created_at', { ascending: false }).limit(5000),
-    supabase.from('categories').select('id,name').order('sort_order'),
-  ]);
+/* ============================================================
+   MƏHSULLARI SUPABASE-DƏN 20-LİK YÜKLƏ
+   ============================================================ */
 
-  $('#productCategory').innerHTML = '<option value="">Kateqoriya seç</option>' + (categories.data || []).map((category) => `
-    <option value="${category.id}">${esc(category.name)}</option>
-  `).join('');
+async function loadProducts(reset = true) {
+  const table = $('#productTable');
 
-  const filtered = q
-    ? (products.data || []).filter((p) => String(p.name || '').toLowerCase().includes(q.toLowerCase()))
-    : (products.data || []);
+  if (!table) return;
 
-  $('#productTable').innerHTML = products.error
-    ? `<tr><td colspan="10">${products.error.message}</td></tr>`
-    : filtered.map((product) => `
+  /*
+    Yeni axtarış, silmə, redaktə və ya yenilənmədirsə
+    siyahı əvvəldən başlayır.
+  */
+  if (reset) {
+    productRequestToken += 1;
+    productPageOffset = 0;
+    productHasMore = true;
+    productIsLoading = false;
+
+    table.innerHTML = '';
+
+    setProductLoadStatus(
+      'Məhsullar yüklənir...',
+      { loading: true }
+    );
+  }
+
+  if (
+    productIsLoading ||
+    (!reset && !productHasMore)
+  ) {
+    return;
+  }
+
+  const currentToken =
+    productRequestToken;
+
+  const search =
+    String($('#productSearch')?.value || '')
+      .trim();
+
+  const from =
+    productPageOffset;
+
+  const to =
+    from + PRODUCT_PAGE_SIZE - 1;
+
+  productIsLoading = true;
+
+  setProductLoadStatus(
+    reset
+      ? 'Məhsullar yüklənir...'
+      : 'Növbəti məhsullar yüklənir...',
+    { loading: true }
+  );
+
+  let query = supabase
+    .from('products')
+    .select('*,categories(name)')
+    .order('created_at', {
+      ascending: false,
+    })
+    .range(from, to);
+
+  /*
+    Axtarış artıq brauzerdə 5000 məhsul içində deyil,
+    birbaşa Supabase-də aparılır.
+  */
+  if (search) {
+    query = query.ilike(
+      'name',
+      `%${search}%`
+    );
+  }
+
+  const { data, error } =
+    await query;
+
+  /*
+    Bu sorğu gedərkən yeni axtarış başlayıbsa
+    köhnə cavabı siyahıya əlavə etmirik.
+  */
+  if (currentToken !== productRequestToken) {
+    productIsLoading = false;
+    return;
+  }
+
+  productIsLoading = false;
+
+  if (error) {
+    console.error(
+      'Məhsullar yüklənmədi:',
+      error
+    );
+
+    if (reset) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="9">
+            ${esc(error.message)}
+          </td>
+        </tr>
+      `;
+    }
+
+    setProductLoadStatus(
+      'Məhsullar yüklənmədi',
+      { finished: true }
+    );
+
+    return;
+  }
+
+  const rows =
+    data || [];
+
+  if (reset && !rows.length) {
+    table.innerHTML = `
       <tr>
-        <td><img class="admin-product-img" src="${product.image_url || PLACEHOLDER}" alt="${esc(product.name)}"></td>
-        <td>
-          <b>${esc(product.name)}</b>
-          <small class="muted">${esc(product.short_description || '')}</small>
-        </td>
-        <td>${esc(product.categories?.name || 'Kateqoriyasız')}</td>
-        <td>${money(product.price)}${product.old_price ? `<br><small class="muted">${money(product.old_price)}</small>` : ''}</td>
-        <td>${product.stock_quantity || 0} ${esc(product.unit || 'ədəd')}</td>
-        <td>${product.is_featured ? '<span class="mini-badge mini-yellow">Seçilmiş</span>' : '<span class="mini-badge mini-blue">Adi</span>'}</td>
-        <td>${activeSwitch(product.id, product.status === 'active', 'toggle-product-status', 'products', 'status')}</td>
-        <td>${formatDate(product.created_at)}</td>
-        <td>
-          <div class="action-row">
-            <button class="btn btn-soft btn-mini edit-product" data-row="${rowAttr(product)}">Redaktə</button>
-            <button class="btn btn-danger btn-mini del-product" data-id="${product.id}">Sil</button>
-          </div>
+        <td colspan="9">
+          Məhsul tapılmadı.
         </td>
       </tr>
-    `).join('') || '<tr><td colspan="10">Məhsul yoxdur.</td></tr>';
+    `;
+
+    productHasMore = false;
+
+    setProductLoadStatus(
+      'Başqa məhsul yoxdur',
+      { finished: true }
+    );
+
+    return;
+  }
+
+  const html = rows.map((product) => `
+    <tr data-product-row-id="${product.id}">
+      <td>
+        <img
+          class="admin-product-img"
+          src="${product.image_url || PLACEHOLDER}"
+          alt="${esc(product.name)}"
+        >
+      </td>
+
+      <td>
+        <b>${esc(product.name)}</b>
+
+        <small class="muted">
+          ${esc(product.short_description || '')}
+        </small>
+      </td>
+
+      <td>
+        ${esc(
+          product.categories?.name ||
+          'Kateqoriyasız'
+        )}
+      </td>
+
+      <td>
+        ${money(product.price)}
+
+        ${product.old_price
+          ? `
+            <br>
+            <small class="muted">
+              ${money(product.old_price)}
+            </small>
+          `
+          : ''
+        }
+      </td>
+
+      <td>
+        ${product.stock_quantity || 0}
+        ${esc(product.unit || 'ədəd')}
+      </td>
+
+      <td>
+        ${product.is_featured
+          ? `
+            <span class="mini-badge mini-yellow">
+              Seçilmiş
+            </span>
+          `
+          : `
+            <span class="mini-badge mini-blue">
+              Adi
+            </span>
+          `
+        }
+      </td>
+
+      <td>
+        ${activeSwitch(
+          product.id,
+          product.status === 'active',
+          'toggle-product-status',
+          'products',
+          'status'
+        )}
+      </td>
+
+      <td>
+        ${formatDate(product.created_at)}
+      </td>
+
+      <td>
+        <div class="action-row">
+          <button
+            class="btn btn-soft btn-mini edit-product"
+            data-row="${rowAttr(product)}"
+          >
+            Redaktə
+          </button>
+
+          <button
+            class="btn btn-danger btn-mini del-product"
+            data-id="${product.id}"
+          >
+            Sil
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  table.insertAdjacentHTML(
+    'beforeend',
+    html
+  );
+
+  productPageOffset +=
+    rows.length;
+
+  productHasMore =
+    rows.length === PRODUCT_PAGE_SIZE;
 
   bindProductEvents();
+
+  if (productHasMore) {
+    setProductLoadStatus(
+      'Aşağı endikcə digər 20 məhsul yüklənəcək'
+    );
+  } else {
+    setProductLoadStatus(
+      'Bütün məhsullar göstərildi',
+      { finished: true }
+    );
+  }
 }
+
+
+
+/* ============================================================
+   YENİ ƏLAVƏ OLUNAN MƏHSUL SƏTRLƏRİNƏ HADİSƏLƏR
+   ============================================================ */
 
 function bindProductEvents() {
   $$('.edit-product').forEach((button) => {
-    button.addEventListener('click', () => fillForm('productForm', JSON.parse(button.dataset.row)));
+    if (button.dataset.bound === '1') {
+      return;
+    }
+
+    button.dataset.bound = '1';
+
+    button.addEventListener(
+      'click',
+      () => {
+        fillForm(
+          'productForm',
+          JSON.parse(button.dataset.row)
+        );
+      }
+    );
   });
 
   $$('.del-product').forEach((button) => {
-    button.addEventListener('click', async () => {
-      if (!confirm('Məhsul silinsin?')) return;
-      const { error } = await supabase.from('products').delete().eq('id', button.dataset.id);
-      toast(error ? error.message : 'Məhsul silindi');
-      loadProducts();
-    });
+    if (button.dataset.bound === '1') {
+      return;
+    }
+
+    button.dataset.bound = '1';
+
+    button.addEventListener(
+      'click',
+      async () => {
+        if (!confirm('Məhsul silinsin?')) {
+          return;
+        }
+
+        button.disabled = true;
+
+        const { error } = await supabase
+          .from('products')
+          .delete()
+          .eq('id', button.dataset.id);
+
+        toast(
+          error
+            ? error.message
+            : 'Məhsul silindi'
+        );
+
+        button.disabled = false;
+
+        if (!error) {
+          await loadProducts(true);
+          await loadDiscountCards(true);
+        }
+      }
+    );
   });
 
-  $$('.toggle-product-status').forEach((input) => input.addEventListener('change', async () => {
-    const status = input.checked ? 'active' : 'inactive';
-    const { error } = await supabase.from('products').update({ status, updated_at: new Date().toISOString() }).eq('id', input.dataset.id);
-    toast(error ? error.message : 'Məhsul statusu dəyişdi');
-    loadProducts();
-  }));
+  $$('.toggle-product-status').forEach((input) => {
+    if (input.dataset.bound === '1') {
+      return;
+    }
+
+    input.dataset.bound = '1';
+
+    input.addEventListener(
+      'change',
+      async () => {
+        const status =
+          input.checked
+            ? 'active'
+            : 'inactive';
+
+        input.disabled = true;
+
+        const { error } = await supabase
+          .from('products')
+          .update({
+            status,
+            updated_at:
+              new Date().toISOString(),
+          })
+          .eq('id', input.dataset.id);
+
+        toast(
+          error
+            ? error.message
+            : 'Məhsul statusu dəyişdi'
+        );
+
+        input.disabled = false;
+
+        if (!error) {
+          await loadProducts(true);
+          await loadDiscountCards(true);
+        }
+      }
+    );
+  });
 }
 
 
@@ -1157,7 +1658,8 @@ async function saveProduct(event) {
 
     toast(response.error ? response.error.message : 'Məhsul saxlanıldı');
     event.target.reset();
-    loadProducts();
+    await loadProducts(true);
+    await loadDiscountCards(true);
   } catch (error) {
     toast(error.message);
   }
