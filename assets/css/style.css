@@ -10107,3 +10107,35 @@ body[data-page="home"] .site-footer {
     background: rgba(5, 150, 105, 0.82);
   }
 }
+
+
+/* ============================================================
+   HAMBURGER KATALOQ — SOL KATEQORİYA SİYAHISI SCROLLBAR
+   ============================================================ */
+
+.catalog-left {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(22, 163, 74, 0.62)
+    rgba(220, 252, 231, 0.75);
+}
+
+.catalog-left::-webkit-scrollbar {
+  width: 9px;
+}
+
+.catalog-left::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(220, 252, 231, 0.75);
+}
+
+.catalog-left::-webkit-scrollbar-thumb {
+  min-height: 42px;
+  border: 2px solid rgba(220, 252, 231, 0.75);
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.62);
+}
+
+.catalog-left::-webkit-scrollbar-thumb:hover {
+  background: rgba(5, 150, 105, 0.82);
+}
