@@ -10002,3 +10002,71 @@ body[data-page="home"] .site-footer {
     display: none !important;
   }
 }
+
+
+/* ================================================================================================================ */
+/* ============================================================
+   HAMBURGER KATALOQ — BÜTÜN MƏHSULLAR ÜÇÜN SCROLL
+   ============================================================ */
+
+.catalog-right {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.catalog-keyword-grid {
+  /*
+    Məhsul sayı çox olduqda menyu səhifədən daşmır.
+    Siyahının öz daxilində aşağı-yuxarı hərəkət edilir.
+  */
+  max-height: calc(100vh - 230px) !important;
+  max-height: calc(100dvh - 230px) !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  align-content: start;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+
+  padding-right: 8px;
+  padding-bottom: 12px;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(22, 163, 74, 0.55)
+    rgba(220, 252, 231, 0.72);
+}
+
+.catalog-keyword-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.catalog-keyword-grid::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(220, 252, 231, 0.72);
+}
+
+.catalog-keyword-grid::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(220, 252, 231, 0.72);
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.58);
+}
+
+.catalog-keyword-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(5, 150, 105, 0.78);
+}
+
+@media (max-width: 768px) {
+  .catalog-keyword-grid {
+    /*
+      Telefonda header və geri düyməsi üçün
+      bir qədər artıq yer saxlanılır.
+    */
+    max-height: calc(100vh - 175px) !important;
+    max-height: calc(100dvh - 175px) !important;
+
+    padding-right: 5px;
+  }
+}
