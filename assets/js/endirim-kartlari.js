@@ -1611,74 +1611,16 @@ function drawFeatureRow(
 
 
 // ============================================================
-// EAN-13 / UPC-A BARKOD GENERATORU
+// JSBARCODE — REAL EAN-13 / UPC-A BARKOD GENERATORU
 //
-// products.sku:
-// 13 rəqəm → EAN-13
 // 12 rəqəm → UPC-A
+// 13 rəqəm → EAN-13
 //
-// 12 rəqəmli UPC-A daxildə qarşısına 0 əlavə olunaraq
-// EAN-13 strukturu ilə çəkilir.
-// Kartın altında isə bazadakı orijinal SKU yazılır.
+// Mövcud barkod koordinatları dəyişdirilmir.
 // ============================================================
 
-const EAN13_L_PATTERNS = {
-  0: '0001101',
-  1: '0011001',
-  2: '0010011',
-  3: '0111101',
-  4: '0100011',
-  5: '0110001',
-  6: '0101111',
-  7: '0111011',
-  8: '0110111',
-  9: '0001011',
-};
 
-const EAN13_G_PATTERNS = {
-  0: '0100111',
-  1: '0110011',
-  2: '0011011',
-  3: '0100001',
-  4: '0011101',
-  5: '0111001',
-  6: '0000101',
-  7: '0010001',
-  8: '0001001',
-  9: '0010111',
-};
-
-const EAN13_R_PATTERNS = {
-  0: '1110010',
-  1: '1100110',
-  2: '1101100',
-  3: '1000010',
-  4: '1011100',
-  5: '1001110',
-  6: '1010000',
-  7: '1000100',
-  8: '1001000',
-  9: '1110100',
-};
-
-const EAN13_PARITY_PATTERNS = {
-  0: 'LLLLLL',
-  1: 'LLGLGG',
-  2: 'LLGGLG',
-  3: 'LLGGGL',
-  4: 'LGLLGG',
-  5: 'LGGLLG',
-  6: 'LGGGLL',
-  7: 'LGLGLG',
-  8: 'LGLGGL',
-  9: 'LGGLGL',
-};
-
-
-// ============================================================
-// SKU-DAN YALNIZ RƏQƏMLƏRİ GÖTÜR
-// ============================================================
-
+// SKU daxilində yalnız rəqəmləri saxlayır
 function normalizeRetailBarcode(value) {
   return String(value ?? '')
     .replace(/\D/g, '')
@@ -1686,58 +1628,35 @@ function normalizeRetailBarcode(value) {
 }
 
 
-// ============================================================
-// EAN-13 YOXLAMA RƏQƏMİNİ HESABLA
-// ============================================================
-
-function calculateEan13CheckDigit(first12Digits) {
-  if (!/^\d{12}$/.test(first12Digits)) {
-    return null;
-  }
-
-  let total = 0;
-
-  for (
-    let index = 0;
-    index < first12Digits.length;
-    index += 1
-  ) {
-    const digit =
-      Number(first12Digits[index]);
-
-    total +=
-      digit *
-      (
-        index % 2 === 0
-          ? 1
-          : 3
-      );
-  }
-
-  return String(
-    (10 - (total % 10)) % 10
-  );
+// JsBarcode kitabxanasının yüklənməsini yoxlayır
+function isJsBarcodeReady() {
+  return typeof window.JsBarcode === 'function';
 }
 
 
-// ============================================================
-// 12 VƏ YA 13 RƏQƏMLİ SKU-NU BARKODA HAZIRLA
-// ============================================================
+// Barkodu müvəqqəti canvas üzərində yaradır
+function createJsBarcodeCanvas(value, maxWidth, barHeight) {
+  if (!isJsBarcodeReady()) {
+    console.error(
+      'JsBarcode kitabxanası yüklənməyib'
+    );
 
-function prepareRetailBarcode(value) {
-  const original =
+    return null;
+  }
+
+  const normalized =
     normalizeRetailBarcode(value);
 
-  let ean13Value = '';
-
   /*
-    12 rəqəmli kod UPC-A-dır.
-    EAN-13 strukturu üçün əvvəlinə 0 əlavə edilir.
+    12 rəqəmli 1C barkodu UPC-A,
+    13 rəqəmli barkod isə EAN-13 kimi çəkilir.
   */
-  if (original.length === 12) {
-    ean13Value = `0${original}`;
-  } else if (original.length === 13) {
-    ean13Value = original;
+  let format = '';
+
+  if (normalized.length === 12) {
+    format = 'UPC';
+  } else if (normalized.length === 13) {
+    format = 'EAN13';
   } else {
     console.warn(
       'Barkod 12 və ya 13 rəqəmli deyil:',
@@ -1747,258 +1666,97 @@ function prepareRetailBarcode(value) {
     return null;
   }
 
-  const first12 =
-    ean13Value.slice(0, 12);
-
-  const actualCheckDigit =
-    ean13Value.slice(-1);
-
-  const expectedCheckDigit =
-    calculateEan13CheckDigit(first12);
-
   /*
-    Səhv yazılmış barkod çəkilmir.
-    Beləliklə skanerdə başqa məhsul kodu çıxmasının
-    qarşısı alınır.
+    Əvvəl 3 px modul eni ilə yoxlayırıq.
+    Sahəyə sığmasa 2 px, sonra 1 px istifadə olunur.
+
+    Tam piksel eni xətlərin bulanıqlaşmasının
+    qarşısını alır.
   */
-  if (
-    expectedCheckDigit !==
-    actualCheckDigit
-  ) {
-    console.warn(
-      'Barkodun yoxlama rəqəmi düzgün deyil:',
-      {
-        sku: original,
-        expectedCheckDigit,
-        actualCheckDigit,
+  const candidateWidths = [3, 2, 1];
+
+  for (const lineWidth of candidateWidths) {
+    const barcodeCanvas =
+      document.createElement('canvas');
+
+    try {
+      window.JsBarcode(
+        barcodeCanvas,
+        normalized,
+        {
+          format,
+
+          /*
+            Hər nazik modulun eni.
+            Kassa skanerinin düzgün oxuması üçün
+            tam piksel saxlanılır.
+          */
+          width: lineWidth,
+
+          /*
+            Yalnız qara xətlərin hündürlüyü.
+          */
+          height: Math.max(
+            40,
+            Math.round(barHeight)
+          ),
+
+          lineColor: '#000000',
+          background: '#ffffff',
+
+          /*
+            Rəqəmi JsBarcode çəkmir.
+            Aşağıdakı mövcud kodumuz rəqəmi
+            əvvəlki koordinatda ayrıca yazacaq.
+          */
+          displayValue: false,
+
+          /*
+            Ağ sakit sahə əsas kartdakı
+            sidePadding vasitəsilə saxlanılır.
+          */
+          margin: 0,
+
+          flat: true,
+        }
+      );
+
+      if (
+        barcodeCanvas.width <= maxWidth
+      ) {
+        return {
+          canvas: barcodeCanvas,
+          value: normalized,
+          format,
+        };
       }
-    );
+    } catch (error) {
+      console.warn(
+        'JsBarcode barkodu yarada bilmədi:',
+        {
+          value: normalized,
+          format,
+          error: error?.message || error,
+        }
+      );
 
-    return null;
-  }
-
-  return {
-    original,
-    ean13Value,
-  };
-}
-
-
-// ============================================================
-// EAN-13 RƏQƏMLƏRİNİ 95 MODULLU PATTERNƏ ÇEVİR
-// ============================================================
-
-function encodeEan13(value) {
-  const firstDigit =
-    value[0];
-
-  const leftDigits =
-    value.slice(1, 7);
-
-  const rightDigits =
-    value.slice(7, 13);
-
-  const parity =
-    EAN13_PARITY_PATTERNS[
-      firstDigit
-    ];
-
-  let pattern = '101';
-
-  for (
-    let index = 0;
-    index < leftDigits.length;
-    index += 1
-  ) {
-    const digit =
-      leftDigits[index];
-
-    const encodingType =
-      parity[index];
-
-    pattern +=
-      encodingType === 'L'
-        ? EAN13_L_PATTERNS[digit]
-        : EAN13_G_PATTERNS[digit];
-  }
-
-  pattern += '01010';
-
-  for (const digit of rightDigits) {
-    pattern +=
-      EAN13_R_PATTERNS[digit];
-  }
-
-  pattern += '101';
-
-  return pattern;
-}
-
-
-// ============================================================
-// EAN-13 QORUYUCU XƏTLƏR
-// ============================================================
-
-function isEan13GuardModule(index) {
-  return (
-    /*
-      Sol başlanğıc: 101
-    */
-    index >= 0 &&
-    index <= 2
-  ) || (
-    /*
-      Orta ayırıcı: 01010
-    */
-    index >= 45 &&
-    index <= 49
-  ) || (
-    /*
-      Sağ sonluq: 101
-    */
-    index >= 92 &&
-    index <= 94
-  );
-}
-
-
-// ============================================================
-// EAN-13 / UPC-A BARKODUNU CANVAS ÜZƏRİNDƏ ÇƏK
-//
-// x, y, width və height hazır koordinatlardır.
-// Heç bir mövcud koordinat dəyişdirilmir.
-// ============================================================
-
-function drawRetailBarcode(
-  ctx,
-  value,
-  x,
-  y,
-  width,
-  height
-) {
-  const prepared =
-    prepareRetailBarcode(value);
-
-  if (!prepared) {
-    return false;
-  }
-
-  const pattern =
-    encodeEan13(
-      prepared.ean13Value
-    );
-
-  /*
-    EAN-13 əsas barkodu 95 moduldur.
-
-    Sol sakit sahə: 11 modul
-    Sağ sakit sahə: 7 modul
-    Cəmi: 113 modul
-  */
-  const leftQuietModules = 11;
-  const rightQuietModules = 7;
-
-  const totalModules =
-    leftQuietModules +
-    95 +
-    rightQuietModules;
-
-  /*
-    Xətlər yarım pikselə düşməsin deyə
-    modul enini tam piksel seçirik.
-  */
-  const moduleWidth =
-    Math.max(
-      1,
-      Math.floor(
-        width /
-        totalModules
-      )
-    );
-
-  const renderedWidth =
-    totalModules *
-    moduleWidth;
-
-  /*
-    Barkodu verilmiş sahənin ortasına yerləşdirir.
-    CARD_LAYOUT koordinatları dəyişmir.
-  */
-  const startX =
-    Math.round(
-      x +
-      (
-        width -
-        renderedWidth
-      ) / 2
-    );
-
-  const barsStartX =
-    startX +
-    leftQuietModules *
-    moduleWidth;
-
-  const normalBarHeight =
-    Math.max(
-      1,
-      Math.round(
-        height * 0.88
-      )
-    );
-
-  const guardBarHeight =
-    height;
-
-  ctx.save();
-
-  /*
-    Barkod çəkilərkən filter və kölgə istifadə edilmir.
-    Xətlərin kassa skanerində daha aydın oxunmasına kömək edir.
-  */
-  ctx.filter = 'none';
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.globalAlpha = 1;
-
-  ctx.fillStyle = '#000000';
-
-  for (
-    let index = 0;
-    index < pattern.length;
-    index += 1
-  ) {
-    if (pattern[index] !== '1') {
-      continue;
+      return null;
     }
-
-    const barHeight =
-      isEan13GuardModule(index)
-        ? guardBarHeight
-        : normalBarHeight;
-
-    ctx.fillRect(
-      Math.round(
-        barsStartX +
-        index *
-        moduleWidth
-      ),
-      Math.round(y),
-      moduleWidth,
-      barHeight
-    );
   }
 
-  ctx.restore();
+  console.warn(
+    'Barkod mövcud ağ sahəyə sığmadı:',
+    normalized
+  );
 
-  return true;
+  return null;
 }
 
 
 // ============================================================
 // BARKOD SAHƏSİ
 //
-// CARD_LAYOUT.barcode daxilindəki koordinatlar olduğu kimi qalır.
+// CARD_LAYOUT.barcode koordinatları olduğu kimi qalır.
 // ============================================================
 
 function drawBarcodeArea(ctx, sku) {
@@ -2022,30 +1780,69 @@ function drawBarcodeArea(ctx, sku) {
     barcode.boxWidth -
     barcode.sidePadding * 2;
 
-  const success =
-    drawRetailBarcode(
-      ctx,
+  const generated =
+    createJsBarcodeCanvas(
       value,
-      barsX,
-      barsY,
       barsWidth,
       barcode.barsHeight
     );
 
-  if (!success) {
-    return;
-  }
+  if (!generated) return;
+
+  const barcodeCanvas =
+    generated.canvas;
 
   /*
-    Barkodun altında Supabase-dəki orijinal
-    12 və ya 13 rəqəmli SKU göstərilir.
+    JsBarcode-un yaratdığı barkod dartılmadan,
+    təbii ölçüsündə ağ sahənin ortasına qoyulur.
+    Bu vacibdir: şəkli eni üzrə dartmaq xətləri
+    bulanıqlaşdırıb skaneri poza bilər.
+  */
+  const drawX =
+    Math.round(
+      barsX +
+      (
+        barsWidth -
+        barcodeCanvas.width
+      ) / 2
+    );
+
+  const drawY =
+    Math.round(barsY);
+
+  ctx.save();
+
+  ctx.filter = 'none';
+  ctx.globalAlpha = 1;
+  ctx.imageSmoothingEnabled = false;
+
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+
+  ctx.drawImage(
+    barcodeCanvas,
+    drawX,
+    drawY
+  );
+
+  ctx.restore();
+
+
+  /*
+    SKU rəqəmi əvvəlki koordinatda qalır.
+    Heç bir yerləşmə rəqəmi dəyişdirilmir.
   */
   ctx.save();
 
   ctx.filter = 'none';
+  ctx.globalAlpha = 1;
+
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
-  ctx.globalAlpha = 1;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = '#050505';
   ctx.textAlign = 'center';
