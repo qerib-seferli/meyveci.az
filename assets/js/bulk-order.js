@@ -146,8 +146,13 @@ function setupEvents() {
      AŞAĞI ENDİKCƏ AVTOMATİK YÜKLƏMƏ
      ========================================================== */
 
-  initBulkProductsInfiniteScroll();
-
+    /*
+    Avtomatik məhsul yükləmə söndürüldü.
+    Növbəti 20 məhsul yalnız "Daha çox göstər"
+    düyməsinə vurulduqda yüklənəcək.
+ 
+      initBulkProductsInfiniteScroll();
+     */
 
   $('#bulkCheckoutToggle')?.addEventListener('click', () => {
     $('#bulkPersonalFields')?.classList.toggle('checkout-collapsed');
