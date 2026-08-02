@@ -912,22 +912,29 @@ const categoryProductsCache =
   const right = $('#catalogRight');
 
 
-  async function loadMenuCategoryProducts(
-  categoryId
-) {
-  const cacheKey =
-    String(categoryId);
+async function loadMenuCategoryProducts(categoryId) {
+  const cacheKey = String(categoryId);
 
-  if (
-    categoryProductsCache.has(cacheKey)
-  ) {
-    return categoryProductsCache.get(
-      cacheKey
-    );
+  /*
+    Kateqoriya daha əvvəl açılıbsa məhsulları
+    Supabase-dən yenidən çəkmirik.
+  */
+  if (categoryProductsCache.has(cacheKey)) {
+    return categoryProductsCache.get(cacheKey);
   }
 
-  const { data, error } =
-    await supabase
+  const allProducts = [];
+
+  /*
+    Supabase-dən hər sorğuda 500 məhsul götürürük.
+    Kateqoriyada nə qədər məhsul varsa hamısı gələcək.
+  */
+  const pageSize = 500;
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
       .from('products')
       .select(`
         id,
@@ -939,26 +946,51 @@ const categoryProductsCache =
       .order('name', {
         ascending: true,
       })
-      .limit(60);
+      .order('id', {
+        ascending: true,
+      })
+      .range(
+        offset,
+        offset + pageSize - 1
+      );
 
-  if (error) {
-    console.warn(
-      'Hamburger məhsulları yüklənmədi:',
-      error.message
-    );
+    if (error) {
+      console.warn(
+        'Hamburger məhsulları yüklənmədi:',
+        error.message
+      );
 
-    return [];
+      break;
+    }
+
+    const rows = data || [];
+
+    allProducts.push(...rows);
+
+    offset += rows.length;
+
+    hasMore = rows.length === pageSize;
   }
 
-  const products =
-    data || [];
+  /*
+    Təhlükəsizlik üçün eyni ID-li məhsul
+    iki dəfə menyuya əlavə olunmur.
+  */
+  const uniqueProducts = [
+    ...new Map(
+      allProducts.map((product) => [
+        String(product.id),
+        product,
+      ])
+    ).values(),
+  ];
 
   categoryProductsCache.set(
     cacheKey,
-    products
+    uniqueProducts
   );
 
-  return products;
+  return uniqueProducts;
 }
 
 
