@@ -30,10 +30,24 @@ const state = {
   categories: [],
   products: [],
   favorites: new Set(),
+
   category: 'all',
   query: '',
-  visible: 15,
 };
+
+/* ============================================================
+   ANA SƏHİFƏ MƏHSULLARI — 20-LİK SERVER SƏHİFƏLƏMƏSİ
+   ============================================================ */
+
+const HOME_PRODUCT_PAGE_SIZE = 20;
+const HOME_DISCOUNT_FETCH_SIZE = 60;
+
+let homeProductOffset = 0;
+let homeProductsHaveMore = true;
+let homeProductsLoading = false;
+let homeProductsRequestToken = 0;
+let homeSearchTimer = null;
+let homeProductsObserver = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
@@ -72,55 +86,64 @@ async function initHome() {
   window.dispatchEvent(new Event('hideLoader'));
 }
 
+
 function setupHomeEvents() {
+  /* ==========================================================
+     ANA SƏHİFƏ AXTARIŞI
+     Axtarış bütün bazada Supabase üzərindən aparılır.
+     ========================================================== */
+
   $('#homeSearchInput')?.addEventListener('input', (event) => {
-    state.query = event.target.value.trim().toLowerCase();
-    state.visible = 15;
-    renderProducts();
-  });
+    state.query = event.target.value.trim();
 
-  $('#clearHomeFilters')?.addEventListener('click', () => {
-    state.query = '';
-    state.category = 'all';
-    state.visible = 15;
-    $('#homeSearchInput').value = '';
-    renderCategoryChips();
-    renderProducts();
-  });
+    clearTimeout(homeSearchTimer);
 
-  $('#loadMore')?.addEventListener('click', () => {
-    state.visible += 15;
-    renderProducts();
-  });
-
-
-  
-  let autoLoadBusy = false;
-
-  window.addEventListener('scroll', () => {
-    const loadMoreButton = $('#loadMore');
-  
-    if (!loadMoreButton) return;
-    if (loadMoreButton.style.display === 'none') return;
-    if (autoLoadBusy) return;
-  
-    const nearBottom =
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
-  
-    if (!nearBottom) return;
-  
-    autoLoadBusy = true;
-    state.visible += 15;
-    renderProducts();
-  
-    setTimeout(() => {
-      autoLoadBusy = false;
+    homeSearchTimer = setTimeout(() => {
+      loadHomeProducts(true);
     }, 350);
   });
 
 
-  
-    const categoryRow = $('#homeCategoryChips');
+  /* ==========================================================
+     FİLTRLƏRİ SIFIRLA
+     ========================================================== */
+
+  $('#clearHomeFilters')?.addEventListener('click', async () => {
+    state.query = '';
+    state.category = 'all';
+
+    const input = $('#homeSearchInput');
+
+    if (input) {
+      input.value = '';
+    }
+
+    renderCategoryChips();
+    await loadHomeProducts(true);
+  });
+
+
+  /* ==========================================================
+     DAHA ÇOX GÖSTƏR
+     ========================================================== */
+
+  $('#loadMore')?.addEventListener('click', async () => {
+    await loadHomeProducts(false);
+  });
+
+
+  /* ==========================================================
+     AŞAĞI ENDİKCƏ NÖVBƏTİ 20 MƏHSUL
+     ========================================================== */
+
+  initHomeProductsInfiniteScroll();
+
+
+  /* ==========================================================
+     KATEQORİYA SƏTRİNİ MAUSLA SAĞA-SOLA ÇƏKMƏ
+     ========================================================== */
+
+  const categoryRow = $('#homeCategoryChips');
 
   if (categoryRow) {
     let isDown = false;
@@ -130,8 +153,13 @@ function setupHomeEvents() {
     categoryRow.addEventListener('mousedown', (event) => {
       isDown = true;
       categoryRow.classList.add('dragging');
-      startX = event.pageX - categoryRow.offsetLeft;
-      scrollLeft = categoryRow.scrollLeft;
+
+      startX =
+        event.pageX -
+        categoryRow.offsetLeft;
+
+      scrollLeft =
+        categoryRow.scrollLeft;
     });
 
     categoryRow.addEventListener('mouseleave', () => {
@@ -146,81 +174,608 @@ function setupHomeEvents() {
 
     categoryRow.addEventListener('mousemove', (event) => {
       if (!isDown) return;
+
       event.preventDefault();
 
-      const x = event.pageX - categoryRow.offsetLeft;
-      const walk = (x - startX) * 1.4;
-      categoryRow.scrollLeft = scrollLeft - walk;
+      const x =
+        event.pageX -
+        categoryRow.offsetLeft;
+
+      const walk =
+        (x - startX) * 1.4;
+
+      categoryRow.scrollLeft =
+        scrollLeft - walk;
+    });
+  }
+
+
+  /* ==========================================================
+     HAMBURGER MENYUDAN GƏLƏN KATEQORİYA/MƏHSUL FİLTRİ
+     ========================================================== */
+
+  window.addEventListener(
+    'meyveciCatalogFilter',
+    async (event) => {
+      state.category =
+        event.detail?.category || 'all';
+
+      state.query =
+        String(event.detail?.query || '').trim();
+
+      const input =
+        $('#homeSearchInput');
+
+      if (input) {
+        input.value = state.query;
+      }
+
+      renderCategoryChips();
+
+      await loadHomeProducts(true);
+
+      requestAnimationFrame(() => {
+        const productsSection =
+          document.querySelector('#products');
+
+        if (!productsSection) return;
+
+        const headerOffset = 100;
+
+        const targetTop =
+          productsSection.getBoundingClientRect().top +
+          window.scrollY -
+          headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth',
+        });
+      });
+    }
+  );
+}
+
+
+async function loadHomeData() {
+  const [
+    categoriesRes,
+    bannersRes,
+    newsRes,
+    partnersRes,
+    favoritesRes,
+  ] = await Promise.all([
+    supabase
+      .from('categories')
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        image_url,
+        sort_order
+      `)
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(80),
+
+    supabase
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(5),
+
+    supabase
+      .from('news')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', {
+        ascending: false,
+      })
+      .limit(8),
+
+    supabase
+      .from('partners')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(16),
+
+    supabase
+      .from('favorites')
+      .select('product_id'),
+  ]);
+
+  if (categoriesRes.error) {
+    console.warn(
+      'Kateqoriyalar yüklənmədi:',
+      categoriesRes.error.message
+    );
+  }
+
+  state.categories =
+    categoriesRes.data || [];
+
+  state.favorites = new Set(
+    (favoritesRes.data || []).map(
+      (item) => String(item.product_id)
+    )
+  );
+
+  renderBanners(
+    bannersRes.data || []
+  );
+
+  renderNews(
+    newsRes.data || []
+  );
+
+  renderPartners(
+    partnersRes.data || []
+  );
+
+
+  /* Hamburgerdən başqa səhifədən gələn filtr */
+  const savedFilter =
+    localStorage.getItem(
+      'meyveciCatalogFilter'
+    );
+
+  if (savedFilter) {
+    try {
+      const filter =
+        JSON.parse(savedFilter);
+
+      state.category =
+        filter.category || 'all';
+
+      state.query =
+        String(filter.query || '').trim();
+
+      const input =
+        $('#homeSearchInput');
+
+      if (input) {
+        input.value = state.query;
+      }
+    } catch (error) {
+      console.warn(
+        'Kataloq filtri oxunmadı:',
+        error
+      );
+    }
+
+    localStorage.removeItem(
+      'meyveciCatalogFilter'
+    );
+  }
+
+  renderCategoryChips();
+
+  /* Supabase-dən yalnız ilk 20 məhsul */
+  await loadHomeProducts(true);
+}
+
+
+
+/* ============================================================
+   ANA SƏHİFƏ ÜÇÜN MƏHSUL SORĞUSU
+   ============================================================ */
+
+function createHomeProductsQuery() {
+  let query = supabase
+    .from('products')
+    .select(`
+      id,
+      category_id,
+      name,
+      slug,
+      price,
+      old_price,
+      stock_quantity,
+      unit,
+      image_url,
+      short_description,
+      description,
+      is_featured,
+      status,
+      rating_avg,
+      created_at
+    `)
+    .eq('status', 'active')
+    .order('is_featured', {
+      ascending: false,
+    })
+    .order('created_at', {
+      ascending: false,
+    })
+    .order('id', {
+      ascending: true,
     });
 
-      window.addEventListener('meyveciCatalogFilter', (event) => {
-        state.category = event.detail.category || 'all';
-        state.query = String(event.detail.query || '').toLowerCase();
-        state.visible = 15;
-    
-        if ($('#homeSearchInput')) $('#homeSearchInput').value = state.query;
-    
-        renderCategoryChips();
-        renderProducts();
-    
-        requestAnimationFrame(() => {
-          const productsGrid = document.querySelector('#productsGrid');
-        
-          if (!productsGrid) return;
-        
-          const headerOffset = 100;
-        
-          const targetTop =
-            productsGrid.getBoundingClientRect().top +
-            window.scrollY -
-            headerOffset;
-        
-          window.scrollTo({
-            top: Math.max(0, targetTop),
-            behavior: 'smooth',
-          });
-        });
-      });  
+  /*
+    Adi kateqoriya seçilibsə birbaşa Supabase-də filter olunur.
+  */
+  if (
+    state.category !== 'all' &&
+    state.category !== 'discounts'
+  ) {
+    query = query.eq(
+      'category_id',
+      state.category
+    );
+  }
+
+  /*
+    Axtarış bütün bazada aparılır.
+  */
+  const search =
+    String(state.query || '').trim();
+
+  if (search) {
+    const safeSearch = search
+      .replaceAll(',', ' ')
+      .replaceAll('(', ' ')
+      .replaceAll(')', ' ')
+      .replaceAll('.', ' ')
+      .trim();
+
+    if (safeSearch) {
+      query = query.or(
+        [
+          `name.ilike.%${safeSearch}%`,
+          `unit.ilike.%${safeSearch}%`,
+          `short_description.ilike.%${safeSearch}%`,
+          `description.ilike.%${safeSearch}%`,
+          `one_c_name.ilike.%${safeSearch}%`,
+          `sku.ilike.%${safeSearch}%`,
+        ].join(',')
+      );
     }
   }
 
-async function loadHomeData() {
-  const [categories, products, banners, news, partners, favorites] = await Promise.all([
-    supabase.from('categories').select('id,name,slug,description,image_url,sort_order').eq('is_active', true).order('sort_order').limit(50),
-    supabase.from('products').select('*').eq('status', 'active').order('is_featured', { ascending: false }).order('created_at', { ascending: false }).limit(120),
-    supabase.from('banners').select('*').eq('is_active', true).order('sort_order').limit(5),
-    supabase.from('news').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(8),
-    supabase.from('partners').select('*').eq('is_active', true).order('sort_order').limit(16),
-    supabase.from('favorites').select('product_id'),
-  ]);
+  return query;
+}
 
-  state.categories = categories.data || [];
-  state.products = products.data || [];
-  state.favorites = new Set((favorites.data || []).map((item) => item.product_id));
 
-  renderBanners(banners.data || []);
-  renderNews(news.data || []);
-  renderCategoryChips();
+/* ============================================================
+   ENDİRİMLİ MƏHSUL YOXLAMASI
+   ============================================================ */
 
-      const savedFilter = localStorage.getItem('meyveciCatalogFilter');
+function isHomeDiscountProduct(product) {
+  const price =
+    Number(product?.price || 0);
 
-      if (savedFilter) {
-        try {
-          const filter = JSON.parse(savedFilter);
-          state.category = filter.category || 'all';
-          state.query = String(filter.query || '').toLowerCase();
-    
-          if ($('#homeSearchInput')) $('#homeSearchInput').value = state.query;
-    
-          localStorage.removeItem('meyveciCatalogFilter');
-        } catch (e) {
-          localStorage.removeItem('meyveciCatalogFilter');
+  const oldPrice =
+    Number(product?.old_price || 0);
+
+  return (
+    Number.isFinite(price) &&
+    Number.isFinite(oldPrice) &&
+    oldPrice > price
+  );
+}
+
+
+/* ============================================================
+   DAHA ÇOX DÜYMƏSİNİN VƏZİYYƏTİ
+   ============================================================ */
+
+function updateHomeLoadMoreButton() {
+  const button =
+    $('#loadMore');
+
+  if (!button) return;
+
+  if (homeProductsLoading) {
+    button.style.display =
+      'inline-flex';
+
+    button.disabled = true;
+    button.textContent =
+      'Məhsullar yüklənir...';
+
+    return;
+  }
+
+  button.disabled = false;
+
+  if (homeProductsHaveMore) {
+    button.style.display =
+      'inline-flex';
+
+    button.textContent =
+      'Daha çox göstər';
+  } else {
+    button.style.display =
+      'none';
+  }
+}
+
+
+/* ============================================================
+   SUPABASE-DƏN 20-20 MƏHSUL YÜKLƏ
+   ============================================================ */
+
+async function loadHomeProducts(reset = true) {
+  const container =
+    $('#productsGrid');
+
+  if (!container) return;
+
+  if (reset) {
+    homeProductsRequestToken += 1;
+
+    homeProductOffset = 0;
+    homeProductsHaveMore = true;
+    homeProductsLoading = false;
+
+    state.products = [];
+
+    container.innerHTML = `
+      <div class="card">
+        <b>Məhsullar yüklənir...</b>
+        <p class="muted">
+          Zəhmət olmasa gözləyin.
+        </p>
+      </div>
+    `;
+  }
+
+  if (
+    homeProductsLoading ||
+    (!reset && !homeProductsHaveMore)
+  ) {
+    return;
+  }
+
+  const requestToken =
+    homeProductsRequestToken;
+
+  homeProductsLoading = true;
+
+  updateHomeLoadMoreButton();
+
+  try {
+    const collected = [];
+
+    /*
+      Endirimli məhsullarda old_price > price müqayisəsi
+      JavaScript-də yoxlanılır.
+    */
+    if (state.category === 'discounts') {
+      while (
+        collected.length <
+          HOME_PRODUCT_PAGE_SIZE &&
+        homeProductsHaveMore
+      ) {
+        const from =
+          homeProductOffset;
+
+        const to =
+          from +
+          HOME_DISCOUNT_FETCH_SIZE -
+          1;
+
+        const { data, error } =
+          await createHomeProductsQuery()
+            .not('old_price', 'is', null)
+            .range(from, to);
+
+        if (
+          requestToken !==
+          homeProductsRequestToken
+        ) {
+          return;
+        }
+
+        if (error) {
+          throw error;
+        }
+
+        const rows =
+          data || [];
+
+        homeProductOffset +=
+          rows.length;
+
+        if (
+          rows.length <
+          HOME_DISCOUNT_FETCH_SIZE
+        ) {
+          homeProductsHaveMore = false;
+        }
+
+        for (const product of rows) {
+          if (
+            !isHomeDiscountProduct(product)
+          ) {
+            continue;
+          }
+
+          const duplicate =
+            state.products.some(
+              (item) =>
+                String(item.id) ===
+                String(product.id)
+            ) ||
+            collected.some(
+              (item) =>
+                String(item.id) ===
+                String(product.id)
+            );
+
+          if (duplicate) continue;
+
+          collected.push(product);
+
+          if (
+            collected.length >=
+            HOME_PRODUCT_PAGE_SIZE
+          ) {
+            break;
+          }
+        }
+
+        if (!rows.length) {
+          homeProductsHaveMore = false;
         }
       }
-      
-  renderProducts();
-  renderPartners(partners.data || []);
+    } else {
+      const from =
+        homeProductOffset;
+
+      const to =
+        from +
+        HOME_PRODUCT_PAGE_SIZE -
+        1;
+
+      const { data, error } =
+        await createHomeProductsQuery()
+          .range(from, to);
+
+      if (
+        requestToken !==
+        homeProductsRequestToken
+      ) {
+        return;
+      }
+
+      if (error) {
+        throw error;
+      }
+
+      const rows =
+        data || [];
+
+      homeProductOffset +=
+        rows.length;
+
+      homeProductsHaveMore =
+        rows.length ===
+        HOME_PRODUCT_PAGE_SIZE;
+
+      collected.push(...rows);
+    }
+
+    if (
+      requestToken !==
+      homeProductsRequestToken
+    ) {
+      return;
+    }
+
+    const existingIds =
+      new Set(
+        state.products.map(
+          (product) =>
+            String(product.id)
+        )
+      );
+
+    const uniqueRows =
+      collected.filter((product) => {
+        const id =
+          String(product.id);
+
+        if (existingIds.has(id)) {
+          return false;
+        }
+
+        existingIds.add(id);
+        return true;
+      });
+
+    state.products.push(
+      ...uniqueRows
+    );
+
+    renderProducts();
+  } catch (error) {
+    console.error(
+      'Ana səhifə məhsulları yüklənmədi:',
+      error
+    );
+
+    if (reset) {
+      container.innerHTML = `
+        <div class="card">
+          <b>Məhsullar yüklənmədi</b>
+          <p class="muted">
+            ${escapeAttr(
+              error?.message ||
+              'Naməlum xəta'
+            )}
+          </p>
+        </div>
+      `;
+    }
+
+    toast(
+      error?.message ||
+      'Məhsullar yüklənmədi'
+    );
+  } finally {
+    if (
+      requestToken ===
+      homeProductsRequestToken
+    ) {
+      homeProductsLoading = false;
+      updateHomeLoadMoreButton();
+    }
+  }
 }
+
+
+/* ============================================================
+   AŞAĞI ENDİKCƏ AVTOMATİK NÖVBƏTİ 20 MƏHSUL
+   ============================================================ */
+
+function initHomeProductsInfiniteScroll() {
+  const button =
+    $('#loadMore');
+
+  if (
+    !button ||
+    homeProductsObserver
+  ) {
+    return;
+  }
+
+  homeProductsObserver =
+    new IntersectionObserver(
+      (entries) => {
+        const entry =
+          entries[0];
+
+        if (
+          !entry?.isIntersecting ||
+          homeProductsLoading ||
+          !homeProductsHaveMore
+        ) {
+          return;
+        }
+
+        if (window.scrollY < 250) {
+          return;
+        }
+
+        loadHomeProducts(false);
+      },
+      {
+        root: null,
+        rootMargin: '450px 0px',
+        threshold: 0.01,
+      }
+    );
+
+  homeProductsObserver.observe(
+    button
+  );
+}
+
+
 
 function renderBanners(rows) {
   const container = $('#bannerGrid');
@@ -381,55 +936,74 @@ function renderCategoryChips() {
   `;
 
   $$('#homeCategoryChips .category-card').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.category = button.dataset.id;
-      state.visible = 15;
+    button.addEventListener('click', async () => {
+      const selectedCategory =
+        button.dataset.id || 'all';
+  
+      if (
+        selectedCategory ===
+        state.category
+      ) {
+        return;
+      }
+  
+      state.category =
+        selectedCategory;
+  
       renderCategoryChips();
-      renderProducts();
+  
+      await loadHomeProducts(true);
     });
   });
 }
 
-function filteredProducts() {
-  return state.products.filter((product) => {
-    
-    const categoryMatch =
-      state.category === 'all' ||
-      (state.category === 'discounts' && Number(product.old_price) > Number(product.price)) ||
-      product.category_id === state.category;
-    
-    const searchMatch = !state.query || product.name.toLowerCase().includes(state.query);
-    return categoryMatch && searchMatch;
-  });
-}
+
 
 function renderProducts() {
-  const container = $('#productsGrid');
+  const container =
+    $('#productsGrid');
+
   if (!container) return;
 
-  const rows = filteredProducts();
-  const visibleRows = rows.slice(0, state.visible);
-
-  container.innerHTML = visibleRows.map(productCard).join('') || `
-    <div class="card">
-      <b>Məhsul tapılmadı</b>
-      <p class="muted">Axtarışı və ya kateqoriyanı dəyişin.</p>
-    </div>
-  `;
+  container.innerHTML =
+    state.products
+      .map(productCard)
+      .join('') ||
+    `
+      <div class="card">
+        <b>Məhsul tapılmadı</b>
+        <p class="muted">
+          Axtarışı və ya kateqoriyanı dəyişin.
+        </p>
+      </div>
+    `;
 
   $$('.add-cart').forEach((button) => {
-    button.addEventListener('click', () => addCart(button.dataset.id));
+    button.addEventListener(
+      'click',
+      () => addCart(
+        button.dataset.id
+      )
+    );
   });
 
   $$('.fav-btn').forEach((button) => {
-    button.addEventListener('click', () => toggleFavorite(button.dataset.id, button));
+    button.addEventListener(
+      'click',
+      () => toggleFavorite(
+        button.dataset.id,
+        button
+      )
+    );
   });
-  
-    bindEditorProductImageButtons(container);
-  
-  const loadMoreButton = $('#loadMore');
-  if (loadMoreButton) loadMoreButton.style.display = rows.length > visibleRows.length ? 'inline-flex' : 'none';
+
+  bindEditorProductImageButtons(
+    container
+  );
+
+  updateHomeLoadMoreButton();
 }
+
 
 
 function bindEditorProductImageButtons(root = document) {
