@@ -49,6 +49,16 @@ let homeProductsRequestToken = 0;
 let homeSearchTimer = null;
 let homeProductsObserver = null;
 
+/* ============================================================
+   MƏHSUL DETALI — OXŞAR MƏHSULLAR 10-LUQ SƏHİFƏLƏMƏ
+   ============================================================ */
+
+const RELATED_PRODUCT_PAGE_SIZE = 10;
+
+let relatedProductsOffset = 0;
+let relatedProductsHaveMore = true;
+let relatedProductsLoading = false;
+
 document.addEventListener('DOMContentLoaded', async () => {
   await initLayout();
 
@@ -1347,32 +1357,334 @@ async function initProduct() {
 
 
 // Məhsul detalının altında eyni kateqoriyadan oxşar məhsullar göstərilir.
+// ============================================================
+// MƏHSUL DETALI — OXŞAR MƏHSULLARI 10-10 GÖSTƏR
+// ============================================================
+
 async function renderRelatedProducts(product) {
   const detail = $('#productDetail');
-  const { data } = await supabase
-    .from('products')
-    .select('*')
-    .eq('status', 'active')
-    .eq('category_id', product.category_id)
-    .neq('id', product.id)
-    .limit(5);
 
-  if (!data?.length) return;
+  if (
+    !detail ||
+    !product?.id ||
+    !product?.category_id
+  ) {
+    return;
+  }
 
+  /*
+    Yeni məhsul detalı açıldıqda əvvəlki səhifələmə
+    məlumatlarını sıfırlayırıq.
+  */
+  relatedProductsOffset = 0;
+  relatedProductsHaveMore = true;
+  relatedProductsLoading = false;
+
+  /*
+    Əvvəl yalnız bölmənin quruluşunu yaradırıq.
+    Məhsullar aşağıdakı funksiya ilə 10-10 əlavə ediləcək.
+  */
   detail.insertAdjacentHTML('beforeend', `
-    <section class="related-products">
-      <div class="section-head"><h2>Oxşar məhsullar</h2></div>
-      <div class="product-grid">${data.map(productCard).join('')}</div>
+    <section
+      id="relatedProductsSection"
+      class="related-products"
+      data-product-id="${product.id}"
+      data-category-id="${product.category_id}"
+    >
+      <div class="section-head">
+        <h2>Oxşar məhsullar</h2>
+      </div>
+
+      <div
+        id="relatedProductsGrid"
+        class="product-grid"
+      ></div>
+
+      <div
+        id="relatedProductsLoadMoreWrap"
+        class="load-more-wrap"
+      >
+        <button
+          id="relatedProductsLoadMore"
+          class="btn btn-soft"
+          type="button"
+        >
+          Daha çox göstər
+        </button>
+      </div>
     </section>
   `);
 
-  $$('.related-products .add-cart').forEach((button) => button.addEventListener('click', () => addCart(button.dataset.id)));
-  $$('.related-products .fav-btn').forEach((button) => button.addEventListener('click', () => toggleFavorite(button.dataset.id, button)));
+  /*
+    İlk 10 məhsulu avtomatik gətiririk.
+    Sonrakılar yalnız düymə ilə gələcək.
+  */
+  await loadRelatedProducts(product);
 
-    bindEditorProductImageButtons(
-    detail.querySelector('.related-products')
+  $('#relatedProductsLoadMore')?.addEventListener(
+    'click',
+    async () => {
+      await loadRelatedProducts(product);
+    }
   );
 }
+
+
+// ============================================================
+// SUPABASE-DƏN NÖVBƏTİ 10 OXŞAR MƏHSULU GƏTİR
+// ============================================================
+
+async function loadRelatedProducts(product) {
+  const section = $('#relatedProductsSection');
+  const grid = $('#relatedProductsGrid');
+  const button = $('#relatedProductsLoadMore');
+  const buttonWrap = $('#relatedProductsLoadMoreWrap');
+
+  if (
+    !section ||
+    !grid ||
+    !product?.category_id ||
+    relatedProductsLoading ||
+    !relatedProductsHaveMore
+  ) {
+    return;
+  }
+
+  relatedProductsLoading = true;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Məhsullar yüklənir...';
+  }
+
+  try {
+    const from = relatedProductsOffset;
+    const to =
+      from +
+      RELATED_PRODUCT_PAGE_SIZE -
+      1;
+
+    /*
+      count: 'exact' vasitəsilə həmin kateqoriyada
+      neçə oxşar məhsulun qaldığını dəqiq bilirik.
+    */
+    const {
+      data,
+      error,
+      count,
+    } = await supabase
+      .from('products')
+      .select(`
+        id,
+        category_id,
+        name,
+        slug,
+        price,
+        old_price,
+        stock_quantity,
+        unit,
+        image_url,
+        short_description,
+        description,
+        is_featured,
+        status,
+        rating_avg,
+        created_at
+      `, {
+        count: 'exact',
+      })
+      .eq('status', 'active')
+      .eq('category_id', product.category_id)
+      .neq('id', product.id)
+      .order('is_featured', {
+        ascending: false,
+      })
+      .order('name', {
+        ascending: true,
+      })
+      .order('id', {
+        ascending: true,
+      })
+      .range(from, to);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = data || [];
+
+    /*
+      Cari gətirilən real məhsul sayı qədər offset artır.
+    */
+    relatedProductsOffset += rows.length;
+
+    /*
+      Bazadakı ümumi oxşar məhsul sayına çatmışıqsa
+      daha çox məhsul yoxdur.
+    */
+    relatedProductsHaveMore =
+      relatedProductsOffset <
+      Number(count || 0);
+
+    /*
+      Səbətə əlavə funksiyası məhsulu state.products içində
+      axtardığı üçün oxşar məhsulları da təhlükəsiz şəkildə
+      həmin siyahıya əlavə edirik.
+    */
+    const existingIds = new Set(
+      state.products.map((item) =>
+        String(item.id)
+      )
+    );
+
+    rows.forEach((item) => {
+      if (!existingIds.has(String(item.id))) {
+        state.products.push(item);
+        existingIds.add(String(item.id));
+      }
+    });
+
+    /*
+      Yeni kartları əvvəlkiləri silmədən gridin sonuna əlavə edirik.
+    */
+    appendRelatedProductCards(
+      grid,
+      rows
+    );
+
+    /*
+      İlk sorğuda heç bir oxşar məhsul yoxdursa
+      bütün bölməni göstərmirik.
+    */
+    if (
+      relatedProductsOffset === 0 &&
+      !rows.length
+    ) {
+      section.remove();
+      return;
+    }
+
+    /*
+      Məhsul qalmayıbsa düyməni gizlədirik.
+    */
+    if (!relatedProductsHaveMore) {
+      if (buttonWrap) {
+        buttonWrap.style.display = 'none';
+      }
+    } else {
+      if (buttonWrap) {
+        buttonWrap.style.display = '';
+      }
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Daha çox göstər';
+      }
+    }
+  } catch (error) {
+    console.error(
+      'Oxşar məhsullar yüklənmədi:',
+      error
+    );
+
+    toast(
+      error?.message ||
+      'Oxşar məhsullar yüklənmədi'
+    );
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Yenidən yoxla';
+    }
+  } finally {
+    relatedProductsLoading = false;
+
+    if (
+      button &&
+      relatedProductsHaveMore &&
+      button.textContent === 'Məhsullar yüklənir...'
+    ) {
+      button.disabled = false;
+      button.textContent = 'Daha çox göstər';
+    }
+  }
+}
+
+
+// ============================================================
+// YENİ GƏLƏN OXŞAR MƏHSUL KARTLARINI SƏHİFƏYƏ ƏLAVƏ ET
+// ============================================================
+
+function appendRelatedProductCards(
+  grid,
+  products
+) {
+  if (
+    !grid ||
+    !products?.length
+  ) {
+    return;
+  }
+
+  /*
+    Müvəqqəti konteynerdə yalnız yeni gələn 10 kartı
+    hazırlayırıq. Beləliklə əvvəlki kartlara ikinci dəfə
+    event listener əlavə edilmir.
+  */
+  const temporaryContainer =
+    document.createElement('div');
+
+  temporaryContainer.innerHTML =
+    products
+      .map(productCard)
+      .join('');
+
+  $$('.add-cart', temporaryContainer).forEach(
+    (button) => {
+      button.addEventListener(
+        'click',
+        () => {
+          addCart(button.dataset.id);
+        }
+      );
+    }
+  );
+
+  $$('.fav-btn', temporaryContainer).forEach(
+    (button) => {
+      button.addEventListener(
+        'click',
+        () => {
+          toggleFavorite(
+            button.dataset.id,
+            button
+          );
+        }
+      );
+    }
+  );
+
+  /*
+    Redaktor icazəsi olan şəxslər üçün yeni kartların
+    şəkil redaktə düyməsini də aktivləşdiririk.
+  */
+  bindEditorProductImageButtons(
+    temporaryContainer
+  );
+
+  const fragment =
+    document.createDocumentFragment();
+
+  while (temporaryContainer.firstChild) {
+    fragment.appendChild(
+      temporaryContainer.firstChild
+    );
+  }
+
+  grid.appendChild(fragment);
+}
+
+
 
 function prepareMarquee(selector, direction) {
   const element = $(selector);
