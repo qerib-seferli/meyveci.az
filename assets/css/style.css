@@ -4530,14 +4530,47 @@ select option {
   }
 
   .catalog-right {
-    min-height: 500px !important;
-    padding: 20px 24px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 620px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    padding: 20px 16px 20px 24px !important;
+    overflow: hidden !important;
+  }
+
+  .catalog-right-title {
+    flex: 0 0 auto;
   }
 
   .catalog-keyword-grid {
-    display: block !important;
-    column-count: 4;
-    column-gap: 22px;
+    min-width: 0;
+    min-height: 0;
+
+    flex: 1 1 auto;
+
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    column-gap: 22px !important;
+    row-gap: 0 !important;
+    align-content: start !important;
+
+    max-height: none !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    padding-right: 10px !important;
+    padding-bottom: 14px !important;
+
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color:
+      rgba(22, 163, 74, 0.62)
+      rgba(220, 252, 231, 0.75);
   }
 
   .catalog-keyword {
@@ -10015,29 +10048,6 @@ body[data-page="home"] .site-footer {
   overflow: hidden;
 }
 
-.catalog-keyword-grid {
-  /*
-    Məhsul sayı çox olduqda menyu səhifədən daşmır.
-    Siyahının öz daxilində aşağı-yuxarı hərəkət edilir.
-  */
-  max-height: calc(100vh - 230px) !important;
-  max-height: calc(100dvh - 230px) !important;
-
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-
-  align-content: start;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-
-  padding-right: 8px;
-  padding-bottom: 12px;
-
-  scrollbar-width: thin;
-  scrollbar-color:
-    rgba(22, 163, 74, 0.55)
-    rgba(220, 252, 231, 0.72);
-}
 
 .catalog-keyword-grid::-webkit-scrollbar {
   width: 8px;
@@ -10068,5 +10078,32 @@ body[data-page="home"] .site-footer {
     max-height: calc(100dvh - 175px) !important;
 
     padding-right: 5px;
+  }
+}
+
+
+/* ============================================================
+   HAMBURGER KATALOQ — SAĞ MƏHSUL SİYAHISI SCROLLBAR
+   ============================================================ */
+
+@media (min-width: 769px) {
+  .catalog-keyword-grid::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  .catalog-keyword-grid::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: rgba(220, 252, 231, 0.75);
+  }
+
+  .catalog-keyword-grid::-webkit-scrollbar-thumb {
+    min-height: 42px;
+    border: 2px solid rgba(220, 252, 231, 0.75);
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.62);
+  }
+
+  .catalog-keyword-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(5, 150, 105, 0.82);
   }
 }
