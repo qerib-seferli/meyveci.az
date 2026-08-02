@@ -10139,3 +10139,36 @@ body[data-page="home"] .site-footer {
 .catalog-left::-webkit-scrollbar-thumb:hover {
   background: rgba(5, 150, 105, 0.82);
 }
+
+
+/* ============================================================
+   HAMBURGER KATALOQ — SAĞ MƏHSUL SAHƏSİNİ GENİŞLƏNDİR
+   ============================================================ */
+
+@media (min-width: 1100px) {
+  .catalog-mega-menu {
+    width: min(1180px, calc(100vw - 70px)) !important;
+    max-width: 1180px !important;
+  }
+
+  .catalog-left {
+    width: 280px !important;
+    flex: 0 0 280px !important;
+  }
+
+  .catalog-right {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .catalog-keyword-grid {
+    grid-template-columns: repeat(4, minmax(170px, 1fr)) !important;
+    column-gap: 28px !important;
+  }
+
+  .catalog-keyword {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
