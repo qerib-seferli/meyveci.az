@@ -847,99 +847,262 @@ async function initCatalogMegaMenu() {
     document.body.appendChild(menu);
   }
 
-  const [{ data: categories }, { data: products }] = await Promise.all([
-    supabase
-      .from('categories')
-      .select('id,name,image_url,slug,sort_order')
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(60),
+const [
+  { data: categories, error: categoriesError },
+  { data: discountRows, error: discountError },
+] = await Promise.all([
+  supabase
+    .from('categories')
+    .select(`
+      id,
+      name,
+      image_url,
+      slug,
+      sort_order
+    `)
+    .eq('is_active', true)
+    .order('sort_order')
+    .limit(80),
 
+  /*
+    Bu sorğu yalnız hamburgerdə maksimum endirim faizini
+    hesablamaq üçündür. Məhsul adları ayrıca kateqoriyaya
+    vurulduqda gələcək.
+  */
   supabase
     .from('products')
-    .select('id,name,category_id,image_url,status,price,old_price')
+    .select('price,old_price')
     .eq('status', 'active')
-    .order('name')
-    .limit(300),
-    
-  ]);
+    .not('old_price', 'is', null)
+    .limit(5000),
+]);
 
-  const cats = categories || [];
-  const prods = products || [];
+if (categoriesError) {
+  console.warn(
+    'Hamburger kateqoriyaları yüklənmədi:',
+    categoriesError.message
+  );
+}
+
+if (discountError) {
+  console.warn(
+    'Endirim məlumatı yüklənmədi:',
+    discountError.message
+  );
+}
+
+const cats =
+  categories || [];
+
+const discountProducts =
+  (discountRows || []).filter(
+    (product) =>
+      Number(product.old_price) >
+      Number(product.price)
+  );
+
+/*
+  Açılmış kateqoriyanın məhsullarını yadda saxlayır.
+  Eyni kateqoriyaya ikinci dəfə vuranda yenidən sorğu getmir.
+*/
+const categoryProductsCache =
+  new Map();
 
   const left = $('#catalogLeft');
   const right = $('#catalogRight');
 
-  function productKeywords(categoryId) {
-    const names = prods
-      .filter((p) => p.category_id === categoryId)
-      .map((p) => String(p.name || '').trim())
-      .filter(Boolean);
 
-    const words = [];
+  async function loadMenuCategoryProducts(
+  categoryId
+) {
+  const cacheKey =
+    String(categoryId);
 
-    names.forEach((name) => {
-      const firstWord = name.split(' ')[0];
-      if (firstWord && firstWord.length > 2) words.push(firstWord);
-      words.push(name);
-    });
-
-    return [...new Set(words)].slice(0, 18);
+  if (
+    categoryProductsCache.has(cacheKey)
+  ) {
+    return categoryProductsCache.get(
+      cacheKey
+    );
   }
 
-  function openCategory(category) {
-    const keywords = productKeywords(category.id);
+  const { data, error } =
+    await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        category_id
+      `)
+      .eq('status', 'active')
+      .eq('category_id', categoryId)
+      .order('name', {
+        ascending: true,
+      })
+      .limit(60);
 
-    right.innerHTML = `
-      <div class="catalog-mobile-head">
-        <button id="catalogBackBtn" type="button">←</button>
-        <b>${category.name}</b>
-      </div>
+  if (error) {
+    console.warn(
+      'Hamburger məhsulları yüklənmədi:',
+      error.message
+    );
 
-      <div class="catalog-right-title">
-        <img src="${category.image_url || `${root}assets/img/logo/Cilek-logo.png`}" alt="${category.name}">
-        <div>
-          <b>${category.name}</b>
-          <span>Məhsul adına görə sürətli filter</span>
-        </div>
-      </div>
-
-      <div class="catalog-keyword-grid">
-        ${keywords.map((word) => `
-          <button class="catalog-keyword" type="button" data-cat="${category.id}" data-word="${escapeAttr(word)}">
-            ${word}
-          </button>
-        `).join('') || '<span class="muted">Bu kateqoriyada məhsul yoxdur.</span>'}
-      </div>
-    `;
-
-    $$('.catalog-keyword').forEach((item) => {
-      item.addEventListener('click', () => {
-        applyCatalogFilter(item.dataset.cat, item.dataset.word);
-      });
-    });
-
-    $('#catalogBackBtn')?.addEventListener('click', () => {
-      menu.classList.remove('show-products');
-    });
-
-    $('#catalogCloseBtn')?.addEventListener('click', () => {
-      menu.classList.remove('show');
-      menu.classList.remove('show-products');
-    });
-    
-    menu.classList.add('show-products');
+    return [];
   }
 
+  const products =
+    data || [];
 
-  const discountedProducts = prods.filter((product) =>
-    Number(product.old_price) > Number(product.price)
+  categoryProductsCache.set(
+    cacheKey,
+    products
   );
+
+  return products;
+}
+
+
+async function openCategory(category) {
+  right.innerHTML = `
+    <div class="catalog-mobile-head">
+      <button
+        id="catalogBackBtn"
+        type="button"
+      >
+        ←
+      </button>
+
+      <b>${escapeAttr(category.name)}</b>
+    </div>
+
+    <div class="catalog-right-title">
+      <img
+        src="${
+          category.image_url ||
+          `${root}assets/img/logo/Cilek-logo.png`
+        }"
+        alt="${escapeAttr(category.name)}"
+      >
+
+      <div>
+        <b>${escapeAttr(category.name)}</b>
+        <span>
+          Məhsul adına görə sürətli filtr
+        </span>
+      </div>
+    </div>
+
+    <div class="catalog-keyword-grid">
+      <span class="muted">
+        Məhsullar yüklənir...
+      </span>
+    </div>
+  `;
+
+  $('#catalogBackBtn')?.addEventListener(
+    'click',
+    () => {
+      menu.classList.remove(
+        'show-products'
+      );
+    }
+  );
+
+  $('#catalogCloseBtn')?.addEventListener(
+    'click',
+    () => {
+      menu.classList.remove('show');
+      menu.classList.remove(
+        'show-products'
+      );
+    }
+  );
+
+  menu.classList.add(
+    'show-products'
+  );
+
+  const products =
+    await loadMenuCategoryProducts(
+      category.id
+    );
+
+  /*
+    Yalnız bazadakı tam məhsul adları göstərilir.
+    Acı, Adi kimi süni ilk sözlər yaradılmır.
+  */
+  const names = [
+    ...new Set(
+      products
+        .map((product) =>
+          String(product.name || '').trim()
+        )
+        .filter(Boolean)
+    ),
+  ];
+
+  const keywordGrid =
+    right.querySelector(
+      '.catalog-keyword-grid'
+    );
+
+  if (!keywordGrid) return;
+
+  keywordGrid.innerHTML =
+    names.length
+      ? names.map((name) => `
+          <button
+            class="catalog-keyword"
+            type="button"
+            data-cat="${category.id}"
+            data-word="${escapeAttr(name)}"
+          >
+            ${escapeAttr(name)}
+          </button>
+        `).join('')
+      : `
+          <span class="muted">
+            Bu kateqoriyada məhsul yoxdur.
+          </span>
+        `;
+
+  $$('.catalog-keyword', right).forEach(
+    (item) => {
+      item.addEventListener(
+        'click',
+        () => {
+          applyCatalogFilter(
+            item.dataset.cat,
+            item.dataset.word
+          );
+        }
+      );
+    }
+  );
+}
   
-  const maxDiscount = discountedProducts.length
-    ? Math.max(...discountedProducts.map((product) =>
-        Math.round(((Number(product.old_price) - Number(product.price)) / Number(product.old_price)) * 100)
-      ))
+
+// Köhnə endirim hesablamasını
+//  const discountedProducts = prods.filter((product) =>
+//    Number(product.old_price) > Number(product.price)
+// );
+  
+const maxDiscount =
+  discountProducts.length
+    ? Math.max(
+        ...discountProducts.map(
+          (product) =>
+            Math.round(
+              (
+                (
+                  Number(product.old_price) -
+                  Number(product.price)
+                ) /
+                Number(product.old_price)
+              ) * 100
+            )
+        )
+      )
     : 0;
 
   
