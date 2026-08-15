@@ -68,21 +68,46 @@
           </div>
         </div>
 
-      <form id="productForm" class="form-grid">
+      <form id="productForm" class="form-grid catalog-product-form">
         <input type="hidden" name="id">
+
         <input name="name" placeholder="Məhsul adı" required>
         <input name="slug" placeholder="Slug">
+
         <select id="productCategory" name="category_id"></select>
-        <input name="price" type="number" step="0.01" placeholder="Qiymət">
-        <input name="old_price" type="number" step="0.01" placeholder="Köhnə qiymət">
-        <input name="stock_quantity" type="number" step="0.001" min="0" placeholder="Stok">
-        <input name="unit" placeholder="Ölçü vahidi">
-        <input name="image_url" placeholder="Şəkil linki">
-        <label class="gallery-field">🖼️ Qalereyadan məhsul şəkli seç <input id="productImage" type="file" accept="image/*"></label>
-        <select name="status"><option value="active">Aktiv</option><option value="inactive">Passiv</option></select>
-        <label class="gallery-field"><input type="checkbox" name="is_featured"> ⭐ Seçilmiş məhsul</label>
+
+        <div class="catalog-price-grid">
+          <input name="price" type="number" step="0.01" placeholder="Qiymət">
+          <input name="old_price" type="number" step="0.01" placeholder="Köhnə qiymət">
+          <input name="stock_quantity" type="number" step="0.001" min="0" placeholder="Stok">
+          <input name="unit" placeholder="Ölçü vahidi">
+        </div>
+
+        <input name="one_c_name" placeholder="1C-də olan məhsul adı">
+        <input name="sku" placeholder="SKU (Barkod)" inputmode="numeric" autocomplete="off">
+
+        <div class="catalog-media-row full">
+          <input name="image_url" placeholder="Şəkil linki">
+
+          <label class="gallery-field catalog-gallery-field">
+            🖼️ Qalereyadan məhsul şəkli seç
+            <input id="productImage" type="file" accept="image/*">
+          </label>
+
+          <select name="status">
+            <option value="active">Aktiv</option>
+            <option value="inactive">Passiv</option>
+          </select>
+
+          <label class="gallery-field catalog-featured-field">
+            <input type="checkbox" name="is_featured">
+            ⭐ Seçilmiş məhsul
+          </label>
+        </div>
+
         <textarea class="full" name="short_description" placeholder="Qısa açıqlama"></textarea>
         <textarea class="full" name="description" placeholder="Ətraflı açıqlama"></textarea>
+
         <button class="btn btn-primary">Saxla</button>
         <button id="newProduct" type="button" class="btn btn-soft">Yeni məhsul</button>
       </form>
