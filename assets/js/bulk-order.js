@@ -756,6 +756,12 @@ function renderProducts() {
       </div>
     `;
 
+    $$('.bulk-product-img').forEach((imageBox) => {
+      imageBox.addEventListener('click', () => {
+        openBulkProductImage(imageBox.dataset.image);
+      });
+    });
+  
   $$('.bulk-add').forEach((button) => {
     button.addEventListener(
       'click',
@@ -805,7 +811,14 @@ function productCard(product) {
 
   return `
     <article class="bulk-product-card ${hasDiscount ? 'bulk-discount-card' : ''} ${qty > 0 ? 'selected' : ''}">
-      <div class="bulk-product-img">
+      
+      <div
+        class="bulk-product-img"
+        data-image="${product.image_url || PLACEHOLDER}"
+        role="button"
+        aria-label="Məhsul şəklini böyüt"
+      >
+
         <img loading="lazy" src="${product.image_url || PLACEHOLDER}" alt="${safeText(product.name)}">
         ${hasDiscount ? `<span class="bulk-discount-badge">-${discount}%</span>` : ''}
       </div>
@@ -840,6 +853,66 @@ function productCard(product) {
     </article>
   `;
 }
+
+
+function openBulkProductImage(imageUrl) {
+  document.querySelector('.bulk-image-modal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'bulk-image-modal';
+
+  modal.innerHTML = `
+    <div class="bulk-image-modal-content">
+      <img
+        class="bulk-image-modal-logo"
+        src="./assets/img/logo/Meyveci-logo.png"
+        alt="Meyvəçi"
+      >
+
+      <img
+        class="bulk-image-modal-product"
+        src="${imageUrl || PLACEHOLDER}"
+        alt="Məhsul"
+      >
+
+      <button
+        class="bulk-image-modal-close"
+        type="button"
+        aria-label="Bağla"
+      >
+        ×
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.classList.add('bulk-modal-open');
+
+  const closeModal = () => {
+    modal.remove();
+    document.body.classList.remove('bulk-modal-open');
+  };
+
+  modal
+    .querySelector('.bulk-image-modal-close')
+    ?.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  const onKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', onKeyDown);
+    }
+  };
+
+  document.addEventListener('keydown', onKeyDown);
+}
+
 
 function renderSelected() {
   const list = $('#bulkSelectedList');
