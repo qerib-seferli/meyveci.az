@@ -1257,6 +1257,29 @@ async function loadProducts(reset = true) {
     { loading: true }
   );
 
+  let categoryIds = [];
+
+  if (search) {
+    const {
+      data: matchedCategories,
+      error: categorySearchError,
+    } = await supabase
+      .from('categories')
+      .select('id')
+      .ilike('name', `%${search}%`)
+      .limit(100);
+
+    if (categorySearchError) {
+      console.warn(
+        'Kateqoriya üzrə məhsul axtarışı alınmadı:',
+        categorySearchError
+      );
+    } else {
+      categoryIds = (matchedCategories || [])
+        .map((category) => category.id);
+    }
+  }
+
   let query = supabase
     .from('products')
     .select('*,categories(name)')
@@ -1266,14 +1289,44 @@ async function loadProducts(reset = true) {
     .range(from, to);
 
   /*
-    Axtarış artıq brauzerdə 5000 məhsul içində deyil,
-    birbaşa Supabase-də aparılır.
+    Məhsul axtarışı bütün əsas məlumatlara görə aparılır.
   */
   if (search) {
-    query = query.ilike(
-      'name',
-      `%${search}%`
+    const safeSearch = search
+      .replace(/[,%()]/g, ' ')
+      .trim();
+
+    const filters = [
+      `name.ilike.%${safeSearch}%`,
+      `slug.ilike.%${safeSearch}%`,
+      `one_c_name.ilike.%${safeSearch}%`,
+      `sku.ilike.%${safeSearch}%`,
+      `unit.ilike.%${safeSearch}%`,
+      `image_url.ilike.%${safeSearch}%`,
+      `short_description.ilike.%${safeSearch}%`,
+      `description.ilike.%${safeSearch}%`,
+      `status.ilike.%${safeSearch}%`,
+    ];
+
+    const numericSearch = Number(
+      search.replace(',', '.')
     );
+
+    if (Number.isFinite(numericSearch)) {
+      filters.push(
+        `price.eq.${numericSearch}`,
+        `old_price.eq.${numericSearch}`,
+        `stock_quantity.eq.${numericSearch}`
+      );
+    }
+
+    if (categoryIds.length) {
+      filters.push(
+        `category_id.in.(${categoryIds.join(',')})`
+      );
+    }
+
+    query = query.or(filters.join(','));
   }
 
   const { data, error } =
@@ -1349,9 +1402,20 @@ async function loadProducts(reset = true) {
       <td>
         <b>${esc(product.name)}</b>
 
-        <small class="muted">
-          ${esc(product.short_description || '')}
-        </small>
+          <small class="muted">
+            ${esc(product.short_description || '')}
+          </small>
+  
+          ${(product.one_c_name || product.sku)
+            ? `
+              <small class="muted">
+                1C: ${esc(product.one_c_name || '—')}
+                ·
+                SKU: ${esc(product.sku || '—')}
+              </small>
+            `
+            : ''
+          }
       </td>
 
       <td>
@@ -1640,15 +1704,22 @@ async function saveProduct(event) {
       category_id: data.category_id || null,
       name: data.name,
       slug: data.slug || slugify(data.name),
+
+      one_c_name: data.one_c_name?.trim() || null,
+      sku: data.sku?.trim() || null,
+
       price: Number(data.price || 0),
       old_price: data.old_price ? Number(data.old_price) : null,
       stock_quantity: Number(data.stock_quantity || 0),
       unit: data.unit || 'ədəd',
+
       image_url: imageUrl,
       short_description: data.short_description,
       description: data.description,
+
       is_featured: data.is_featured === 'on',
       status: data.status || 'active',
+
       updated_at: new Date().toISOString(),
     };
 
