@@ -4767,28 +4767,51 @@ async function exportProductsToExcel() {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        sku,
-        name,
-        slug,
-        price,
-        old_price,
-        stock_quantity,
-        unit,
-        one_c_name,
-        categories(name)
-      `)
-      .order('created_at', { ascending: false })
-      .limit(5000);
+    const allProducts = [];
+    const pageSize = 1000;
+    let from = 0;
 
-    if (error) {
-      toast(error.message);
+    while (true) {
+      const to = from + pageSize - 1;
+
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          sku,
+          name,
+          slug,
+          price,
+          old_price,
+          stock_quantity,
+          unit,
+          one_c_name,
+          categories(name)
+        `)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        toast(error.message);
+        return;
+      }
+
+      const batch = data || [];
+
+      allProducts.push(...batch);
+
+      if (batch.length < pageSize) {
+        break;
+      }
+
+      from += pageSize;
+    }
+
+    if (!allProducts.length) {
+      toast('Bazadan məhsul tapılmadı');
       return;
     }
 
-    const rows = (data || []).map((product) => ({
+    const rows = allProducts.map((product) => ({
       'SKU': product.sku || '',
       'Məhsul adı': product.name || '',
       'Slug': product.slug || '',
@@ -4815,16 +4838,24 @@ async function exportProductsToExcel() {
     ];
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Mehsullar');
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Mehsullar'
+    );
 
     XLSX.writeFile(
       workbook,
-      `meyveci-baza-mehsullari-${new Date().toISOString().slice(0, 10)}.xlsx`
+      `meyveci-baza-mehsullari-${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`
     );
 
-    toast('Məhsullar Excelə çıxarıldı');
+    toast(`${allProducts.length} məhsul Excelə çıxarıldı`);
   } catch (error) {
-    toast(error.message);
+    console.error('Excel export xətası:', error);
+    toast(error.message || 'Excel çıxarılarkən xəta baş verdi');
   }
 }
 
