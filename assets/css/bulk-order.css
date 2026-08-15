@@ -2686,3 +2686,131 @@
   */
   scroll-margin-top: 85px;
 }
+
+
+/* ============================================================
+   TOPLU SİFARİŞ — MƏHSUL ŞƏKLİNİ BÖYÜT
+   ============================================================ */
+
+.bulk-product-img {
+  cursor: zoom-in;
+}
+
+.bulk-modal-open {
+  overflow: hidden;
+}
+
+.bulk-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(4, 18, 12, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: bulkModalFade .2s ease;
+}
+
+.bulk-image-modal-content {
+  width: min(92vw, 620px);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.bulk-image-modal-logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(210px, 48vw);
+  max-height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, .18));
+}
+
+.bulk-image-modal-product {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(64vh, 620px);
+  object-fit: contain;
+  border-radius: 22px;
+  filter: drop-shadow(0 20px 45px rgba(0, 0, 0, .28));
+}
+
+.bulk-image-modal-close {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid #ff3030;
+  border-radius: 50%;
+  background: rgba(35, 0, 0, .72);
+  color: #fff;
+  font-size: 36px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 0 10px rgba(255, 35, 35, .9),
+    0 0 25px rgba(255, 35, 35, .55),
+    inset 0 0 12px rgba(255, 35, 35, .25);
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.bulk-image-modal-close:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 14px rgba(255, 35, 35, 1),
+    0 0 35px rgba(255, 35, 35, .75),
+    inset 0 0 14px rgba(255, 35, 35, .3);
+}
+
+@keyframes bulkModalFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .bulk-image-modal {
+    padding: 16px;
+  }
+
+  .bulk-image-modal-content {
+    gap: 15px;
+  }
+
+  .bulk-image-modal-logo {
+    max-width: 170px;
+    max-height: 72px;
+  }
+
+  .bulk-image-modal-product {
+    max-height: 62vh;
+    border-radius: 18px;
+  }
+
+  .bulk-image-modal-close {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+    font-size: 33px;
+  }
+}
