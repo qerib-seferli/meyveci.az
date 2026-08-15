@@ -2855,3 +2855,74 @@ th {
     transform: rotate(360deg);
   }
 }
+
+
+/* ============================================================
+   KATALOQ — MƏHSUL FORMU KOMPAKT DÜZÜLÜŞ
+   Yalnız admin/catalog.html məhsul formasına təsir edir.
+   ============================================================ */
+
+.catalog-product-form .catalog-price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.catalog-product-form .catalog-media-row {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.45fr)
+    minmax(190px, 1fr)
+    minmax(120px, .6fr)
+    minmax(180px, .9fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.catalog-product-form .catalog-media-row > input,
+.catalog-product-form .catalog-media-row > select,
+.catalog-product-form .catalog-media-row > .gallery-field {
+  min-width: 0;
+  min-height: 42px;
+}
+
+.catalog-product-form .catalog-gallery-field,
+.catalog-product-form .catalog-featured-field {
+  border-radius: 14px;
+  padding: 0 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.catalog-product-form textarea {
+  min-height: 86px;
+}
+
+@media (max-width: 1050px) {
+  .catalog-product-form .catalog-price-grid,
+  .catalog-product-form .catalog-media-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .catalog-product-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .catalog-product-form .catalog-price-grid,
+  .catalog-product-form .catalog-media-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-column: 1 / -1;
+  }
+
+  .catalog-product-form > input[name="one_c_name"],
+  .catalog-product-form > input[name="sku"] {
+    grid-column: 1 / -1;
+  }
+
+  .catalog-product-form .catalog-gallery-field,
+  .catalog-product-form .catalog-featured-field {
+    white-space: normal;
+  }
+}
