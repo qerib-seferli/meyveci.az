@@ -1159,7 +1159,6 @@ function productCard(product) {
           <label class="quality-badge editor-status-control" title="Məhsulu aktiv və ya passiv et">
             <input class="editor-product-status-toggle" type="checkbox" data-id="${product.id}" ${product.status === 'active' ? 'checked' : ''}>
             <span class="editor-status-slider"></span>
-            <b class="editor-status-text">${product.status === 'active' ? 'Aktiv' : 'Passiv'}</b>
           </label>
           <span class="editor-product-stamp ${product.status === 'inactive' ? 'show' : ''}">MƏHSUL YOXDUR</span>
         ` : `
@@ -1331,7 +1330,6 @@ async function initProduct() {
           <label class="quality-badge detail-quality-badge editor-status-control" title="Məhsulu aktiv və ya passiv et">
             <input class="editor-product-status-toggle" type="checkbox" data-id="${product.id}" ${product.status === 'active' ? 'checked' : ''}>
             <span class="editor-status-slider"></span>
-            <b class="editor-status-text">${product.status === 'active' ? 'Aktiv' : 'Passiv'}</b>
           </label>
           <span class="editor-product-stamp detail-editor-product-stamp ${product.status === 'inactive' ? 'show' : ''}">MƏHSUL YOXDUR</span>
         ` : `
