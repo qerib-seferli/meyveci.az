@@ -534,6 +534,91 @@ async function loadDashboardKpis() {
   `;
 }
 
+function adminOrderStageMeta(status) {
+  const map = {
+    paid_hold: { label: 'Ödəniş alındı', icon: '💳' },
+    ready_to_confirm: { label: 'Təsdiq gözləyir', icon: '⏳' },
+    confirmed: { label: 'Təsdiqləndi', icon: '✅' },
+    preparing: { label: 'Hazırlanır', icon: '🥝' },
+    ready_for_courier: { label: 'Kuryerə hazır', icon: '📦' },
+    on_the_way: { label: 'Yoldadır', icon: '🚚' },
+    courier_near: { label: 'Yaxındadır', icon: '📍' },
+    delivered: { label: 'Təhvil verildi', icon: '🎉' },
+    cancelled: { label: 'Ləğv edildi', icon: '❌' },
+    refunded: { label: 'Geri ödənildi', icon: '↩️' },
+  };
+  return map[status] || { label: statusAz(status), icon: '•' };
+}
+
+function compactStageDuration(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return '—';
+  const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  if (days) return `${days} gün ${hours} saat`;
+  if (hours) return `${hours} saat ${minutes} dəq`;
+  return `${minutes} dəq`;
+}
+
+function recentOrderTimelineHtml(order, history = [], profilesMap = new Map()) {
+  const ordered = [...history].sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
+  const points = [{
+    status: 'paid_hold',
+    at: order.created_at,
+    actor: 'Sistem',
+  }];
+
+  ordered.forEach((item) => {
+    if (!item?.to_status || !item?.changed_at) return;
+    const actorProfile = profilesMap.get(item.changed_by) || {};
+    const actor = item.changed_by
+      ? `${actorProfile.first_name || ''} ${actorProfile.last_name || ''}`.trim() || actorProfile.email || 'Əməkdaş'
+      : 'Sistem';
+    const previous = points[points.length - 1];
+    if (previous?.status === item.to_status) {
+      previous.at = item.changed_at;
+      previous.actor = actor;
+      return;
+    }
+    points.push({ status: item.to_status, at: item.changed_at, actor });
+  });
+
+  if (order.status && !points.some((point) => point.status === order.status)) {
+    points.push({ status: order.status, at: null, actor: '—' });
+  }
+
+  return `
+    <div class="recent-order-timeline">
+      <div class="recent-order-timeline-head">
+        <b>📊 Sifarişin iş axını</b>
+        <span>${history.length ? 'Real mərhələ tarixçəsi' : 'Tarixçə bu andan etibarən toplanacaq'}</span>
+      </div>
+      <div class="recent-order-stage-list">
+        ${points.map((point, index) => {
+          const meta = adminOrderStageMeta(point.status);
+          const next = points[index + 1];
+          const isCurrent = index === points.length - 1 && !['delivered', 'cancelled', 'refunded'].includes(point.status);
+          const duration = point.at
+            ? compactStageDuration((next?.at ? new Date(next.at).getTime() : Date.now()) - new Date(point.at).getTime())
+            : '—';
+          return `
+            <div class="recent-order-stage ${isCurrent ? 'is-current' : ''} ${['cancelled', 'refunded'].includes(point.status) ? 'is-problem' : ''}">
+              <span class="recent-order-stage-icon">${meta.icon}</span>
+              <div class="recent-order-stage-body">
+                <b>${esc(meta.label)}</b>
+                <small>${point.at ? formatDate(point.at) : 'Vaxt qeydə alınmayıb'}</small>
+                <small class="recent-order-stage-actor">👤 ${esc(point.actor || 'Sistem')}</small>
+              </div>
+              <span class="recent-order-stage-duration">${isCurrent ? '⏱ davam edir' : `⏱ ${duration}`}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
 async function loadRecentOrders() {
   const box = $('#recentOrders');
   if (!box) return;
@@ -561,6 +646,24 @@ async function loadRecentOrders() {
 
   const profilesMap = new Map((profilesData || []).map((profile) => [profile.id, profile]));
   const rows = ordersData || [];
+
+  const historyMap = new Map();
+  if (rows.length) {
+    const { data: historyData, error: historyError } = await supabase
+      .from('order_status_history')
+      .select('order_id,from_status,to_status,changed_at,changed_by')
+      .in('order_id', rows.map((order) => order.id))
+      .order('changed_at', { ascending: true });
+
+    if (historyError) {
+      console.warn('Sifariş mərhələ tarixçəsi alına bilmədi:', historyError);
+    } else {
+      (historyData || []).forEach((item) => {
+        if (!historyMap.has(item.order_id)) historyMap.set(item.order_id, []);
+        historyMap.get(item.order_id).push(item);
+      });
+    }
+  }
 
   box.innerHTML = rows.length ? `
     <div class="recent-orders-table-wrap">
@@ -633,6 +736,11 @@ async function loadRecentOrders() {
                 </td>
                 <td><b>${money(order.total_amount)}</b></td>
                 <td>${formatDate(order.created_at)}</td>
+              </tr>
+              <tr class="recent-order-timeline-row">
+                <td colspan="8">
+                  ${recentOrderTimelineHtml(order, historyMap.get(order.id) || [], profilesMap)}
+                </td>
               </tr>
             `;
           }).join('')}
