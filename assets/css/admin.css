@@ -2926,3 +2926,103 @@ th {
     white-space: normal;
   }
 }
+
+
+/* ============================================================
+   KATALOQ — AKTİV / PASSİV MƏHSULLAR PANELİ
+   ============================================================ */
+.inactive-products-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 320px);
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+
+.inactive-products-toolbar .admin-search {
+  width: 100%;
+  max-width: none;
+}
+
+.inactive-products-table th,
+.inactive-products-table td {
+  vertical-align: middle;
+}
+
+.inactive-status-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+}
+
+.inactive-status-label {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.inactive-sku {
+  font-size: 12px;
+  color: #065f46;
+  background: #ecfdf5;
+  border-radius: 8px;
+  padding: 4px 7px;
+}
+
+.inactive-products-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: 14px;
+}
+
+.recent-orders-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(16, 185, 129, .14);
+  border-radius: 16px;
+}
+
+.recent-orders-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+  background: rgba(255,255,255,.72);
+}
+
+.recent-orders-table th,
+.recent-orders-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid rgba(16, 185, 129, .12);
+  text-align: left;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.recent-orders-table th {
+  color: #065f46;
+  background: rgba(220,252,231,.72);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.recent-orders-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.recent-order-code {
+  color: #047857;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.recent-payment-method {
+  display: block;
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .inactive-products-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

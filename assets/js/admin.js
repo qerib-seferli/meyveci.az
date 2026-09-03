@@ -49,6 +49,12 @@ let productSearchTimer = null;
 let productRequestToken = 0;
 let productCategoriesLoaded = false;
 
+const INACTIVE_PRODUCT_PAGE_SIZE = 50;
+let inactiveProductOffset = 0;
+let inactiveProductHasMore = true;
+let inactiveProductLoading = false;
+let inactiveProductSearchTimer = null;
+
 
 const AZ_CITY_REGIONS = [
   'Abşeron','Ağcabədi','Ağdam','Ağdaş','Ağdərə','Ağstafa','Ağsu','Alabaşlı','Astara','Babək','Bakı',
@@ -497,54 +503,110 @@ async function dashboard() {
   });
 }
 
+const ADMIN_PAID_STATUSES = ['paid', 'approved'];
+
 async function loadDashboardKpis() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [products, orders, users, couriers, pendingPay, todayOrders, revenue] = await Promise.all([
+  const [products, orders, users, couriers, successfulPayments, todayOrders, paidOrders] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }),
-    supabase.from('orders').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).in('payment_status', ADMIN_PAID_STATUSES),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('couriers').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('orders').select('id', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
-    supabase.from('orders').select('total_amount').eq('status', 'delivered'),
+    supabase.from('payments').select('id', { count: 'exact', head: true }).in('status', ADMIN_PAID_STATUSES),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).in('payment_status', ADMIN_PAID_STATUSES).gte('created_at', today.toISOString()),
+    supabase.from('orders').select('total_amount').in('payment_status', ADMIN_PAID_STATUSES),
   ]);
 
-  const totalRevenue = (revenue.data || []).reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
+  const totalRevenue = (paidOrders.data || []).reduce(
+    (sum, item) => sum + Number(item.total_amount || 0),
+    0
+  );
 
   $('#kpis').innerHTML = `
     <div class="pro-kpi"><span>Ümumi məhsul</span><strong>${products.count || 0}</strong><small>Kataloq bazası</small></div>
-    <div class="pro-kpi"><span>Ümumi sifariş</span><strong>${orders.count || 0}</strong><small>Bütün tarix</small></div>
-    <div class="pro-kpi"><span>Bugünkü sifariş</span><strong>${todayOrders.count || 0}</strong><small>Canlı satış</small></div>
+    <div class="pro-kpi"><span>Ümumi sifariş</span><strong>${orders.count || 0}</strong><small>Yalnız ödənilmiş sifarişlər</small></div>
+    <div class="pro-kpi"><span>Bugünkü sifariş</span><strong>${todayOrders.count || 0}</strong><small>Bu gün ödənilmiş</small></div>
     <div class="pro-kpi"><span>İstifadəçi</span><strong>${users.count || 0}</strong><small>Müştəri bazası</small></div>
     <div class="pro-kpi"><span>Aktiv kuryer</span><strong>${couriers.count || 0}</strong><small>Çatdırılma komandası</small></div>
-    <div class="pro-kpi"><span>Gözləyən ödəniş</span><strong>${pendingPay.count || 0}</strong><small>${money(totalRevenue)} dövriyyə</small></div>
+    <div class="pro-kpi"><span>Təsdiqlənmiş ödəniş</span><strong>${successfulPayments.count || 0}</strong><small>${money(totalRevenue)} real dövriyyə</small></div>
   `;
 }
 
 async function loadRecentOrders() {
-  const { data } = await supabase
+  const box = $('#recentOrders');
+  if (!box) return;
+
+  const { data, error } = await supabase
     .from('orders')
-    .select('*')
+    .select('id,user_id,order_code,full_name,phone,city_region,address_text,apartment,door_code,lat,lng,payment_method,payment_status,total_amount,created_at,status')
+    .in('payment_status', ADMIN_PAID_STATUSES)
     .order('created_at', { ascending: false })
     .limit(8);
 
-  $('#recentOrders').innerHTML = (data || []).map((order) => `
-    <div class="pro-order-card">
-      <div class="pro-cell-main">
-        <span>
-          <b>${esc(order.order_code || order.id)}</b>
-          <small>${formatDate(order.created_at)} • ${money(order.total_amount)}</small>
-        </span>
-      </div>
-      <div class="action-row">
-        ${statusBadge(order.status)}
-        ${payBadge(order.payment_status)}
-        <a class="btn btn-soft btn-mini" href="orders.html?code=${encodeURIComponent(order.order_code || '')}">Aç</a>
-      </div>
+  if (error) {
+    box.innerHTML = `<span class="muted">${esc(error.message)}</span>`;
+    return;
+  }
+
+  const rows = data || [];
+
+  box.innerHTML = rows.length ? `
+    <div class="recent-orders-table-wrap">
+      <table class="recent-orders-table">
+        <thead>
+          <tr>
+            <th>Ad / Soyad</th>
+            <th>Telefon</th>
+            <th>Sifariş kodu</th>
+            <th>Çatdırılma ünvanı</th>
+            <th>Konum</th>
+            <th>Ödəniş</th>
+            <th>Məbləğ</th>
+            <th>Sifariş tarixi</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((order) => {
+            const address = [
+              order.city_region,
+              order.address_text,
+              order.apartment ? `Mənzil/ünvan: ${order.apartment}` : '',
+              order.door_code ? `Qapı kodu: ${order.door_code}` : '',
+            ].filter(Boolean).join(', ');
+
+            const lat = Number(order.lat);
+            const lng = Number(order.lng);
+            const hasLocation = Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0;
+            const googleMapsUrl = hasLocation
+              ? `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`
+              : '';
+
+            return `
+              <tr>
+                <td><b>${esc(order.full_name || '—')}</b></td>
+                <td>${esc(order.phone || '—')}</td>
+                <td><a class="recent-order-code" href="orders.html?code=${encodeURIComponent(order.order_code || '')}">${esc(order.order_code || order.id)}</a></td>
+                <td>${esc(address || 'Ünvan qeyd edilməyib')}</td>
+                <td>
+                  ${hasLocation
+                    ? `<a class="btn btn-soft btn-mini" href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer">📍 Konumu aç</a>`
+                    : '<span class="muted">Seçilməyib</span>'}
+                </td>
+                <td>
+                  ${payBadge(order.payment_status)}
+                  <small class="muted recent-payment-method">${esc(methodAz(order.payment_method))}</small>
+                </td>
+                <td><b>${money(order.total_amount)}</b></td>
+                <td>${formatDate(order.created_at)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
     </div>
-  `).join('') || '<span class="muted">Sifariş yoxdur.</span>';
+  ` : '<span class="muted">Ödənilmiş sifariş yoxdur.</span>';
 }
 
 
@@ -899,6 +961,8 @@ async function catalog() {
   await loadProductCategoryOptions();
   await loadProducts(true);
   await loadDiscountCards(true);
+  await loadInactiveProductCategoryOptions();
+  await loadInactiveProducts(true);
 
   initProductsInfiniteScroll();
   initDiscountCardsInfiniteScroll();
@@ -975,7 +1039,16 @@ async function catalog() {
     'click',
     printSelectedDiscountCards
   );
+
+  $('#inactiveProductSearch')?.addEventListener('input', () => {
+    clearTimeout(inactiveProductSearchTimer);
+    inactiveProductSearchTimer = setTimeout(() => loadInactiveProducts(true), 350);
+  });
+
+  $('#inactiveProductCategory')?.addEventListener('change', () => loadInactiveProducts(true));
+  $('#inactiveProductsMore')?.addEventListener('click', () => loadInactiveProducts(false));
 }
+
 
 
 /* ============================================================
@@ -1283,6 +1356,7 @@ async function loadProducts(reset = true) {
   let query = supabase
     .from('products')
     .select('*,categories(name)')
+    .eq('status', 'active')
     .order('created_at', {
       ascending: false,
     })
@@ -1575,6 +1649,7 @@ function bindProductEvents() {
         if (!error) {
           await loadProducts(true);
           await loadDiscountCards(true);
+          await loadInactiveProducts(true);
         }
       }
     );
@@ -1617,12 +1692,180 @@ function bindProductEvents() {
         if (!error) {
           await loadProducts(true);
           await loadDiscountCards(true);
+          await loadInactiveProducts(true);
         }
       }
     );
   });
 }
 
+
+
+/* ============================================================
+   AKTİV - PASSİV MƏHSULLAR PANELİ
+   Passiv məhsullar ayrıca siyahıda saxlanılır.
+   ============================================================ */
+
+async function loadInactiveProductCategoryOptions() {
+  const select = $('#inactiveProductCategory');
+  if (!select) return;
+
+  const currentValue = select.value;
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id,name')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.warn('Passiv məhsul kateqoriya filtri yüklənmədi:', error);
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">Bütün kateqoriyalar</option>
+    ${(data || []).map((category) => `
+      <option value="${category.id}">${esc(category.name)}</option>
+    `).join('')}
+  `;
+
+  if ([...select.options].some((option) => option.value === currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+async function loadInactiveProducts(reset = true) {
+  const table = $('#inactiveProductTable');
+  if (!table || inactiveProductLoading) return;
+
+  if (reset) {
+    inactiveProductOffset = 0;
+    inactiveProductHasMore = true;
+    table.innerHTML = '<tr><td colspan="6">Passiv məhsullar yüklənir...</td></tr>';
+  }
+
+  if (!inactiveProductHasMore) return;
+
+  inactiveProductLoading = true;
+
+  const search = String($('#inactiveProductSearch')?.value || '').trim();
+  const categoryId = $('#inactiveProductCategory')?.value || '';
+  const from = inactiveProductOffset;
+  const to = from + INACTIVE_PRODUCT_PAGE_SIZE - 1;
+
+  let categoryIds = [];
+
+  if (search) {
+    const { data: categoryMatches } = await supabase
+      .from('categories')
+      .select('id')
+      .ilike('name', `%${search}%`)
+      .limit(100);
+
+    categoryIds = (categoryMatches || []).map((category) => category.id);
+  }
+
+  let query = supabase
+    .from('products')
+    .select('id,name,category_id,image_url,one_c_name,sku,status,slug,unit,short_description,description,categories(name)')
+    .eq('status', 'inactive')
+    .order('updated_at', { ascending: false })
+    .range(from, to);
+
+  if (categoryId) {
+    query = query.eq('category_id', categoryId);
+  }
+
+  if (search) {
+    const safeSearch = search.replace(/[,%()]/g, ' ').trim();
+    const filters = [
+      `name.ilike.%${safeSearch}%`,
+      `slug.ilike.%${safeSearch}%`,
+      `one_c_name.ilike.%${safeSearch}%`,
+      `sku.ilike.%${safeSearch}%`,
+      `unit.ilike.%${safeSearch}%`,
+      `short_description.ilike.%${safeSearch}%`,
+      `description.ilike.%${safeSearch}%`,
+    ];
+
+    if (!categoryId && categoryIds.length) {
+      filters.push(`category_id.in.(${categoryIds.join(',')})`);
+    }
+
+    query = query.or(filters.join(','));
+  }
+
+  const { data, error } = await query;
+  inactiveProductLoading = false;
+
+  const moreButton = $('#inactiveProductsMore');
+
+  if (error) {
+    table.innerHTML = `<tr><td colspan="6">${esc(error.message)}</td></tr>`;
+    if (moreButton) moreButton.hidden = true;
+    return;
+  }
+
+  const rows = data || [];
+
+  if (reset) table.innerHTML = '';
+
+  if (!rows.length && reset) {
+    table.innerHTML = '<tr><td colspan="6">Passiv məhsul yoxdur.</td></tr>';
+    inactiveProductHasMore = false;
+    if (moreButton) moreButton.hidden = true;
+    return;
+  }
+
+  table.insertAdjacentHTML('beforeend', rows.map((product) => `
+    <tr data-inactive-product-id="${product.id}">
+      <td><img class="admin-product-img" src="${product.image_url || PLACEHOLDER}" alt="${esc(product.name)}"></td>
+      <td><b>${esc(product.name || '—')}</b></td>
+      <td>${esc(product.categories?.name || 'Kateqoriyasız')}</td>
+      <td>${esc(product.one_c_name || '—')}</td>
+      <td><code class="inactive-sku">${esc(product.sku || '—')}</code></td>
+      <td>
+        <div class="inactive-status-cell">
+          ${activeSwitch(product.id, false, 'toggle-inactive-product-status', 'products', 'status')}
+          <span class="inactive-status-label">Passiv</span>
+        </div>
+      </td>
+    </tr>
+  `).join(''));
+
+  inactiveProductOffset += rows.length;
+  inactiveProductHasMore = rows.length === INACTIVE_PRODUCT_PAGE_SIZE;
+  if (moreButton) moreButton.hidden = !inactiveProductHasMore;
+
+  bindInactiveProductEvents();
+}
+
+function bindInactiveProductEvents() {
+  $$('.toggle-inactive-product-status').forEach((input) => {
+    if (input.dataset.bound === '1') return;
+    input.dataset.bound = '1';
+
+    input.addEventListener('change', async () => {
+      const status = input.checked ? 'active' : 'inactive';
+      input.disabled = true;
+
+      const { error } = await supabase
+        .from('products')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', input.dataset.id);
+
+      input.disabled = false;
+      toast(error ? error.message : status === 'active' ? 'Məhsul aktiv edildi' : 'Məhsul passiv edildi');
+
+      if (!error) {
+        await Promise.all([
+          loadInactiveProducts(true),
+          loadProducts(true),
+          loadDiscountCards(true),
+        ]);
+      }
+    });
+  });
+}
 
 /*==================== YÜKLƏNƏN PRADUKT RƏSİMLƏRİ SIXIŞDIRILIR =======================*/
     async function compressProductImage(file, maxSizeKB = 80) {

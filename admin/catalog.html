@@ -43,6 +43,7 @@
       <button class="tab active" data-tab="productsPanel">Məhsullar</button>
       <button class="tab" data-tab="catsPanel">Kateqoriyalar</button>
       <button class="tab" data-tab="discountCardsPanel">Endirim kartları</button>
+      <button class="tab" data-tab="inactiveProductsPanel">Aktiv - Passiv</button>
     </div>
 
     <section id="productsPanel" class="tab-panel active card pro-card">
@@ -210,6 +211,42 @@
         <span id="discountCardsLoadMoreText">
           Aşağı endikcə digər endirim kartları yüklənəcək
         </span>
+      </div>
+    </section>
+
+    <section id="inactiveProductsPanel" class="tab-panel card pro-card">
+      <div class="section-head inactive-products-head">
+        <div>
+          <h2>Aktiv - Passiv məhsullar</h2>
+          <p class="muted">Passiv edilən məhsullar burada toplanır. Aktiv etdikdə siyahıdan avtomatik çıxır.</p>
+        </div>
+      </div>
+
+      <div class="inactive-products-toolbar">
+        <input id="inactiveProductSearch" class="admin-search" type="search" placeholder="Bütün məlumatlara görə axtar...">
+        <select id="inactiveProductCategory" class="admin-search">
+          <option value="">Bütün kateqoriyalar</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table class="pro-table inactive-products-table">
+          <thead>
+            <tr>
+              <th>Şəkil</th>
+              <th>Məhsul ad</th>
+              <th>Kateqoriya</th>
+              <th>1C-də olan məhsul adı</th>
+              <th>SKU-Barkod</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="inactiveProductTable"></tbody>
+        </table>
+      </div>
+
+      <div class="inactive-products-more-wrap">
+        <button id="inactiveProductsMore" type="button" class="btn btn-soft btn-mini" hidden>Daha çox göstər</button>
       </div>
     </section>
 

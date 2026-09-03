@@ -10200,3 +10200,127 @@ body[data-page="home"] .site-footer {
     overflow-wrap: anywhere;
   }
 }
+
+
+/* ============================================================
+   REDAKTOR — MƏHSULUN MAĞAZADA VAR/YÖX STATUSU
+   ============================================================ */
+.editor-status-control.quality-badge {
+  min-width: 94px;
+  min-height: 34px;
+  padding: 5px 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(16,185,129,.28);
+}
+
+.editor-status-control input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.editor-status-slider {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  flex: 0 0 34px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+  transition: .18s ease;
+}
+
+.editor-status-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.22);
+  transition: .18s ease;
+}
+
+.editor-status-control input:checked + .editor-status-slider {
+  background: #16a34a;
+}
+
+.editor-status-control input:checked + .editor-status-slider::after {
+  transform: translateX(16px);
+}
+
+.editor-status-text {
+  font-size: 9px;
+  line-height: 1;
+  color: #065f46;
+  white-space: nowrap;
+}
+
+.editor-product-inactive .product-media {
+  filter: saturate(.72);
+}
+
+.editor-product-stamp {
+  display: none;
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%) rotate(-11deg);
+  padding: 7px 10px;
+  border: 3px double #dc2626;
+  border-radius: 7px;
+  color: #dc2626;
+  background: rgba(255,255,255,.78);
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 1000;
+  letter-spacing: .7px;
+  text-shadow: 0 0 1px rgba(220,38,38,.35);
+  box-shadow: 0 0 0 2px rgba(220,38,38,.08);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.editor-product-stamp.show {
+  display: block;
+}
+
+.detail-editor-product-stamp {
+  top: 50%;
+  font-size: clamp(18px, 3vw, 30px);
+  padding: 10px 16px;
+}
+
+@media (max-width: 640px) {
+  .editor-status-control.quality-badge {
+    min-width: 82px;
+    padding: 4px 5px;
+  }
+
+  .editor-status-slider {
+    width: 30px;
+    flex-basis: 30px;
+  }
+
+  .editor-status-control input:checked + .editor-status-slider::after {
+    transform: translateX(12px);
+  }
+
+  .editor-status-text {
+    font-size: 8px;
+  }
+
+  .editor-product-stamp {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+}

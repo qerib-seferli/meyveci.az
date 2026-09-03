@@ -235,14 +235,18 @@ async function initFavorites() {
 
   const { data, error } = await supabase
     .from('favorites')
-    .select('id,products(id,name,price,old_price,image_url,unit,short_description,rating_avg)')
+    .select('id,products(id,name,price,old_price,image_url,unit,short_description,rating_avg,status)')
     .eq('user_id', activeUser.id)
     .order('created_at', { ascending: false })
     .limit(80);
 
+  const visibleFavorites = (data || []).filter(
+    (row) => row.products?.status === 'active'
+  );
+
   $('#favoritesGrid').innerHTML = error
     ? `<div class="card">${error.message}</div>`
-    : (data || []).map(productRow).join('') || '<div class="card">Sevimli məhsul yoxdur.</div>';
+    : visibleFavorites.map(productRow).join('') || '<div class="card">Sevimli məhsul yoxdur.</div>';
 
   // Sevimlilər səhifəsində bütün kartların düymələrini ayrı-ayrı işlək edirik.
   $$('.add-cart').forEach((button) => {

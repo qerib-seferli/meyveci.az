@@ -82,6 +82,35 @@ export function clearEditorCache() {
 }
 
 /* ============================================================
+   REDAKTOR — MƏHSUL AKTİV/PASSİV STATUSU
+   ============================================================ */
+
+export async function updateEditorProductStatus(productId, status) {
+  const activeProfile = await getEditorProfile();
+
+  if (!activeProfile) {
+    throw new Error('Redaktor icazəsi tapılmadı');
+  }
+
+  if (!['active', 'inactive'].includes(status)) {
+    throw new Error('Yanlış məhsul statusu');
+  }
+
+  const { data, error } = await supabase.rpc(
+    'editor_update_product_status',
+    {
+      p_product_id: productId,
+      p_status: status,
+    }
+  );
+
+  if (error) throw error;
+  if (data !== true) throw new Error('Məhsul statusu yenilənmədi');
+
+  return true;
+}
+
+/* ============================================================
    ŞƏKLİN 4:3 FORMATINA SALINMASI
    ============================================================ */
 

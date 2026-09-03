@@ -22,6 +22,7 @@ import { initLayout } from './layout.js';
 import {
   getEditorPermissions,
   openProductImageEditor,
+  updateEditorProductStatus,
 } from './editor.js';
 
 let editorPermissions = null;
@@ -392,8 +393,13 @@ function createHomeProductsQuery() {
       status,
       rating_avg,
       created_at
-    `)
-    .eq('status', 'active')
+    `);
+
+  if (!editorPermissions) {
+    query = query.eq('status', 'active');
+  }
+
+  query = query
     .order('is_featured', {
       ascending: false,
     })
@@ -1011,6 +1017,8 @@ function renderProducts() {
     container
   );
 
+  bindEditorProductStatusToggles(container);
+
   updateHomeLoadMoreButton();
 }
 
@@ -1057,6 +1065,48 @@ function bindEditorProductImageButtons(root = document) {
 }
 
 
+function bindEditorProductStatusToggles(root = document) {
+  if (!editorPermissions) return;
+
+  $$('.editor-product-status-toggle', root).forEach((input) => {
+    if (input.dataset.bound === '1') return;
+    input.dataset.bound = '1';
+
+    input.addEventListener('click', (event) => event.stopPropagation());
+    input.addEventListener('change', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const nextStatus = input.checked ? 'active' : 'inactive';
+      const previousStatus = input.checked ? 'inactive' : 'active';
+      const productId = input.dataset.id;
+      const card = input.closest('.product-card');
+
+      input.disabled = true;
+
+      try {
+        await updateEditorProductStatus(productId, nextStatus);
+
+        const product = state.products.find((item) => item.id === productId);
+        if (product) product.status = nextStatus;
+
+        card?.classList.toggle('editor-product-inactive', nextStatus === 'inactive');
+        card?.querySelector('.editor-product-stamp')?.classList.toggle('show', nextStatus === 'inactive');
+
+        const stateText = card?.querySelector('.editor-status-text');
+        if (stateText) stateText.textContent = nextStatus === 'active' ? 'Aktiv' : 'Passiv';
+
+        toast(nextStatus === 'active' ? 'Məhsul aktiv edildi' : 'Məhsul passiv edildi və müştərilərdən gizlədildi');
+      } catch (error) {
+        input.checked = previousStatus === 'active';
+        toast(error?.message || 'Məhsul statusu dəyişmədi');
+      } finally {
+        input.disabled = false;
+      }
+    });
+  });
+}
+
 function productCard(product) {
   const discount = getDiscount(product.price, product.old_price);
   const isFavorite = state.favorites.has(product.id);
@@ -1064,7 +1114,7 @@ function productCard(product) {
   const hasDiscount = discount > 0;
 
   return `
-    <article class="product-card ${hasDiscount ? 'discount-product-card' : 'fresh-product-card'}">
+    <article class="product-card ${hasDiscount ? 'discount-product-card' : 'fresh-product-card'} ${editorPermissions && product.status === 'inactive' ? 'editor-product-inactive' : ''}">
       <div class="product-media">
         <div class="rating-pill">
           <span>⭐</span>
@@ -1105,7 +1155,16 @@ function productCard(product) {
         </a>
 
         <div class="fresh-badge">🌿 TƏZƏ MƏHSUL</div>
-        <div class="quality-badge">🛡️ KEYFİYYƏT<br>ZƏMANƏTİ</div>
+        ${editorPermissions ? `
+          <label class="quality-badge editor-status-control" title="Məhsulu aktiv və ya passiv et">
+            <input class="editor-product-status-toggle" type="checkbox" data-id="${product.id}" ${product.status === 'active' ? 'checked' : ''}>
+            <span class="editor-status-slider"></span>
+            <b class="editor-status-text">${product.status === 'active' ? 'Aktiv' : 'Passiv'}</b>
+          </label>
+          <span class="editor-product-stamp ${product.status === 'inactive' ? 'show' : ''}">MƏHSUL YOXDUR</span>
+        ` : `
+          <div class="quality-badge">🛡️ KEYFİYYƏT<br>ZƏMANƏTİ</div>
+        `}
       </div>
 
       <div class="product-title-row">
@@ -1228,7 +1287,7 @@ async function initProduct() {
     .eq('id', id)
     .maybeSingle();
 
-  if (error || !product) {
+  if (error || !product || (product.status !== 'active' && !editorPermissions)) {
     detail.innerHTML = '<div class="card">Məhsul tapılmadı.</div>';
     return;
   }
@@ -1268,7 +1327,16 @@ async function initProduct() {
         >
 
         <div class="fresh-badge detail-fresh-badge">🌿 TƏZƏ MƏHSUL</div>
-        <div class="quality-badge detail-quality-badge">🛡️ KEYFİYYƏT ZƏMANƏTİ</div>
+        ${editorPermissions ? `
+          <label class="quality-badge detail-quality-badge editor-status-control" title="Məhsulu aktiv və ya passiv et">
+            <input class="editor-product-status-toggle" type="checkbox" data-id="${product.id}" ${product.status === 'active' ? 'checked' : ''}>
+            <span class="editor-status-slider"></span>
+            <b class="editor-status-text">${product.status === 'active' ? 'Aktiv' : 'Passiv'}</b>
+          </label>
+          <span class="editor-product-stamp detail-editor-product-stamp ${product.status === 'inactive' ? 'show' : ''}">MƏHSUL YOXDUR</span>
+        ` : `
+          <div class="quality-badge detail-quality-badge">🛡️ KEYFİYYƏT ZƏMANƏTİ</div>
+        `}
       </div>
 
 
@@ -1350,6 +1418,7 @@ async function initProduct() {
   });
   
   bindEditorProductImageButtons(detail);
+  bindEditorProductStatusToggles(detail);
   
   await renderRelatedProducts(product);
 }
