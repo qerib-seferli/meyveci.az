@@ -33,6 +33,7 @@ let courierMarkers = new Map();
 let adminSoundReady = false;
 let adminAlarmLoop = null;
 let adminChatUnreadMap = new Map();
+let recentOrderTimelineTimer = null;
 
 
 /* ============================================================
@@ -550,70 +551,167 @@ function adminOrderStageMeta(status) {
   return map[status] || { label: statusAz(status), icon: '•' };
 }
 
-function compactStageDuration(ms) {
+function compactStageDuration(ms, withSeconds = true) {
   if (!Number.isFinite(ms) || ms < 0) return '—';
-  const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
+
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
   if (days) return `${days} gün ${hours} saat`;
   if (hours) return `${hours} saat ${minutes} dəq`;
-  return `${minutes} dəq`;
+  if (minutes) return withSeconds ? `${minutes} dəq ${seconds} san` : `${minutes} dəq`;
+  return `${seconds} san`;
+}
+
+const ADMIN_ORDER_FLOW = [
+  'paid_hold',
+  'ready_to_confirm',
+  'confirmed',
+  'preparing',
+  'ready_for_courier',
+  'on_the_way',
+  'courier_near',
+  'delivered',
+];
+
+function refreshRecentOrderLiveDurations() {
+  $$('.recent-order-stage-duration[data-live-start]').forEach((node) => {
+    const startAt = new Date(node.dataset.liveStart || '').getTime();
+    if (!Number.isFinite(startAt)) return;
+    node.textContent = `⏱ ${compactStageDuration(Date.now() - startAt)} davam edir`;
+  });
+}
+
+function ensureRecentOrderTimelineTimer() {
+  refreshRecentOrderLiveDurations();
+  if (recentOrderTimelineTimer) return;
+  recentOrderTimelineTimer = window.setInterval(refreshRecentOrderLiveDurations, 1000);
 }
 
 function recentOrderTimelineHtml(order, history = [], profilesMap = new Map()) {
-  const ordered = [...history].sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
-  const points = [{
-    status: 'paid_hold',
+  const ordered = [...history]
+    .filter((item) => item?.to_status && item?.changed_at)
+    .sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
+
+  const eventMap = new Map();
+  eventMap.set('paid_hold', {
     at: order.created_at,
     actor: 'Sistem',
-  }];
+    source: 'order',
+  });
 
   ordered.forEach((item) => {
-    if (!item?.to_status || !item?.changed_at) return;
     const actorProfile = profilesMap.get(item.changed_by) || {};
     const actor = item.changed_by
       ? `${actorProfile.first_name || ''} ${actorProfile.last_name || ''}`.trim() || actorProfile.email || 'Əməkdaş'
       : 'Sistem';
-    const previous = points[points.length - 1];
-    if (previous?.status === item.to_status) {
-      previous.at = item.changed_at;
-      previous.actor = actor;
-      return;
-    }
-    points.push({ status: item.to_status, at: item.changed_at, actor });
+
+    // Eyni status təkrar yazılıbsa ən son real keçid vaxtını saxla.
+    eventMap.set(item.to_status, {
+      at: item.changed_at,
+      actor,
+      source: 'history',
+    });
   });
 
-  if (order.status && !points.some((point) => point.status === order.status)) {
-    points.push({ status: order.status, at: null, actor: '—' });
+  // Köhnə sifarişlərdə tarixçə sonradan qoşulubsa cari statusu itirmirik.
+  // updated_at yalnız fallback-dır; dəqiq tarixçə kimi təqdim edilmir.
+  if (order.status && !eventMap.has(order.status)) {
+    eventMap.set(order.status, {
+      at: order.updated_at || null,
+      actor: '—',
+      source: 'fallback',
+    });
   }
+
+  const terminalProblem = ['cancelled', 'refunded'].includes(order.status)
+    ? order.status
+    : null;
+
+  const currentIndex = ADMIN_ORDER_FLOW.indexOf(order.status);
+  const visibleFlow = [...ADMIN_ORDER_FLOW];
+  if (terminalProblem) visibleFlow.push(terminalProblem);
+
+  const stages = visibleFlow.map((status, index) => {
+    const event = eventMap.get(status) || null;
+    const meta = adminOrderStageMeta(status);
+    const isProblem = ['cancelled', 'refunded'].includes(status);
+    const isCurrent = status === order.status && !['delivered', 'cancelled', 'refunded'].includes(status);
+
+    let state = 'pending';
+    if (isProblem && status === order.status) state = 'problem';
+    else if (status === 'delivered' && order.status === 'delivered') state = 'done';
+    else if (isCurrent) state = 'current';
+    else if (event || (currentIndex >= 0 && index < currentIndex)) state = 'done';
+
+    return { status, index, event, meta, state };
+  });
+
+  const timestamped = stages
+    .filter((stage) => stage.event?.at)
+    .map((stage) => ({ ...stage, time: new Date(stage.event.at).getTime() }))
+    .filter((stage) => Number.isFinite(stage.time));
+
+  const nextTimestampAfter = (stage) => timestamped.find((item) => item.time > new Date(stage.event?.at || 0).getTime());
 
   return `
     <div class="recent-order-timeline">
       <div class="recent-order-timeline-head">
         <b>📊 Sifarişin iş axını</b>
-        <span>${history.length ? 'Real mərhələ tarixçəsi' : 'Tarixçə bu andan etibarən toplanacaq'}</span>
+        <span>${history.length ? 'Mərhələlər real vaxtla qeydə alınır' : 'Köhnə mərhələlərin vaxtı yoxdursa uydurulmur; yeni keçidlər avtomatik yazılır'}</span>
       </div>
+
       <div class="recent-order-stage-list">
-        ${points.map((point, index) => {
-          const meta = adminOrderStageMeta(point.status);
-          const next = points[index + 1];
-          const isCurrent = index === points.length - 1 && !['delivered', 'cancelled', 'refunded'].includes(point.status);
-          const duration = point.at
-            ? compactStageDuration((next?.at ? new Date(next.at).getTime() : Date.now()) - new Date(point.at).getTime())
+        ${stages.map((stage) => {
+          const { event, meta, state } = stage;
+          const nextTimed = event?.at && state === 'done' ? nextTimestampAfter(stage) : null;
+          const duration = event?.at && nextTimed
+            ? compactStageDuration(nextTimed.time - new Date(event.at).getTime())
             : '—';
+
+          const timeText = event?.at
+            ? formatDate(event.at)
+            : state === 'pending'
+              ? 'Hələ başlamayıb'
+              : 'Keçid vaxtı qeydə alınmayıb';
+
+          const actorText = event?.actor && event.actor !== '—'
+            ? `👤 ${event.actor}`
+            : state === 'pending'
+              ? '👤 —'
+              : '👤 Qeyd yoxdur';
+
+          let durationHtml = '<span class="recent-order-stage-duration is-empty">Vaxt yoxdur</span>';
+          if (state === 'current' && event?.at) {
+            durationHtml = `<span class="recent-order-stage-duration" data-live-start="${esc(event.at)}">⏱ ${compactStageDuration(Date.now() - new Date(event.at).getTime())} davam edir</span>`;
+          } else if (state === 'done' && duration !== '—') {
+            durationHtml = `<span class="recent-order-stage-duration">⏱ ${duration}</span>`;
+          } else if (state === 'pending') {
+            durationHtml = '<span class="recent-order-stage-duration is-pending-duration">Gözləyir</span>';
+          }
+
           return `
-            <div class="recent-order-stage ${isCurrent ? 'is-current' : ''} ${['cancelled', 'refunded'].includes(point.status) ? 'is-problem' : ''}">
+            <div class="recent-order-stage is-${state}">
               <span class="recent-order-stage-icon">${meta.icon}</span>
               <div class="recent-order-stage-body">
                 <b>${esc(meta.label)}</b>
-                <small>${point.at ? formatDate(point.at) : 'Vaxt qeydə alınmayıb'}</small>
-                <small class="recent-order-stage-actor">👤 ${esc(point.actor || 'Sistem')}</small>
+                <small>${esc(timeText)}</small>
+                <small class="recent-order-stage-actor">${esc(actorText)}</small>
               </div>
-              <span class="recent-order-stage-duration">${isCurrent ? '⏱ davam edir' : `⏱ ${duration}`}</span>
+              ${durationHtml}
             </div>
           `;
         }).join('')}
+      </div>
+
+      <div class="recent-order-timeline-legend">
+        <span class="legend-done">● Tamamlanıb</span>
+        <span class="legend-current">● Hazırda davam edir</span>
+        <span class="legend-pending">● Növbəti mərhələ</span>
+        <span class="legend-problem">● Problem / bağlanıb</span>
       </div>
     </div>
   `;
@@ -626,7 +724,7 @@ async function loadRecentOrders() {
   const [{ data: ordersData, error: ordersError }, { data: profilesData, error: profilesError }] = await Promise.all([
     supabase
       .from('orders')
-      .select('id,user_id,order_code,full_name,phone,city_region,address_text,apartment,door_code,lat,lng,payment_method,payment_status,total_amount,created_at,status')
+      .select('id,user_id,order_code,full_name,phone,city_region,address_text,apartment,door_code,lat,lng,payment_method,payment_status,total_amount,created_at,updated_at,status')
       .in('payment_status', ADMIN_PAID_STATUSES)
       .order('created_at', { ascending: false })
       .limit(8),
@@ -748,6 +846,8 @@ async function loadRecentOrders() {
       </table>
     </div>
   ` : '<span class="muted">Ödənilmiş sifariş yoxdur.</span>';
+
+  ensureRecentOrderTimelineTimer();
 }
 
 

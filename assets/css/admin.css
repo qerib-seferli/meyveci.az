@@ -3153,3 +3153,79 @@ th {
     flex-basis: 150px;
   }
 }
+
+/* ============================================================
+   DASHBOARD — SİFARİŞ İŞ AXINI V2
+   Keçmiş / cari / növbəti mərhələləri vizual ayırır.
+   ============================================================ */
+.recent-order-stage.is-done {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.recent-order-stage.is-current {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, .14);
+}
+
+.recent-order-stage.is-pending {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  opacity: .78;
+}
+
+.recent-order-stage.is-problem {
+  border-color: #fecaca;
+  background: #fff1f2;
+}
+
+.recent-order-stage.is-done .recent-order-stage-icon {
+  background: #dcfce7;
+}
+
+.recent-order-stage.is-current .recent-order-stage-icon {
+  background: #fef3c7;
+}
+
+.recent-order-stage.is-pending .recent-order-stage-icon {
+  background: #e2e8f0;
+  filter: grayscale(.35);
+}
+
+.recent-order-stage.is-problem .recent-order-stage-icon {
+  background: #fee2e2;
+}
+
+.recent-order-stage.is-pending .recent-order-stage-body b,
+.recent-order-stage.is-pending .recent-order-stage-body small {
+  color: #64748b;
+}
+
+.recent-order-stage-duration.is-empty,
+.recent-order-stage-duration.is-pending-duration {
+  background: #eef2f7;
+  color: #64748b;
+}
+
+.recent-order-timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px dashed rgba(15, 118, 110, .14);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.recent-order-timeline-legend .legend-done { color: #15803d; }
+.recent-order-timeline-legend .legend-current { color: #b45309; }
+.recent-order-timeline-legend .legend-pending { color: #64748b; }
+.recent-order-timeline-legend .legend-problem { color: #dc2626; }
+
+@media (max-width: 700px) {
+  .recent-order-timeline-legend {
+    gap: 5px 9px;
+  }
+}
