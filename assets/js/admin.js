@@ -538,19 +538,29 @@ async function loadRecentOrders() {
   const box = $('#recentOrders');
   if (!box) return;
 
-  const { data, error } = await supabase
-    .from('orders')
-    .select('id,user_id,order_code,full_name,phone,city_region,address_text,apartment,door_code,lat,lng,payment_method,payment_status,total_amount,created_at,status')
-    .in('payment_status', ADMIN_PAID_STATUSES)
-    .order('created_at', { ascending: false })
-    .limit(8);
+  const [{ data: ordersData, error: ordersError }, { data: profilesData, error: profilesError }] = await Promise.all([
+    supabase
+      .from('orders')
+      .select('id,user_id,order_code,full_name,phone,city_region,address_text,apartment,door_code,lat,lng,payment_method,payment_status,total_amount,created_at,status')
+      .in('payment_status', ADMIN_PAID_STATUSES)
+      .order('created_at', { ascending: false })
+      .limit(8),
+    supabase
+      .from('profiles')
+      .select('id,first_name,last_name,email,phone,city_region,address_line,apartment,door_code,lat,lng'),
+  ]);
 
-  if (error) {
-    box.innerHTML = `<span class="muted">${esc(error.message)}</span>`;
+  if (ordersError) {
+    box.innerHTML = `<span class="muted">${esc(ordersError.message)}</span>`;
     return;
   }
 
-  const rows = data || [];
+  if (profilesError) {
+    console.warn('Dashboard profil məlumatları alına bilmədi:', profilesError);
+  }
+
+  const profilesMap = new Map((profilesData || []).map((profile) => [profile.id, profile]));
+  const rows = ordersData || [];
 
   box.innerHTML = rows.length ? `
     <div class="recent-orders-table-wrap">
@@ -569,24 +579,47 @@ async function loadRecentOrders() {
         </thead>
         <tbody>
           ${rows.map((order) => {
+            const profile = profilesMap.get(order.user_id) || {};
+
+            const customerName = safe(
+              order.full_name,
+              `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Müştəri'
+            );
+
+            const phone = safe(order.phone, profile.phone || '—');
+
+            const cityRegion = safe(order.city_region, profile.city_region || '');
+            const addressText = safe(order.address_text, profile.address_line || '');
+            const apartment = safe(order.apartment, profile.apartment || '');
+            const doorCode = safe(order.door_code, profile.door_code || '');
+
             const address = [
-              order.city_region,
-              order.address_text,
-              order.apartment ? `Mənzil/ünvan: ${order.apartment}` : '',
-              order.door_code ? `Qapı kodu: ${order.door_code}` : '',
+              cityRegion,
+              addressText,
+              apartment ? `Mənzil: ${apartment}` : '',
+              doorCode ? `Qapı kodu: ${doorCode}` : '',
             ].filter(Boolean).join(', ');
 
-            const lat = Number(order.lat);
-            const lng = Number(order.lng);
-            const hasLocation = Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0;
+            const orderLat = Number(order.lat);
+            const orderLng = Number(order.lng);
+            const profileLat = Number(profile.lat);
+            const profileLng = Number(profile.lng);
+
+            const hasOrderLocation = Number.isFinite(orderLat) && Number.isFinite(orderLng) && orderLat !== 0 && orderLng !== 0;
+            const hasProfileLocation = Number.isFinite(profileLat) && Number.isFinite(profileLng) && profileLat !== 0 && profileLng !== 0;
+
+            const lat = hasOrderLocation ? orderLat : profileLat;
+            const lng = hasOrderLocation ? orderLng : profileLng;
+            const hasLocation = hasOrderLocation || hasProfileLocation;
+
             const googleMapsUrl = hasLocation
               ? `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`
               : '';
 
             return `
               <tr>
-                <td><b>${esc(order.full_name || '—')}</b></td>
-                <td>${esc(order.phone || '—')}</td>
+                <td><b>${esc(customerName)}</b></td>
+                <td>${esc(phone)}</td>
                 <td><a class="recent-order-code" href="orders.html?code=${encodeURIComponent(order.order_code || '')}">${esc(order.order_code || order.id)}</a></td>
                 <td>${esc(address || 'Ünvan qeyd edilməyib')}</td>
                 <td>
