@@ -10,10 +10,25 @@ let notificationPollTimer = null;
 let lastNotificationTime = new Date().toISOString();
 
 
-// Məhsul detalındakı "Geri" düyməsi yalnız Windows EXE qabığında göstərilir.
-// Adi brauzer və PWA-da düymə qəsdən gizli qalır.
+// Məhsul detalındakı "Geri" düyməsi yalnız Meyvəçi Windows EXE-dən açılan
+// xüsusi desktop sessiyasında göstərilir. Adi brauzer və PWA dəyişdirilmir.
+const MEYVECI_DESKTOP_SESSION_KEY = 'meyveci_desktop_exe_session_v1';
+
 function detectMeyveciDesktopExe() {
   try {
+    const params = new URLSearchParams(window.location.search);
+
+    // Windows launcher tətbiqi ilk açılışda ?app=exe göndərir.
+    // sessionStorage yalnız həmin pəncərə/tab sessiyasında qalır; buna görə
+    // eyni brauzerin adi pəncərələrində və PWA-da geri düyməsi açılmır.
+    if (params.get('app') === 'exe') {
+      sessionStorage.setItem(MEYVECI_DESKTOP_SESSION_KEY, '1');
+    }
+
+    const launchedByMeyveciExe =
+      sessionStorage.getItem(MEYVECI_DESKTOP_SESSION_KEY) === '1';
+
+    // Köhnə/native wrapper-lər üçün təhlükəsiz uyğunluq saxlanılır.
     const ua = String(navigator.userAgent || '');
     const platform = String(
       navigator.userAgentData?.platform ||
@@ -22,13 +37,6 @@ function detectMeyveciDesktopExe() {
     );
 
     const isWindows = /windows/i.test(platform) || /windows nt/i.test(ua);
-    const isPwa =
-      window.matchMedia?.('(display-mode: standalone)')?.matches === true ||
-      window.matchMedia?.('(display-mode: fullscreen)')?.matches === true ||
-      window.navigator.standalone === true;
-
-    // Meyvəçi EXE müxtəlif Windows web-wrapper texnologiyalarından biri ilə
-    // işləyə bilər. Burada yalnız native desktop wrapper siqnalları qəbul olunur.
     const hasWebView2 = Boolean(window.chrome?.webview);
     const hasElectron =
       /electron/i.test(ua) ||
@@ -39,17 +47,15 @@ function detectMeyveciDesktopExe() {
     const hasCef = /cef|cefsharp/i.test(ua) || Boolean(window.CefSharp);
     const hasCustomExeUa = /meyveci(?:-desktop|-exe| desktop| exe)/i.test(ua);
 
-    const isNativeDesktopWrapper =
+    const nativeWrapperDetected =
       isWindows &&
-      !isPwa &&
       (hasWebView2 || hasElectron || hasNwJs || hasTauri || hasCef || hasCustomExeUa);
 
     document.documentElement.classList.toggle(
       'meyveci-desktop-exe',
-      isNativeDesktopWrapper
+      launchedByMeyveciExe || nativeWrapperDetected
     );
   } catch {
-    // Təhlükəsiz fallback: mühit dəqiq tanınmırsa düymə göstərilmir.
     document.documentElement.classList.remove('meyveci-desktop-exe');
   }
 }
