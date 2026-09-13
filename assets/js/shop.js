@@ -17,7 +17,7 @@ import {
   normalizeQty,
 } from './core.js';
 
-import { initLayout } from './layout.js';
+import { initLayout, goBackFromProduct } from './layout.js';
 
 import {
   getEditorPermissions,
@@ -1296,6 +1296,13 @@ async function initProduct() {
   const hasDiscount = discount > 0;
 
   detail.innerHTML = `
+    <div class="product-detail-back-row">
+      <button id="productBackBtn" class="product-back-btn" type="button" aria-label="Əvvəlki səhifəyə qayıt">
+        <span class="product-back-arrow" aria-hidden="true">←</span>
+        <span>Geri</span>
+      </button>
+    </div>
+
     <div class="product-detail-pro ${hasDiscount ? 'detail-discount' : 'detail-fresh'}">
     
       <div class="product-detail-image">
@@ -1405,6 +1412,8 @@ async function initProduct() {
         </div>
     </div>
   `;
+
+  $('#productBackBtn')?.addEventListener('click', goBackFromProduct);
 
   $('#addCartDetail').addEventListener('click', () => addCart(product.id));
   

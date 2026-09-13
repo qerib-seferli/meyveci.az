@@ -9,6 +9,9 @@ import { $, $$, profile, logout, supabase, playNotifySound, notificationBodyAz, 
 let notificationPollTimer = null;
 let lastNotificationTime = new Date().toISOString();
 
+// Məhsul detalından geri qayıdanda istifadəçinin əvvəlki səhifə və scroll mövqeyini qoruyur.
+const PRODUCT_RETURN_KEY = 'meyveci_product_return_v1';
+
 const bottomNav = [
   ['favorites.html', '❤️', 'Sevimlilər', 'favCount'],
   ['cart.html', '🛒', 'Səbət', 'cartCount'],
@@ -26,6 +29,9 @@ const bottomNav = [
 ];
 
 export async function initLayout() {
+  setupProductReturnNavigation();
+  restoreSavedPagePosition();
+
   renderTopbar();
   renderSideAds();
   renderBottomNav();
@@ -37,6 +43,130 @@ export async function initLayout() {
   startNotificationPolling();
   window.addEventListener('hideLoader', hideLoader);
   setTimeout(hideLoader, 550);
+}
+
+function setupProductReturnNavigation() {
+  if (window.__meyveciProductReturnBound) return;
+  window.__meyveciProductReturnBound = true;
+
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link) return;
+
+    let targetUrl;
+
+    try {
+      targetUrl = new URL(link.href, location.href);
+    } catch {
+      return;
+    }
+
+    if (targetUrl.origin !== location.origin) return;
+    if (!targetUrl.pathname.endsWith('/product.html')) return;
+
+    // Məhsul detalından başqa oxşar məhsula keçid ilkin siyahı mövqeyini pozmasın.
+    if (document.body?.dataset?.page === 'product') return;
+
+    const returnState = {
+      url: location.href,
+      scrollX: Math.max(0, window.scrollX || 0),
+      scrollY: Math.max(0, window.scrollY || 0),
+      savedAt: Date.now(),
+    };
+
+    try {
+      sessionStorage.setItem(PRODUCT_RETURN_KEY, JSON.stringify(returnState));
+    } catch {
+      // sessionStorage bloklanıbsa brauzerin history geri davranışı yenə işləyəcək.
+    }
+  }, true);
+}
+
+function readProductReturnState() {
+  try {
+    const raw = sessionStorage.getItem(PRODUCT_RETURN_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed?.url) return null;
+
+    // Köhnə sessiya məlumatının yanlış səhifəyə qaytarmasının qarşısını alır.
+    if (parsed.savedAt && Date.now() - parsed.savedAt > 6 * 60 * 60 * 1000) {
+      sessionStorage.removeItem(PRODUCT_RETURN_KEY);
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function samePageWithoutHash(firstUrl, secondUrl) {
+  try {
+    const first = new URL(firstUrl, location.href);
+    const second = new URL(secondUrl, location.href);
+    return first.origin === second.origin &&
+      first.pathname === second.pathname &&
+      first.search === second.search;
+  } catch {
+    return false;
+  }
+}
+
+function restoreSavedPagePosition() {
+  if (document.body?.dataset?.page === 'product') return;
+
+  const saved = readProductReturnState();
+  if (!saved || !samePageWithoutHash(saved.url, location.href)) return;
+
+  const targetY = Math.max(0, Number(saved.scrollY || 0));
+  const targetX = Math.max(0, Number(saved.scrollX || 0));
+  const startedAt = Date.now();
+
+  const tryRestore = () => {
+    const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+    if (maxY >= targetY || Date.now() - startedAt > 6000) {
+      window.scrollTo({ left: targetX, top: Math.min(targetY, maxY), behavior: 'auto' });
+      return;
+    }
+
+    setTimeout(tryRestore, 120);
+  };
+
+  requestAnimationFrame(tryRestore);
+}
+
+export function goBackFromProduct() {
+  const saved = readProductReturnState();
+
+  // Əvvəl history istifadə olunur: PWA/EXE və brauzerdə əvvəlki DOM/scroll bərpasını ən yaxşı bu qoruyur.
+  if (document.referrer) {
+    try {
+      const referrer = new URL(document.referrer);
+      if (referrer.origin === location.origin && history.length > 1) {
+        history.back();
+        return;
+      }
+    } catch {
+      // Aşağıdakı saxlanmış ünvan fallback-i istifadə olunacaq.
+    }
+  }
+
+  if (saved?.url) {
+    try {
+      const returnUrl = new URL(saved.url, location.href);
+      if (returnUrl.origin === location.origin) {
+        location.href = returnUrl.href;
+        return;
+      }
+    } catch {
+      // Ana səhifə fallback-i istifadə olunacaq.
+    }
+  }
+
+  location.href = `${getRootPath()}index.html`;
 }
 
 function hideLoader() {

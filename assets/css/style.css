@@ -10370,3 +10370,80 @@ body[data-page="home"] .site-footer {
     transform: translateX(16px) !important;
   }
 }
+
+
+/* ============================================================
+   MƏHSUL DETALI — GERİ QAYIT DÜYMƏSİ
+   Yalnız product.html detal hissəsinə təsir edir.
+   ============================================================ */
+.product-detail-back-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 0 10px;
+}
+
+.product-back-btn {
+  appearance: none;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 15px 8px 10px;
+  border: 1px solid rgba(5, 150, 105, 0.20);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #047857;
+  box-shadow: 0 8px 20px rgba(15, 122, 55, 0.10);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.product-back-arrow {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #047857;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.product-back-btn:hover {
+  transform: translateY(-1px);
+  background: #f0fdf4;
+  box-shadow: 0 10px 24px rgba(15, 122, 55, 0.15);
+}
+
+.product-back-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 700px) {
+  .product-detail-back-row {
+    margin-bottom: 8px;
+  }
+
+  .product-back-btn {
+    min-height: 38px;
+    padding: 6px 12px 6px 8px;
+    gap: 7px;
+    font-size: 13px;
+  }
+
+  .product-back-arrow {
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+  }
+}
