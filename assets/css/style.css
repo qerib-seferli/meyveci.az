@@ -10447,3 +10447,10 @@ body[data-page="home"] .site-footer {
     font-size: 18px;
   }
 }
+
+/*telefonlarda gizlənəcək, desktop brauzer və EXE-də isə Geri düyməsi görünəcək. */
+@media (max-width: 768px) {
+  .product-back-button {
+    display: none !important;
+  }
+}
