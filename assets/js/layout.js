@@ -9,6 +9,54 @@ import { $, $$, profile, logout, supabase, playNotifySound, notificationBodyAz, 
 let notificationPollTimer = null;
 let lastNotificationTime = new Date().toISOString();
 
+
+// Məhsul detalındakı "Geri" düyməsi yalnız Windows EXE qabığında göstərilir.
+// Adi brauzer və PWA-da düymə qəsdən gizli qalır.
+function detectMeyveciDesktopExe() {
+  try {
+    const ua = String(navigator.userAgent || '');
+    const platform = String(
+      navigator.userAgentData?.platform ||
+      navigator.platform ||
+      ''
+    );
+
+    const isWindows = /windows/i.test(platform) || /windows nt/i.test(ua);
+    const isPwa =
+      window.matchMedia?.('(display-mode: standalone)')?.matches === true ||
+      window.matchMedia?.('(display-mode: fullscreen)')?.matches === true ||
+      window.navigator.standalone === true;
+
+    // Meyvəçi EXE müxtəlif Windows web-wrapper texnologiyalarından biri ilə
+    // işləyə bilər. Burada yalnız native desktop wrapper siqnalları qəbul olunur.
+    const hasWebView2 = Boolean(window.chrome?.webview);
+    const hasElectron =
+      /electron/i.test(ua) ||
+      Boolean(window.electronAPI) ||
+      Boolean(window.process?.versions?.electron);
+    const hasNwJs = Boolean(window.process?.versions?.nw);
+    const hasTauri = Boolean(window.__TAURI__ || window.__TAURI_INTERNALS__);
+    const hasCef = /cef|cefsharp/i.test(ua) || Boolean(window.CefSharp);
+    const hasCustomExeUa = /meyveci(?:-desktop|-exe| desktop| exe)/i.test(ua);
+
+    const isNativeDesktopWrapper =
+      isWindows &&
+      !isPwa &&
+      (hasWebView2 || hasElectron || hasNwJs || hasTauri || hasCef || hasCustomExeUa);
+
+    document.documentElement.classList.toggle(
+      'meyveci-desktop-exe',
+      isNativeDesktopWrapper
+    );
+  } catch {
+    // Təhlükəsiz fallback: mühit dəqiq tanınmırsa düymə göstərilmir.
+    document.documentElement.classList.remove('meyveci-desktop-exe');
+  }
+}
+
+// CSS yüklənən kimi brauzer/PWA üçün düymə gizlidir; EXE aşkarlanarsa açılır.
+detectMeyveciDesktopExe();
+
 // Məhsul detalından geri qayıdanda istifadəçinin əvvəlki səhifə və scroll mövqeyini qoruyur.
 const PRODUCT_RETURN_KEY = 'meyveci_product_return_v1';
 

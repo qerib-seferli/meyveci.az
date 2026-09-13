@@ -10448,10 +10448,15 @@ body[data-page="home"] .site-footer {
   }
 }
 
-/*telefonlarda gizlənəcək, desktop brauzer və EXE-də isə Geri düyməsi görünəcək. */
-@media (max-width: 1024px) {
-  .product-back-btn,
-  .product-detail-back-row {
-    display: none !important;
-  }
+/* ============================================================
+   GERİ DÜYMƏSİ — YALNIZ WINDOWS EXE
+   Adi brauzer və PWA-da gizlidir.
+   EXE mühiti layout.js tərəfindən təsdiqlənəndə göstərilir.
+   ============================================================ */
+.product-detail-back-row {
+  display: none !important;
+}
+
+html.meyveci-desktop-exe .product-detail-back-row {
+  display: flex !important;
 }
