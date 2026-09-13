@@ -15,7 +15,18 @@ internal static class Program
 
             if (!string.IsNullOrWhiteSpace(browser) && File.Exists(browser))
             {
+                // EXE üçün ayrıca browser profili istifadə olunur. Beləliklə saytın
+                // EXE marker-i adi Edge/Chrome, PWA və telefon sessiyalarına qarışmır.
+                var profileDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Meyveci",
+                    "DesktopProfile"
+                );
+
+                Directory.CreateDirectory(profileDir);
+
                 var arguments =
+                    "--user-data-dir=\"" + profileDir + "\" " +
                     "--app=\"" + AppUrl + "\" " +
                     "--start-maximized " +
                     "--no-first-run " +

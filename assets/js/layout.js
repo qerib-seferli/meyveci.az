@@ -10,25 +10,39 @@ let notificationPollTimer = null;
 let lastNotificationTime = new Date().toISOString();
 
 
-// Məhsul detalındakı "Geri" düyməsi yalnız Meyvəçi Windows EXE-dən açılan
-// xüsusi desktop sessiyasında göstərilir. Adi brauzer və PWA dəyişdirilmir.
-const MEYVECI_DESKTOP_SESSION_KEY = 'meyveci_desktop_exe_session_v1';
+// Məhsul detalındakı "Geri" düyməsi yalnız Meyvəçi Windows EXE sessiyasında göstərilir.
+// Windows launcher ayrıca Edge/Chrome profilindən istifadə edir; buna görə bu marker
+// adi brauzerə və PWA-ya qarışmır.
+const MEYVECI_DESKTOP_LOCAL_KEY = 'meyveci_desktop_exe_v2';
+const MEYVECI_DESKTOP_SESSION_KEY = 'meyveci_desktop_exe_session_v2';
 
 function detectMeyveciDesktopExe() {
   try {
     const params = new URLSearchParams(window.location.search);
+    const launchedWithExeMarker = params.get('app') === 'exe';
 
-    // Windows launcher tətbiqi ilk açılışda ?app=exe göndərir.
-    // sessionStorage yalnız həmin pəncərə/tab sessiyasında qalır; buna görə
-    // eyni brauzerin adi pəncərələrində və PWA-da geri düyməsi açılmır.
-    if (params.get('app') === 'exe') {
-      sessionStorage.setItem(MEYVECI_DESKTOP_SESSION_KEY, '1');
+    if (launchedWithExeMarker) {
+      try {
+        localStorage.setItem(MEYVECI_DESKTOP_LOCAL_KEY, '1');
+      } catch {}
+
+      try {
+        sessionStorage.setItem(MEYVECI_DESKTOP_SESSION_KEY, '1');
+      } catch {}
     }
 
-    const launchedByMeyveciExe =
-      sessionStorage.getItem(MEYVECI_DESKTOP_SESSION_KEY) === '1';
+    let persistentExeMarker = false;
+    let sessionExeMarker = false;
 
-    // Köhnə/native wrapper-lər üçün təhlükəsiz uyğunluq saxlanılır.
+    try {
+      persistentExeMarker = localStorage.getItem(MEYVECI_DESKTOP_LOCAL_KEY) === '1';
+    } catch {}
+
+    try {
+      sessionExeMarker = sessionStorage.getItem(MEYVECI_DESKTOP_SESSION_KEY) === '1';
+    } catch {}
+
+    // Native wrapper izi olan köhnə build-lərlə uyğunluq saxlanılır.
     const ua = String(navigator.userAgent || '');
     const platform = String(
       navigator.userAgentData?.platform ||
@@ -51,16 +65,22 @@ function detectMeyveciDesktopExe() {
       isWindows &&
       (hasWebView2 || hasElectron || hasNwJs || hasTauri || hasCef || hasCustomExeUa);
 
+    const isDesktopExe =
+      launchedWithExeMarker ||
+      persistentExeMarker ||
+      sessionExeMarker ||
+      nativeWrapperDetected;
+
     document.documentElement.classList.toggle(
       'meyveci-desktop-exe',
-      launchedByMeyveciExe || nativeWrapperDetected
+      isDesktopExe
     );
   } catch {
     document.documentElement.classList.remove('meyveci-desktop-exe');
   }
 }
 
-// CSS yüklənən kimi brauzer/PWA üçün düymə gizlidir; EXE aşkarlanarsa açılır.
+// CSS-də düymə default gizlidir; yalnız bu sinif əlavə olunanda göstərilir.
 detectMeyveciDesktopExe();
 
 // Məhsul detalından geri qayıdanda istifadəçinin əvvəlki səhifə və scroll mövqeyini qoruyur.
