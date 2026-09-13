@@ -10449,7 +10449,7 @@ body[data-page="home"] .site-footer {
 }
 
 /*telefonlarda gizlənəcək, desktop brauzer və EXE-də isə Geri düyməsi görünəcək. */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .product-back-button {
     display: none !important;
   }
